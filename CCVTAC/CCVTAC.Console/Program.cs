@@ -66,8 +66,16 @@ class Program
         var downloadEntity = downloadEntityResult.Value;
         printer.PrintLine($"Processing {downloadEntity.GetType()} URL...");
 
+        List<string> args = new() {
+            "--extract-audio -f m4a",
+            "--write-thumbnail",
+            "--convert-thumbnails jpg",
+            "--write-info-json",
+            "--split-chapters"
+        };
+
         var downloadResult = ExternalTools.Downloader(
-            "--extract-audio -f m4a --write-thumbnail --convert-thumbnails jpg --write-info-json --split-chapters",
+            string.Join(" ", args),
             downloadEntity,
             settings.WorkingDirectory!,
             printer);
