@@ -5,28 +5,6 @@ using CCVTAC.Console.DownloadEntities;
 namespace CCVTAC.Console;
 public class ExternalTools
 {
-    public static void Downloader()
-    {
-        // https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.process.standardoutput?view=net-7.0&redirectedfrom=MSDN#System_Diagnostics_Process_StandardOutput
-        using (Process process = new())
-        {
-            process.StartInfo.FileName = "ls";
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.RedirectStandardOutput = true;
-            process.StartInfo.WorkingDirectory = "./temp";
-            process.Start();
-
-            // Synchronously read the standard output of the spawned process.
-            StreamReader reader = process.StandardOutput;
-            string output = reader.ReadToEnd();
-
-            // Write the redirected output to this application's window.
-            System.Console.WriteLine(output);
-
-            process.WaitForExit();
-        }
-    }
-
     public static Result<int> Downloader(string args, IDownloadEntity downloadData, string saveDirectory, Printer printer)
     {
         var stopwatch = new Stopwatch();
@@ -44,7 +22,7 @@ public class ExternalTools
             WorkingDirectory = saveDirectory
         };
 
-        var process = Process.Start(processInfo);
+        using var process = Process.Start(processInfo);
         if (process is null)
         {
             return Result.Fail($"Could not start process {processFileName} -- is it installed?");
@@ -75,7 +53,7 @@ public class ExternalTools
             WorkingDirectory = workingDirectory
         };
 
-        var process = Process.Start(processInfo);
+        using var process = Process.Start(processInfo);
         if (process is null)
         {
             return Result.Fail($"Could not start process {processFileName} -- is it installed?");
@@ -90,6 +68,7 @@ public class ExternalTools
         var stopwatch = new Stopwatch();
         stopwatch.Start();
 
+        // TODO: This way won't work for M4A files. Find another method.
         const string processFileName = "find";
         const string args = """. -name "*.m4a" -exec mp3gain -r -k -p -s i {} \;""";
 
@@ -98,14 +77,13 @@ public class ExternalTools
         {
             FileName = processFileName,
             Arguments = $"{args}",
-            // Arguments = string.Empty,
             UseShellExecute = false,
             RedirectStandardOutput = false,
             CreateNoWindow = true,
             WorkingDirectory = workingDirectory
         };
 
-        var process = Process.Start(processInfo);
+        using var process = Process.Start(processInfo);
         if (process is null)
         {
             return Result.Fail($"Could not start process {processFileName} -- is it installed?");
