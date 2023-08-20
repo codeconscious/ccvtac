@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 
 namespace CCVTAC.Console.PostProcessing;
 
@@ -7,22 +6,25 @@ internal static class Deleter
 {
     public static void Run(string workingDirectory, Printer printer)
     {
-        try
-        {
-            var dir = new DirectoryInfo(workingDirectory);
-            List<string> deletableExtensions = new() { ".json", ".jpg" };
+        var dir = new DirectoryInfo(workingDirectory);
+        List<string> deletableExtensions = new() { ".json", ".jpg" };
 
-            foreach (var file in dir.EnumerateFiles("*")
-                                    .Where(f => deletableExtensions.Contains(f.Extension)))
+        printer.Print($"Deleting unneeded {string.Join(" and ", deletableExtensions)} files...");
+
+        foreach (var file in dir.EnumerateFiles("*")
+                                .Where(f => deletableExtensions.Contains(f.Extension)))
+        {
+            try
             {
                 file.Delete();
-                printer.PrintLine($"Deleted file \"{file.Name}\"");
+                printer.PrintLine($"Deleted \"{file.Name}\"");
+            }
+            catch (Exception ex)
+            {
+                printer.Error($"Could not delete \"{file.Name}\": {ex.Message}");
             }
         }
-        catch (Exception ex)
-        {
-            printer.Error($"Error deleting file: {ex.Message}");
-        }
+
+        printer.Print("Deletion done.");
     }
 }
-

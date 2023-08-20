@@ -23,7 +23,6 @@ internal static class Mover
                 printer.Error($"Error moving file \"{file.Name}\": {ex.Message}");
             }
         }
-        printer.PrintLine($"{movedCount} file(s) moved to \"{moveToDirectory}\"");
+        printer.PrintLine($"{movedCount} file(s) moved.");
     }
 }
-

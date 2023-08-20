@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.IO;
 using CCVTAC.Console.DownloadEntities;
 
 namespace CCVTAC.Console;
@@ -10,6 +9,7 @@ public class ExternalTools
         var stopwatch = new Stopwatch();
         stopwatch.Start();
 
+        printer.PrintLine("Starting download...");
         const string processFileName = "yt-dlp";
         printer.PrintLine($"Running command: {processFileName} {args} {downloadData.FullResourceId}");
         var processInfo = new ProcessStartInfo()
@@ -28,7 +28,7 @@ public class ExternalTools
             return Result.Fail($"Could not start process {processFileName} -- is it installed?");
         }
         process.WaitForExit();
-        printer.PrintLine($"Done in {stopwatch.ElapsedMilliseconds:#,##0}ms");
+        printer.PrintLine($"Done downloading in {stopwatch.ElapsedMilliseconds:#,##0}ms");
         return process.ExitCode == 0
             ? Result.Ok(process.ExitCode)
             : Result.Fail($"Error downloading the resource (error code {process.ExitCode}).");
@@ -42,6 +42,7 @@ public class ExternalTools
         const string processFileName = "mogrify";
         const string args = "-trim -fuzz 10% *.jpg";
 
+        printer.PrintLine("Auto-trimming images...");
         printer.PrintLine($"Running command: {processFileName} {args}");
         var processInfo = new ProcessStartInfo()
         {
@@ -59,7 +60,7 @@ public class ExternalTools
             return Result.Fail($"Could not start process {processFileName} -- is it installed?");
         }
         process.WaitForExit();
-        printer.PrintLine($"Done in {stopwatch.ElapsedMilliseconds:#,##0}ms");
+        printer.PrintLine($"Done auto-trimming in {stopwatch.ElapsedMilliseconds:#,##0}ms");
         return Result.Ok(process.ExitCode);
     }
 
