@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using CCVTAC.Console.DownloadEntities;
+using CCVTAC.Console.Settings;
 
 namespace CCVTAC.Console;
 
@@ -18,6 +19,27 @@ class Program
             return;
         }
 
+        var readSettingsResult = SettingsService.Read(printer, createFileIfMissing: true);
+        if (readSettingsResult.IsFailed)
+        {
+            printer.Error(readSettingsResult.Errors[0].Message);
+            return;
+        }
+        Settings.Settings settings = readSettingsResult.Value;
+
+        var ensureValidSettingsResult = SettingsService.EnsureValidSettings(settings);
+        if (ensureValidSettingsResult.IsFailed)
+        {
+            printer.Error("Error(s) found in settings file:");
+            ensureValidSettingsResult.Errors.ForEach(e => printer.Error($"- {e.Message}"));
+            return;
+        }
+        printer.PrintLine("Settings file loaded OK.");
+
+        SettingsService.SetId3v2Version(
+            version: SettingsService.Id3v2Version.TwoPoint3,
+            forceAsDefault: true);
+
         while (true)
         {
             string input = printer.GetInput("Enter a YouTube URL (or 'q' to quit): ");
@@ -28,33 +50,26 @@ class Program
                 return;
             }
 
-            Run(input, printer);
+            Run(input, settings, printer);
         }
     }
 
-    static void Run(string url, Printer printer)
+    static void Run(string url, Settings.Settings settings, Printer printer)
     {
         var downloadEntityResult = DownloadEntityFactory.Create(url);
         if (downloadEntityResult.IsFailed)
         {
             printer.Error(downloadEntityResult.Errors?.First().Message
-                          ?? "An unknown error occurred.");
+                          ?? "An unknown error occurred parsing the resource type.");
             return;
         }
         var downloadEntity = downloadEntityResult.Value;
-        printer.PrintLine($"Process a {downloadEntity.GetType()}");
-
-        var workingDirectory = Path.Combine(AppContext.BaseDirectory, "temp");
-        if (!Path.Exists(workingDirectory))
-        {
-            Directory.CreateDirectory(workingDirectory);
-            printer.PrintLine($"Created directory \"{workingDirectory}\"");
-        }
+        printer.PrintLine($"Processing {downloadEntity.GetType()} URL...");
 
         var downloadResult = ExternalTools.Downloader(
             "--extract-audio -f m4a --write-thumbnail --convert-thumbnails jpg --write-info-json --split-chapters",
             downloadEntity,
-            workingDirectory,
+            settings.WorkingDirectory!,
             printer);
         if (downloadResult.IsFailed)
         {
@@ -65,16 +80,16 @@ class Program
         printer.Print("Adding URL to the history log... ");
         try
         {
-            File.AppendAllText("history.log", url);
+            File.AppendAllText("history.log", url + Environment.NewLine);
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
             printer.Error("Error appending to history log: " + ex.Message);
         }
         printer.PrintLine("OK.");
 
 
-        var pp = new PostProcessing.PostProcessing(workingDirectory, printer);
+        var pp = new PostProcessing.PostProcessing(settings, printer);
         pp.Run();
     }
 

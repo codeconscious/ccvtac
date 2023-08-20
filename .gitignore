@@ -3,6 +3,7 @@
 *.profraw
 .DS_Store
 history.log
+settings.json
 
 
 ## Ignore Visual Studio temporary files, build results, and
