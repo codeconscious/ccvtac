@@ -7,7 +7,7 @@ public class Printer
     public void Print(string message, bool appendLineBreak = true, byte prependLines = 0, byte appendLines = 0, bool processMarkup = false)
     {
         if (string.IsNullOrWhiteSpace(message))
-            throw new ArgumentNullException(nameof(message), "Message cannot be empty");
+            throw new ArgumentNullException(nameof(message), "Message cannot be empty.");
 
         PrintEmptyLines(prependLines);
 
@@ -23,7 +23,8 @@ public class Printer
 
     public void Error(string message, byte appendLines = 0)
     {
-        Print("[red]" + message + "[/]", true, appendLines: appendLines, processMarkup: true);
+        AnsiConsole.MarkupLineInterpolated($"[red]{message}[/]");
+        PrintEmptyLines(appendLines);
     }
 
     public void Errors(IEnumerable<string> errors, string? message = null, byte appendLines = 0)
@@ -35,7 +36,7 @@ public class Printer
             Print("[red]" + message + "[/]", appendLines: appendLines, processMarkup: true);
 
         foreach (var error in errors)
-            Print("[red]" + message + "[/]", appendLines: appendLines, processMarkup: true);
+            AnsiConsole.MarkupLineInterpolated($"[red]- {error}[/]");
     }
 
     public void Warning(string message, byte appendLines = 0)
@@ -60,6 +61,6 @@ public class Printer
     public string GetInput(string prompt)
     {
         PrintEmptyLines(1);
-        return AnsiConsole.Ask<string>($"[blue]{prompt}[/]");
+        return AnsiConsole.Ask<string>($"[aqua]{prompt}[/]");
     }
 }

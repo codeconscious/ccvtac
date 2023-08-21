@@ -32,7 +32,6 @@ class Program
         var ensureValidSettingsResult = SettingsService.EnsureValidSettings(settings);
         if (ensureValidSettingsResult.IsFailed)
         {
-            printer.Error("Error(s) found in settings file:");
             printer.Errors(
                 ensureValidSettingsResult.Errors.Select(e => e.Message),
                 "Error(s) found in settings file:");
