@@ -1,12 +1,12 @@
 namespace CCVTAC.Console.PostProcessing;
 
-public class PostProcessing
+public class Setup
 {
     public string WorkingDirectory { get; }
     public string MoveToDirectory { get; }
     public Printer Printer { get; }
 
-    public PostProcessing(Settings.Settings setting, Printer printer)
+    public Setup(Settings.Settings setting, Printer printer)
     {
         WorkingDirectory = setting.WorkingDirectory!;
         MoveToDirectory = setting.MoveToDirectory!;

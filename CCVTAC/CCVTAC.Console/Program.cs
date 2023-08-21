@@ -66,7 +66,7 @@ class Program
         var downloadEntity = downloadEntityResult.Value;
         printer.PrintLine($"Processing {downloadEntity.GetType()} URL...");
 
-        List<string> args = new() {
+        IReadOnlyList<string> args = new List<string>() {
             "--extract-audio -f m4a",
             "--write-thumbnail",
             "--convert-thumbnails jpg",
@@ -92,13 +92,13 @@ class Program
         }
         catch (Exception ex)
         {
-            printer.Error("Error appending to history log: " + ex.Message);
+            printer.Error($"Could not append \"{url}\" to history log: " + ex.Message);
         }
         printer.PrintLine("OK.");
 
 
-        var pp = new PostProcessing.PostProcessing(settings, printer);
-        pp.Run();
+        var postProcessor = new PostProcessing.Setup(settings, printer);
+        postProcessor.Run();
     }
 
     static void PrintHelp(Printer printer)
