@@ -13,8 +13,7 @@ class Program
     {
         var printer = new Printer();
 
-        if (args.Length == 0 ||
-            (args.Length > 0 && HelpCommands.Contains(args[0].ToLowerInvariant())))
+        if (args.Length > 0 && HelpCommands.Contains(args[0].ToLowerInvariant()))
         {
             PrintHelp(printer);
             return;
@@ -115,14 +114,14 @@ class Program
         printer.Print("CodeConscious Video-to-Audio Converter (ccvtac)");
         printer.Print("• Converts YouTube videos to M4A audio files saved locally on your device");
         printer.Print("• Is a wrapper around yt-dlp (https://github.com/yt-dlp/yt-dlp/), which must already be installed");
-        printer.Print("• Adds ID3v2 tags including video thumbnails as album art and a comment summarizing video metadata");
-        printer.Print("• Keeps a local-only history of entered URLs.");
+        printer.Print("• Adds ID3v2 tags, including video thumbnails as album art and a comment summarizing video metadata");
+        printer.Print("• Keeps a local-only history of entered URLs");
         printer.Print("Instructions:");
-        printer.Print("• When starting the program, optionally supply one or more of the following argument(s):");
-        printer.Print("    -s   Splits video chapters into separate files (Continues until you quit)");
+        // printer.Print("• When starting the program, optionally supply one or more of the following argument(s):");
+        // printer.Print("    -s   Splits video chapters into separate files (Continues until you quit)");
         //                     -D   Debug mode, in which no downloads occur
-        printer.Print("• After the application start, enter single URLs to start the download and conversion process.");
+        printer.Print("• After the application starts, enter single URLs to start the download and conversion process.");
         printer.Print("  URLs may be for single videos, playlists, or channels.");
-        printer.Print("• Enter `q` or `quit` to exit.");
+        printer.Print("• Enter `q` or `quit` to quit.");
     }
 }
