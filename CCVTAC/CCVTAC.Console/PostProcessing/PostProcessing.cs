@@ -15,7 +15,7 @@ public class Setup
 
     internal void Run()
     {
-        Printer.PrintLine("Starting post-processing...");
+        Printer.Print("Starting post-processing...");
 
         // TODO: Create an interface and iterate through them, calling `Run()`?
         ImageProcessor.Run(WorkingDirectory, Printer);
@@ -24,6 +24,6 @@ public class Setup
         Deleter.Run(WorkingDirectory, Printer);
         Mover.Run(WorkingDirectory, MoveToDirectory, Printer);
 
-        Printer.PrintLine("Post-processing done!");
+        Printer.Print("Post-processing done!");
     }
 }

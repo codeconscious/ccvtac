@@ -22,7 +22,9 @@ class Program
         var readSettingsResult = SettingsService.Read(printer, createFileIfMissing: true);
         if (readSettingsResult.IsFailed)
         {
-            printer.Error(readSettingsResult.Errors[0].Message);
+            printer.Errors(
+                readSettingsResult.Errors.Select(e => e.Message),
+                "Error(s) reading the settings file:");
             return;
         }
         Settings.Settings settings = readSettingsResult.Value;
@@ -31,10 +33,12 @@ class Program
         if (ensureValidSettingsResult.IsFailed)
         {
             printer.Error("Error(s) found in settings file:");
-            ensureValidSettingsResult.Errors.ForEach(e => printer.Error($"- {e.Message}"));
+            printer.Errors(
+                ensureValidSettingsResult.Errors.Select(e => e.Message),
+                "Error(s) found in settings file:");
             return;
         }
-        printer.PrintLine("Settings file loaded OK.");
+        printer.Print("Settings file loaded OK.");
 
         SettingsService.SetId3v2Version(
             version: SettingsService.Id3v2Version.TwoPoint3,
@@ -46,7 +50,7 @@ class Program
 
             if (QuitCommands.Contains(input)) // TODO: Make case-insensitive.
             {
-                printer.PrintLine("Quitting...");
+                printer.Print("Quitting...");
                 return;
             }
 
@@ -64,7 +68,7 @@ class Program
             return;
         }
         var downloadEntity = downloadEntityResult.Value;
-        printer.PrintLine($"Processing {downloadEntity.GetType()} URL...");
+        printer.Print($"Processing {downloadEntity.GetType()} URL...");
 
         IReadOnlyList<string> args = new List<string>() {
             "--extract-audio -f m4a",
@@ -85,7 +89,7 @@ class Program
             return;
         }
 
-        printer.Print("Adding URL to the history log... ");
+        printer.Print("Adding URL to the history log... ", appendLineBreak: false);
         try
         {
             File.AppendAllText("history.log", url + Environment.NewLine);
@@ -94,25 +98,28 @@ class Program
         {
             printer.Error($"Could not append \"{url}\" to history log: " + ex.Message);
         }
-        printer.PrintLine("OK.");
+        printer.Print("OK.");
 
 
         var postProcessor = new PostProcessing.Setup(settings, printer);
         postProcessor.Run();
+
+        printer.Print("Done!", appendLines: 1);
     }
 
     static void PrintHelp(Printer printer)
     {
-        printer.PrintLine("CodeConscious Video-to-Audio Converter (ccvtac)");
-        printer.PrintLine("• Converts YouTube videos to MP3s saved locally on your device");
-        printer.PrintLine("• Is a wrapper around yt-dlp (https://github.com/yt-dlp/yt-dlp/), which must already be installed");
-        printer.PrintLine("• Adds ID3v2 tags including video thumbnails as album art and a comment summarizing video metadata");
-        printer.PrintLine("Instructions:");
-        printer.PrintLine("• When starting the program, optionally supply one or more of the following argument(s):");
-        printer.PrintLine("    -s   Splits video chapters into separate files (Continues until you quit)");
+        printer.Print("CodeConscious Video-to-Audio Converter (ccvtac)");
+        printer.Print("• Converts YouTube videos to M4A audio files saved locally on your device");
+        printer.Print("• Is a wrapper around yt-dlp (https://github.com/yt-dlp/yt-dlp/), which must already be installed");
+        printer.Print("• Adds ID3v2 tags including video thumbnails as album art and a comment summarizing video metadata");
+        printer.Print("• Keeps a local-only history of entered URLs.");
+        printer.Print("Instructions:");
+        printer.Print("• When starting the program, optionally supply one or more of the following argument(s):");
+        printer.Print("    -s   Splits video chapters into separate files (Continues until you quit)");
         //                     -D   Debug mode, in which no downloads occur
-        printer.PrintLine("• After the application start, enter single URLs to start the download and conversion process.");
-        printer.PrintLine("  URLs may be for single videos, playlists, or channels.");
-        printer.PrintLine("• Enter `q` or `quit` to exit.");
+        printer.Print("• After the application start, enter single URLs to start the download and conversion process.");
+        printer.Print("  URLs may be for single videos, playlists, or channels.");
+        printer.Print("• Enter `q` or `quit` to exit.");
     }
 }

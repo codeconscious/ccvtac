@@ -9,9 +9,9 @@ public class ExternalTools
         var stopwatch = new Stopwatch();
         stopwatch.Start();
 
-        printer.PrintLine("Starting download...");
+        printer.Print("Starting download...");
         const string processFileName = "yt-dlp";
-        printer.PrintLine($"Running command: {processFileName} {args} {downloadData.FullResourceId}");
+        printer.Print($"Running command: {processFileName} {args} {downloadData.FullResourceId}");
         var processInfo = new ProcessStartInfo()
         {
             FileName = processFileName,
@@ -28,7 +28,7 @@ public class ExternalTools
             return Result.Fail($"Could not start process {processFileName} -- is it installed?");
         }
         process.WaitForExit();
-        printer.PrintLine($"Done downloading in {stopwatch.ElapsedMilliseconds:#,##0}ms");
+        printer.Print($"Done downloading in {stopwatch.ElapsedMilliseconds:#,##0}ms");
         return process.ExitCode == 0
             ? Result.Ok(process.ExitCode)
             : Result.Fail($"Error downloading the resource (error code {process.ExitCode}).");
@@ -42,8 +42,8 @@ public class ExternalTools
         const string processFileName = "mogrify";
         const string args = "-trim -fuzz 10% *.jpg";
 
-        printer.PrintLine("Auto-trimming images...");
-        printer.PrintLine($"Running command: {processFileName} {args}");
+        printer.Print("Auto-trimming images...");
+        printer.Print($"Running command: {processFileName} {args}");
         var processInfo = new ProcessStartInfo()
         {
             FileName = processFileName,
@@ -60,7 +60,7 @@ public class ExternalTools
             return Result.Fail($"Could not start process {processFileName} -- is it installed?");
         }
         process.WaitForExit();
-        printer.PrintLine($"Done auto-trimming in {stopwatch.ElapsedMilliseconds:#,##0}ms");
+        printer.Print($"Done auto-trimming in {stopwatch.ElapsedMilliseconds:#,##0}ms");
         return Result.Ok(process.ExitCode);
     }
 
@@ -73,7 +73,7 @@ public class ExternalTools
         const string processFileName = "find";
         const string args = """. -name "*.m4a" -exec mp3gain -r -k -p -s i {} \;""";
 
-        printer.PrintLine($"Running command: {processFileName}");
+        printer.Print($"Running command: {processFileName}");
         var processInfo = new ProcessStartInfo()
         {
             FileName = processFileName,
@@ -90,7 +90,7 @@ public class ExternalTools
             return Result.Fail($"Could not start process {processFileName} -- is it installed?");
         }
         process.WaitForExit();
-        printer.PrintLine($"Done in {stopwatch.ElapsedMilliseconds:#,##0}ms");
+        printer.Print($"Done in {stopwatch.ElapsedMilliseconds:#,##0}ms");
         return Result.Ok(process.ExitCode);
     }
 }

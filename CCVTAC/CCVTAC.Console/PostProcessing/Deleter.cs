@@ -17,7 +17,7 @@ internal static class Deleter
             try
             {
                 file.Delete();
-                printer.PrintLine($"Deleted \"{file.Name}\"");
+                printer.Print($"- Deleted \"{file.Name}\"");
             }
             catch (Exception ex)
             {

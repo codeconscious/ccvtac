@@ -88,7 +88,7 @@ internal static class Tagger
         catch (Exception ex)
         {
             printer.Error($"Error finding a single image in \"{workingDirectory}\": {ex.Message}");
-            printer.PrintLine("Aborting image addition.");
+            printer.Print("Aborting image addition.");
             return;
         }
 
@@ -97,12 +97,12 @@ internal static class Tagger
             var pics = new TagLib.IPicture[1];
             pics[0] = new TagLib.Picture(imageFile);
             taggedFile.Tag.Pictures = pics;
-            printer.PrintLine("Image attached to tagged file.");
+            printer.Print("Image attached to tagged file.");
         }
         catch (Exception ex)
         {
             printer.Error($"Error attaching image to the tagged file: {ex.Message}");
-            printer.PrintLine("Aborting image addition.");
+            printer.Print("Aborting image addition.");
             return;
         }
     }
