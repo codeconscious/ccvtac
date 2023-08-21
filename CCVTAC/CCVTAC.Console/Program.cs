@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using CCVTAC.Console.DownloadEntities;
 using CCVTAC.Console.Settings;
 
@@ -7,13 +6,15 @@ namespace CCVTAC.Console;
 
 class Program
 {
+    private static readonly string[] HelpCommands = new[] { "-h", "--help" };
     private static readonly string[] QuitCommands = new[] { "q", "quit", "exit" };
 
     static void Main(string[] args)
     {
         var printer = new Printer();
 
-        if (args.Length > 0 && args[0] == "-h")
+        if (args.Length == 0 ||
+            (args.Length > 0 && HelpCommands.Contains(args[0].ToLowerInvariant())))
         {
             PrintHelp(printer);
             return;
@@ -48,7 +49,7 @@ class Program
         {
             string input = printer.GetInput("Enter a YouTube URL (or 'q' to quit): ");
 
-            if (QuitCommands.Contains(input)) // TODO: Make case-insensitive.
+            if (QuitCommands.Contains(input.ToLowerInvariant())) // TODO: Make case-insensitive.
             {
                 printer.Print("Quitting...");
                 return;
