@@ -61,6 +61,9 @@ class Program
 
     static void Run(string url, Settings.Settings settings, Printer printer)
     {
+        var stopwatch = new System.Diagnostics.Stopwatch();
+        stopwatch.Start();
+
         var downloadEntityResult = DownloadEntityFactory.Create(url);
         if (downloadEntityResult.IsFailed)
         {
@@ -101,11 +104,10 @@ class Program
         }
         printer.Print("OK.");
 
-
         var postProcessor = new PostProcessing.Setup(settings, printer);
         postProcessor.Run();
 
-        printer.Print("Done!", appendLines: 1);
+        printer.Print($"Done in {stopwatch.ElapsedMilliseconds:#,##0}ms.", appendLines: 1);
     }
 
     static void PrintHelp(Printer printer)
