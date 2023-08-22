@@ -20,11 +20,11 @@ internal static class Renamer
             "Remove extra spaces"),
         new RenamePattern(
             new Regex(@"(?<= - )\d{3} (\d{1,3})\.?\s?"),
-            "%<g1>s - ",
+            "%<1>s - ",
             "Remove and reformat duplicate track numbers"),
         new RenamePattern(
             new Regex(@"(.+?)(?: - )(.+?) \[[\w⧸]+\] .+ \(([\d\?？]{4})\)"),
-            "%<g1>s - %<g2>s [%<g3>s]",
+            "%<1>s - %<2>s [%<3>s]",
             "Custom reformat"),
         new RenamePattern(
             new Regex(@"\s*[(（【［\[\-]?(?:[Oo]fficial +|OFFICIAL +)?(?:[Mm]usic [Vv]ideo|MUSIC VIDEO|[Ll]yric [Vv]ideo|LYRIC VIDEO|[Vv]ideo|VIDEO|[Aa]udio|[Vv]isualizer|AUDIO|[Ff]ull (?:[Aa]lbum|LP|EP)|M(?:[_/])?V)[)】］）\]\-]?"),
@@ -32,27 +32,27 @@ internal static class Renamer
             "Remove unneeded labels"),
         new RenamePattern(
             new Regex(@"^(.+?)(?: - )?\s?[｢「『【](.+)[」｣』】]\s?(\d{4})(?:\s?MV)?"),
-            "%<g1>s - %<g2>s [%<g3>s]",
+            "%<1>s - %<2>s [%<3>s]",
             "Reformat 'PERSON「TITLE」YEAR'"),
         new RenamePattern(
             new Regex(@"^(.+?)(?: - )?\s?[｢「『【](.+?)[」｣』】](?:\s?MV)?(?=\.\w{3,4})"),
-            "%<g1>s - %<g2>s",
+            "%<1>s - %<2>s",
             "Reformat 'PERSON「TITLE」' (alone, not followed by anything)"),
         new RenamePattern(
             new Regex(@"^(.+?)(?: - )?\s?([｢「『【].+?[」｣』】](?:\s?MV)?.*)(?=\.\w{3,4})"),
-            "%<g1>s - %<g2>s",
+            "%<1>s - %<2>s",
             "Reformat 'PERSON「TITLE」' followed by other info"),
         new RenamePattern(
             new Regex(@"(^.+) \[\s(.+)\s\]"),
-            "%<g1>s - %<g2>s",
+            "%<1>s - %<2>s",
             "Reformat 'ARTIST [ TITLE ]'"),
         new RenamePattern(
             new Regex(@"^(.+)\s{1,}-\s{1,}'(.+)'"),
-            "%<g1>s - %<g2>s",
+            "%<1>s - %<2>s",
             "Reformat 'ARTIST - \'TITLE\' ]'"),
         new RenamePattern(
             new Regex(@"^(.+?)(?: - [｢「『【])(.+)(?:[」｣』】]).*(?=（Full Ver.）)"),
-            "%<g1>s - %<g2>s",
+            "%<1>s - %<2>s",
             "Reformat 'ARTIST - \'TITLE\' ]'"),
         new RenamePattern(
             new Regex(@" - - "),
@@ -90,7 +90,7 @@ internal static class Renamer
                 var replacementText = new StringBuilder(pattern.ReplacementText);
                 for (int i = 0; i < match.Groups.Count - 1; i++)
                 {
-                    replacementText.Replace($"%<g{i + 1}>s", match.Groups[i + 1].Value);
+                    replacementText.Replace($"%<{i + 1}>s", match.Groups[i + 1].Value);
                 }
 
                 workingFileName.Insert(match.Index, replacementText.ToString());
