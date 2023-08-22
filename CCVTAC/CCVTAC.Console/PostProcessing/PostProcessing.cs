@@ -21,6 +21,7 @@ public class Setup
         ImageProcessor.Run(WorkingDirectory, Printer);
         Tagger.Run(WorkingDirectory, Printer);
         // AudioNormalizer.Run(WorkingDirectory, Printer); // TODO: `mp3gain`は無理なので、別のnormalize方法を要検討。
+        Renamer.Run(WorkingDirectory, Printer);
         Deleter.Run(WorkingDirectory, Printer);
         Mover.Run(WorkingDirectory, MoveToDirectory, Printer);
 
