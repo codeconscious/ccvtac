@@ -14,7 +14,10 @@ internal static class Mover
         {
             try
             {
-                File.Move(file.FullName, $"{Path.Combine(moveToDirectory, file.Name)}");
+                File.Move(
+                    file.FullName,
+                    $"{Path.Combine(moveToDirectory, file.Name)}",
+                    true);
                 printer.Print($"- Moved \"{file.Name}\"");
                 movedCount++;
             }
