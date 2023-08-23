@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -23,7 +22,6 @@ internal static class Tagger
                 printer.Error($"No {jsonFileSearchPattern} files found! Aborting...");
                 return;
             }
-            // printer.Warning($"Found {jsonFiles.Count()} JSON file(s).");
         }
         catch (Exception ex)
         {
@@ -31,35 +29,33 @@ internal static class Tagger
             return;
         }
 
-        var regex = new Regex(@".+\[([\w_\-]{11})\](?:.*)?\.(\w+)");
-        var matches = jsonFiles
-                        .Select(f => regex.Match(f))
+        var resourceIdRegex = new Regex(@".+\[([\w_\-]{11})\](?:.*)?\.(\w+)");
+        var idsWithFileNames = jsonFiles
+                        .Select(f => resourceIdRegex.Match(f))
                         .Where(m => m.Success)
-                        .Select(m => m.Captures);
-        var idsWithFileNames = matches.Select(m => m.OfType<Match>().First())
+                        .Select(m => m.Captures.OfType<Match>().First())
                                       .GroupBy(m => m.Groups[1].Value,
                                                m => m.Groups[0].Value);
         var invalid = idsWithFileNames.Where(g => g.Count() != 1);
         if (invalid.Any())
         {
             printer.Errors(
-                invalid.Select(i => $"Too many JSON files for ID {i.Key}"),
+                invalid.Select(i => $"Too many JSON files for ID {i.Key}, so this ID will be skipped."),
                 "JSON errors:"
             );
         }
         var valid = idsWithFileNames.Where(g => g.Count() == 1);
-        // printer.Print($"Valid IDs: {string.Join(", ", valid.Select(i => i.Key))}");
 
         const string audioFileExtension = ".m4a";
         foreach (var idNamePair in valid)
         {
             var resourceId = idNamePair.Key;
-
             var jsonFileName = idNamePair.Single();
+
             string json;
             try
             {
-                json = File.ReadAllText(jsonFileName);
+                json = File.ReadAllText(jsonFileName.Trim());
             }
             catch (Exception ex)
             {
@@ -67,12 +63,12 @@ internal static class Tagger
                 continue;
             }
 
-            YouTubeJson.Root? data;
+            YouTubeJson.Root? parsedJson;
             try
             {
-                data = JsonSerializer.Deserialize<YouTubeJson.Root>(json);
+                parsedJson = JsonSerializer.Deserialize<YouTubeJson.Root>(json);
 
-                if (data is null)
+                if (parsedJson is null)
                 {
                     printer.Error($"JSON from file \"{json}\" was unexpectedly null.");
                     continue;
@@ -91,6 +87,7 @@ internal static class Tagger
                 continue;
             }
             printer.Print($"Found {audioFilesForThisID.Count()} audio file(s) for resource ID {idNamePair.Key}");
+            // TODO: If there is more than one, it indicates a split video, so the original (largest) should be deleted.
 
             foreach (var audioFilePath in audioFilesForThisID)
             {
@@ -98,10 +95,10 @@ internal static class Tagger
                 printer.Print($"Current audio file: \"{audioFileName}\"");
 
                 using var taggedFile = TagLib.File.Create(audioFilePath);
-                taggedFile.Tag.Title = data.title;
-                taggedFile.Tag.Year = GetYear(data, printer);
+                taggedFile.Tag.Title = parsedJson.title;
+                taggedFile.Tag.Year = GetYear(parsedJson, printer);
                 // taggedFile.Tag. // TODO: Manually add 'original name' frame.
-                taggedFile.Tag.Comment = GenerateComment(data);
+                taggedFile.Tag.Comment = GenerateComment(parsedJson);
                 AddImage(taggedFile, resourceId, workingDirectory, printer);
                 taggedFile.Save();
                 printer.Print($"Wrote tags to \"{audioFileName}\"");
