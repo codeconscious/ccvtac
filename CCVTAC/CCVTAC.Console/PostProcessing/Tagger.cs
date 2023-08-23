@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -95,8 +96,10 @@ internal static class Tagger
             {
                 var audioFileName = Path.GetFileName(audioFilePath);
                 printer.Print($"Current audio file: \"{audioFileName}\"");
+
                 using var taggedFile = TagLib.File.Create(audioFilePath);
                 taggedFile.Tag.Title = data.title;
+                taggedFile.Tag.Year = GetYear(data, printer);
                 // taggedFile.Tag. // TODO: Manually add 'original name' frame.
                 taggedFile.Tag.Comment = GenerateComment(data);
                 AddImage(taggedFile, resourceId, workingDirectory, printer);
@@ -119,6 +122,52 @@ internal static class Tagger
             sb.AppendLine($"• Uploaded: {data.upload_date})");
             sb.AppendLine($"• Description: {data.description})");
             return sb.ToString();
+        }
+
+        static uint GetYear(YouTubeJson.Root data, Printer printer)
+        {
+            // TODO: Put this somewhere where it can be static.s
+            List<(string Regex, string Text, string Source)> parsePatterns = new()
+            {
+                (@"(?<=[(（\[［【])[12]\d{3}(?=[)）\]］】])", data.title, "title"),
+                (@"(?<=℗ )[12]\d{3}(?=\s)", data.description, "description's \"℗\" symbol"),
+                (@"(?<=[Rr]eleased [io]n: )[12]\d{3}", data.description, "description 'released on' date"),
+                (@"[12]\d{3}(?=年(?:\d{1,2}月\d{1,2}日)?リリース)", data.description, "description's リリース date"),
+            };
+
+            foreach (var pattern in parsePatterns)
+            {
+                var result = ParseYear(pattern.Regex, pattern.Text);
+                if (result is null)
+                    continue;
+
+                printer.Print($"Writing year {result.Value} (matched via {pattern.Source})");
+                return result.Value;
+            }
+
+            printer.Print("No year could be parsed, so defaulting to 0.");
+            return 0;
+
+            /// <summary>
+            /// Applies a regex pattern against text, returning the matched value
+            /// or null if there was no successful match.
+            /// </summary>
+            /// <param name="regexPattern"></param>
+            /// <param name="text">Text that might contain a year.</param>
+            /// <returns>A number representing a year or null.</returns>
+            static uint? ParseYear(string regexPattern, string text)
+            {
+                ArgumentNullException.ThrowIfNullOrEmpty(regexPattern);
+
+                var regex = new Regex(regexPattern);
+                var match = regex.Match(text);
+
+                if (match is null)
+                    return null;
+                return uint.TryParse(match.Value, out var matchYear)
+                    ? matchYear
+                    : null;
+            };
         }
     }
 
