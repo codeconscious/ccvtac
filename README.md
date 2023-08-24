@@ -2,7 +2,7 @@
 
 A small .NET CLI tool that acts as a wrapper around [yt-dlp](https://github.com/yt-dlp/yt-dlp) to even more easily download audio from specific YouTube videos.
 
-I [originally created this tool in Ruby](https://github.com/codeconscious/youtube-audio-downloader-ruby) to get better acquainted with Ruby for work, but I've rewritten it in C# because I decided to move from MP3 to M4A files to avoid unnecessary conversion, but the Ruby gem (library) I was using doesn't support M4A; and frankly, while Ruby's neat, I enjoy working with C# more.
+I [originally created this tool in Ruby](https://github.com/codeconscious/youtube-audio-downloader-ruby) to get better acquainted with Ruby for work, but I've rewritten it in C# because I decided to move from MP3 to M4A files to avoid unnecessary conversion (for better quality in smaller files), but the Ruby gem (library) I was using doesn't support M4A; and frankly, while Ruby's neat, I enjoy working with C# much more.
 
 Feel free to use it yourself, but please do so responsibly. No warranties or guarantees provided!
 
@@ -10,10 +10,10 @@ Feel free to use it yourself, but please do so responsibly. No warranties or gua
 
 - Easily convert YouTube videos to local M4A audio files!
 - Supports video and playlist URLs
-- Video metadata saved to Comment tags
-- Renames files via
-- Video thumbnails are auto-trimmed and written to files as album art
-- Files are automatically moved to a specified directory
+- Video metadata (uploader name and URL, source URL, etc.) saved to Comment tags
+- Renames files via specific regex patterns (to remove resource IDs, etc.)
+- Video thumbnails are auto-trimmed and written to files as album art (Optional)
+- Post-processed files are automatically moved to a specified directory
 - All URLs entered are saved locally to a file named `history.log`
 
 ### TODOs and Ideas
@@ -26,7 +26,8 @@ Feel free to use it yourself, but please do so responsibly. No warranties or gua
 Prerequisites:
 
 - .NET 7
-- yt-dlp
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp)
+- Optional: [mogrify](https://imagemagick.org/script/mogrify.php) (for auto-trimming album art)
 
 Run the program with `dotnet run`. Pass `-h` or `--help` for the instructions.
 
