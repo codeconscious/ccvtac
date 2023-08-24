@@ -4,7 +4,11 @@ using CCVTAC.Console.DownloadEntities;
 namespace CCVTAC.Console;
 public class ExternalTools
 {
-    public static Result<int> Downloader(string args, IDownloadEntity downloadData, string saveDirectory, Printer printer)
+    public static Result<int> Downloader(
+        string args,
+        IDownloadEntity downloadData,
+        string saveDirectory,
+        Printer printer)
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
@@ -25,13 +29,13 @@ public class ExternalTools
         using var process = Process.Start(processInfo);
         if (process is null)
         {
-            return Result.Fail($"Could not start process {processFileName} -- is it installed?");
+            return Result.Fail($"Could not start {processFileName} -- is it installed?");
         }
         process.WaitForExit();
         printer.Print($"Done downloading in {stopwatch.ElapsedMilliseconds:#,##0}ms");
         return process.ExitCode == 0
             ? Result.Ok(process.ExitCode)
-            : Result.Fail($"Full or partial error downloading the resource (error code {process.ExitCode}).");
+            : Result.Fail($"Full or partial download error (yt-dlp error {process.ExitCode}).");
     }
 
     public static Result<int> ImageProcessor(string workingDirectory, Printer printer)
