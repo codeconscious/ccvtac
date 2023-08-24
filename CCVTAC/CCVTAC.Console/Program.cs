@@ -123,16 +123,18 @@ class Program
     static void PrintHelp(Printer printer)
     {
         printer.Print("CodeConscious Video-to-Audio Converter (ccvtac)");
-        printer.Print("• Converts YouTube videos to M4A audio files saved locally on your device");
-        printer.Print("• Is a wrapper around yt-dlp (https://github.com/yt-dlp/yt-dlp/), which must already be installed");
-        printer.Print("• Adds ID3v2 tags, including video thumbnails as album art and a comment summarizing video metadata");
-        printer.Print("• Keeps a local-only history of entered URLs");
+        printer.Print("- Easily convert YouTube videos to local M4A audio files!");
+        printer.Print("- Supports video and playlist URLs");
+        printer.Print("- Video metadata (uploader name and URL, source URL, etc.) saved to Comment tags");
+        printer.Print("- Renames files via specific regex patterns (to remove resource IDs, etc.)");
+        printer.Print("- Video thumbnails are auto-trimmed and written to files as album art (Optional)");
+        printer.Print("- Post-processed files are automatically moved to a specified directory");
+        printer.Print("- All URLs entered are saved locally to a file named `history.log`", appendLines: 1);
+
         printer.Print("Instructions:");
-        // printer.Print("• When starting the program, optionally supply one or more of the following argument(s):");
-        // printer.Print("    -s   Splits video chapters into separate files (Continues until you quit)");
-        //                     -D   Debug mode, in which no downloads occur
-        printer.Print("• After the application starts, enter single URLs to start the download and conversion process.");
-        printer.Print("  URLs may be for single videos, playlists, or channels.");
+        printer.Print("• Run the program once to generate a blank settings.json file, then populate it with directory paths.");
+        printer.Print("• After the application starts, enter single URLs to start the download process.");
+        printer.Print("  URLs may be for single videos or playlists.");
         printer.Print("• Enter `q` or `quit` to quit.");
     }
 }
