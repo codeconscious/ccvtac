@@ -1,5 +1,3 @@
-using System.IO;
-
 namespace CCVTAC.Console.PostProcessing;
 
 public class Setup
@@ -8,15 +6,18 @@ public class Setup
     public string MoveToDirectory { get; }
     public Printer Printer { get; }
 
-    public Setup(Settings.Settings setting, Printer printer)
+    public Setup(Settings.Settings settings, Printer printer)
     {
-        WorkingDirectory = setting.WorkingDirectory!;
-        MoveToDirectory = setting.MoveToDirectory!;
+        WorkingDirectory = settings.WorkingDirectory!;
+        MoveToDirectory = settings.MoveToDirectory!;
         Printer = printer;
     }
 
     internal void Run()
     {
+        var stopwatch = new System.Diagnostics.Stopwatch();
+        stopwatch.Start();
+
         Printer.Print("Starting post-processing...");
 
         // TODO: Create an interface and iterate through them, calling `Run()`?
@@ -25,16 +26,8 @@ public class Setup
         // AudioNormalizer.Run(WorkingDirectory, Printer); // TODO: `mp3gain`は無理なので、別のnormalize方法を要検討。
         Renamer.Run(WorkingDirectory, Printer);
         Deleter.Run(WorkingDirectory, Printer);
-        Mover.Run(WorkingDirectory, MoveToDirectory, Printer);
+        Mover.Run(WorkingDirectory, MoveToDirectory, Printer, true);
 
-        IReadOnlyList<string> ignoreFiles = new List<string>() { ".DS_Store" };
-        if (Directory.GetFiles(WorkingDirectory, "*")
-                     .Where(dirFile => !ignoreFiles.Any(ignoreFile => dirFile.EndsWith(ignoreFile)))
-                     .Any())
-        {
-            Printer.Warning("Some files unexpectedly remain in the working folder. Please check it.");
-        }
-
-        Printer.Print("Post-processing done!");
+        Printer.Print($"Post-processing done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
     }
 }
