@@ -31,7 +31,7 @@ public class ExternalTools
         printer.Print($"Done downloading in {stopwatch.ElapsedMilliseconds:#,##0}ms");
         return process.ExitCode == 0
             ? Result.Ok(process.ExitCode)
-            : Result.Fail($"Error downloading the resource (error code {process.ExitCode}).");
+            : Result.Fail($"Full or partial error downloading the resource (error code {process.ExitCode}).");
     }
 
     public static Result<int> ImageProcessor(string workingDirectory, Printer printer)

@@ -101,7 +101,8 @@ class Program
             printer);
         if (downloadResult.IsFailed)
         {
-            return Result.Fail(downloadResult.Errors.First().Message);
+            downloadResult.Errors.ForEach(e => printer.Error(e.Message));
+            printer.Print("However, post-processing will still be attempted.");
         }
 
         try
