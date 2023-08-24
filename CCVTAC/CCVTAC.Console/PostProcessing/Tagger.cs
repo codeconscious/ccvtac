@@ -22,7 +22,6 @@ internal static class Tagger
                 printer.Error($"No {jsonFileSearchPattern} files found! Aborting...");
                 return;
             }
-            // printer.Warning($"Found {jsonFiles.Count()} JSON file(s).");
         }
         catch (Exception ex)
         {
@@ -30,35 +29,33 @@ internal static class Tagger
             return;
         }
 
-        var regex = new Regex(@".+\[([\w_\-]{11})\](?:.*)?\.(\w+)");
-        var matches = jsonFiles
-                        .Select(f => regex.Match(f))
+        var resourceIdRegex = new Regex(@".+\[([\w_\-]{11})\](?:.*)?\.(\w+)");
+        var idsWithFileNames = jsonFiles
+                        .Select(f => resourceIdRegex.Match(f))
                         .Where(m => m.Success)
-                        .Select(m => m.Captures);
-        var idsWithFileNames = matches.Select(m => m.OfType<Match>().First())
+                        .Select(m => m.Captures.OfType<Match>().First())
                                       .GroupBy(m => m.Groups[1].Value,
                                                m => m.Groups[0].Value);
         var invalid = idsWithFileNames.Where(g => g.Count() != 1);
         if (invalid.Any())
         {
             printer.Errors(
-                invalid.Select(i => $"Too many JSON files for ID {i.Key}"),
+                invalid.Select(i => $"Too many JSON files for ID {i.Key}, so this ID will be skipped."),
                 "JSON errors:"
             );
         }
         var valid = idsWithFileNames.Where(g => g.Count() == 1);
-        // printer.Print($"Valid IDs: {string.Join(", ", valid.Select(i => i.Key))}");
 
         const string audioFileExtension = ".m4a";
         foreach (var idNamePair in valid)
         {
             var resourceId = idNamePair.Key;
-
             var jsonFileName = idNamePair.Single();
+
             string json;
             try
             {
-                json = File.ReadAllText(jsonFileName);
+                json = File.ReadAllText(jsonFileName.Trim());
             }
             catch (Exception ex)
             {
@@ -66,12 +63,12 @@ internal static class Tagger
                 continue;
             }
 
-            YouTubeJson.Root? data;
+            YouTubeJson.Root? parsedJson;
             try
             {
-                data = JsonSerializer.Deserialize<YouTubeJson.Root>(json);
+                parsedJson = JsonSerializer.Deserialize<YouTubeJson.Root>(json);
 
-                if (data is null)
+                if (parsedJson is null)
                 {
                     printer.Error($"JSON from file \"{json}\" was unexpectedly null.");
                     continue;
@@ -83,22 +80,47 @@ internal static class Tagger
                 continue;
             }
 
-            var audioFilesForThisID = Directory.GetFiles(workingDirectory, $"*{idNamePair.Key}*{audioFileExtension}");
+            var audioFilesForThisID = Directory
+                .GetFiles(workingDirectory, $"*{idNamePair.Key}*{audioFileExtension}")
+                .ToList();
             if (!audioFilesForThisID.Any())
             {
                 printer.Error($"No {audioFileExtension} files for ID {idNamePair.Key} were found.");
                 continue;
             }
             printer.Print($"Found {audioFilesForThisID.Count()} audio file(s) for resource ID {idNamePair.Key}");
+            // TODO: If there is more than one, it indicates a split video, so the original (largest) should be deleted.
+
+            // For split videos, delete the source file.
+            if (audioFilesForThisID.Count() > 1)
+            {
+                var largestFileInfo = audioFilesForThisID
+                    .Select(fn => new FileInfo(fn))
+                    .OrderByDescending(fi => fi.Length)
+                    .First();
+
+                try
+                {
+                    File.Delete(largestFileInfo.FullName);
+                    audioFilesForThisID.Remove(largestFileInfo.FullName);
+                    printer.Print($"Deleted original file \"{largestFileInfo.Name}\"");
+                }
+                catch (Exception ex)
+                {
+                    printer.Error($"Error deleting file \"{largestFileInfo.Name}\": {ex.Message}");
+                }
+            }
 
             foreach (var audioFilePath in audioFilesForThisID)
             {
                 var audioFileName = Path.GetFileName(audioFilePath);
                 printer.Print($"Current audio file: \"{audioFileName}\"");
+
                 using var taggedFile = TagLib.File.Create(audioFilePath);
-                taggedFile.Tag.Title = data.title;
+                taggedFile.Tag.Title = parsedJson.title;
+                taggedFile.Tag.Year = GetYear(parsedJson, printer);
                 // taggedFile.Tag. // TODO: Manually add 'original name' frame.
-                taggedFile.Tag.Comment = GenerateComment(data);
+                taggedFile.Tag.Comment = GenerateComment(parsedJson);
                 AddImage(taggedFile, resourceId, workingDirectory, printer);
                 taggedFile.Save();
                 printer.Print($"Wrote tags to \"{audioFileName}\"");
@@ -119,6 +141,52 @@ internal static class Tagger
             sb.AppendLine($"• Uploaded: {data.upload_date})");
             sb.AppendLine($"• Description: {data.description})");
             return sb.ToString();
+        }
+
+        static uint GetYear(YouTubeJson.Root data, Printer printer)
+        {
+            // TODO: Put this somewhere where it can be static.s
+            List<(string Regex, string Text, string Source)> parsePatterns = new()
+            {
+                (@"(?<=[(（\[［【])[12]\d{3}(?=[)）\]］】])", data.title, "title"),
+                (@"(?<=℗ )[12]\d{3}(?=\s)", data.description, "description's \"℗\" symbol"),
+                (@"(?<=[Rr]eleased [io]n: )[12]\d{3}", data.description, "description 'released on' date"),
+                (@"[12]\d{3}(?=年(?:\d{1,2}月\d{1,2}日)?リリース)", data.description, "description's リリース date"),
+            };
+
+            foreach (var pattern in parsePatterns)
+            {
+                var result = ParseYear(pattern.Regex, pattern.Text);
+                if (result is null)
+                    continue;
+
+                printer.Print($"Writing year {result.Value} (matched via {pattern.Source})");
+                return result.Value;
+            }
+
+            printer.Print("No year could be parsed, so defaulting to 0.");
+            return 0;
+
+            /// <summary>
+            /// Applies a regex pattern against text, returning the matched value
+            /// or null if there was no successful match.
+            /// </summary>
+            /// <param name="regexPattern"></param>
+            /// <param name="text">Text that might contain a year.</param>
+            /// <returns>A number representing a year or null.</returns>
+            static uint? ParseYear(string regexPattern, string text)
+            {
+                ArgumentNullException.ThrowIfNullOrEmpty(regexPattern);
+
+                var regex = new Regex(regexPattern);
+                var match = regex.Match(text);
+
+                if (match is null)
+                    return null;
+                return uint.TryParse(match.Value, out var matchYear)
+                    ? matchYear
+                    : null;
+            };
         }
     }
 

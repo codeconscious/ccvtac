@@ -42,7 +42,7 @@ public class Printer
     public void Warning(string message, byte appendLines = 0)
     {
         // Print("[yellow]" + message + "[/]", true, appendLines: appendLines, processMarkup: true);
-        AnsiConsole.MarkupLineInterpolated($"[yellow]- {message}[/]");
+        AnsiConsole.MarkupLineInterpolated($"[yellow]{message}[/]");
         PrintEmptyLines(appendLines);
     }
 

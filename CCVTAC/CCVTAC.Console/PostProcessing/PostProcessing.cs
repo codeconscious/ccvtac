@@ -1,3 +1,5 @@
+using System.IO;
+
 namespace CCVTAC.Console.PostProcessing;
 
 public class Setup
@@ -24,6 +26,14 @@ public class Setup
         Renamer.Run(WorkingDirectory, Printer);
         Deleter.Run(WorkingDirectory, Printer);
         Mover.Run(WorkingDirectory, MoveToDirectory, Printer);
+
+        IReadOnlyList<string> ignoreFiles = new List<string>() { ".DS_Store" };
+        if (Directory.GetFiles(WorkingDirectory, "*")
+                     .Where(dirFile => !ignoreFiles.Any(ignoreFile => dirFile.EndsWith(ignoreFile)))
+                     .Any())
+        {
+            Printer.Warning("Some files unexpectedly remain in the working folder. Please check it.");
+        }
 
         Printer.Print("Post-processing done!");
     }
