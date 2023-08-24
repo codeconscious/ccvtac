@@ -80,7 +80,9 @@ internal static class Tagger
                 continue;
             }
 
-            var audioFilesForThisID = Directory.GetFiles(workingDirectory, $"*{idNamePair.Key}*{audioFileExtension}");
+            var audioFilesForThisID = Directory
+                .GetFiles(workingDirectory, $"*{idNamePair.Key}*{audioFileExtension}")
+                .ToList();
             if (!audioFilesForThisID.Any())
             {
                 printer.Error($"No {audioFileExtension} files for ID {idNamePair.Key} were found.");
@@ -88,6 +90,26 @@ internal static class Tagger
             }
             printer.Print($"Found {audioFilesForThisID.Count()} audio file(s) for resource ID {idNamePair.Key}");
             // TODO: If there is more than one, it indicates a split video, so the original (largest) should be deleted.
+
+            // For split videos, delete the source file.
+            if (audioFilesForThisID.Count() > 1)
+            {
+                var largestFileInfo = audioFilesForThisID
+                    .Select(fn => new FileInfo(fn))
+                    .OrderByDescending(fi => fi.Length)
+                    .First();
+
+                try
+                {
+                    File.Delete(largestFileInfo.FullName);
+                    audioFilesForThisID.Remove(largestFileInfo.FullName);
+                    printer.Print($"Deleted original file \"{largestFileInfo.Name}\"");
+                }
+                catch (Exception ex)
+                {
+                    printer.Error($"Error deleting file \"{largestFileInfo.Name}\": {ex.Message}");
+                }
+            }
 
             foreach (var audioFilePath in audioFilesForThisID)
             {
