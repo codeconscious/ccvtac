@@ -62,12 +62,12 @@ class Program
             if (result.IsSuccess)
             {
                 successCount++;
-                printer.Print(result.Value, appendLines: 1);
+                printer.Print(result.Value);
             }
             else
             {
                 failureCount++;
-                printer.Error(result.Value, appendLines: 1);
+                printer.Error(result.Value);
             }
         }
     }
