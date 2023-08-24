@@ -32,7 +32,8 @@ internal static class Mover
         }
 
         printer.Print($"{successCount} file(s) moved in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
-        printer.Warning($"{failureCount} file(s) could not be moved.");
+        if (failureCount > 0)
+            printer.Warning($"However, {failureCount} file(s) could not be moved.");
 
         WarnAboutOrphanedWorkingFiles(workingDirectory, printer);
     }
