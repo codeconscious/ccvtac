@@ -43,21 +43,36 @@ class Program
             version: SettingsService.Id3v2Version.TwoPoint3,
             forceAsDefault: true);
 
+        const string prompt = "Enter a YouTube URL (or 'q' to quit): ";
+        ushort successCount = 0;
+        ushort failureCount = 0;
         while (true)
         {
-            string input = printer.GetInput("Enter a YouTube URL (or 'q' to quit): ");
+            string input = printer.GetInput(prompt);
 
-            if (QuitCommands.Contains(input.ToLowerInvariant())) // TODO: Make case-insensitive.
+            if (QuitCommands.Contains(input.ToLowerInvariant()))
             {
-                printer.Print("Quitting...");
+                var successLabel = successCount == 1 ? "success" : "successes";
+                var failureLabel = failureCount == 1 ? "failure" : "failures";
+                printer.Print($"Quitting with {successCount} {successLabel} and {failureCount} {failureLabel}.");
                 return;
             }
 
-            Run(input, settings, printer);
+            var result = Run(input, settings, printer);
+            if (result.IsSuccess)
+            {
+                successCount++;
+                printer.Print(result.Value, appendLines: 1);
+            }
+            else
+            {
+                failureCount++;
+                printer.Error(result.Value, appendLines: 1);
+            }
         }
     }
 
-    static void Run(string url, Settings.Settings settings, Printer printer)
+    static Result<string> Run(string url, Settings.Settings settings, Printer printer)
     {
         var stopwatch = new System.Diagnostics.Stopwatch();
         stopwatch.Start();
@@ -65,9 +80,8 @@ class Program
         var downloadEntityResult = DownloadEntityFactory.Create(url);
         if (downloadEntityResult.IsFailed)
         {
-            printer.Error(downloadEntityResult.Errors?.First().Message
-                          ?? "An unknown error occurred parsing the resource type.");
-            return;
+            return Result.Fail(downloadEntityResult.Errors?.First().Message
+                               ?? "An unknown error occurred parsing the resource type.");
         }
         var downloadEntity = downloadEntityResult.Value;
         printer.Print($"Processing {downloadEntity.GetType()} URL...");
@@ -77,7 +91,7 @@ class Program
             "--write-thumbnail",
             "--convert-thumbnails jpg",
             "--write-info-json",
-            "--split-chapters"
+            "--split-chapters" // 設定ファイルの項目にするかもしれない。
         };
 
         var downloadResult = ExternalTools.Downloader(
@@ -87,25 +101,23 @@ class Program
             printer);
         if (downloadResult.IsFailed)
         {
-            printer.Error(downloadResult.Errors.First().Message);
-            return;
+            return Result.Fail(downloadResult.Errors.First().Message);
         }
 
-        printer.Print("Adding URL to the history log... ", appendLineBreak: false);
         try
         {
             File.AppendAllText("history.log", url + Environment.NewLine);
+            printer.Print("Added URL to the history log.");
         }
         catch (Exception ex)
         {
-            printer.Error($"Could not append \"{url}\" to history log: " + ex.Message);
+            printer.Error($"Could not append URL {url} to history log: " + ex.Message);
         }
-        printer.Print("OK.");
 
         var postProcessor = new PostProcessing.Setup(settings, printer);
         postProcessor.Run();
 
-        printer.Print($"Done in {stopwatch.ElapsedMilliseconds:#,##0}ms.", appendLines: 1);
+        return Result.Ok($"Done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
     }
 
     static void PrintHelp(Printer printer)
