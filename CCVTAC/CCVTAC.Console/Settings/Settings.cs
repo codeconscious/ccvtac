@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace CCVTAC.Console.Settings;
 
-public sealed record Settings
+public sealed class Settings
 {
     [JsonPropertyName("workingDirectory")]
     [JsonRequired]
@@ -14,4 +14,11 @@ public sealed record Settings
 
     [JsonPropertyName("splitChapters")]
     public bool SplitChapters { get; init; } = true;
+
+    /// <summary>
+    /// The audio file format that should be downloaded. It must be
+    /// a format supported by both yt-dlp and TagLib#.
+    /// </summary>
+    [JsonPropertyName("audioFormat")]
+    public string? AudioFormat { get; init; } = "m4a";
 }

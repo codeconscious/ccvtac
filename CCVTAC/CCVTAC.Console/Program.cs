@@ -37,7 +37,7 @@ class Program
                 "Error(s) found in settings file:");
             return;
         }
-        printer.Print($"Settings file loaded OK. Video chapters {(settings.SplitChapters ? "WILL" : "will NOT")} be split.");
+        SettingsService.PrintSummary(settings, printer, "Settings loaded OK:");
 
         SettingsService.SetId3v2Version(
             version: SettingsService.Id3v2Version.TwoPoint3,
@@ -116,7 +116,7 @@ class Program
     private static string GenerateDownloadArgs(Settings.Settings settings)
     {
         var args = new List<string>() {
-            "--extract-audio -f m4a", // TODO: Perhaps support other formats
+            $"--extract-audio -f {settings.AudioFormat}",
             "--write-thumbnail --convert-thumbnails jpg", // For writing album art
             "--write-info-json", // For parsing and writing metadata
         };

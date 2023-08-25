@@ -1,12 +1,17 @@
 using System.IO;
 using System.Text.Json;
-using FluentResults;
 
 namespace CCVTAC.Console.Settings;
 
 public static class SettingsService
 {
     private const string _settingsFileName = "settings.json";
+
+    /// <summary>
+    /// A list of audio file format codes used by yt-dlp and that are supported
+    /// by TagLib# (for tagging) as well.
+    /// </summary>
+    private static readonly string[] ValidAudioFormats = new string[] { "m4a", "mp3" };
 
     /// <summary>
     /// Subversions of ID3 version 2 (such as 2.3 or 2.4).
@@ -125,8 +130,32 @@ public static class SettingsService
         else if (!Directory.Exists(settings.WorkingDirectory))
             errors.Add($"Working directory \"{settings.WorkingDirectory}\" does not exist.");
 
+        if (!ValidAudioFormats.Contains(settings.AudioFormat))
+        {
+            errors.Add(
+                $"Invalid audio format in settings: \"{settings.AudioFormat}\". " +
+                $"Please use one of the following: \"{string.Join("\", \"", ValidAudioFormats)}\".");
+        }
+
         return errors.Any()
             ? Result.Fail(errors)
             : Result.Ok();
+    }
+
+    /// <summary>
+    /// Prints a summary of the given settings.
+    /// </summary>
+    /// <param name="settings"></param>
+    /// <param name="printer"></param>
+    /// <param name="header">Optional text to appear above the settings.</param>
+    public static void PrintSummary(Settings settings, Printer printer, string? header = null)
+    {
+        if (header is not null)
+            printer.Print(header);
+
+        printer.Print($"- Downloading .{settings.AudioFormat} files");
+        printer.Print($"- Video chapters {(settings.SplitChapters ? "WILL" : "will NOT")} be split");
+        printer.Print($"- Working directory: {settings.WorkingDirectory}");
+        printer.Print($"- Move-to directory: {settings.MoveToDirectory}");
     }
 }
