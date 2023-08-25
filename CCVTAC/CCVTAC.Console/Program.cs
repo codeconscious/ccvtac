@@ -37,7 +37,7 @@ class Program
                 "Error(s) found in settings file:");
             return;
         }
-        printer.Print("Settings file loaded OK.");
+        printer.Print($"Settings file loaded OK. Video chapters {(settings.SplitChapters ? "WILL" : "will NOT")} be split.");
 
         SettingsService.SetId3v2Version(
             version: SettingsService.Id3v2Version.TwoPoint3,
@@ -86,23 +86,15 @@ class Program
         var downloadEntity = downloadEntityResult.Value;
         printer.Print($"Processing {downloadEntity.GetType()} URL...");
 
-        IReadOnlyList<string> args = new List<string>() {
-            "--extract-audio -f m4a",
-            "--write-thumbnail",
-            "--convert-thumbnails jpg",
-            "--write-info-json",
-            "--split-chapters" // 設定ファイルの項目にするかもしれない。
-        };
-
         var downloadResult = ExternalTools.Downloader(
-            string.Join(" ", args),
+            GenerateDownloadArgs(settings),
             downloadEntity,
             settings.WorkingDirectory!,
             printer);
         if (downloadResult.IsFailed)
         {
             downloadResult.Errors.ForEach(e => printer.Error(e.Message));
-            printer.Print("However, post-processing will still be attempted.");
+            printer.Warning("However, post-processing will still be attempted.");
         }
 
         try
@@ -119,6 +111,20 @@ class Program
         postProcessor.Run();
 
         return Result.Ok($"Done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
+    }
+
+    private static string GenerateDownloadArgs(Settings.Settings settings)
+    {
+        var args = new List<string>() {
+            "--extract-audio -f m4a", // TODO: Perhaps support other formats
+            "--write-thumbnail --convert-thumbnails jpg", // For writing album art
+            "--write-info-json", // For parsing and writing metadata
+        };
+
+        if (settings.SplitChapters)
+            args.Add("--split-chapters");
+
+        return string.Join(" ", args);
     }
 
     static void PrintHelp(Printer printer)
