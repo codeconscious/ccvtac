@@ -19,24 +19,13 @@ class Program
             return;
         }
 
-        var readSettingsResult = SettingsService.Read(printer, createFileIfMissing: true);
-        if (readSettingsResult.IsFailed)
+        var settingsResult = GetSettings();
+        if (settingsResult.IsFailed)
         {
-            printer.Errors(
-                readSettingsResult.Errors.Select(e => e.Message),
-                "Error(s) reading the settings file:");
+            printer.Errors(settingsResult.Errors.Select(e => e.Message), "Settings file errors:");
             return;
         }
-        Settings.Settings settings = readSettingsResult.Value;
-
-        var ensureValidSettingsResult = SettingsService.EnsureValidSettings(settings);
-        if (ensureValidSettingsResult.IsFailed)
-        {
-            printer.Errors(
-                ensureValidSettingsResult.Errors.Select(e => e.Message),
-                "Error(s) found in settings file:");
-            return;
-        }
+        var settings = settingsResult.Value;
         SettingsService.PrintSummary(settings, printer, "Settings loaded OK:");
 
         SettingsService.SetId3v2Version(
@@ -70,6 +59,23 @@ class Program
                 printer.Error(result.Value);
             }
         }
+    }
+
+    static Result<Settings.Settings> GetSettings()
+    {
+        var readSettingsResult = SettingsService.Read(createFileIfMissing: true);
+        if (readSettingsResult.IsFailed)
+            return Result.Fail(readSettingsResult.Errors.Select(e => e.Message));
+
+        Settings.Settings settings = readSettingsResult.Value;
+
+        var ensureValidSettingsResult = SettingsService.EnsureValidSettings(settings);
+        if (ensureValidSettingsResult.IsFailed)
+        {
+            return ensureValidSettingsResult;
+        }
+
+        return readSettingsResult.Value;
     }
 
     static Result<string> Run(string url, Settings.Settings settings, Printer printer)

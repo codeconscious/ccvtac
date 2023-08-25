@@ -41,37 +41,36 @@ public static class SettingsService
     /// Creates the specified settings file if it is missing.
     /// Otherwise, does nothing.
     /// </summary>
-    /// <returns>A bool indicating success or no action (true) or else failure (false).</returns>
-    public static bool CreateIfMissing(Printer printer)
+    /// <returns>A Result indicating success or no action (Ok) or else failure (Fail).</returns>
+    public static Result CreateIfMissing()
     {
         if (File.Exists(_settingsFileName))
-            return true;
+            return Result.Ok();
 
         try
         {
-            return Write(new Settings(), printer);
+            return Write(new Settings());
         }
         catch (Exception ex)
         {
-            printer.Error($"There was an error creating \"{_settingsFileName}\": {ex.Message}");
-            return false;
+            return Result.Fail($"Error creating \"{_settingsFileName}\": {ex.Message}");
         }
     }
 
     /// <summary>
     /// Reads the settings file and parses the JSON to a Settings object.
     /// </summary>
-    public static Result<Settings> Read(Printer printer, bool createFileIfMissing = false)
+    public static Result<Settings> Read(bool createFileIfMissing = false)
     {
         try
         {
-            if (createFileIfMissing && !CreateIfMissing(printer))
+            if (createFileIfMissing && CreateIfMissing().IsFailed)
                 return Result.Fail($"Settings file \"{_settingsFileName}\" missing.");
 
             var text = File.ReadAllText(_settingsFileName);
-            var json = JsonSerializer.Deserialize<Settings>(text)
-                       ?? throw new JsonException();
-            return Result.Ok(json);
+            var settings = JsonSerializer.Deserialize<Settings>(text)
+                           ?? throw new JsonException();
+            return Result.Ok(settings);
         }
         catch (FileNotFoundException)
         {
@@ -88,8 +87,8 @@ public static class SettingsService
     /// </summary>
     /// <param name="settings"></param>
     /// <param name="printer"></param>
-    /// <returns>A bool indicating success or failure.</returns>
-    public static bool Write(Settings settings, Printer printer)
+    /// <returns>A Result indicating success or failure.</returns>
+    public static Result Write(Settings settings)
     {
         try
         {
@@ -102,17 +101,15 @@ public static class SettingsService
                         System.Text.Unicode.UnicodeRanges.All)
                 });
             File.WriteAllText(_settingsFileName, json);
-            return true;
+            return Result.Ok();
         }
         catch (FileNotFoundException)
         {
-            printer.Error($"Settings file \"{_settingsFileName}\" is missing.");
-            return false;
+            return Result.Fail($"Settings file \"{_settingsFileName}\" is missing.");
         }
         catch (JsonException ex)
         {
-            printer.Error($"The settings file is invalid: {ex.Message}");
-            return false;
+            return Result.Fail($"Invalid JSON in settings file: {ex.Message}.");
         }
     }
 
@@ -147,7 +144,7 @@ public static class SettingsService
     /// </summary>
     /// <param name="settings"></param>
     /// <param name="printer"></param>
-    /// <param name="header">Optional text to appear above the settings.</param>
+    /// <param name="header">An optional line of text to appear above the settings.</param>
     public static void PrintSummary(Settings settings, Printer printer, string? header = null)
     {
         if (header is not null)
