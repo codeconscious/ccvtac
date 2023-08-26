@@ -118,7 +118,7 @@ internal static class Tagger
 
                 using var taggedFile = TagLib.File.Create(audioFilePath);
                 taggedFile.Tag.Title = parsedJson.title;
-                taggedFile.Tag.Year = GetYear(parsedJson, printer);
+                taggedFile.Tag.Year = DetectReleaseYear(parsedJson, printer);
                 // taggedFile.Tag. // TODO: Manually add 'original name' frame.
                 taggedFile.Tag.Comment = GenerateComment(parsedJson);
                 AddImage(taggedFile, resourceId, workingDirectory, printer);
@@ -143,9 +143,13 @@ internal static class Tagger
             return sb.ToString();
         }
 
-        static uint GetYear(YouTubeJson.Root data, Printer printer)
+        /// <summary>
+        /// Attempt to automatically detect a release year in the video metadata.
+        /// If none is found, return a default value.
+        /// </summary>
+        static uint DetectReleaseYear(YouTubeJson.Root data, Printer printer, ushort defaultYear = 0)
         {
-            // TODO: Put this somewhere where it can be static.s
+            // TODO: Put this somewhere where it can be static.
             List<(string Regex, string Text, string Source)> parsePatterns = new()
             {
                 (@"(?<=[(（\[［【])[12]\d{3}(?=[)）\]］】])", data.title, "title"),
@@ -164,12 +168,12 @@ internal static class Tagger
                 return result.Value;
             }
 
-            printer.Print("No year could be parsed, so defaulting to 0.");
+            printer.Print($"No year could be parsed, so defaulting to ${defaultYear}.");
             return 0;
 
             /// <summary>
             /// Applies a regex pattern against text, returning the matched value
-            /// or null if there was no successful match.
+            /// or else null if there was no successful match.
             /// </summary>
             /// <param name="regexPattern"></param>
             /// <param name="text">Text that might contain a year.</param>
