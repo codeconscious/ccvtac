@@ -31,7 +31,7 @@ Prerequisites:
 
 Run the program with `dotnet run`. Pass `-h` or `--help` for the instructions.
 
-If your `settings.json` file does not exist, it will created in the application directory. You will need to enter paths to two existing directories: (1) a working directory for temporary files and (2) the directory to which the final audio files should be moved.
+If your `settings.json` file does not exist, it will created in the application directory with default settings. At minimum, you will need to enter paths to two existing directories: (1) a working directory for temporary files and (2) the directory to which the final audio files should be moved.
 
 Once the program is running, simply enter a YouTube video or playlist URL at the prompt and press Enter.
 
