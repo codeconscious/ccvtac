@@ -78,14 +78,14 @@ internal static class Renamer
 
         foreach (var file in files)
         {
-            var workingFileName = new StringBuilder(file.Name);
+            var workingNewFileName = new StringBuilder(file.Name);
             foreach(var pattern in RenamePatterns)
             {
-                var match = pattern.Regex.Match(workingFileName.ToString());
+                var match = pattern.Regex.Match(workingNewFileName.ToString());
                 if (!match.Success)
                     continue;
 
-                workingFileName.Remove(match.Index, match.Length);
+                workingNewFileName.Remove(match.Index, match.Length);
 
                 var replacementText = new StringBuilder(pattern.ReplacementText);
                 for (int i = 0; i < match.Groups.Count - 1; i++)
@@ -93,15 +93,16 @@ internal static class Renamer
                     replacementText.Replace($"%<{i + 1}>s", match.Groups[i + 1].Value);
                 }
 
-                workingFileName.Insert(match.Index, replacementText.ToString());
+                workingNewFileName.Insert(match.Index, replacementText.ToString());
             }
 
             try
             {
                 File.Move(
                     file.FullName,
-                    Path.Combine(workingDirectory, workingFileName.ToString()));
-                printer.Print($"- Renamed \"{file.Name}\" to \"{workingFileName}\"");
+                    Path.Combine(workingDirectory, workingNewFileName.ToString()));
+                printer.Print($"- From: \"{file.Name}\"");
+                printer.Print($"    To: \"{workingNewFileName}\"");
             }
             catch (Exception ex)
             {

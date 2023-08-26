@@ -92,11 +92,14 @@ class Program
         var downloadEntity = downloadEntityResult.Value;
         printer.Print($"Processing {downloadEntity.GetType()} URL...");
 
-        var downloadResult = ExternalTools.Downloader(
-            GenerateDownloadArgs(settings),
-            downloadEntity,
+        var downloadToolSettings = new ExternalTools.ExternalToolSettings(
+            "video download and audio extraction",
+            "yt-dlp",
+            GenerateDownloadArgs(settings, url),
             settings.WorkingDirectory!,
-            printer);
+            printer
+        );
+        var downloadResult = ExternalTools.Run(downloadToolSettings);
         if (downloadResult.IsFailed)
         {
             downloadResult.Errors.ForEach(e => printer.Error(e.Message));
@@ -119,7 +122,7 @@ class Program
         return Result.Ok($"Done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
     }
 
-    private static string GenerateDownloadArgs(UserSettings settings)
+    private static string GenerateDownloadArgs(UserSettings settings, params string[]? additionalArgs)
     {
         var args = new List<string>() {
             $"--extract-audio -f {settings.AudioFormat}",
@@ -130,7 +133,7 @@ class Program
         if (settings.SplitChapters)
             args.Add("--split-chapters");
 
-        return string.Join(" ", args);
+        return string.Join(" ", args.Concat(additionalArgs ?? Enumerable.Empty<string>()));
     }
 
     static void PrintHelp(Printer printer)

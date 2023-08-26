@@ -88,8 +88,8 @@ internal static class Tagger
                 printer.Error($"No {audioFileExtension} files for ID {idNamePair.Key} were found.");
                 continue;
             }
-            printer.Print($"Found {audioFilesForThisID.Count()} audio file(s) for resource ID {idNamePair.Key}");
-            // TODO: If there is more than one, it indicates a split video, so the original (largest) should be deleted.
+            printer.Print($"Found {audioFilesForThisID.Count()} audio file(s) for resource ID \"{idNamePair.Key}\"");
+            // TODO: If there is more than one, it indicates a split video, so the original (largest) file should be deleted.
 
             // For split videos, delete the source file.
             if (audioFilesForThisID.Count() > 1)
@@ -168,7 +168,7 @@ internal static class Tagger
                 return result.Value;
             }
 
-            printer.Print($"No year could be parsed, so defaulting to ${defaultYear}.");
+            printer.Print($"No year could be parsed, so defaulting to {defaultYear}.");
             return 0;
 
             /// <summary>
@@ -220,7 +220,7 @@ internal static class Tagger
             var pics = new TagLib.IPicture[1];
             pics[0] = new TagLib.Picture(imageFile);
             taggedFile.Tag.Pictures = pics;
-            printer.Print("Image attached to tagged file.");
+            printer.Print("Image attached to file tags.");
         }
         catch (Exception ex)
         {

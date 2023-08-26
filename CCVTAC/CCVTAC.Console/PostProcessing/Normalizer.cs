@@ -4,7 +4,6 @@ internal static class AudioNormalizer
 {
     internal static void Run(string workingDirectory, Printer printer)
     {
-        ExternalTools.AudioNormalization(workingDirectory, printer);
+        // ExternalTools.AudioNormalization(workingDirectory, printer);
     }
 }
-
