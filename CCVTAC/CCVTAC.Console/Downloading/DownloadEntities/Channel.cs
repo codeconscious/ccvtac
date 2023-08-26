@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace CCVTAC.Console.DownloadEntities;
+namespace CCVTAC.Console.Downloading.DownloadEntities;
 
 public sealed class Channel : IDownloadEntity
 {
