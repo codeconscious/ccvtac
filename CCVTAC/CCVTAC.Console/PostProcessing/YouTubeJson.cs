@@ -1,12 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace CCVTAC.Console.PostProcessing;
 
-public class YouTubeJson
+public sealed class YouTubeJson
 {
     // Root myDeserializedClass = JsonSerializer.Deserialize<Root>(myJsonResponse);
     public sealed record AutomaticCaptions(

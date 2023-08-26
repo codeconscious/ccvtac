@@ -1,15 +1,9 @@
 using System.Diagnostics;
 
-namespace CCVTAC.Console;
-public class ExternalTools
-{
-    public record ExternalToolSettings(
-        string Summary,
-        string ProgramName,
-        string Args,
-        string WorkingDirectory,
-        Printer Printer);
+namespace CCVTAC.Console.ExternalUtilties;
 
+public static class Caller
+{
     public static Result<int> Run(ExternalToolSettings settings)
     {
         var stopwatch = new Stopwatch();

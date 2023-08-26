@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 
 namespace CCVTAC.Console.DownloadEntities;
 
-public class Channel : IDownloadEntity
+public sealed class Channel : IDownloadEntity
 {
     public static string Name => nameof(Channel);
     public static Regex Regex => new(@"(?:www\.)?youtube\.com/(?:c/|channel/|@|user/)[\w\-]+");

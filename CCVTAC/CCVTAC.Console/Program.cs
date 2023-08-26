@@ -7,7 +7,7 @@ namespace CCVTAC.Console;
 class Program
 {
     private static readonly string[] HelpCommands = new[] { "-h", "--help" };
-    private static readonly string[] QuitCommands = new[] { "q", "quit", "exit" };
+    private static readonly string[] QuitCommands = new[] { "q", "quit", "exit", "bye" };
 
     static void Main(string[] args)
     {
@@ -28,8 +28,8 @@ class Program
         var settings = settingsResult.Value;
         SettingsService.PrintSummary(settings, printer, "Settings loaded OK:");
 
-        SettingsService.SetId3v2Version(
-            version: SettingsService.Id3v2Version.TwoPoint3,
+        TagFormat.SetId3v2Version(
+            version: TagFormat.Id3v2Version.TwoPoint3,
             forceAsDefault: true);
 
         const string prompt = "Enter a YouTube URL (or 'q' to quit): ";
@@ -92,14 +92,14 @@ class Program
         var downloadEntity = downloadEntityResult.Value;
         printer.Print($"Processing {downloadEntity.GetType()} URL...");
 
-        var downloadToolSettings = new ExternalTools.ExternalToolSettings(
+        var downloadToolSettings = new ExternalUtilties.ExternalToolSettings(
             "video download and audio extraction",
             "yt-dlp",
             GenerateDownloadArgs(settings, url),
             settings.WorkingDirectory!,
             printer
         );
-        var downloadResult = ExternalTools.Run(downloadToolSettings);
+        var downloadResult = ExternalUtilties.Caller.Run(downloadToolSettings);
         if (downloadResult.IsFailed)
         {
             downloadResult.Errors.ForEach(e => printer.Error(e.Message));
@@ -138,19 +138,25 @@ class Program
 
     static void PrintHelp(Printer printer)
     {
-        printer.Print("CodeConscious Video-to-Audio Converter (ccvtac)");
-        printer.Print("- Easily convert YouTube videos to local M4A audio files!");
+        printer.Print("CodeConscious Video-to-Audio Converter (CCVTAC)");
+        printer.Print("- Easily convert YouTube videos to local audio files with ID3v2 tags!");
+        printer.Print($"  (Supported audio formats: {string.Join(", ", SettingsService.ValidAudioFormats)})");
         printer.Print("- Supports video and playlist URLs");
         printer.Print("- Video metadata (uploader name and URL, source URL, etc.) saved to Comment tags");
-        printer.Print("- Renames files via specific regex patterns (to remove resource IDs, etc.)");
+        printer.Print("- Auto-renames files via specific regex patterns (to remove resource IDs, etc.)");
         printer.Print("- Video thumbnails are auto-trimmed and written to files as album art (Optional)");
         printer.Print("- Post-processed files are automatically moved to a specified directory");
-        printer.Print("- All URLs entered are saved locally to a file named `history.log`", appendLines: 1);
+        printer.Print("- All URLs entered are saved locally to a file named `history.log`",
+                      appendLines: 1);
+
+        printer.Print("Prerequisites:");
+        printer.Print("- [Required] yt-dlp (https://github.com/yt-dlp/yt-dlp/) for downloading audio");
+        printer.Print("- [Optional] mogrify (https://imagemagick.org/script/mogrify.php) for auto-cropping album art",
+                      appendLines: 1);
 
         printer.Print("Instructions:");
         printer.Print("• Run the program once to generate a blank settings.json file, then populate it with directory paths.");
-        printer.Print("• After the application starts, enter single URLs to start the download process.");
-        printer.Print("  URLs may be for single videos or playlists.");
-        printer.Print("• Enter `q` or `quit` to quit.");
+        printer.Print("• After the application starts, enter single video or playlist URLs to start the download process.");
+        printer.Print("• Enter \"q\" or \"quit\" to quit.");
     }
 }

@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 
 namespace CCVTAC.Console.DownloadEntities;
 
-public class Video : IDownloadEntity
+public sealed class Video : IDownloadEntity
 {
     public static string Name => nameof(Video);
     public static Regex Regex => new(@"^[\w-]{11}$|(?<=v=|v\\=)[\w-]{11}|(?<=youtu\.be/).{11}");

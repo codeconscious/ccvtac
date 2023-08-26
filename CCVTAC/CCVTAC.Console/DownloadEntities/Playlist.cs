@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 
 namespace CCVTAC.Console.DownloadEntities;
 
-public class Playlist : IDownloadEntity
+public sealed class Playlist : IDownloadEntity
 {
     public static string Name => nameof(Playlist);
     public static Regex Regex => new(@"(?<=list=)[\w\-]+");
