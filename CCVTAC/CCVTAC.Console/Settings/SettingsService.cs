@@ -49,7 +49,7 @@ public static class SettingsService
 
         try
         {
-            return Write(new Settings());
+            return Write(new UserSettings());
         }
         catch (Exception ex)
         {
@@ -60,7 +60,7 @@ public static class SettingsService
     /// <summary>
     /// Reads the settings file and parses the JSON to a Settings object.
     /// </summary>
-    public static Result<Settings> Read(bool createFileIfMissing = false)
+    public static Result<UserSettings> Read(bool createFileIfMissing = false)
     {
         try
         {
@@ -68,7 +68,7 @@ public static class SettingsService
                 return Result.Fail($"Settings file \"{_settingsFileName}\" missing.");
 
             var text = File.ReadAllText(_settingsFileName);
-            var settings = JsonSerializer.Deserialize<Settings>(text)
+            var settings = JsonSerializer.Deserialize<UserSettings>(text)
                            ?? throw new JsonException();
             return Result.Ok(settings);
         }
@@ -88,7 +88,7 @@ public static class SettingsService
     /// <param name="settings"></param>
     /// <param name="printer"></param>
     /// <returns>A Result indicating success or failure.</returns>
-    public static Result Write(Settings settings)
+    public static Result Write(UserSettings settings)
     {
         try
         {
@@ -113,7 +113,7 @@ public static class SettingsService
         }
     }
 
-    public static Result EnsureValidSettings(Settings settings)
+    public static Result EnsureValidSettings(UserSettings settings)
     {
         List<string> errors = new();
 
@@ -145,7 +145,7 @@ public static class SettingsService
     /// <param name="settings"></param>
     /// <param name="printer"></param>
     /// <param name="header">An optional line of text to appear above the settings.</param>
-    public static void PrintSummary(Settings settings, Printer printer, string? header = null)
+    public static void PrintSummary(UserSettings settings, Printer printer, string? header = null)
     {
         if (header is not null)
             printer.Print(header);

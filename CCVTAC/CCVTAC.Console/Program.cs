@@ -61,13 +61,13 @@ class Program
         }
     }
 
-    static Result<Settings.Settings> GetSettings()
+    static Result<UserSettings> GetSettings()
     {
         var readSettingsResult = SettingsService.Read(createFileIfMissing: true);
         if (readSettingsResult.IsFailed)
             return Result.Fail(readSettingsResult.Errors.Select(e => e.Message));
 
-        Settings.Settings settings = readSettingsResult.Value;
+        UserSettings settings = readSettingsResult.Value;
 
         var ensureValidSettingsResult = SettingsService.EnsureValidSettings(settings);
         if (ensureValidSettingsResult.IsFailed)
@@ -78,7 +78,7 @@ class Program
         return readSettingsResult.Value;
     }
 
-    static Result<string> Run(string url, Settings.Settings settings, Printer printer)
+    static Result<string> Run(string url, UserSettings settings, Printer printer)
     {
         var stopwatch = new System.Diagnostics.Stopwatch();
         stopwatch.Start();
@@ -119,7 +119,7 @@ class Program
         return Result.Ok($"Done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
     }
 
-    private static string GenerateDownloadArgs(Settings.Settings settings)
+    private static string GenerateDownloadArgs(UserSettings settings)
     {
         var args = new List<string>() {
             $"--extract-audio -f {settings.AudioFormat}",

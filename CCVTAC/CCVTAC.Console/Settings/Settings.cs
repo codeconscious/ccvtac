@@ -6,7 +6,7 @@ namespace CCVTAC.Console.Settings;
 /// Represents the settings saved in the settings file. These customizations
 /// change the behavior of the application.
 /// </summary>
-public sealed class Settings
+public sealed class UserSettings
 {
     /// <summary>
     /// The directory where working files are temporarily stored during
