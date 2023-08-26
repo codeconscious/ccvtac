@@ -19,24 +19,13 @@ class Program
             return;
         }
 
-        var readSettingsResult = SettingsService.Read(printer, createFileIfMissing: true);
-        if (readSettingsResult.IsFailed)
+        var settingsResult = GetSettings();
+        if (settingsResult.IsFailed)
         {
-            printer.Errors(
-                readSettingsResult.Errors.Select(e => e.Message),
-                "Error(s) reading the settings file:");
+            printer.Errors(settingsResult.Errors.Select(e => e.Message), "Settings file errors:");
             return;
         }
-        Settings.Settings settings = readSettingsResult.Value;
-
-        var ensureValidSettingsResult = SettingsService.EnsureValidSettings(settings);
-        if (ensureValidSettingsResult.IsFailed)
-        {
-            printer.Errors(
-                ensureValidSettingsResult.Errors.Select(e => e.Message),
-                "Error(s) found in settings file:");
-            return;
-        }
+        var settings = settingsResult.Value;
         SettingsService.PrintSummary(settings, printer, "Settings loaded OK:");
 
         SettingsService.SetId3v2Version(
@@ -72,7 +61,24 @@ class Program
         }
     }
 
-    static Result<string> Run(string url, Settings.Settings settings, Printer printer)
+    static Result<UserSettings> GetSettings()
+    {
+        var readSettingsResult = SettingsService.Read(createFileIfMissing: true);
+        if (readSettingsResult.IsFailed)
+            return Result.Fail(readSettingsResult.Errors.Select(e => e.Message));
+
+        UserSettings settings = readSettingsResult.Value;
+
+        var ensureValidSettingsResult = SettingsService.EnsureValidSettings(settings);
+        if (ensureValidSettingsResult.IsFailed)
+        {
+            return ensureValidSettingsResult;
+        }
+
+        return readSettingsResult.Value;
+    }
+
+    static Result<string> Run(string url, UserSettings settings, Printer printer)
     {
         var stopwatch = new System.Diagnostics.Stopwatch();
         stopwatch.Start();
@@ -113,7 +119,7 @@ class Program
         return Result.Ok($"Done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
     }
 
-    private static string GenerateDownloadArgs(Settings.Settings settings)
+    private static string GenerateDownloadArgs(UserSettings settings)
     {
         var args = new List<string>() {
             $"--extract-audio -f {settings.AudioFormat}",

@@ -6,7 +6,7 @@ public class Setup
     public string MoveToDirectory { get; }
     public Printer Printer { get; }
 
-    public Setup(Settings.Settings settings, Printer printer)
+    public Setup(Settings.UserSettings settings, Printer printer)
     {
         WorkingDirectory = settings.WorkingDirectory!;
         MoveToDirectory = settings.MoveToDirectory!;
