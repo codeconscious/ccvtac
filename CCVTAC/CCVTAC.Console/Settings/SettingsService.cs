@@ -48,9 +48,7 @@ public static class SettingsService
 
         var ensureValidSettingsResult = EnsureValidSettings(settings);
         if (ensureValidSettingsResult.IsFailed)
-        {
             return Result.Fail(ensureValidSettingsResult.Errors.Select(e => e.Message));
-        }
 
         TagFormat.SetId3v2Version(
             version: TagFormat.Id3v2Version.TwoPoint3,
@@ -138,12 +136,12 @@ public static class SettingsService
     {
         List<string> errors = new();
 
-        if (settings.MoveToDirectory == null)
+        if (settings.MoveToDirectory is null)
             errors.Add($"No move-to directory was specified in the settings.");
         else if (!Directory.Exists(settings.MoveToDirectory))
             errors.Add($"Move-to directory \"{settings.MoveToDirectory}\" does not exist.");
 
-        if (settings.WorkingDirectory == null)
+        if (settings.WorkingDirectory is null)
             errors.Add($"No working directory was specified in the settings.");
         else if (!Directory.Exists(settings.WorkingDirectory))
             errors.Add($"Working directory \"{settings.WorkingDirectory}\" does not exist.");

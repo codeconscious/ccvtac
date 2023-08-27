@@ -7,25 +7,26 @@ namespace CCVTAC.Console.PostProcessing;
 
 internal static class Tagger
 {
+    private const string _jsonFileSearchPattern = "*.json";
+
     internal static void Run(string workingDirectory, Printer printer)
     {
         var stopwatch = new System.Diagnostics.Stopwatch();
         stopwatch.Start();
 
-        const string jsonFileSearchPattern = "*.json";
         List<string> jsonFiles;
         try
         {
-            jsonFiles = Directory.GetFiles(workingDirectory, jsonFileSearchPattern).ToList();
+            jsonFiles = Directory.GetFiles(workingDirectory, _jsonFileSearchPattern).ToList();
             if (!jsonFiles.Any())
             {
-                printer.Error($"No {jsonFileSearchPattern} files found! Aborting...");
+                printer.Error($"No {_jsonFileSearchPattern} files found! Aborting...");
                 return;
             }
         }
         catch (Exception ex)
         {
-            printer.Error($"Error reading {jsonFileSearchPattern} files: " + ex.Message);
+            printer.Error($"Error reading {_jsonFileSearchPattern} files: " + ex.Message);
             return;
         }
 
@@ -41,7 +42,7 @@ internal static class Tagger
         {
             printer.Errors(
                 "JSON errors:",
-                invalid.Select(i => $"Too many JSON files for ID {i.Key}, so this ID will be skipped.")
+                invalid.Select(i => $"There was not one JSON file for ID {i.Key}, so this ID will be skipped.")
             );
         }
         var valid = idsWithFileNames.Where(g => g.Count() == 1);

@@ -1,7 +1,7 @@
 namespace CCVTAC.Console.ExternalUtilties;
 
 public sealed record ExternalToolSettings(
-    string Summary,
+    string Description,
     string ProgramName,
     string Args,
     string WorkingDirectory,

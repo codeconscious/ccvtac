@@ -9,7 +9,7 @@ public static class Caller
         var stopwatch = new Stopwatch();
         stopwatch.Start();
 
-        settings.Printer.Print($"Starting {settings.Summary}...");
+        settings.Printer.Print($"Starting {settings.Description}...");
         settings.Printer.Print($"Running command: {settings.ProgramName} {settings.Args}");
         var processInfo = new ProcessStartInfo()
         {
@@ -27,7 +27,7 @@ public static class Caller
             return Result.Fail($"Could not start {settings.ProgramName} -- is it installed?");
         }
         process.WaitForExit();
-        settings.Printer.Print($"Done with {settings.Summary} in {stopwatch.ElapsedMilliseconds:#,##0}ms");
+        settings.Printer.Print($"Done with {settings.Description} in {stopwatch.ElapsedMilliseconds:#,##0}ms");
         return process.ExitCode == 0
             ? Result.Ok(process.ExitCode)
             : Result.Fail($"Full or partial download error ({settings.ProgramName} error {process.ExitCode}).");
