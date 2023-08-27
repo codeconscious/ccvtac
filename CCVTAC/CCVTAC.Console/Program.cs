@@ -21,7 +21,9 @@ internal static class Program
         var settingsResult = GetSettings();
         if (settingsResult.IsFailed)
         {
-            printer.Errors(settingsResult.Errors.Select(e => e.Message), "Settings file errors:");
+            printer.Errors(
+                "Settings file errors:",
+                settingsResult.Errors.Select(e => e.Message));
             return;
         }
         var settings = settingsResult.Value;
@@ -92,7 +94,7 @@ internal static class Program
 
                 var messages = downloadResult.Errors.Select(e => e.Message);
                 if (messages?.Any() == true)
-                    _printer.Errors(messages, "Download error(s):");
+                    _printer.Errors("Download error(s):", messages);
             }
         }
 

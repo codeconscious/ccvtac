@@ -40,8 +40,8 @@ internal static class Tagger
         if (invalid.Any())
         {
             printer.Errors(
-                invalid.Select(i => $"Too many JSON files for ID {i.Key}, so this ID will be skipped."),
-                "JSON errors:"
+                "JSON errors:",
+                invalid.Select(i => $"Too many JSON files for ID {i.Key}, so this ID will be skipped.")
             );
         }
         var valid = idsWithFileNames.Where(g => g.Count() == 1);

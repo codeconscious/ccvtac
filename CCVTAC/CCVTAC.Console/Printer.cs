@@ -27,16 +27,27 @@ public sealed class Printer
         PrintEmptyLines(appendLines);
     }
 
-    public void Errors(IEnumerable<string> errors, string? message = null, byte appendLines = 0)
+    public void Errors(IEnumerable<string> errors, byte appendLines = 0)
     {
         if (errors?.Any() != true)
-            throw new ArgumentException("No errors to print were provided.", nameof(errors));
+            throw new ArgumentException("No errors were provided!", nameof(errors));
 
-        if (message is not null)
-            Print("[red]" + message + "[/]", appendLines: appendLines, processMarkup: true);
+        errors.ToList().ForEach(e =>
+            AnsiConsole.MarkupLineInterpolated($"[red]- {e}[/]"));
 
-        foreach (var error in errors)
-            AnsiConsole.MarkupLineInterpolated($"[red]- {error}[/]");
+        Errors(errors, appendLines);
+    }
+
+    public void Errors(string headerMessage, IEnumerable<string> errors, byte appendLines = 0)
+    {
+        if (headerMessage is not null)
+        {
+            Print("[red]" + headerMessage + "[/]",
+                  appendLines: appendLines,
+                  processMarkup: true);
+        }
+
+        Errors(errors, appendLines);
     }
 
     public void Warning(string message, byte appendLines = 0)
