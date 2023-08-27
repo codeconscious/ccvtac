@@ -25,9 +25,8 @@ sealed class ResultHandler
         {
             _failureCount++;
 
-            var messages = downloadResult.Errors.Select(e => e.Message);
-            if (messages?.Any() == true)
-                _printer.Errors("Download error(s):", messages);
+            if (downloadResult.IsFailed)
+                _printer.Errors(downloadResult);
         }
     }
 

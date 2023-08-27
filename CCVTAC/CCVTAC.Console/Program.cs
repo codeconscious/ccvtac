@@ -18,29 +18,36 @@ internal static class Program
             return;
         }
 
-        var settingsResult = GetSettings();
-        if (settingsResult.IsFailed)
+        // Top-level `try` to catch and pretty-print unexpected exceptions.
+        try
         {
-            printer.Errors(
-                "Settings file errors:",
-                settingsResult.Errors.Select(e => e.Message));
-            return;
+            var settingsResult = GetSettings();
+            if (settingsResult.IsFailed)
+            {
+                printer.Errors("Settings file errors:", settingsResult);
+                return;
+            }
+            var settings = settingsResult.Value;
+            SettingsService.PrintSummary(settings, printer, "Settings loaded OK:");
+
+            TagFormat.SetId3v2Version(
+                version: TagFormat.Id3v2Version.TwoPoint3,
+                forceAsDefault: true);
+
+            var resultCounter = new ResultHandler(printer);
+            while (true)
+            {
+                if (!Run(settings, resultCounter, printer))
+                    break;
+            }
+
+            resultCounter.PrintFinalSummary();
         }
-        var settings = settingsResult.Value;
-        SettingsService.PrintSummary(settings, printer, "Settings loaded OK:");
-
-        TagFormat.SetId3v2Version(
-            version: TagFormat.Id3v2Version.TwoPoint3,
-            forceAsDefault: true);
-
-        var resultCounter = new ResultHandler(printer);
-        while (true)
+        catch (Exception ex)
         {
-            if (!Run(settings, resultCounter, printer))
-                break;
+            printer.Error($"Fatal error: {ex.Message}");
+            Spectre.Console.AnsiConsole.WriteException(ex);
         }
-
-        resultCounter.PrintFinalSummary();
     }
 
     private static bool Run(UserSettings settings, ResultHandler resultHandler, Printer printer)
@@ -67,45 +74,6 @@ internal static class Program
         return true;
     }
 
-    private sealed class ResultHandler
-    {
-        private nuint _successCount;
-        private nuint _failureCount;
-        private readonly Printer _printer;
-
-        public ResultHandler(Printer printer)
-        {
-            ArgumentNullException.ThrowIfNull(printer);
-            _printer = printer;
-        }
-
-        public void RegisterResult(Result<string> downloadResult)
-        {
-            if (downloadResult.IsSuccess)
-            {
-                _successCount++;
-
-                if (!string.IsNullOrWhiteSpace(downloadResult?.Value))
-                    _printer.Print(downloadResult.Value);
-            }
-            else
-            {
-                _failureCount++;
-
-                var messages = downloadResult.Errors.Select(e => e.Message);
-                if (messages?.Any() == true)
-                    _printer.Errors("Download error(s):", messages);
-            }
-        }
-
-        public void PrintFinalSummary()
-        {
-            var successLabel = _successCount == 1 ? "success" : "successes";
-            var failureLabel = _failureCount == 1 ? "failure" : "failures";
-            _printer.Print($"Quitting with {_successCount} {successLabel} and {_failureCount} {failureLabel}.");
-        }
-    }
-
     static Result<UserSettings> GetSettings()
     {
         var readSettingsResult = SettingsService.Read(createFileIfMissing: true);
@@ -117,7 +85,7 @@ internal static class Program
         var ensureValidSettingsResult = SettingsService.EnsureValidSettings(settings);
         if (ensureValidSettingsResult.IsFailed)
         {
-            return ensureValidSettingsResult;
+            return Result.Fail(ensureValidSettingsResult.Errors.Select(e => e.Message));
         }
 
         return readSettingsResult.Value;
