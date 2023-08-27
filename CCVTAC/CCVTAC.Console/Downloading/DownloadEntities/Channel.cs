@@ -1,8 +1,8 @@
 using System.Text.RegularExpressions;
 
-namespace CCVTAC.Console.DownloadEntities;
+namespace CCVTAC.Console.Downloading.DownloadEntities;
 
-public class Channel : IDownloadEntity
+public sealed class Channel : IDownloadEntity
 {
     public static string Name => nameof(Channel);
     public static Regex Regex => new(@"(?:www\.)?youtube\.com/(?:c/|channel/|@|user/)[\w\-]+");

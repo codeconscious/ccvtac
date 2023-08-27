@@ -2,7 +2,7 @@
 
 namespace CCVTAC.Tests;
 
-public class DownloadEntityFactory
+public sealed class DownloadEntityFactory
 {
     [Fact]
     public void Video()

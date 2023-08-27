@@ -8,6 +8,7 @@ internal static class Renamer
 {
     private record struct RenamePattern(Regex Regex, string ReplacementText, string Description);
 
+    // TODO: Convert this into a setting.
     private static readonly IReadOnlyList<RenamePattern> RenamePatterns = new List<RenamePattern>()
     {
         new RenamePattern(
@@ -70,22 +71,21 @@ internal static class Renamer
         stopwatch.Start();
 
         var dir = new DirectoryInfo(workingDirectory);
-        List<string> validExtensions = new() { ".m4a" };
 
         var files = dir.EnumerateFiles("*") // Needed?
-                       .Where(f => validExtensions.Contains(f.Extension));
-        printer.Print($"Renaming {files.Count()} {string.Join(" and ", validExtensions)} file(s)...");
+                       .Where(f => Settings.SettingsService.ValidAudioFormats.Any(f.Extension.EndsWith));
+        printer.Print($"Renaming {files.Count()} audio file(s)...");
 
         foreach (var file in files)
         {
-            var workingFileName = new StringBuilder(file.Name);
+            var workingNewFileName = new StringBuilder(file.Name);
             foreach(var pattern in RenamePatterns)
             {
-                var match = pattern.Regex.Match(workingFileName.ToString());
+                var match = pattern.Regex.Match(workingNewFileName.ToString());
                 if (!match.Success)
                     continue;
 
-                workingFileName.Remove(match.Index, match.Length);
+                workingNewFileName.Remove(match.Index, match.Length);
 
                 var replacementText = new StringBuilder(pattern.ReplacementText);
                 for (int i = 0; i < match.Groups.Count - 1; i++)
@@ -93,15 +93,16 @@ internal static class Renamer
                     replacementText.Replace($"%<{i + 1}>s", match.Groups[i + 1].Value);
                 }
 
-                workingFileName.Insert(match.Index, replacementText.ToString());
+                workingNewFileName.Insert(match.Index, replacementText.ToString());
             }
 
             try
             {
                 File.Move(
                     file.FullName,
-                    Path.Combine(workingDirectory, workingFileName.ToString()));
-                printer.Print($"- Renamed \"{file.Name}\" to \"{workingFileName}\"");
+                    Path.Combine(workingDirectory, workingNewFileName.ToString()));
+                printer.Print($"- From: \"{file.Name}\"");
+                printer.Print($"    To: \"{workingNewFileName}\"");
             }
             catch (Exception ex)
             {

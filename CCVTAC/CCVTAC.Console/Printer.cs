@@ -2,7 +2,7 @@ using Spectre.Console;
 
 namespace CCVTAC.Console;
 
-public class Printer
+public sealed class Printer
 {
     public void Print(string message, bool appendLineBreak = true, byte prependLines = 0, byte appendLines = 0, bool processMarkup = false)
     {

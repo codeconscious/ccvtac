@@ -1,8 +1,8 @@
 using System.Text.RegularExpressions;
 
-namespace CCVTAC.Console.DownloadEntities;
+namespace CCVTAC.Console.Downloading.DownloadEntities;
 
-public class Playlist : IDownloadEntity
+public sealed class Playlist : IDownloadEntity
 {
     public static string Name => nameof(Playlist);
     public static Regex Regex => new(@"(?<=list=)[\w\-]+");

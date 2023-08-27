@@ -1,13 +1,12 @@
-﻿using System.IO;
-using CCVTAC.Console.DownloadEntities;
-using CCVTAC.Console.Settings;
+﻿using CCVTAC.Console.Settings;
 
 namespace CCVTAC.Console;
 
-class Program
+internal static class Program
 {
     private static readonly string[] HelpCommands = new[] { "-h", "--help" };
-    private static readonly string[] QuitCommands = new[] { "q", "quit", "exit" };
+    private static readonly string[] QuitCommands = new[] { "q", "quit", "exit", "bye" };
+    private static readonly string InputPrompt = "Enter a YouTube URL (or 'q' to quit):";
 
     static void Main(string[] args)
     {
@@ -15,7 +14,7 @@ class Program
 
         if (args.Length > 0 && HelpCommands.Contains(args[0].ToLowerInvariant()))
         {
-            PrintHelp(printer);
+            Help.Print(printer);
             return;
         }
 
@@ -28,36 +27,80 @@ class Program
         var settings = settingsResult.Value;
         SettingsService.PrintSummary(settings, printer, "Settings loaded OK:");
 
-        SettingsService.SetId3v2Version(
-            version: SettingsService.Id3v2Version.TwoPoint3,
+        TagFormat.SetId3v2Version(
+            version: TagFormat.Id3v2Version.TwoPoint3,
             forceAsDefault: true);
 
-        const string prompt = "Enter a YouTube URL (or 'q' to quit): ";
-        ushort successCount = 0;
-        ushort failureCount = 0;
+        var resultCounter = new ResultHandler(printer);
         while (true)
         {
-            string input = printer.GetInput(prompt);
+            if (!Run(settings, resultCounter, printer))
+                break;
+        }
 
-            if (QuitCommands.Contains(input.ToLowerInvariant()))
-            {
-                var successLabel = successCount == 1 ? "success" : "successes";
-                var failureLabel = failureCount == 1 ? "failure" : "failures";
-                printer.Print($"Quitting with {successCount} {successLabel} and {failureCount} {failureLabel}.");
-                return;
-            }
+        resultCounter.PrintFinalSummary();
+    }
 
-            var result = Run(input, settings, printer);
-            if (result.IsSuccess)
+    private static bool Run(UserSettings settings, ResultHandler resultHandler, Printer printer)
+    {
+        string userInput = printer.GetInput(InputPrompt);
+
+        if (QuitCommands.Contains(userInput.ToLowerInvariant()))
+        {
+            return false;
+        }
+
+        var stopwatch = new System.Diagnostics.Stopwatch();
+        stopwatch.Start();
+
+        var downloadResult = Downloading.Downloader.Run(userInput, settings, printer);
+        resultHandler.RegisterResult(downloadResult);
+
+        History.Append(userInput, printer);
+
+        var postProcessor = new PostProcessing.Setup(settings, printer);
+        postProcessor.Run();
+
+        printer.Print($"Done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
+        return true;
+    }
+
+    private sealed class ResultHandler
+    {
+        private nuint _successCount;
+        private nuint _failureCount;
+        private readonly Printer _printer;
+
+        public ResultHandler(Printer printer)
+        {
+            ArgumentNullException.ThrowIfNull(printer);
+            _printer = printer;
+        }
+
+        public void RegisterResult(Result<string> downloadResult)
+        {
+            if (downloadResult.IsSuccess)
             {
-                successCount++;
-                printer.Print(result.Value);
+                _successCount++;
+
+                if (!string.IsNullOrWhiteSpace(downloadResult?.Value))
+                    _printer.Print(downloadResult.Value);
             }
             else
             {
-                failureCount++;
-                printer.Error(result.Value);
+                _failureCount++;
+
+                var messages = downloadResult.Errors.Select(e => e.Message);
+                if (messages?.Any() == true)
+                    _printer.Errors(messages, "Download error(s):");
             }
+        }
+
+        public void PrintFinalSummary()
+        {
+            var successLabel = _successCount == 1 ? "success" : "successes";
+            var failureLabel = _failureCount == 1 ? "failure" : "failures";
+            _printer.Print($"Quitting with {_successCount} {successLabel} and {_failureCount} {failureLabel}.");
         }
     }
 
@@ -76,78 +119,5 @@ class Program
         }
 
         return readSettingsResult.Value;
-    }
-
-    static Result<string> Run(string url, UserSettings settings, Printer printer)
-    {
-        var stopwatch = new System.Diagnostics.Stopwatch();
-        stopwatch.Start();
-
-        var downloadEntityResult = DownloadEntityFactory.Create(url);
-        if (downloadEntityResult.IsFailed)
-        {
-            return Result.Fail(downloadEntityResult.Errors?.First().Message
-                               ?? "An unknown error occurred parsing the resource type.");
-        }
-        var downloadEntity = downloadEntityResult.Value;
-        printer.Print($"Processing {downloadEntity.GetType()} URL...");
-
-        var downloadResult = ExternalTools.Downloader(
-            GenerateDownloadArgs(settings),
-            downloadEntity,
-            settings.WorkingDirectory!,
-            printer);
-        if (downloadResult.IsFailed)
-        {
-            downloadResult.Errors.ForEach(e => printer.Error(e.Message));
-            printer.Warning("However, post-processing will still be attempted.");
-        }
-
-        try
-        {
-            File.AppendAllText("history.log", url + Environment.NewLine);
-            printer.Print("Added URL to the history log.");
-        }
-        catch (Exception ex)
-        {
-            printer.Error($"Could not append URL {url} to history log: " + ex.Message);
-        }
-
-        var postProcessor = new PostProcessing.Setup(settings, printer);
-        postProcessor.Run();
-
-        return Result.Ok($"Done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
-    }
-
-    private static string GenerateDownloadArgs(UserSettings settings)
-    {
-        var args = new List<string>() {
-            $"--extract-audio -f {settings.AudioFormat}",
-            "--write-thumbnail --convert-thumbnails jpg", // For writing album art
-            "--write-info-json", // For parsing and writing metadata
-        };
-
-        if (settings.SplitChapters)
-            args.Add("--split-chapters");
-
-        return string.Join(" ", args);
-    }
-
-    static void PrintHelp(Printer printer)
-    {
-        printer.Print("CodeConscious Video-to-Audio Converter (ccvtac)");
-        printer.Print("- Easily convert YouTube videos to local M4A audio files!");
-        printer.Print("- Supports video and playlist URLs");
-        printer.Print("- Video metadata (uploader name and URL, source URL, etc.) saved to Comment tags");
-        printer.Print("- Renames files via specific regex patterns (to remove resource IDs, etc.)");
-        printer.Print("- Video thumbnails are auto-trimmed and written to files as album art (Optional)");
-        printer.Print("- Post-processed files are automatically moved to a specified directory");
-        printer.Print("- All URLs entered are saved locally to a file named `history.log`", appendLines: 1);
-
-        printer.Print("Instructions:");
-        printer.Print("• Run the program once to generate a blank settings.json file, then populate it with directory paths.");
-        printer.Print("• After the application starts, enter single URLs to start the download process.");
-        printer.Print("  URLs may be for single videos or playlists.");
-        printer.Print("• Enter `q` or `quit` to quit.");
     }
 }

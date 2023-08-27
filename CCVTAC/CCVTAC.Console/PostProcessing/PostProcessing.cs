@@ -1,6 +1,6 @@
 namespace CCVTAC.Console.PostProcessing;
 
-public class Setup
+public sealed class Setup
 {
     public string WorkingDirectory { get; }
     public string MoveToDirectory { get; }
