@@ -141,7 +141,7 @@ internal static class Tagger
             sb.AppendLine($"• URL: {data.webpage_url}");
             sb.AppendLine($"• Title: {data.fulltitle}");
             sb.AppendLine($"• Uploader: {data.uploader} ({data.uploader_url})");
-            sb.AppendLine($"• Uploaded: {data.upload_date[0..4]}/{data.upload_date[4..6]}/{data.upload_date[6..8]}"); // "2023/08/27"
+            sb.AppendLine($"• Uploaded: {data.upload_date[4..6]}/{data.upload_date[6..8]}/{data.upload_date[0..4]}"); // "08/27/2023"
             sb.AppendLine($"• Description: {data.description})");
             return sb.ToString();
         }
