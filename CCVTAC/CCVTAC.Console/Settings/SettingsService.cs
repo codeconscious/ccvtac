@@ -18,12 +18,11 @@ public static class SettingsService
             "m4a", // Recommended for most or all videos since conversation is unnecessary.
             // "mp3",
             // "vorbis",
-            // "wav
+            // "wav"
         };
 
     /// <summary>
-    /// Creates the specified settings file if it is missing.
-    /// Otherwise, does nothing.
+    /// Creates the specified settings file if it is missing. Otherwise, does nothing.
     /// </summary>
     /// <returns>A Result indicating success or no action (Ok) or else failure (Fail).</returns>
     public static Result CreateIfMissing()
