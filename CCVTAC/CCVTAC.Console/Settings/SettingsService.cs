@@ -38,7 +38,7 @@ public static class SettingsService
         printer.Print($"- Move-to directory: {settings.MoveToDirectory}");
     }
 
-    public static Result<UserSettings> GetSettings()
+    public static Result<UserSettings> GetUserSettings()
     {
         var readSettingsResult = Read(createFileIfMissing: true);
         if (readSettingsResult.IsFailed)
@@ -51,6 +51,10 @@ public static class SettingsService
         {
             return Result.Fail(ensureValidSettingsResult.Errors.Select(e => e.Message));
         }
+
+        TagFormat.SetId3v2Version(
+            version: TagFormat.Id3v2Version.TwoPoint3,
+            forceAsDefault: true);
 
         return readSettingsResult.Value;
     }

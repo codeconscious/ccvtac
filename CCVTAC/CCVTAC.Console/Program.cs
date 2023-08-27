@@ -21,28 +21,7 @@ internal static class Program
         // Top-level `try` to catch and pretty-print unexpected exceptions.
         try
         {
-            var settingsResult = SettingsService.GetSettings();
-            if (settingsResult.IsFailed)
-            {
-                printer.Errors("Settings file errors:", settingsResult);
-                return;
-            }
-            var settings = settingsResult.Value;
-            SettingsService.PrintSummary(settings, printer, "Settings loaded OK:");
-
-            TagFormat.SetId3v2Version(
-                version: TagFormat.Id3v2Version.TwoPoint3,
-                forceAsDefault: true);
-
-            var resultCounter = new ResultHandler(printer);
-            while (true)
-            {
-                bool shouldQuit = Run(settings, resultCounter, printer);
-                if (shouldQuit)
-                    break;
-            }
-
-            resultCounter.PrintFinalSummary();
+            Start(printer);
         }
         catch (Exception topLevelException)
         {
@@ -52,13 +31,39 @@ internal static class Program
     }
 
     /// <summary>
+     /// Does the initial setup and oversees the overall process.
+    /// </summary>
+    /// <param name="printer"></param>
+    private static void Start(Printer printer)
+    {
+        var settingsResult = SettingsService.GetUserSettings();
+        if (settingsResult.IsFailed)
+        {
+            printer.Errors("Settings file errors:", settingsResult);
+            return;
+        }
+        var userSettings = settingsResult.Value;
+        SettingsService.PrintSummary(userSettings, printer, "Settings loaded OK:");
+
+        var resultCounter = new ResultHandler(printer);
+        while (true)
+        {
+            bool shouldQuit = ProcessSingleResource(userSettings, resultCounter, printer);
+            if (shouldQuit)
+                break;
+        }
+
+        resultCounter.PrintFinalSummary();
+    }
+
+    /// <summary>
     /// Processes a single user request, from input to downloading and file post-processing.
     /// </summary>
     /// <param name="settings"></param>
     /// <param name="resultHandler"></param>
     /// <param name="printer"></param>
     /// <returns>A bool indicating whether to quit the program (true) or continue (false).</returns>
-    private static bool Run(UserSettings settings, ResultHandler resultHandler, Printer printer)
+    private static bool ProcessSingleResource(UserSettings settings, ResultHandler resultHandler, Printer printer)
     {
         string userInput = printer.GetInput(InputPrompt);
 
