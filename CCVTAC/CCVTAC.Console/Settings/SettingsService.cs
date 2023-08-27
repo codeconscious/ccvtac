@@ -22,10 +22,44 @@ public static class SettingsService
         };
 
     /// <summary>
+    /// Prints a summary of the given settings.
+    /// </summary>
+    /// <param name="settings"></param>
+    /// <param name="printer"></param>
+    /// <param name="header">An optional line of text to appear above the settings.</param>
+    public static void PrintSummary(UserSettings settings, Printer printer, string? header = null)
+    {
+        if (header is not null)
+            printer.Print(header);
+
+        printer.Print($"- Downloading .{settings.AudioFormat} files");
+        printer.Print($"- Video chapters {(settings.SplitChapters ? "WILL" : "will NOT")} be split");
+        printer.Print($"- Working directory: {settings.WorkingDirectory}");
+        printer.Print($"- Move-to directory: {settings.MoveToDirectory}");
+    }
+
+    public static Result<UserSettings> GetSettings()
+    {
+        var readSettingsResult = Read(createFileIfMissing: true);
+        if (readSettingsResult.IsFailed)
+            return Result.Fail(readSettingsResult.Errors.Select(e => e.Message));
+
+        UserSettings settings = readSettingsResult.Value;
+
+        var ensureValidSettingsResult = EnsureValidSettings(settings);
+        if (ensureValidSettingsResult.IsFailed)
+        {
+            return Result.Fail(ensureValidSettingsResult.Errors.Select(e => e.Message));
+        }
+
+        return readSettingsResult.Value;
+    }
+
+    /// <summary>
     /// Creates the specified settings file if it is missing. Otherwise, does nothing.
     /// </summary>
     /// <returns>A Result indicating success or no action (Ok) or else failure (Fail).</returns>
-    public static Result CreateIfMissing()
+    private static Result CreateIfMissing()
     {
         if (File.Exists(_settingsFileName))
             return Result.Ok();
@@ -43,7 +77,7 @@ public static class SettingsService
     /// <summary>
     /// Reads the settings file and parses the JSON to a Settings object.
     /// </summary>
-    public static Result<UserSettings> Read(bool createFileIfMissing = false)
+    private static Result<UserSettings> Read(bool createFileIfMissing = false)
     {
         try
         {
@@ -71,7 +105,7 @@ public static class SettingsService
     /// <param name="settings"></param>
     /// <param name="printer"></param>
     /// <returns>A Result indicating success or failure.</returns>
-    public static Result Write(UserSettings settings)
+    private static Result Write(UserSettings settings)
     {
         try
         {
@@ -96,7 +130,7 @@ public static class SettingsService
         }
     }
 
-    public static Result EnsureValidSettings(UserSettings settings)
+    private static Result EnsureValidSettings(UserSettings settings)
     {
         List<string> errors = new();
 
@@ -120,22 +154,5 @@ public static class SettingsService
         return errors.Any()
             ? Result.Fail(errors)
             : Result.Ok();
-    }
-
-    /// <summary>
-    /// Prints a summary of the given settings.
-    /// </summary>
-    /// <param name="settings"></param>
-    /// <param name="printer"></param>
-    /// <param name="header">An optional line of text to appear above the settings.</param>
-    public static void PrintSummary(UserSettings settings, Printer printer, string? header = null)
-    {
-        if (header is not null)
-            printer.Print(header);
-
-        printer.Print($"- Downloading .{settings.AudioFormat} files");
-        printer.Print($"- Video chapters {(settings.SplitChapters ? "WILL" : "will NOT")} be split");
-        printer.Print($"- Working directory: {settings.WorkingDirectory}");
-        printer.Print($"- Move-to directory: {settings.MoveToDirectory}");
     }
 }

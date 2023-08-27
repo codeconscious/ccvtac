@@ -21,7 +21,7 @@ internal static class Program
         // Top-level `try` to catch and pretty-print unexpected exceptions.
         try
         {
-            var settingsResult = GetSettings();
+            var settingsResult = SettingsService.GetSettings();
             if (settingsResult.IsFailed)
             {
                 printer.Errors("Settings file errors:", settingsResult);
@@ -43,13 +43,20 @@ internal static class Program
 
             resultCounter.PrintFinalSummary();
         }
-        catch (Exception ex)
+        catch (Exception topLevelException)
         {
-            printer.Error($"Fatal error: {ex.Message}");
-            Spectre.Console.AnsiConsole.WriteException(ex);
+            printer.Error($"Fatal error: {topLevelException.Message}");
+            Spectre.Console.AnsiConsole.WriteException(topLevelException);
         }
     }
 
+    /// <summary>
+    /// Processes a single user request, from input to downloading and file post-processing.
+    /// </summary>
+    /// <param name="settings"></param>
+    /// <param name="resultHandler"></param>
+    /// <param name="printer"></param>
+    /// <returns>A bool indicating whether to continue (true) or quit the program (false).</returns>
     private static bool Run(UserSettings settings, ResultHandler resultHandler, Printer printer)
     {
         string userInput = printer.GetInput(InputPrompt);
@@ -59,8 +66,8 @@ internal static class Program
             return false;
         }
 
-        var stopwatch = new System.Diagnostics.Stopwatch();
-        stopwatch.Start();
+        var mainStopwatch = new System.Diagnostics.Stopwatch();
+        mainStopwatch.Start();
 
         var downloadResult = Downloading.Downloader.Run(userInput, settings, printer);
         resultHandler.RegisterResult(downloadResult);
@@ -70,24 +77,7 @@ internal static class Program
         var postProcessor = new PostProcessing.Setup(settings, printer);
         postProcessor.Run();
 
-        printer.Print($"Done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
+        printer.Print($"Done in {mainStopwatch.ElapsedMilliseconds:#,##0}ms.");
         return true;
-    }
-
-    static Result<UserSettings> GetSettings()
-    {
-        var readSettingsResult = SettingsService.Read(createFileIfMissing: true);
-        if (readSettingsResult.IsFailed)
-            return Result.Fail(readSettingsResult.Errors.Select(e => e.Message));
-
-        UserSettings settings = readSettingsResult.Value;
-
-        var ensureValidSettingsResult = SettingsService.EnsureValidSettings(settings);
-        if (ensureValidSettingsResult.IsFailed)
-        {
-            return Result.Fail(ensureValidSettingsResult.Errors.Select(e => e.Message));
-        }
-
-        return readSettingsResult.Value;
     }
 }
