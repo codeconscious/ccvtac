@@ -37,7 +37,8 @@ internal static class Program
             var resultCounter = new ResultHandler(printer);
             while (true)
             {
-                if (!Run(settings, resultCounter, printer))
+                bool shouldQuit = Run(settings, resultCounter, printer);
+                if (shouldQuit)
                     break;
             }
 
@@ -56,15 +57,13 @@ internal static class Program
     /// <param name="settings"></param>
     /// <param name="resultHandler"></param>
     /// <param name="printer"></param>
-    /// <returns>A bool indicating whether to continue (true) or quit the program (false).</returns>
+    /// <returns>A bool indicating whether to quit the program (true) or continue (false).</returns>
     private static bool Run(UserSettings settings, ResultHandler resultHandler, Printer printer)
     {
         string userInput = printer.GetInput(InputPrompt);
 
         if (QuitCommands.Contains(userInput.ToLowerInvariant()))
-        {
-            return false;
-        }
+            return true;
 
         var mainStopwatch = new System.Diagnostics.Stopwatch();
         mainStopwatch.Start();
@@ -78,6 +77,6 @@ internal static class Program
         postProcessor.Run();
 
         printer.Print($"Done in {mainStopwatch.ElapsedMilliseconds:#,##0}ms.");
-        return true;
+        return false;
     }
 }
