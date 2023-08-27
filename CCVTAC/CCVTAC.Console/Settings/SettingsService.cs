@@ -29,10 +29,10 @@ public static class SettingsService
     /// <param name="header">An optional line of text to appear above the settings.</param>
     public static void PrintSummary(UserSettings settings, Printer printer, string? header = null)
     {
-        if (header is not null)
+        if (!string.IsNullOrWhiteSpace(header))
             printer.Print(header);
 
-        printer.Print($"- Downloading .{settings.AudioFormat} files");
+        printer.Print($"- Downloading {settings.AudioFormat!.ToUpperInvariant()} files");
         printer.Print($"- Video chapters {(settings.SplitChapters ? "WILL" : "will NOT")} be split");
         printer.Print($"- Working directory: {settings.WorkingDirectory}");
         printer.Print($"- Move-to directory: {settings.MoveToDirectory}");
