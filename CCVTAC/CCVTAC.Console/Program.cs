@@ -2,10 +2,11 @@
 
 namespace CCVTAC.Console;
 
-class Program
+internal static class Program
 {
     private static readonly string[] HelpCommands = new[] { "-h", "--help" };
     private static readonly string[] QuitCommands = new[] { "q", "quit", "exit", "bye" };
+    private static readonly string InputPrompt = "Enter a YouTube URL (or 'q' to quit):";
 
     static void Main(string[] args)
     {
@@ -13,7 +14,7 @@ class Program
 
         if (args.Length > 0 && HelpCommands.Contains(args[0].ToLowerInvariant()))
         {
-            Help.PrintHelp(printer);
+            Help.Print(printer);
             return;
         }
 
@@ -30,37 +31,76 @@ class Program
             version: TagFormat.Id3v2Version.TwoPoint3,
             forceAsDefault: true);
 
-        const string prompt = "Enter a YouTube URL (or 'q' to quit): ";
-        nuint successCount = 0;
-        nuint failureCount = 0;
+        var resultCounter = new ResultHandler(printer);
         while (true)
         {
-            string input = printer.GetInput(prompt);
+            if (!Run(settings, resultCounter, printer))
+                break;
+        }
 
-            if (QuitCommands.Contains(input.ToLowerInvariant()))
-            {
-                ShowResults(successCount, failureCount, printer);
-                return;
-            }
+        resultCounter.PrintFinalSummary();
+    }
 
-            var downloadResult = Downloading.Downloader.Run(input, settings, printer);
+    private static bool Run(UserSettings settings, ResultHandler resultHandler, Printer printer)
+    {
+        string userInput = printer.GetInput(InputPrompt);
+
+        if (QuitCommands.Contains(userInput.ToLowerInvariant()))
+        {
+            return false;
+        }
+
+        var stopwatch = new System.Diagnostics.Stopwatch();
+        stopwatch.Start();
+
+        var downloadResult = Downloading.Downloader.Run(userInput, settings, printer);
+        resultHandler.RegisterResult(downloadResult);
+
+        History.Append(userInput, printer);
+
+        var postProcessor = new PostProcessing.Setup(settings, printer);
+        postProcessor.Run();
+
+        printer.Print($"Done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
+        return true;
+    }
+
+    private sealed class ResultHandler
+    {
+        private nuint _successCount;
+        private nuint _failureCount;
+        private readonly Printer _printer;
+
+        public ResultHandler(Printer printer)
+        {
+            ArgumentNullException.ThrowIfNull(printer);
+            _printer = printer;
+        }
+
+        public void RegisterResult(Result<string> downloadResult)
+        {
             if (downloadResult.IsSuccess)
             {
-                successCount++;
-                printer.Print(downloadResult.Value);
+                _successCount++;
+
+                if (!string.IsNullOrWhiteSpace(downloadResult?.Value))
+                    _printer.Print(downloadResult.Value);
             }
             else
             {
-                failureCount++;
-                printer.Errors(
-                    downloadResult.Errors.Select(e => e.Message),
-                    "Download errors:");
+                _failureCount++;
+
+                var messages = downloadResult.Errors.Select(e => e.Message);
+                if (messages?.Any() == true)
+                    _printer.Errors(messages, "Download error(s):");
             }
+        }
 
-            History.Append(input, printer);
-
-            var postProcessor = new PostProcessing.Setup(settings, printer);
-            postProcessor.Run();
+        public void PrintFinalSummary()
+        {
+            var successLabel = _successCount == 1 ? "success" : "successes";
+            var failureLabel = _failureCount == 1 ? "failure" : "failures";
+            _printer.Print($"Quitting with {_successCount} {successLabel} and {_failureCount} {failureLabel}.");
         }
     }
 
@@ -79,13 +119,5 @@ class Program
         }
 
         return readSettingsResult.Value;
-    }
-
-    static void ShowResults(nuint successCount, nuint failureCount, Printer printer)
-    {
-        var successLabel = successCount == 1 ? "success" : "successes";
-        var failureLabel = failureCount == 1 ? "failure" : "failures";
-        printer.Print($"Quitting with {successCount} {successLabel} and {failureCount} {failureLabel} for downloads.");
-        return;
     }
 }

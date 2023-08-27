@@ -27,7 +27,7 @@ public static class Caller
             return Result.Fail($"Could not start {settings.ProgramName} -- is it installed?");
         }
         process.WaitForExit();
-        settings.Printer.Print($"Done {settings.Summary} in {stopwatch.ElapsedMilliseconds:#,##0}ms");
+        settings.Printer.Print($"Done with {settings.Summary} in {stopwatch.ElapsedMilliseconds:#,##0}ms");
         return process.ExitCode == 0
             ? Result.Ok(process.ExitCode)
             : Result.Fail($"Full or partial download error ({settings.ProgramName} error {process.ExitCode}).");

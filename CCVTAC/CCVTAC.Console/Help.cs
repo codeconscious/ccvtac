@@ -2,7 +2,7 @@ namespace CCVTAC.Console;
 
 public static class Help
 {
-    internal static void PrintHelp(Printer printer)
+    internal static void Print(Printer printer)
     {
         printer.Print("CodeConscious Video-to-Audio Converter (CCVTAC)");
         printer.Print("- Easily convert YouTube videos to local audio files with ID3v2 tags!");

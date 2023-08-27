@@ -8,6 +8,7 @@ internal static class Renamer
 {
     private record struct RenamePattern(Regex Regex, string ReplacementText, string Description);
 
+    // TODO: Convert this into a setting.
     private static readonly IReadOnlyList<RenamePattern> RenamePatterns = new List<RenamePattern>()
     {
         new RenamePattern(
@@ -70,11 +71,10 @@ internal static class Renamer
         stopwatch.Start();
 
         var dir = new DirectoryInfo(workingDirectory);
-        List<string> validExtensions = new() { ".m4a" };
 
         var files = dir.EnumerateFiles("*") // Needed?
-                       .Where(f => validExtensions.Contains(f.Extension));
-        printer.Print($"Renaming {files.Count()} {string.Join(" and ", validExtensions)} file(s)...");
+                       .Where(f => Settings.SettingsService.ValidAudioFormats.Any(f.Extension.EndsWith));
+        printer.Print($"Renaming {files.Count()} audio file(s)...");
 
         foreach (var file in files)
         {

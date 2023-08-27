@@ -15,8 +15,8 @@ public static class SettingsService
         new string[] {
             // "aac",
             // "flac",
-            "m4a",
-            "mp3",
+            "m4a", // Recommended for most or all videos since conversation is unnecessary.
+            // "mp3",
             // "vorbis",
             // "wav
         };

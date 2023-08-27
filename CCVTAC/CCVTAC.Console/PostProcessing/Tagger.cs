@@ -46,7 +46,6 @@ internal static class Tagger
         }
         var valid = idsWithFileNames.Where(g => g.Count() == 1);
 
-        const string audioFileExtension = ".m4a";
         foreach (var idNamePair in valid)
         {
             var resourceId = idNamePair.Key;
@@ -81,15 +80,15 @@ internal static class Tagger
             }
 
             var audioFilesForThisID = Directory
-                .GetFiles(workingDirectory, $"*{idNamePair.Key}*{audioFileExtension}")
-                .ToList();
+                .GetFiles(workingDirectory)
+                .Where(f => Settings.SettingsService.ValidAudioFormats.Any(f.ToLowerInvariant().EndsWith))
+                .ToImmutableList();
             if (!audioFilesForThisID.Any())
             {
-                printer.Error($"No {audioFileExtension} files for ID {idNamePair.Key} were found.");
+                printer.Error($"No supported audio files for ID {idNamePair.Key} were found.");
                 continue;
             }
             printer.Print($"Found {audioFilesForThisID.Count()} audio file(s) for resource ID \"{idNamePair.Key}\"");
-            // TODO: If there is more than one, it indicates a split video, so the original (largest) file should be deleted.
 
             // For split videos, delete the source file.
             if (audioFilesForThisID.Count() > 1)
@@ -119,7 +118,6 @@ internal static class Tagger
                 using var taggedFile = TagLib.File.Create(audioFilePath);
                 taggedFile.Tag.Title = parsedJson.title;
                 taggedFile.Tag.Year = DetectReleaseYear(parsedJson, printer);
-                // taggedFile.Tag. // TODO: Manually add 'original name' frame.
                 taggedFile.Tag.Comment = GenerateComment(parsedJson);
                 AddImage(taggedFile, resourceId, workingDirectory, printer);
                 taggedFile.Save();
@@ -129,16 +127,21 @@ internal static class Tagger
 
         printer.Print($"Tagging done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
 
+        /// <summary>
+        /// Generate a comment using data parsed from the JSON file.
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns>The formatted comment.</returns>
         static string GenerateComment(YouTubeJson.Root data)
         {
             StringBuilder sb = new();
             sb.AppendLine("SOURCE DATA:");
-            sb.AppendLine($"• Downloaded: {DateTime.Now}");
+            sb.AppendLine($"• Downloaded: {DateTime.Now} using CCVTAC");
             sb.AppendLine($"• Service: {data.extractor_key}");
-            sb.AppendLine($"• Title: {data.fulltitle}");
             sb.AppendLine($"• URL: {data.webpage_url}");
+            sb.AppendLine($"• Title: {data.fulltitle}");
             sb.AppendLine($"• Uploader: {data.uploader} ({data.uploader_url})");
-            sb.AppendLine($"• Uploaded: {data.upload_date})");
+            sb.AppendLine($"• Uploaded: {data.upload_date[0..4]}/{data.upload_date[4..6]}/{data.upload_date[6..8]}"); // "2023/08/27"
             sb.AppendLine($"• Description: {data.description})");
             return sb.ToString();
         }
