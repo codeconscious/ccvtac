@@ -9,11 +9,12 @@ Feel free to use it yourself, but please do so responsibly. No warranties or gua
 ## Features
 
 - Easily convert YouTube videos to local audio files!
-- Supports video and playlist URLs
+- Supports video, playlist, and channel URLs
 - Video metadata (uploader name and URL, source URL, etc.) saved to Comment tags
 - Renames files via specific regex patterns (to remove resource IDs, etc.)
 - Video thumbnails are auto-trimmed and written to files as album art
 - Post-processed files are automatically moved to a specified directory
+- File ID3 tags are automatically written where possible
 - All URLs entered are saved locally to a file named `history.log`
 
 ### TODOs and Ideas
