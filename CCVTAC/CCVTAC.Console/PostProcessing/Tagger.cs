@@ -11,6 +11,8 @@ internal static class Tagger
 
     internal static void Run(string workingDirectory, Printer printer)
     {
+        printer.Print("Adding file tags...");
+
         var stopwatch = new System.Diagnostics.Stopwatch();
         stopwatch.Start();
 
@@ -118,6 +120,16 @@ internal static class Tagger
 
                 using var taggedFile = TagLib.File.Create(audioFilePath);
                 taggedFile.Tag.Title = parsedJson.title;
+                var maybeArtist = DetectArtist(parsedJson, printer);
+                if (maybeArtist is not null)
+                {
+                    taggedFile.Tag.Performers = new[] { maybeArtist };
+                }
+                var maybeAlbum = DetectAlbum(parsedJson, printer);
+                if (maybeAlbum is not null)
+                {
+                    taggedFile.Tag.Album = maybeAlbum;
+                }
                 taggedFile.Tag.Year = DetectReleaseYear(parsedJson, printer);
                 taggedFile.Tag.Comment = GenerateComment(parsedJson);
                 AddImage(taggedFile, resourceId, workingDirectory, printer);
@@ -145,6 +157,53 @@ internal static class Tagger
             sb.AppendLine($"• Uploaded: {data.upload_date[4..6]}/{data.upload_date[6..8]}/{data.upload_date[0..4]}"); // "08/27/2023"
             sb.AppendLine($"• Description: {data.description})");
             return sb.ToString();
+        }
+
+        static string? DetectArtist(YouTubeJson.Root data, Printer printer, string? defaultName = null)
+        {
+            // TODO: Put this somewhere where it can be static.
+            List<(string Regex, int Group, string Text, string Source)> parsePatterns = new()
+            {
+                (@"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D", 2, data.description, "description (\"topic\" style)"),
+            };
+
+            foreach (var pattern in parsePatterns)
+            {
+                var regex = new Regex(pattern.Regex);
+                var match = regex.Match(pattern.Text);
+
+                if (match is not { Success: true })
+                    continue;
+
+                printer.Print($"Writing artist \"{match.Groups[pattern.Group].Value}\" (matched via {pattern.Source})");
+                return match.Groups[pattern.Group].Value.Trim();
+            }
+
+            return defaultName;
+        }
+
+        static string? DetectAlbum(YouTubeJson.Root data, Printer printer, string? defaultName = null)
+        {
+            // TODO: Put this somewhere where it can be static.
+            List<(string Regex, int Group, string Text, string Source)> parsePatterns = new()
+            {
+                (@"(?<=[Aa]lbum: ).+", 0, data.description, "description"),
+                (@"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D", 3, data.description, "description (\"topic\" style)"),
+            };
+
+            foreach (var pattern in parsePatterns)
+            {
+                var regex = new Regex(pattern.Regex);
+                var match = regex.Match(pattern.Text);
+
+                if (match is not { Success: true })
+                    continue;
+
+                printer.Print($"Writing album \"{match.Groups[pattern.Group].Value}\" (matched via {pattern.Source})");
+                return match.Groups[pattern.Group].Value.Trim();
+            }
+
+            return defaultName;
         }
 
         /// <summary>
@@ -224,12 +283,11 @@ internal static class Tagger
             var pics = new TagLib.IPicture[1];
             pics[0] = new TagLib.Picture(imageFile);
             taggedFile.Tag.Pictures = pics;
-            printer.Print("Image attached to file tags.");
+            printer.Print("Image written to file tags OK.");
         }
         catch (Exception ex)
         {
-            printer.Error($"Error attaching image to the audio file: {ex.Message}");
-            printer.Print("Aborting image addition.");
+            printer.Error($"Error writing image to the audio file: {ex.Message}");
             return;
         }
     }
