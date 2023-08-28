@@ -62,25 +62,7 @@ internal static class Tagger
                 continue;
             }
 
-            // For split videos, each of which will have the same resource ID, delete the source file.
-            if (taggingSet.AudioFilePaths.Count() > 1)
-            {
-                var largestFileInfo = taggingSet.AudioFilePaths
-                    .Select(fn => new FileInfo(fn))
-                    .OrderByDescending(fi => fi.Length)
-                    .First();
-
-                try
-                {
-                    File.Delete(largestFileInfo.FullName);
-                    taggingSet.AudioFilePaths.Remove(largestFileInfo.FullName);
-                    printer.Print($"Deleted original file \"{largestFileInfo.Name}\"");
-                }
-                catch (Exception ex)
-                {
-                    printer.Error($"Error deleting file \"{largestFileInfo.Name}\": {ex.Message}");
-                }
-            }
+            DeleteSourceFile(taggingSet, printer);
 
             foreach (var audioFilePath in taggingSet.AudioFilePaths)
             {
@@ -276,6 +258,34 @@ internal static class Tagger
                     ? matchYear
                     : null;
             };
+        }
+    }
+
+    /// <summary>
+    /// Deletes the pre-split, source audio (if any) for split videos, each of which will have the same resource ID.
+    /// </summary>
+    /// <param name="taggingSet"></param>
+    /// <param name="printer"></param>
+    private static void DeleteSourceFile(TaggingSet taggingSet, Printer printer)
+    {
+        if (taggingSet.AudioFilePaths.Count() > 1)
+        {
+            var largestFileInfo =
+                taggingSet.AudioFilePaths
+                    .Select(fn => new FileInfo(fn))
+                    .OrderByDescending(fi => fi.Length)
+                    .First();
+
+            try
+            {
+                File.Delete(largestFileInfo.FullName);
+                taggingSet.AudioFilePaths.Remove(largestFileInfo.FullName);
+                printer.Print($"Deleted pre-split source file \"{largestFileInfo.Name}\"");
+            }
+            catch (Exception ex)
+            {
+                printer.Error($"Error deleting pre-split source file \"{largestFileInfo.Name}\": {ex.Message}");
+            }
         }
     }
 
