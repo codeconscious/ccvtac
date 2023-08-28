@@ -119,7 +119,7 @@ internal static class Tagger
                 printer.Print($"Current audio file: \"{audioFileName}\"");
 
                 using var taggedFile = TagLib.File.Create(audioFilePath);
-                taggedFile.Tag.Title = parsedJson.title;
+                taggedFile.Tag.Title = DetectTitle(parsedJson, printer, parsedJson.title);
                 var maybeArtist = DetectArtist(parsedJson, printer);
                 if (maybeArtist is not null)
                 {
@@ -159,12 +159,36 @@ internal static class Tagger
             return sb.ToString();
         }
 
+        static string? DetectTitle(YouTubeJson.Root data, Printer printer, string? defaultName = null)
+        {
+            // TODO: Put this somewhere where it can be static.
+            List<(string Regex, int Group, string Text, string Source)> parsePatterns = new()
+            {
+                (@"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D", 1, data.description, "description (Topic style)"),
+            };
+
+            foreach (var pattern in parsePatterns)
+            {
+                var regex = new Regex(pattern.Regex);
+                var match = regex.Match(pattern.Text);
+
+                if (match is not { Success: true })
+                    continue;
+
+                printer.Print($"Writing title \"{match.Groups[pattern.Group].Value}\" (matched via {pattern.Source})");
+                return match.Groups[pattern.Group].Value.Trim();
+            }
+
+            printer.Print($"Writing title \"{defaultName}\" (taken from video title)");
+            return defaultName;
+        }
+
         static string? DetectArtist(YouTubeJson.Root data, Printer printer, string? defaultName = null)
         {
             // TODO: Put this somewhere where it can be static.
             List<(string Regex, int Group, string Text, string Source)> parsePatterns = new()
             {
-                (@"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D", 2, data.description, "description (\"topic\" style)"),
+                (@"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D", 2, data.description, "description (Topic style)"),
             };
 
             foreach (var pattern in parsePatterns)
@@ -188,7 +212,8 @@ internal static class Tagger
             List<(string Regex, int Group, string Text, string Source)> parsePatterns = new()
             {
                 (@"(?<=[Aa]lbum: ).+", 0, data.description, "description"),
-                (@"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D", 3, data.description, "description (\"topic\" style)"),
+                (@"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D", 3, data.description, "description (Topic style)"),
+                ("""(?<='s ['"]).+(?=['"] album)""", 0, data.description, "description"),
             };
 
             foreach (var pattern in parsePatterns)
