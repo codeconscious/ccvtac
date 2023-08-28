@@ -9,7 +9,7 @@ internal static class Tagger
 {
     private const string _jsonFileSearchPattern = "*.json";
     private const string _audioFileSearchPattern = "*.m4a"; // TODO: Need to handle more
-    private static Regex _videoResourceIdRegex = new(@".+\[([\w_\-]{11})\](?:.*)?\.(\w+)");
+    private static readonly Regex _videoResourceIdRegex = new(@".+\[([\w_\-]{11})\](?:.*)?\.(\w+)");
 
     internal static void Run(string workingDirectory, Printer printer)
     {
@@ -18,11 +18,11 @@ internal static class Tagger
         var stopwatch = new System.Diagnostics.Stopwatch();
         stopwatch.Start();
 
-        IReadOnlyList<TagSet> tagSets;
+        IReadOnlyList<TaggingSet> taggingSets;
         try
         {
-            var all = Directory.GetFiles(workingDirectory);
-            tagSets = CreateTagSets(all, workingDirectory);
+            var allFiles = Directory.GetFiles(workingDirectory);
+            taggingSets = CreateTagSets(allFiles, workingDirectory);
         }
         catch (Exception ex)
         {
@@ -30,18 +30,18 @@ internal static class Tagger
             return;
         }
 
-        foreach (var tagSet in tagSets)
+        foreach (var taggingSet in taggingSets)
         {
-            printer.Print($"{tagSet.AudioFilePaths.Count()} audio files with resource ID {tagSet.ResourceId}");
+            printer.Print($"{taggingSet.AudioFilePaths.Count()} audio files with resource ID {taggingSet.ResourceId}");
 
             string json;
             try
             {
-                json = File.ReadAllText(tagSet.JsonFilePath);
+                json = File.ReadAllText(taggingSet.JsonFilePath);
             }
             catch (Exception ex)
             {
-                printer.Error($"Error reading JSON file \"{tagSet.JsonFilePath}\": {ex.Message}.");
+                printer.Error($"Error reading JSON file \"{taggingSet.JsonFilePath}\": {ex.Message}.");
                 continue;
             }
 
@@ -52,7 +52,7 @@ internal static class Tagger
 
                 if (parsedJson is null)
                 {
-                    printer.Error($"The JSON from file \"{tagSet.JsonFilePath}\" was unexpectedly null.");
+                    printer.Error($"The JSON from file \"{taggingSet.JsonFilePath}\" was unexpectedly null.");
                     continue;
                 }
             }
@@ -63,9 +63,9 @@ internal static class Tagger
             }
 
             // For split videos, each of which will have the same resource ID, delete the source file.
-            if (tagSet.AudioFilePaths.Count() > 1)
+            if (taggingSet.AudioFilePaths.Count() > 1)
             {
-                var largestFileInfo = tagSet.AudioFilePaths
+                var largestFileInfo = taggingSet.AudioFilePaths
                     .Select(fn => new FileInfo(fn))
                     .OrderByDescending(fi => fi.Length)
                     .First();
@@ -73,7 +73,7 @@ internal static class Tagger
                 try
                 {
                     File.Delete(largestFileInfo.FullName);
-                    tagSet.AudioFilePaths.Remove(largestFileInfo.FullName);
+                    taggingSet.AudioFilePaths.Remove(largestFileInfo.FullName);
                     printer.Print($"Deleted original file \"{largestFileInfo.Name}\"");
                 }
                 catch (Exception ex)
@@ -82,7 +82,7 @@ internal static class Tagger
                 }
             }
 
-            foreach (var audioFilePath in tagSet.AudioFilePaths)
+            foreach (var audioFilePath in taggingSet.AudioFilePaths)
             {
                 try
                 {
@@ -103,7 +103,7 @@ internal static class Tagger
                     }
                     taggedFile.Tag.Year = DetectReleaseYear(parsedJson, printer);
                     taggedFile.Tag.Comment = GenerateComment(parsedJson);
-                    AddImage(taggedFile, tagSet.ResourceId, workingDirectory, printer);
+                    AddImage(taggedFile, taggingSet.ResourceId, workingDirectory, printer);
                     taggedFile.Save();
                     printer.Print($"Wrote tags to \"{audioFileName}\"");
                 }
@@ -117,10 +117,10 @@ internal static class Tagger
 
         printer.Print($"Tagging done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
 
-        static List<TagSet> CreateTagSets(IEnumerable<string> filePaths, string workingDirectory)
+        static List<TaggingSet> CreateTagSets(IEnumerable<string> filePaths, string workingDirectory)
         {
             if (!filePaths.Any())
-                return new List<TagSet>();
+                return new List<TaggingSet>();
 
             return filePaths
                         .Select(f => _videoResourceIdRegex.Match(f))
@@ -128,12 +128,12 @@ internal static class Tagger
                         .Select(m => m.Captures.OfType<Match>().First())
                         .GroupBy(m => m.Groups[1].Value,
                                  m => m.Groups[0].Value)
-                        .Where(gr => gr.Count(f => f.EndsWith(".json", StringComparison.OrdinalIgnoreCase)) == 1)
+                        .Where(gr => gr.Count(f => f.EndsWith(_jsonFileSearchPattern, StringComparison.OrdinalIgnoreCase)) == 1)
                         .Select(gr => {
-                            return new TagSet(
+                            return new TaggingSet(
                                 gr.Key,
-                                gr.Where(f => f.EndsWith(".m4a")), // # TODO: Support multiple formats.
-                                gr.Where(f => f.EndsWith(".json")).First());
+                                gr.Where(f => f.EndsWith(_audioFileSearchPattern)), // # TODO: Support multiple formats.
+                                gr.Where(f => f.EndsWith(_jsonFileSearchPattern)).First());
                         }).ToList();
         }
 
@@ -335,13 +335,16 @@ internal static class Tagger
         TwoPoint4 = 4,
     }
 
-    public sealed class TagSet
+    /// <summary>
+    /// Contains all of the data necessary for tagging files.
+    /// </summary>
+    public sealed class TaggingSet
     {
         public string ResourceId { get; init; }
         public List<string> AudioFilePaths { get; init; }
         public string JsonFilePath { get; init; }
 
-        public TagSet(string resourceId, IEnumerable<string> audioFilePaths, string jsonFilePath)
+        public TaggingSet(string resourceId, IEnumerable<string> audioFilePaths, string jsonFilePath)
         {
             if (string.IsNullOrWhiteSpace(resourceId))
                 throw new ArgumentException("The resource ID must be provided");
