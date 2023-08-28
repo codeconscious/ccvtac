@@ -1,12 +1,12 @@
 namespace CCVTAC.Console;
 
-sealed class ResultHandler
+sealed class ResultTracker
 {
     private nuint _successCount;
     private nuint _failureCount;
     private readonly Printer _printer;
 
-    public ResultHandler(Printer printer)
+    public ResultTracker(Printer printer)
     {
         ArgumentNullException.ThrowIfNull(printer);
         _printer = printer;

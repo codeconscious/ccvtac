@@ -45,7 +45,7 @@ internal static class Program
         var userSettings = settingsResult.Value;
         SettingsService.PrintSummary(userSettings, printer, "Settings loaded OK:");
 
-        var resultCounter = new ResultHandler(printer);
+        var resultCounter = new ResultTracker(printer);
         while (true)
         {
             bool shouldQuit = ProcessSingleResource(userSettings, resultCounter, printer);
@@ -63,7 +63,7 @@ internal static class Program
     /// <param name="resultHandler"></param>
     /// <param name="printer"></param>
     /// <returns>A bool indicating whether to quit the program (true) or continue (false).</returns>
-    private static bool ProcessSingleResource(UserSettings settings, ResultHandler resultHandler, Printer printer)
+    private static bool ProcessSingleResource(UserSettings settings, ResultTracker resultHandler, Printer printer)
     {
         string userInput = printer.GetInput(InputPrompt);
 

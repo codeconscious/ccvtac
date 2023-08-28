@@ -8,6 +8,8 @@ namespace CCVTAC.Console.PostProcessing;
 internal static class Tagger
 {
     private const string _jsonFileSearchPattern = "*.json";
+    private const string _audioFileSearchPattern = "*.m4a"; // TODO: Need to handle more
+    private static Regex _videoResourceIdRegex = new(@".+\[([\w_\-]{11})\](?:.*)?\.(\w+)");
 
     internal static void Run(string workingDirectory, Printer printer)
     {
@@ -16,43 +18,50 @@ internal static class Tagger
         var stopwatch = new System.Diagnostics.Stopwatch();
         stopwatch.Start();
 
-        List<string> jsonFiles;
+        List<string> audioFiles;
         try
         {
-            jsonFiles = Directory.GetFiles(workingDirectory, _jsonFileSearchPattern).ToList();
-            if (!jsonFiles.Any())
+            audioFiles = Directory.GetFiles(workingDirectory, _audioFileSearchPattern).ToList();
+            if (!audioFiles.Any())
             {
-                printer.Error($"No {_jsonFileSearchPattern} files found! Aborting...");
+                printer.Error($"No {_audioFileSearchPattern} files found! Aborting...");
                 return;
             }
         }
         catch (Exception ex)
         {
-            printer.Error($"Error reading {_jsonFileSearchPattern} files: " + ex.Message);
+            printer.Error($"Error reading {_audioFileSearchPattern} files: " + ex.Message);
             return;
         }
 
-        var resourceIdRegex = new Regex(@".+\[([\w_\-]{11})\](?:.*)?\.(\w+)");
-        var idsWithFileNames = jsonFiles
-                        .Select(f => resourceIdRegex.Match(f))
-                        .Where(m => m.Success)
-                        .Select(m => m.Captures.OfType<Match>().First())
-                                      .GroupBy(m => m.Groups[1].Value,
-                                               m => m.Groups[0].Value);
-        var invalid = idsWithFileNames.Where(g => g.Count() != 1);
-        if (invalid.Any())
-        {
-            printer.Errors(
-                "JSON errors:",
-                invalid.Select(i => $"There was not one JSON file for ID {i.Key}, so this ID will be skipped.")
-            );
-        }
-        var valid = idsWithFileNames.Where(g => g.Count() == 1);
+        var idsWithAudioFileNames = GroupIdsWithAudioFileNames(audioFiles);
 
-        foreach (var idNamePair in valid)
+        // foreach (var pair in idsWithAudioFileNames)
+        // {
+        //     printer.Warning($"{pair.Key}");
+        //     pair.ToList().ForEach(p => printer.Warning($"- {p}"));
+        // }
+        // return;
+
+        foreach (var thisIdWithAudioFileNames in idsWithAudioFileNames)
         {
-            var resourceId = idNamePair.Key;
-            var jsonFileName = idNamePair.Single();
+            var resourceId = thisIdWithAudioFileNames.Key;
+            var audioFilePaths = thisIdWithAudioFileNames.ToList();
+
+            printer.Print($"{thisIdWithAudioFileNames.Count()} audio files with resource ID {resourceId}");
+
+            string jsonFileName;
+            try
+            {
+                // TODO: Refactor this to a new class/struct with the ID, files, and single JSON file within.
+                jsonFileName = Directory.GetFiles(workingDirectory, $"*{resourceId}{_jsonFileSearchPattern}").Single();
+            }
+            catch (Exception ex)
+            {
+                printer.Error($"A single JSON file for resource ID {resourceId} was not found: {ex.Message}");
+                printer.Warning("Will continue to the next file...");
+                continue;
+            }
 
             string json;
             try
@@ -82,21 +91,10 @@ internal static class Tagger
                 continue;
             }
 
-            var audioFilesForThisID = Directory
-                .GetFiles(workingDirectory)
-                .Where(f => Settings.SettingsService.ValidAudioFormats.Any(f.ToLowerInvariant().EndsWith))
-                .ToImmutableList();
-            if (!audioFilesForThisID.Any())
+            // For split videos, each of which will have the same resource ID, delete the source file.
+            if (audioFilePaths.Count() > 1)
             {
-                printer.Error($"No supported audio files for ID {idNamePair.Key} were found.");
-                continue;
-            }
-            printer.Print($"Found {audioFilesForThisID.Count()} audio file(s) for resource ID \"{idNamePair.Key}\"");
-
-            // For split videos, delete the source file.
-            if (audioFilesForThisID.Count() > 1)
-            {
-                var largestFileInfo = audioFilesForThisID
+                var largestFileInfo = audioFilePaths
                     .Select(fn => new FileInfo(fn))
                     .OrderByDescending(fi => fi.Length)
                     .First();
@@ -104,7 +102,7 @@ internal static class Tagger
                 try
                 {
                     File.Delete(largestFileInfo.FullName);
-                    audioFilesForThisID.Remove(largestFileInfo.FullName);
+                    audioFilePaths.Remove(largestFileInfo.FullName);
                     printer.Print($"Deleted original file \"{largestFileInfo.Name}\"");
                 }
                 catch (Exception ex)
@@ -113,32 +111,50 @@ internal static class Tagger
                 }
             }
 
-            foreach (var audioFilePath in audioFilesForThisID)
+            foreach (var audioFilePath in audioFilePaths)
             {
-                var audioFileName = Path.GetFileName(audioFilePath);
-                printer.Print($"Current audio file: \"{audioFileName}\"");
+                try
+                {
+                    var audioFileName = Path.GetFileName(audioFilePath);
+                    printer.Print($"Current audio file: \"{audioFileName}\"");
 
-                using var taggedFile = TagLib.File.Create(audioFilePath);
-                taggedFile.Tag.Title = DetectTitle(parsedJson, printer, parsedJson.title);
-                var maybeArtist = DetectArtist(parsedJson, printer);
-                if (maybeArtist is not null)
-                {
-                    taggedFile.Tag.Performers = new[] { maybeArtist };
+                    using var taggedFile = TagLib.File.Create(audioFilePath);
+                    taggedFile.Tag.Title = DetectTitle(parsedJson, printer, parsedJson.title);
+                    var maybeArtist = DetectArtist(parsedJson, printer);
+                    if (maybeArtist is not null)
+                    {
+                        taggedFile.Tag.Performers = new[] { maybeArtist };
+                    }
+                    var maybeAlbum = DetectAlbum(parsedJson, printer);
+                    if (maybeAlbum is not null)
+                    {
+                        taggedFile.Tag.Album = maybeAlbum;
+                    }
+                    taggedFile.Tag.Year = DetectReleaseYear(parsedJson, printer);
+                    taggedFile.Tag.Comment = GenerateComment(parsedJson);
+                    AddImage(taggedFile, resourceId, workingDirectory, printer);
+                    taggedFile.Save();
+                    printer.Print($"Wrote tags to \"{audioFileName}\"");
                 }
-                var maybeAlbum = DetectAlbum(parsedJson, printer);
-                if (maybeAlbum is not null)
+                catch (Exception ex)
                 {
-                    taggedFile.Tag.Album = maybeAlbum;
+                    printer.Error($"Error tagging file: {ex.Message}");
+                    continue;
                 }
-                taggedFile.Tag.Year = DetectReleaseYear(parsedJson, printer);
-                taggedFile.Tag.Comment = GenerateComment(parsedJson);
-                AddImage(taggedFile, resourceId, workingDirectory, printer);
-                taggedFile.Save();
-                printer.Print($"Wrote tags to \"{audioFileName}\"");
             }
         }
 
         printer.Print($"Tagging done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
+
+        static IEnumerable<IGrouping<string, string>> GroupIdsWithAudioFileNames(List<string> audioFileNames)
+        {
+            return audioFileNames
+                        .Select(f => _videoResourceIdRegex.Match(f))
+                        .Where(m => m.Success)
+                        .Select(m => m.Captures.OfType<Match>().First())
+                        .GroupBy(m => m.Groups[1].Value,
+                                 m => m.Groups[0].Value);
+        }
 
         /// <summary>
         /// Generate a comment using data parsed from the JSON file.
