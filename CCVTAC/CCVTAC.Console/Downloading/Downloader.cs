@@ -18,7 +18,7 @@ public static class Downloader
                                ?? "An unknown error occurred parsing the resource type.");
         }
         var downloadEntity = downloadEntityResult.Value;
-        printer.Print($"Processing {downloadEntity.GetType()} URL...");
+        printer.Print($"Processing {downloadEntity.GetType().Name.ToLowerInvariant()} URL...");
 
         var downloadToolSettings = new ExternalUtilties.ExternalToolSettings(
             "video download and audio extraction",
