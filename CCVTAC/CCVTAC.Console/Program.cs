@@ -73,6 +73,7 @@ internal static class Program
         var mainStopwatch = new System.Diagnostics.Stopwatch();
         mainStopwatch.Start();
 
+        // TODO: Handle failures from bad input (e.g., 'w').
         var downloadResult = Downloading.Downloader.Run(userInput, settings, printer);
         resultHandler.RegisterResult(downloadResult);
 
