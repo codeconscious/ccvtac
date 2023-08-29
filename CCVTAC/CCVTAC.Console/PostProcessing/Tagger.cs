@@ -7,11 +7,11 @@ namespace CCVTAC.Console.PostProcessing;
 
 internal static class Tagger
 {
-    private const string _jsonFileSearchPattern = "*.json";
-    private const string _audioFileSearchPattern = "*.m4a"; // TODO: Need to handle more
+    private const string _jsonFileExtension = ".json";
+    private const string _audioFileExtension = ".m4a"; // TODO: Need to handle more
     private static readonly Regex _videoResourceIdRegex = new(@".+\[([\w_\-]{11})\](?:.*)?\.(\w+)");
 
-    internal static void Run(string workingDirectory, Printer printer)
+    internal static Result<string> Run(string workingDirectory, Printer printer)
     {
         printer.Print("Adding file tags...");
 
@@ -26,9 +26,17 @@ internal static class Tagger
         }
         catch (Exception ex)
         {
-            printer.Error($"Error reading {_audioFileSearchPattern} files: " + ex.Message);
-            return;
+            return Result.Fail($"Error reading {_audioFileExtension} files: " + ex.Message);
         }
+
+        // if (!taggingSets.Any()) // Debugging use only
+        // {
+        //     var allFiles = Directory.GetFiles(workingDirectory);
+        //     printer.Print("Current working files:");
+        //     allFiles.ToList().ForEach(f => printer.Print($"- {f}"));
+
+        //     return Result.Fail($"No tagging sets were created! Aborting after {stopwatch.ElapsedMilliseconds:#,##0}ms");
+        // }
 
         foreach (var taggingSet in taggingSets)
         {
@@ -97,7 +105,7 @@ internal static class Tagger
             }
         }
 
-        printer.Print($"Tagging done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
+        return Result.Ok($"Tagging done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
 
         static List<TaggingSet> CreateTagSets(IEnumerable<string> filePaths, string workingDirectory)
         {
@@ -110,12 +118,12 @@ internal static class Tagger
                         .Select(m => m.Captures.OfType<Match>().First())
                         .GroupBy(m => m.Groups[1].Value,
                                  m => m.Groups[0].Value)
-                        .Where(gr => gr.Count(f => f.EndsWith(_jsonFileSearchPattern, StringComparison.OrdinalIgnoreCase)) == 1)
+                        .Where(gr => gr.Count(f => f.EndsWith(_jsonFileExtension, StringComparison.OrdinalIgnoreCase)) == 1)
                         .Select(gr => {
                             return new TaggingSet(
                                 gr.Key,
-                                gr.Where(f => f.EndsWith(_audioFileSearchPattern)), // # TODO: Support multiple formats.
-                                gr.Where(f => f.EndsWith(_jsonFileSearchPattern)).First());
+                                gr.Where(f => f.EndsWith(_audioFileExtension)), // # TODO: Support multiple formats.
+                                gr.Where(f => f.EndsWith(_jsonFileExtension)).First());
                         }).ToList();
         }
 
@@ -322,6 +330,8 @@ internal static class Tagger
             printer.Error($"Error writing image to the audio file: {ex.Message}");
             return;
         }
+
+        printer.Print("Image written to file OK.");
     }
 
     /// <summary>
