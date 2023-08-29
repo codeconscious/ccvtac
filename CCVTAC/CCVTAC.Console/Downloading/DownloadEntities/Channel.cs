@@ -9,7 +9,7 @@ public sealed class Channel : IDownloadEntity
     public static string UrlBase => "https://"; // Differs because this regex will match entire URLs.
 
     public string ResourceId { get; init; }
-    public string FullResourceId => UrlBase + ResourceId;
+    public string FullResourceUrl => UrlBase + ResourceId;
 
     public Channel(string resourceId)
     {

@@ -40,7 +40,7 @@ internal static class Tagger
 
         foreach (var taggingSet in taggingSets)
         {
-            printer.Print($"{taggingSet.AudioFilePaths.Count()} audio files with resource ID {taggingSet.ResourceId}");
+            printer.Print($"{taggingSet.AudioFilePaths.Count()} audio file(s) with resource ID \"{taggingSet.ResourceId}\"");
 
             string json;
             try

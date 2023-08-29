@@ -23,7 +23,7 @@ public static class Downloader
         var downloadToolSettings = new ExternalUtilties.ExternalToolSettings(
             "video download and audio extraction",
             "yt-dlp",
-            GenerateDownloadArgs(settings, downloadEntity.Type, url),
+            GenerateDownloadArgs(settings, downloadEntity.Type, downloadEntity.FullResourceUrl),
             settings.WorkingDirectory!,
             printer
         );

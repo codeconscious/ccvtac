@@ -9,7 +9,7 @@ public sealed class Playlist : IDownloadEntity
     public static string UrlBase => "https://www.youtube.com/playlist?list=";
 
     public string ResourceId { get; init; }
-    public string FullResourceId => UrlBase + ResourceId;
+    public string FullResourceUrl => UrlBase + ResourceId;
 
     public Playlist(string resourceId)
     {

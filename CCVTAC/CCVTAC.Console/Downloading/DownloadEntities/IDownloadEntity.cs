@@ -9,7 +9,7 @@ public interface IDownloadEntity
     public static string UrlBase { get; } = string.Empty;
     public string ResourceId { get; }
 
-    public string FullResourceId => UrlBase + ResourceId;
+    public string FullResourceUrl => UrlBase + ResourceId;
 
     public static bool IsMatch(string input) =>
         input is not null && Regex.IsMatch(input);
