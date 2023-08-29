@@ -37,4 +37,10 @@ public sealed class UserSettings
     /// </summary>
     [JsonPropertyName("audioFormat")]
     public string? AudioFormat { get; init; } = "m4a";
+
+    /// <summary>
+    /// How many seconds the program should sleep between multiple downloads.
+    /// </summary>
+    [JsonPropertyName("sleepBetweenDownloadsSeconds")]
+    public ushort SleepBetweenDownloadsSeconds { get; init; } = 3;
 }

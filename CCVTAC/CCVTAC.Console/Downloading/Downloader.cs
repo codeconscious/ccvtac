@@ -1,4 +1,3 @@
-using System.IO;
 using CCVTAC.Console.Downloading.DownloadEntities;
 using CCVTAC.Console.Settings;
 
@@ -37,7 +36,14 @@ public static class Downloader
         return Result.Ok($"Downloading done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
     }
 
-    private static string GenerateDownloadArgs(UserSettings settings, string? downloadType, params string[]? additionalArgs)
+    /// <summary>
+    /// Generate the argument string from the download tool.
+    /// </summary>
+    /// <returns>A string of arguments that can be passed directly to the download tool.</returns>
+    private static string GenerateDownloadArgs(
+        UserSettings settings,
+        string? downloadType,
+        params string[]? additionalArgs)
     {
         var args = new List<string>() {
             $"--extract-audio -f {settings.AudioFormat}",
@@ -49,7 +55,7 @@ public static class Downloader
             args.Add("--split-chapters");
 
         if (downloadType is not null && downloadType.ToLowerInvariant() != "video")
-            args.Add("--sleep-interval 3"); // TODO: Make a setting.
+            args.Add($"--sleep-interval {settings.SleepBetweenDownloadsSeconds}");
 
         return string.Join(" ", args.Concat(additionalArgs ?? Enumerable.Empty<string>()));
     }
