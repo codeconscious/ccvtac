@@ -18,12 +18,12 @@ public static class Downloader
                                ?? "An unknown error occurred parsing the resource type.");
         }
         var downloadEntity = downloadEntityResult.Value;
-        printer.Print($"Processing {downloadEntity.GetType().Name.ToLowerInvariant()} URL...");
+        printer.Print($"Processing {downloadEntity.Type.ToLowerInvariant()} URL...");
 
         var downloadToolSettings = new ExternalUtilties.ExternalToolSettings(
             "video download and audio extraction",
             "yt-dlp",
-            GenerateDownloadArgs(settings, url),
+            GenerateDownloadArgs(settings, downloadEntity.Type, url),
             settings.WorkingDirectory!,
             printer
         );
@@ -37,7 +37,7 @@ public static class Downloader
         return Result.Ok($"Downloading done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
     }
 
-    private static string GenerateDownloadArgs(UserSettings settings, params string[]? additionalArgs)
+    private static string GenerateDownloadArgs(UserSettings settings, string? downloadType, params string[]? additionalArgs)
     {
         var args = new List<string>() {
             $"--extract-audio -f {settings.AudioFormat}",
@@ -47,6 +47,9 @@ public static class Downloader
 
         if (settings.SplitChapters)
             args.Add("--split-chapters");
+
+        if (downloadType is not null && downloadType.ToLowerInvariant() != "video")
+            args.Add("--sleep-interval 3"); // TODO: Make a setting.
 
         return string.Join(" ", args.Concat(additionalArgs ?? Enumerable.Empty<string>()));
     }

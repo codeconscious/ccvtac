@@ -4,7 +4,7 @@ namespace CCVTAC.Console.Downloading.DownloadEntities;
 
 public sealed class Channel : IDownloadEntity
 {
-    public static string Name => nameof(Channel);
+    public string Type => nameof(Channel);
     public static Regex Regex => new(@"(?:www\.)?youtube\.com/(?:c/|channel/|@|user/)[\w\-]+");
     public static string UrlBase => "https://"; // Differs because this regex will match entire URLs.
 

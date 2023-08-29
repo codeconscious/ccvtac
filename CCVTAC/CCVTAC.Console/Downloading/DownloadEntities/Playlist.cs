@@ -4,7 +4,7 @@ namespace CCVTAC.Console.Downloading.DownloadEntities;
 
 public sealed class Playlist : IDownloadEntity
 {
-    public static string Name => nameof(Playlist);
+    public string Type => nameof(Playlist);
     public static Regex Regex => new(@"(?<=list=)[\w\-]+");
     public static string UrlBase => "https://www.youtube.com/playlist?list=";
 
