@@ -17,7 +17,7 @@ public static class Downloader
                                ?? "An unknown error occurred parsing the resource type.");
         }
         var downloadEntity = downloadEntityResult.Value;
-        printer.Print($"Processing {downloadEntity.Type.ToLowerInvariant()} URL...");
+        printer.Print($"Processing {downloadEntity.Type} URL...");
 
         var downloadToolSettings = new ExternalUtilties.ExternalToolSettings(
             "video download and audio extraction",
@@ -42,7 +42,7 @@ public static class Downloader
     /// <returns>A string of arguments that can be passed directly to the download tool.</returns>
     private static string GenerateDownloadArgs(
         UserSettings settings,
-        string? downloadType,
+        DownloadType downloadType,
         params string[]? additionalArgs)
     {
         var args = new List<string>() {
@@ -54,7 +54,7 @@ public static class Downloader
         if (settings.SplitChapters)
             args.Add("--split-chapters");
 
-        if (downloadType is not null && downloadType.ToLowerInvariant() != "video")
+        if (downloadType is not DownloadType.Video)
             args.Add($"--sleep-interval {settings.SleepBetweenDownloadsSeconds}");
 
         return string.Join(" ", args.Concat(additionalArgs ?? Enumerable.Empty<string>()));
