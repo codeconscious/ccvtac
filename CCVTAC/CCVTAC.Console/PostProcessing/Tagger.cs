@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
@@ -14,100 +13,123 @@ internal static class Tagger
         var stopwatch = new System.Diagnostics.Stopwatch();
         stopwatch.Start();
 
+        var taggingSetsResult = GetTaggingSets(workingDirectory);
         IReadOnlyList<TaggingSet> taggingSets;
+        if (taggingSetsResult.IsSuccess)
+            taggingSets = taggingSetsResult.Value;
+        else
+            return Result.Fail("No tagging sets were generated, so tagging cannot be done.");
+
+        foreach (var taggingSet in taggingSets)
+        {
+            ProcessSingleTaggingSet(taggingSet, printer);
+        }
+
+        return Result.Ok($"Tagging done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
+    }
+
+    private static Result<List<TaggingSet>> GetTaggingSets(string workingDirectory)
+    {
         try
         {
             var allFiles = Directory.GetFiles(workingDirectory);
-            taggingSets = TaggingSet.CreateTaggingSets(allFiles);
+            var taggingSets = TaggingSet.CreateTaggingSets(allFiles);
+            return taggingSets is not null && taggingSets.Any()
+                ? Result.Ok(taggingSets)
+                : Result.Fail("No tagging sets were created.");
         }
         catch (Exception ex)
         {
             return Result.Fail($"Error reading working directory files: {ex.Message}");
         }
+    }
 
-        // if (!taggingSets.Any()) // Debugging use only
-        // {
-        //     var allFiles = Directory.GetFiles(workingDirectory);
-        //     printer.Print("Current working files:");
-        //     allFiles.ToList().ForEach(f => printer.Print($"- {f}"));
+    static void ProcessSingleTaggingSet(TaggingSet taggingSet, Printer printer)
+    {
+        printer.Print($"{taggingSet.AudioFilePaths.Count()} audio file(s) with resource ID \"{taggingSet.ResourceId}\"");
 
-        //     return Result.Fail($"No tagging sets were created! Aborting after {stopwatch.ElapsedMilliseconds:#,##0}ms");
-        // }
-
-        foreach (var taggingSet in taggingSets)
+        var parsedJsonResult = GetParsedJson(taggingSet);
+        YouTubeJson.Root parsedJson;
+        if (parsedJsonResult.IsFailed)
         {
-            printer.Print($"{taggingSet.AudioFilePaths.Count()} audio file(s) with resource ID \"{taggingSet.ResourceId}\"");
+            printer.Errors(parsedJsonResult);
+            return;
+        }
+        parsedJson = parsedJsonResult.Value;
 
-            string json;
-            try
+        DeleteSourceFile(taggingSet, printer);
+
+        foreach (var audioFilePath in taggingSet.AudioFilePaths)
+        {
+            TagSingleFile(parsedJson, audioFilePath, taggingSet.ImageFilePath, printer);
+        }
+    }
+
+    static void TagSingleFile(YouTubeJson.Root parsedJson, string audioFilePath, string imageFilePath, Printer printer)
+    {
+        try
+        {
+            var audioFileName = Path.GetFileName(audioFilePath);
+            printer.Print($"Current audio file: \"{audioFileName}\"");
+
+            using var taggedFile = TagLib.File.Create(audioFilePath);
+            taggedFile.Tag.Title = DetectTitle(parsedJson, printer, parsedJson.title);
+            var maybeArtist = DetectArtist(parsedJson, printer);
+            if (maybeArtist is not null)
             {
-                json = File.ReadAllText(taggingSet.JsonFilePath);
+                taggedFile.Tag.Performers = new[] { maybeArtist };
             }
-            catch (Exception ex)
+            var maybeAlbum = DetectAlbum(parsedJson, printer);
+            if (maybeAlbum is not null)
             {
-                printer.Error($"Error reading JSON file \"{taggingSet.JsonFilePath}\": {ex.Message}.");
-                continue;
+                taggedFile.Tag.Album = maybeAlbum;
             }
-
-            YouTubeJson.Root? parsedJson;
-            try
+            var maybeYear = DetectReleaseYear(parsedJson, printer);
+            if (maybeYear is not null)
             {
-                parsedJson = JsonSerializer.Deserialize<YouTubeJson.Root>(json);
-
-                if (parsedJson is null)
-                {
-                    printer.Error($"The JSON from file \"{taggingSet.JsonFilePath}\" was unexpectedly null.");
-                    continue;
-                }
+                taggedFile.Tag.Year = (uint) maybeYear;
             }
-            catch (JsonException ex)
-            {
-                printer.Error($"Error deserializing JSON from file \"{json}\": {ex.Message}");
-                continue;
-            }
+            taggedFile.Tag.Comment = parsedJson.GenerateComment();
 
-            DeleteSourceFile(taggingSet, printer);
+            WriteImage(taggedFile, imageFilePath, printer);
 
-            foreach (var audioFilePath in taggingSet.AudioFilePaths)
-            {
-                try
-                {
-                    var audioFileName = Path.GetFileName(audioFilePath);
-                    printer.Print($"Current audio file: \"{audioFileName}\"");
+            taggedFile.Save();
+            printer.Print($"Wrote tags to \"{audioFileName}\".");
+        }
+        catch (Exception ex)
+        {
+            printer.Error($"Error tagging file: {ex.Message}");
+        }
+    }
 
-                    using var taggedFile = TagLib.File.Create(audioFilePath);
-                    taggedFile.Tag.Title = DetectTitle(parsedJson, printer, parsedJson.title);
-                    var maybeArtist = DetectArtist(parsedJson, printer);
-                    if (maybeArtist is not null)
-                    {
-                        taggedFile.Tag.Performers = new[] { maybeArtist };
-                    }
-                    var maybeAlbum = DetectAlbum(parsedJson, printer);
-                    if (maybeAlbum is not null)
-                    {
-                        taggedFile.Tag.Album = maybeAlbum;
-                    }
-                    var maybeYear = DetectReleaseYear(parsedJson, printer);
-                    if (maybeYear is not null)
-                    {
-                        taggedFile.Tag.Year = (uint) maybeYear;
-                    }
-                    taggedFile.Tag.Comment = parsedJson.GenerateComment();
-
-                    WriteImage(taggedFile, taggingSet.ImageFilePath, printer);
-
-                    taggedFile.Save();
-                    printer.Print($"Wrote tags to \"{audioFileName}\".");
-                }
-                catch (Exception ex)
-                {
-                    printer.Error($"Error tagging file: {ex.Message}");
-                    continue;
-                }
-            }
+    static Result<YouTubeJson.Root> GetParsedJson(TaggingSet taggingSet)
+    {
+        string json;
+        try
+        {
+            json = File.ReadAllText(taggingSet.JsonFilePath);
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail($"Error reading JSON file \"{taggingSet.JsonFilePath}\": {ex.Message}.");
         }
 
-        return Result.Ok($"Tagging done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
+        YouTubeJson.Root? parsedJson;
+        try
+        {
+            parsedJson = JsonSerializer.Deserialize<YouTubeJson.Root>(json);
+
+            if (parsedJson is null)
+            {
+                return Result.Fail($"The JSON from file \"{taggingSet.JsonFilePath}\" was unexpectedly null.");
+            }
+
+            return Result.Ok(parsedJson);
+        }
+        catch (JsonException ex)
+        {
+            return Result.Fail($"Error deserializing JSON from file \"{json}\": {ex.Message}");
+        }
     }
 
     static string? DetectTitle(YouTubeJson.Root data, Printer printer, string? defaultName = null)
