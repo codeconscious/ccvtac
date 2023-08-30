@@ -48,9 +48,9 @@ internal static class Renamer
             "%<1>s - %<2>s",
             "Reformat 'ARTIST [ TITLE ]'"),
         new RenamePattern(
-            new Regex(@"^(.+)\s{1,}-\s{1,}'(.+)'"),
+            new Regex(@"^(.+)\s{1,}-\s{1,}['＂](.+)['＂]"),
             "%<1>s - %<2>s",
-            "Reformat 'ARTIST - \'TITLE\' ]'"),
+            """Reformat 'ARTIST - 'TITLE' ]', etc."""),
         new RenamePattern(
             new Regex(@"^(.+?)(?: - [｢「『【])(.+)(?:[」｣』】]).*(?=（Full Ver.）)"),
             "%<1>s - %<2>s",
