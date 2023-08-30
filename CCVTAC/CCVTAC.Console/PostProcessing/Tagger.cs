@@ -87,8 +87,13 @@ internal static class Tagger
                     {
                         taggedFile.Tag.Album = maybeAlbum;
                     }
-                    taggedFile.Tag.Year = DetectReleaseYear(parsedJson, printer);
+                    var maybeYear = DetectReleaseYear(parsedJson, printer);
+                    if (maybeYear is not null)
+                    {
+                        taggedFile.Tag.Year = (uint) maybeYear;
+                    }
                     taggedFile.Tag.Comment = parsedJson.GenerateComment();
+
                     WriteImage(taggedFile, taggingSet.ImageFilePath, printer);
 
                     taggedFile.Save();
@@ -206,7 +211,7 @@ internal static class Tagger
     /// Attempt to automatically detect a release year in the video metadata.
     /// If none is found, return a default value.
     /// </summary>
-    static uint DetectReleaseYear(YouTubeJson.Root data, Printer printer, ushort defaultYear = 0)
+    static ushort? DetectReleaseYear(YouTubeJson.Root data, Printer printer, ushort? defaultYear = null)
     {
         // TODO: Put this somewhere where it can be static or made a setting.
         List<(string Regex, string Text, string Source)> parsePatterns = new()
@@ -250,7 +255,7 @@ internal static class Tagger
 
         // TODO: TagLib# seems to only support back to 1904, but best to skip assignment altogether if no year was found.
         printer.Print($"No year could be parsed, so defaulting to {defaultYear}.");
-        return 0;
+        return defaultYear;
 
         /// <summary>
         /// Applies a regex pattern against text, returning the matched value
@@ -259,7 +264,7 @@ internal static class Tagger
         /// <param name="regexPattern"></param>
         /// <param name="text">Text that might contain a year.</param>
         /// <returns>A number representing a year or null.</returns>
-        static uint? ParseYear(string regexPattern, string text)
+        static ushort? ParseYear(string regexPattern, string text)
         {
             ArgumentNullException.ThrowIfNullOrEmpty(regexPattern);
 
@@ -268,7 +273,7 @@ internal static class Tagger
 
             if (match is null)
                 return null;
-            return uint.TryParse(match.Value, out var matchYear)
+            return ushort.TryParse(match.Value, out var matchYear)
                 ? matchYear
                 : null;
         };
