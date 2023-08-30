@@ -89,7 +89,7 @@ internal static class Tagger
                     }
                     taggedFile.Tag.Year = DetectReleaseYear(parsedJson, printer);
                     taggedFile.Tag.Comment = parsedJson.GenerateComment();
-                    WriteImage(taggedFile, taggingSet.ResourceId, workingDirectory, printer);
+                    WriteImage(taggedFile, taggingSet.ImageFilePath, printer);
 
                     taggedFile.Save();
                     printer.Print($"Wrote tags to \"{audioFileName}\"");
@@ -309,24 +309,18 @@ internal static class Tagger
     /// <param name="workingDirectory"></param>
     /// <param name="printer"></param> <summary>
     /// <remarks>Heavily inspired by https://stackoverflow.com/a/61264720/11767771.</remarks>
-    private static void WriteImage(TagLib.File taggedFile, string resourceId, string workingDirectory, Printer printer)
+    private static void WriteImage(TagLib.File taggedFile, string imageFilePath, Printer printer)
     {
-        string imageFile;
-        try
+        if (string.IsNullOrWhiteSpace(imageFilePath))
         {
-            imageFile = Directory.GetFiles(workingDirectory, $"*{resourceId}*.jpg").Single();
-        }
-        catch (Exception ex)
-        {
-            printer.Error($"Error finding image file in \"{workingDirectory}\": {ex.Message}");
-            printer.Print("Aborting image addition.");
+            printer.Error("No image file path was provided, so cannot add an image to the file.");
             return;
         }
 
         try
         {
             var pics = new TagLib.IPicture[1];
-            pics[0] = new TagLib.Picture(imageFile);
+            pics[0] = new TagLib.Picture(imageFilePath);
             taggedFile.Tag.Pictures = pics;
             printer.Print("Image written to file tags OK.");
         }
