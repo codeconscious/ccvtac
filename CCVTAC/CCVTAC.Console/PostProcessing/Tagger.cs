@@ -92,8 +92,9 @@ internal static class Tagger
                         taggedFile.Tag.Album = maybeAlbum;
                     }
                     taggedFile.Tag.Year = DetectReleaseYear(parsedJson, printer);
-                    taggedFile.Tag.Comment = GenerateComment(parsedJson);
+                    taggedFile.Tag.Comment = parsedJson.GenerateComment();
                     AddImage(taggedFile, taggingSet.ResourceId, workingDirectory, printer);
+
                     taggedFile.Save();
                     printer.Print($"Wrote tags to \"{audioFileName}\"");
                 }
@@ -116,8 +117,8 @@ internal static class Tagger
                         .Select(f => _videoResourceIdRegex.Match(f))
                         .Where(m => m.Success)
                         .Select(m => m.Captures.OfType<Match>().First())
-                        .GroupBy(m => m.Groups[1].Value,
-                                 m => m.Groups[0].Value)
+                        .GroupBy(m => m.Groups[1].Value, // Resource ID
+                                 m => m.Groups[0].Value) // Full filename
                         .Where(gr => gr.Count(f => f.EndsWith(_jsonFileExtension, StringComparison.OrdinalIgnoreCase)) == 1)
                         .Select(gr => {
                             return new TaggingSet(
@@ -127,31 +128,17 @@ internal static class Tagger
                         }).ToList();
         }
 
-        /// <summary>
-        /// Generate a comment using data parsed from the JSON file.
-        /// </summary>
-        /// <param name="data"></param>
-        /// <returns>The formatted comment.</returns>
-        static string GenerateComment(YouTubeJson.Root data)
-        {
-            StringBuilder sb = new();
-            sb.AppendLine("SOURCE DATA:");
-            sb.AppendLine($"• Downloaded: {DateTime.Now} using CCVTAC");
-            sb.AppendLine($"• Service: {data.extractor_key}");
-            sb.AppendLine($"• URL: {data.webpage_url}");
-            sb.AppendLine($"• Title: {data.fulltitle}");
-            sb.AppendLine($"• Uploader: {data.uploader} ({data.uploader_url})");
-            sb.AppendLine($"• Uploaded: {data.upload_date[4..6]}/{data.upload_date[6..8]}/{data.upload_date[0..4]}"); // "08/27/2023"
-            sb.AppendLine($"• Description: {data.description})");
-            return sb.ToString();
-        }
-
         static string? DetectTitle(YouTubeJson.Root data, Printer printer, string? defaultName = null)
         {
             // TODO: Put this somewhere where it can be static.
             List<(string Regex, int Group, string Text, string Source)> parsePatterns = new()
             {
-                (@"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D", 1, data.description, "description (Topic style)"),
+                (
+                    @"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D",
+                    1,
+                    data.description,
+                    "description (Topic style)"
+                ),
             };
 
             foreach (var pattern in parsePatterns)
@@ -175,7 +162,12 @@ internal static class Tagger
             // TODO: Put this somewhere where it can be static.
             List<(string Regex, int Group, string Text, string Source)> parsePatterns = new()
             {
-                (@"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D", 2, data.description, "description (Topic style)"),
+                (
+                    @"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D",
+                    2,
+                    data.description,
+                    "description (Topic style)"
+                ),
             };
 
             foreach (var pattern in parsePatterns)
@@ -195,12 +187,27 @@ internal static class Tagger
 
         static string? DetectAlbum(YouTubeJson.Root data, Printer printer, string? defaultName = null)
         {
-            // TODO: Put this somewhere where it can be static.
+            // TODO: Put this somewhere where it can be static or else a setting.
             List<(string Regex, int Group, string Text, string Source)> parsePatterns = new()
             {
-                (@"(?<=[Aa]lbum: ).+", 0, data.description, "description"),
-                (@"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D", 3, data.description, "description (Topic style)"),
-                ("""(?<='s ['"]).+(?=['"] album)""", 0, data.description, "description"),
+                (
+                    @"(?<=[Aa]lbum: ).+",
+                    0,
+                    data.description,
+                    "description"
+                ),
+                (
+                    @"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D",
+                    3,
+                    data.description,
+                    "description (Topic style)"
+                ),
+                (
+                    """(?<='s ['"]).+(?=['"] album)""",
+                    0,
+                    data.description,
+                    "description"
+                ),
             };
 
             foreach (var pattern in parsePatterns)
@@ -227,10 +234,26 @@ internal static class Tagger
             // TODO: Put this somewhere where it can be static.
             List<(string Regex, string Text, string Source)> parsePatterns = new()
             {
-                (@"(?<=[(（\[［【])[12]\d{3}(?=[)）\]］】])", data.title, "title"),
-                (@"(?<=℗ )[12]\d{3}(?=\s)", data.description, "description's \"℗\" symbol"),
-                (@"(?<=[Rr]eleased [io]n: )[12]\d{3}", data.description, "description 'released on' date"),
-                (@"[12]\d{3}(?=年(?:\d{1,2}月\d{1,2}日)?リリース)", data.description, "description's リリース date"),
+                (
+                    @"(?<=[(（\[［【])[12]\d{3}(?=[)）\]］】])",
+                    data.title,
+                    "title"
+                ),
+                (
+                    @"(?<=℗ )[12]\d{3}(?=\s)",
+                    data.description,
+                    "description's \"℗\" symbol"
+                ),
+                (
+                    @"(?<=[Rr]eleased [io]n: )[12]\d{3}",
+                    data.description,
+                    "description 'released on' date"
+                ),
+                (
+                    @"[12]\d{3}(?=年(?:\d{1,2}月\d{1,2}日)?リリース)",
+                    data.description,
+                    "description's リリース date"
+                ),
             };
 
             foreach (var pattern in parsePatterns)
@@ -243,6 +266,7 @@ internal static class Tagger
                 return result.Value;
             }
 
+            // TODO: TagLib# seems to only support back to 1904, but best to skip assignment if none was found.
             printer.Print($"No year could be parsed, so defaulting to {defaultYear}.");
             return 0;
 
@@ -298,7 +322,7 @@ internal static class Tagger
     }
 
     /// <summary>
-    ///
+    /// Write the video thumbnail to the file tags.
     /// </summary>
     /// <param name="taggedFile"></param>
     /// <param name="workingDirectory"></param>
@@ -332,48 +356,5 @@ internal static class Tagger
         }
 
         printer.Print("Image written to file OK.");
-    }
-
-    /// <summary>
-    /// Subversions of ID3 version 2 (such as 2.3 or 2.4).
-    /// </summary>
-    public enum Id3v2Version : byte
-    {
-        /// <summary>
-        /// Rarely, if ever, used. Not recommended.
-        /// </summary>
-        TwoPoint2 = 2,
-
-        /// <summary>
-        /// The most widely used and supported version. Highly recommended.
-        /// </summary>
-        TwoPoint3 = 3,
-
-        /// <summary>
-        /// The newest version, but is not often used or supported. Not particularly recommended.
-        /// </summary>
-        TwoPoint4 = 4,
-    }
-
-    /// <summary>
-    /// Contains all of the data necessary for tagging files.
-    /// </summary>
-    public sealed class TaggingSet
-    {
-        public string ResourceId { get; init; }
-        public List<string> AudioFilePaths { get; init; }
-        public string JsonFilePath { get; init; }
-
-        public TaggingSet(string resourceId, IEnumerable<string> audioFilePaths, string jsonFilePath)
-        {
-            if (string.IsNullOrWhiteSpace(resourceId))
-                throw new ArgumentException("The resource ID must be provided");
-            if (string.IsNullOrWhiteSpace(jsonFilePath))
-                throw new ArgumentException("The JSON file path must be provided");
-
-            ResourceId = resourceId.Trim();
-            AudioFilePaths = audioFilePaths.ToList();
-            JsonFilePath = jsonFilePath.Trim();
-        }
     }
 }
