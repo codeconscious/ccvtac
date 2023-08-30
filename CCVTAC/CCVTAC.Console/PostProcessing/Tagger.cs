@@ -92,7 +92,7 @@ internal static class Tagger
                     WriteImage(taggedFile, taggingSet.ImageFilePath, printer);
 
                     taggedFile.Save();
-                    printer.Print($"Wrote tags to \"{audioFileName}\"");
+                    printer.Print($"Wrote tags to \"{audioFileName}\".");
                 }
                 catch (Exception ex)
                 {
@@ -103,175 +103,175 @@ internal static class Tagger
         }
 
         return Result.Ok($"Tagging done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
+    }
 
-        static string? DetectTitle(YouTubeJson.Root data, Printer printer, string? defaultName = null)
+    static string? DetectTitle(YouTubeJson.Root data, Printer printer, string? defaultName = null)
+    {
+        // TODO: Put this somewhere where it can be static.
+        List<(string Regex, int Group, string Text, string Source)> parsePatterns = new()
         {
-            // TODO: Put this somewhere where it can be static.
-            List<(string Regex, int Group, string Text, string Source)> parsePatterns = new()
-            {
-                (
-                    @"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D",
-                    1,
-                    data.description,
-                    "description (Topic style)"
-                ),
-            };
+            (
+                @"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D",
+                1,
+                data.description,
+                "description (Topic style)"
+            ),
+        };
 
-            foreach (var pattern in parsePatterns)
-            {
-                var regex = new Regex(pattern.Regex);
-                var match = regex.Match(pattern.Text);
+        foreach (var pattern in parsePatterns)
+        {
+            var regex = new Regex(pattern.Regex);
+            var match = regex.Match(pattern.Text);
 
-                if (match is not { Success: true })
-                    continue;
+            if (!match.Success)
+                continue;
 
-                printer.Print($"Writing title \"{match.Groups[pattern.Group].Value}\" (matched via {pattern.Source})");
-                return match.Groups[pattern.Group].Value.Trim();
-            }
-
-            printer.Print($"Writing title \"{defaultName}\" (taken from video title)");
-            return defaultName;
+            printer.Print($"Writing title \"{match.Groups[pattern.Group].Value}\" (matched via {pattern.Source})");
+            return match.Groups[pattern.Group].Value.Trim();
         }
 
-        static string? DetectArtist(YouTubeJson.Root data, Printer printer, string? defaultName = null)
+        printer.Print($"Writing title \"{defaultName}\" (taken from video title)");
+        return defaultName;
+    }
+
+    static string? DetectArtist(YouTubeJson.Root data, Printer printer, string? defaultName = null)
+    {
+        // TODO: Put this somewhere where it can be static.
+        List<(string Regex, int Group, string Text, string Source)> parsePatterns = new()
         {
-            // TODO: Put this somewhere where it can be static.
-            List<(string Regex, int Group, string Text, string Source)> parsePatterns = new()
-            {
-                (
-                    @"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D",
-                    2,
-                    data.description,
-                    "description (Topic style)"
-                ),
-            };
+            (
+                @"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D",
+                2,
+                data.description,
+                "description (Topic style)"
+            ),
+        };
 
-            foreach (var pattern in parsePatterns)
-            {
-                var regex = new Regex(pattern.Regex);
-                var match = regex.Match(pattern.Text);
+        foreach (var pattern in parsePatterns)
+        {
+            var regex = new Regex(pattern.Regex);
+            var match = regex.Match(pattern.Text);
 
-                if (match is not { Success: true })
-                    continue;
+            if (!match.Success)
+                continue;
 
-                printer.Print($"Writing artist \"{match.Groups[pattern.Group].Value}\" (matched via {pattern.Source})");
-                return match.Groups[pattern.Group].Value.Trim();
-            }
-
-            return defaultName;
+            printer.Print($"Writing artist \"{match.Groups[pattern.Group].Value}\" (matched via {pattern.Source})");
+            return match.Groups[pattern.Group].Value.Trim();
         }
 
-        static string? DetectAlbum(YouTubeJson.Root data, Printer printer, string? defaultName = null)
+        return defaultName;
+    }
+
+    static string? DetectAlbum(YouTubeJson.Root data, Printer printer, string? defaultName = null)
+    {
+        // TODO: Put this somewhere where it can be static or else a setting.
+        List<(string Regex, int Group, string Text, string Source)> parsePatterns = new()
         {
-            // TODO: Put this somewhere where it can be static or else a setting.
-            List<(string Regex, int Group, string Text, string Source)> parsePatterns = new()
-            {
-                (
-                    @"(?<=[Aa]lbum: ).+",
-                    0,
-                    data.description,
-                    "description"
-                ),
-                (
-                    @"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D",
-                    3,
-                    data.description,
-                    "description (Topic style)"
-                ),
-                (
-                    """(?<='s ['"]).+(?=['"] album)""",
-                    0,
-                    data.description,
-                    "description"
-                ),
-            };
+            (
+                @"(?<=[Aa]lbum: ).+",
+                0,
+                data.description,
+                "description"
+            ),
+            (
+                @"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D",
+                3,
+                data.description,
+                "description (Topic style)"
+            ),
+            (
+                """(?<='s ['"]).+(?=['"] album)""",
+                0,
+                data.description,
+                "description"
+            ),
+        };
 
-            foreach (var pattern in parsePatterns)
-            {
-                var regex = new Regex(pattern.Regex);
-                var match = regex.Match(pattern.Text);
+        foreach (var pattern in parsePatterns)
+        {
+            var regex = new Regex(pattern.Regex);
+            var match = regex.Match(pattern.Text);
 
-                if (match is not { Success: true })
-                    continue;
+            if (!match.Success)
+                continue;
 
-                printer.Print($"Writing album \"{match.Groups[pattern.Group].Value}\" (matched via {pattern.Source})");
-                return match.Groups[pattern.Group].Value.Trim();
-            }
-
-            return defaultName;
+            printer.Print($"Writing album \"{match.Groups[pattern.Group].Value}\" (matched via {pattern.Source})");
+            return match.Groups[pattern.Group].Value.Trim();
         }
+
+        return defaultName;
+    }
+
+    /// <summary>
+    /// Attempt to automatically detect a release year in the video metadata.
+    /// If none is found, return a default value.
+    /// </summary>
+    static uint DetectReleaseYear(YouTubeJson.Root data, Printer printer, ushort defaultYear = 0)
+    {
+        // TODO: Put this somewhere where it can be static or made a setting.
+        List<(string Regex, string Text, string Source)> parsePatterns = new()
+        {
+            (
+                @"(?<=[(（\[［【])[12]\d{3}(?=[)）\]］】])",
+                data.title,
+                "title"
+            ),
+            (
+                @"(?<=℗ )[12]\d{3}(?=\s)",
+                data.description,
+                "description's \"℗\" symbol"
+            ),
+            (
+                @"(?<=[Rr]eleased [io]n: )[12]\d{3}",
+                data.description,
+                "description 'released on' date"
+            ),
+            (
+                @"[12]\d{3}(?=年(?:\d{1,2}月\d{1,2}日)?リリース)",
+                data.description,
+                "description's リリース-style date"
+            ),
+            (
+                @"[12]\d{3}年(?=\d{1,2}月\d{1,2}日\s?[Rr]elease)",
+                data.description,
+                "description's 年月日-style release date"
+            ),
+        };
+
+        foreach (var pattern in parsePatterns)
+        {
+            var result = ParseYear(pattern.Regex, pattern.Text);
+            if (result is null)
+                continue;
+
+            printer.Print($"Writing year {result.Value} (matched via {pattern.Source})");
+            return result.Value;
+        }
+
+        // TODO: TagLib# seems to only support back to 1904, but best to skip assignment altogether if no year was found.
+        printer.Print($"No year could be parsed, so defaulting to {defaultYear}.");
+        return 0;
 
         /// <summary>
-        /// Attempt to automatically detect a release year in the video metadata.
-        /// If none is found, return a default value.
+        /// Applies a regex pattern against text, returning the matched value
+        /// or else null if there was no successful match.
         /// </summary>
-        static uint DetectReleaseYear(YouTubeJson.Root data, Printer printer, ushort defaultYear = 0)
+        /// <param name="regexPattern"></param>
+        /// <param name="text">Text that might contain a year.</param>
+        /// <returns>A number representing a year or null.</returns>
+        static uint? ParseYear(string regexPattern, string text)
         {
-            // TODO: Put this somewhere where it can be static or made a setting.
-            List<(string Regex, string Text, string Source)> parsePatterns = new()
-            {
-                (
-                    @"(?<=[(（\[［【])[12]\d{3}(?=[)）\]］】])",
-                    data.title,
-                    "title"
-                ),
-                (
-                    @"(?<=℗ )[12]\d{3}(?=\s)",
-                    data.description,
-                    "description's \"℗\" symbol"
-                ),
-                (
-                    @"(?<=[Rr]eleased [io]n: )[12]\d{3}",
-                    data.description,
-                    "description 'released on' date"
-                ),
-                (
-                    @"[12]\d{3}(?=年(?:\d{1,2}月\d{1,2}日)?リリース)",
-                    data.description,
-                    "description's リリース-style date"
-                ),
-                (
-                    @"[12]\d{3}年(?=\d{1,2}月\d{1,2}日\s?[Rr]elease)",
-                    data.description,
-                    "description's 年月日-style release date"
-                ),
-            };
+            ArgumentNullException.ThrowIfNullOrEmpty(regexPattern);
 
-            foreach (var pattern in parsePatterns)
-            {
-                var result = ParseYear(pattern.Regex, pattern.Text);
-                if (result is null)
-                    continue;
+            var regex = new Regex(regexPattern);
+            var match = regex.Match(text);
 
-                printer.Print($"Writing year {result.Value} (matched via {pattern.Source})");
-                return result.Value;
-            }
-
-            // TODO: TagLib# seems to only support back to 1904, but best to skip assignment if none was found.
-            printer.Print($"No year could be parsed, so defaulting to {defaultYear}.");
-            return 0;
-
-            /// <summary>
-            /// Applies a regex pattern against text, returning the matched value
-            /// or else null if there was no successful match.
-            /// </summary>
-            /// <param name="regexPattern"></param>
-            /// <param name="text">Text that might contain a year.</param>
-            /// <returns>A number representing a year or null.</returns>
-            static uint? ParseYear(string regexPattern, string text)
-            {
-                ArgumentNullException.ThrowIfNullOrEmpty(regexPattern);
-
-                var regex = new Regex(regexPattern);
-                var match = regex.Match(text);
-
-                if (match is null)
-                    return null;
-                return uint.TryParse(match.Value, out var matchYear)
-                    ? matchYear
-                    : null;
-            };
-        }
+            if (match is null)
+                return null;
+            return uint.TryParse(match.Value, out var matchYear)
+                ? matchYear
+                : null;
+        };
     }
 
     /// <summary>
