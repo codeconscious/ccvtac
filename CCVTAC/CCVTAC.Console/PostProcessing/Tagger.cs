@@ -7,10 +7,6 @@ namespace CCVTAC.Console.PostProcessing;
 
 internal static class Tagger
 {
-    private const string _jsonFileExtension = ".json";
-    private const string _audioFileExtension = ".m4a"; // TODO: Need to handle more
-    private static readonly Regex _videoResourceIdRegex = new(@".+\[([\w_\-]{11})\](?:.*)?\.(\w+)");
-
     internal static Result<string> Run(string workingDirectory, Printer printer)
     {
         printer.Print("Adding file tags...");
@@ -22,11 +18,11 @@ internal static class Tagger
         try
         {
             var allFiles = Directory.GetFiles(workingDirectory);
-            taggingSets = CreateTagSets(allFiles, workingDirectory);
+            taggingSets = TaggingSet.CreateTaggingSets(allFiles);
         }
         catch (Exception ex)
         {
-            return Result.Fail($"Error reading {_audioFileExtension} files: " + ex.Message);
+            return Result.Fail($"Error reading working directory files: {ex.Message}");
         }
 
         // if (!taggingSets.Any()) // Debugging use only
@@ -93,7 +89,7 @@ internal static class Tagger
                     }
                     taggedFile.Tag.Year = DetectReleaseYear(parsedJson, printer);
                     taggedFile.Tag.Comment = parsedJson.GenerateComment();
-                    AddImage(taggedFile, taggingSet.ResourceId, workingDirectory, printer);
+                    WriteImage(taggedFile, taggingSet.ResourceId, workingDirectory, printer);
 
                     taggedFile.Save();
                     printer.Print($"Wrote tags to \"{audioFileName}\"");
@@ -107,26 +103,6 @@ internal static class Tagger
         }
 
         return Result.Ok($"Tagging done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
-
-        static List<TaggingSet> CreateTagSets(IEnumerable<string> filePaths, string workingDirectory)
-        {
-            if (!filePaths.Any())
-                return new List<TaggingSet>();
-
-            return filePaths
-                        .Select(f => _videoResourceIdRegex.Match(f))
-                        .Where(m => m.Success)
-                        .Select(m => m.Captures.OfType<Match>().First())
-                        .GroupBy(m => m.Groups[1].Value, // Resource ID
-                                 m => m.Groups[0].Value) // Full filename
-                        .Where(gr => gr.Count(f => f.EndsWith(_jsonFileExtension, StringComparison.OrdinalIgnoreCase)) == 1)
-                        .Select(gr => {
-                            return new TaggingSet(
-                                gr.Key,
-                                gr.Where(f => f.EndsWith(_audioFileExtension)), // # TODO: Support multiple formats.
-                                gr.Where(f => f.EndsWith(_jsonFileExtension)).First());
-                        }).ToList();
-        }
 
         static string? DetectTitle(YouTubeJson.Root data, Printer printer, string? defaultName = null)
         {
@@ -231,7 +207,7 @@ internal static class Tagger
         /// </summary>
         static uint DetectReleaseYear(YouTubeJson.Root data, Printer printer, ushort defaultYear = 0)
         {
-            // TODO: Put this somewhere where it can be static.
+            // TODO: Put this somewhere where it can be static or made a setting.
             List<(string Regex, string Text, string Source)> parsePatterns = new()
             {
                 (
@@ -328,7 +304,7 @@ internal static class Tagger
     /// <param name="workingDirectory"></param>
     /// <param name="printer"></param> <summary>
     /// <remarks>Heavily inspired by https://stackoverflow.com/a/61264720/11767771.</remarks>
-    private static void AddImage(TagLib.File taggedFile, string resourceId, string workingDirectory, Printer printer)
+    private static void WriteImage(TagLib.File taggedFile, string resourceId, string workingDirectory, Printer printer)
     {
         string imageFile;
         try
@@ -354,7 +330,5 @@ internal static class Tagger
             printer.Error($"Error writing image to the audio file: {ex.Message}");
             return;
         }
-
-        printer.Print("Image written to file OK.");
     }
 }
