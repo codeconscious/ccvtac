@@ -228,7 +228,12 @@ internal static class Tagger
                 (
                     @"[12]\d{3}(?=年(?:\d{1,2}月\d{1,2}日)?リリース)",
                     data.description,
-                    "description's リリース date"
+                    "description's リリース-style date"
+                ),
+                (
+                    @"[12]\d{3}年(?=\d{1,2}月\d{1,2}日\s?[Rr]elease)",
+                    data.description,
+                    "description's 年月日-style release date"
                 ),
             };
 
