@@ -124,7 +124,7 @@ internal static class Tagger
                 return Result.Fail($"The JSON from file \"{taggingSet.JsonFilePath}\" was unexpectedly null.");
             }
 
-            return Result.Ok(parsedJson);
+            return Result.Ok(parsedJson.Value);
         }
         catch (JsonException ex)
         {
@@ -275,8 +275,7 @@ internal static class Tagger
             return result.Value;
         }
 
-        // TODO: TagLib# seems to only support back to 1904, but best to skip assignment altogether if no year was found.
-        printer.Print($"No year could be parsed, so defaulting to {defaultYear}.");
+        printer.Print($"No year could be parsed{(defaultYear is null ? "." : $", so defaulting to {defaultYear}.")}");
         return defaultYear;
 
         /// <summary>

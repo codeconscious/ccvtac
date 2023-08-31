@@ -2,9 +2,9 @@ using System.Text.Json.Serialization;
 
 namespace CCVTAC.Console.PostProcessing;
 
-public sealed class YouTubeJson
+public record struct YouTubeJson
 {
-    public sealed record Root(
+    public record struct Root(
         [property: JsonPropertyName("id")] string id,
         [property: JsonPropertyName("title")] string title,
         [property: JsonPropertyName("formats")] IReadOnlyList<Format> formats,
@@ -71,15 +71,15 @@ public sealed class YouTubeJson
         [property: JsonPropertyName("_version")] Version _version
     );
 
-    public sealed record AutomaticCaptions(
+    public record struct AutomaticCaptions(
 
     );
 
-    public sealed record DownloaderOptions(
+    public record struct DownloaderOptions(
         [property: JsonPropertyName("http_chunk_size")] int? http_chunk_size
     );
 
-    public sealed record Format(
+    public record struct Format(
         [property: JsonPropertyName("format_id")] string format_id,
         [property: JsonPropertyName("format_note")] string format_note,
         [property: JsonPropertyName("ext")] string ext,
@@ -117,29 +117,29 @@ public sealed class YouTubeJson
         [property: JsonPropertyName("filesize_approx")] int? filesize_approx
     );
 
-    public sealed record Fragment(
+    public record struct Fragment(
         [property: JsonPropertyName("url")] string url,
         [property: JsonPropertyName("duration")] double? duration
     );
 
-    public sealed record Heatmap(
+    public record struct Heatmap(
         [property: JsonPropertyName("start_time")] double? start_time,
         [property: JsonPropertyName("end_time")] double? end_time,
         [property: JsonPropertyName("value")] double? value
     );
 
-    public sealed record HttpHeaders(
+    public record struct HttpHeaders(
         [property: JsonPropertyName("User-Agent")] string UserAgent,
         [property: JsonPropertyName("Accept")] string Accept,
         [property: JsonPropertyName("Accept-Language")] string AcceptLanguage,
         [property: JsonPropertyName("Sec-Fetch-Mode")] string SecFetchMode
     );
 
-    public sealed record Subtitles(
-        // TODO: Populate.
+    public record struct Subtitles(
+        // TODO: Look into deleting.
     );
 
-    public sealed record Thumbnail(
+    public record struct Thumbnail(
         [property: JsonPropertyName("url")] string url,
         [property: JsonPropertyName("preference")] int? preference,
         [property: JsonPropertyName("id")] string id,
@@ -148,7 +148,7 @@ public sealed class YouTubeJson
         [property: JsonPropertyName("resolution")] string resolution
     );
 
-    public sealed record Version(
+    public record struct Version(
         [property: JsonPropertyName("version")] string version,
         [property: JsonPropertyName("release_git_head")] string release_git_head,
         [property: JsonPropertyName("repository")] string repository
