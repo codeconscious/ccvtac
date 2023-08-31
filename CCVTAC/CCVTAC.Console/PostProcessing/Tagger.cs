@@ -61,7 +61,11 @@ internal static class Tagger
         }
     }
 
-    static void TagSingleFile(YouTubeJson.Root parsedJson, string audioFilePath, string imageFilePath, Printer printer)
+    static void TagSingleFile(
+        YouTubeJson.Root parsedJson,
+        string audioFilePath,
+        string imageFilePath,
+        Printer printer)
     {
         try
         {
