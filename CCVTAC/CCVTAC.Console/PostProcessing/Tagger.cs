@@ -14,13 +14,10 @@ internal static class Tagger
         stopwatch.Start();
 
         var taggingSetsResult = GetTaggingSets(workingDirectory);
-        IReadOnlyList<TaggingSet> taggingSets;
-        if (taggingSetsResult.IsSuccess)
-            taggingSets = taggingSetsResult.Value;
-        else
+        if (taggingSetsResult.IsFailed)
             return Result.Fail("No tagging sets were generated, so tagging cannot be done.");
 
-        foreach (var taggingSet in taggingSets)
+        foreach (var taggingSet in taggingSetsResult.Value)
         {
             ProcessSingleTaggingSet(taggingSet, printer);
         }
@@ -28,12 +25,13 @@ internal static class Tagger
         return Result.Ok($"Tagging done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
     }
 
-    private static Result<List<TaggingSet>> GetTaggingSets(string workingDirectory)
+    private static Result<ImmutableList<TaggingSet>> GetTaggingSets(string workingDirectory)
     {
         try
         {
             var allFiles = Directory.GetFiles(workingDirectory);
             var taggingSets = TaggingSet.CreateTaggingSets(allFiles);
+
             return taggingSets is not null && taggingSets.Any()
                 ? Result.Ok(taggingSets)
                 : Result.Fail("No tagging sets were created.");
@@ -49,19 +47,17 @@ internal static class Tagger
         printer.Print($"{taggingSet.AudioFilePaths.Count()} audio file(s) with resource ID \"{taggingSet.ResourceId}\"");
 
         var parsedJsonResult = GetParsedJson(taggingSet);
-        YouTubeJson.Root parsedJson;
         if (parsedJsonResult.IsFailed)
         {
             printer.Errors(parsedJsonResult);
             return;
         }
-        parsedJson = parsedJsonResult.Value;
 
-        DeleteSourceFile(taggingSet, printer);
+        var confirmedTaggingSet = DeleteSourceFile(taggingSet, printer);
 
-        foreach (var audioFilePath in taggingSet.AudioFilePaths)
+        foreach (var audioFilePath in confirmedTaggingSet.AudioFilePaths)
         {
-            TagSingleFile(parsedJson, audioFilePath, taggingSet.ImageFilePath, printer);
+            TagSingleFile(parsedJsonResult.Value, audioFilePath, taggingSet.ImageFilePath, printer);
         }
     }
 
@@ -306,26 +302,27 @@ internal static class Tagger
     /// </summary>
     /// <param name="taggingSet"></param>
     /// <param name="printer"></param>
-    private static void DeleteSourceFile(TaggingSet taggingSet, Printer printer)
+    private static TaggingSet DeleteSourceFile(TaggingSet taggingSet, Printer printer)
     {
-        if (taggingSet.AudioFilePaths.Count() > 1)
-        {
-            var largestFileInfo =
-                taggingSet.AudioFilePaths
-                    .Select(fn => new FileInfo(fn))
-                    .OrderByDescending(fi => fi.Length)
-                    .First();
+        if (taggingSet.AudioFilePaths.Count() <= 1)
+            return taggingSet;
 
-            try
-            {
-                File.Delete(largestFileInfo.FullName);
-                taggingSet.AudioFilePaths.Remove(largestFileInfo.FullName);
-                printer.Print($"Deleted pre-split source file \"{largestFileInfo.Name}\"");
-            }
-            catch (Exception ex)
-            {
-                printer.Error($"Error deleting pre-split source file \"{largestFileInfo.Name}\": {ex.Message}");
-            }
+        var largestFileInfo =
+            taggingSet.AudioFilePaths
+                .Select(fn => new FileInfo(fn))
+                .OrderByDescending(fi => fi.Length)
+                .First();
+
+        try
+        {
+            File.Delete(largestFileInfo.FullName);
+            printer.Print($"Deleted pre-split source file \"{largestFileInfo.Name}\"");
+            return taggingSet with { AudioFilePaths = taggingSet.AudioFilePaths.Remove(largestFileInfo.FullName) };
+        }
+        catch (Exception ex)
+        {
+            printer.Error($"Error deleting pre-split source file \"{largestFileInfo.Name}\": {ex.Message}");
+            return taggingSet;
         }
     }
 
