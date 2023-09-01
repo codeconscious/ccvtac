@@ -6,7 +6,7 @@ namespace CCVTAC.Console.PostProcessing;
 
 internal static class Renamer
 {
-    private record struct RenamePattern(Regex Regex, string ReplacementText, string Description);
+    private record struct RenamePattern(Regex Regex, string ReplaceWithPattern, string Description);
 
     // TODO: Convert this into a setting.
     private static readonly IReadOnlyList<RenamePattern> RenamePatterns = new List<RenamePattern>()
@@ -76,37 +76,53 @@ internal static class Renamer
                        .Where(f => Settings.SettingsService.ValidAudioFormats.Any(f.Extension.EndsWith));
         printer.Print($"Renaming {audioFilePaths.Count()} audio file(s)...");
 
-        foreach (var audioFile in audioFilePaths)
+        foreach (var filePath in audioFilePaths)
         {
-            var workingNewFileName = new StringBuilder(audioFile.Name);
-            foreach(var pattern in RenamePatterns) // TODO: Look into using Aggregate().
-            {
-                var match = pattern.Regex.Match(workingNewFileName.ToString());
-                if (!match.Success)
-                    continue;
+            var newFileName = RenamePatterns.Aggregate(
+                new StringBuilder(filePath.Name),
+                (newFileNameSb, renamePattern) => {
+                    var match = renamePattern.Regex.Match(newFileNameSb.ToString());
+                    if (!match.Success)
+                        return newFileNameSb;
 
-                workingNewFileName.Remove(match.Index, match.Length);
+                    // Delete the matched substring.
+                    newFileNameSb.Remove(match.Index, match.Length);
 
-                var replacementText = new StringBuilder(pattern.ReplacementText);
-                for (int i = 0; i < match.Groups.Count - 1; i++)
-                {
-                    replacementText.Replace($"%<{i + 1}>s", match.Groups[i + 1].Value);
-                }
+                    // Work out the replacement text that should be inserted.
+                    var insertText =
+                        match.Groups.OfType<Group>()
+                             .Select((gr, i) =>
+                             (
+                                SearchFor:   $"%<{i + 1}>s",
+                                ReplaceWith: match.Groups[i + 1].Value
+                             ))
+                             .Aggregate(
+                                 new StringBuilder(renamePattern.ReplaceWithPattern),
+                                 (workingText, replacementParts) =>
+                                     workingText.Replace(
+                                        replacementParts.SearchFor,
+                                        replacementParts.ReplaceWith),
+                                 workingText => workingText.ToString()
+                             );
 
-                workingNewFileName.Insert(match.Index, replacementText.ToString());
-            }
+                    // Insert the replacement text at the same starting position.
+                    newFileNameSb.Insert(match.Index, insertText);
+
+                    return newFileNameSb;
+                },
+                newFileNameSb => newFileNameSb.ToString());
 
             try
             {
                 File.Move(
-                    audioFile.FullName,
-                    Path.Combine(workingDirectory, workingNewFileName.ToString()));
-                printer.Print($"- From: \"{audioFile.Name}\"");
-                printer.Print($"    To: \"{workingNewFileName}\"");
+                    filePath.FullName,
+                    Path.Combine(workingDirectory, newFileName));
+                printer.Print($"- From: \"{filePath.Name}\"");
+                printer.Print($"    To: \"{newFileName}\"");
             }
             catch (Exception ex)
             {
-                printer.Error($"Could not rename \"{audioFile.Name}\": {ex.Message}");
+                printer.Error($"- Could not rename \"{filePath.Name}\": {ex.Message}");
             }
         }
 
