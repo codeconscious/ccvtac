@@ -72,14 +72,14 @@ internal static class Renamer
 
         var dir = new DirectoryInfo(workingDirectory);
 
-        var files = dir.EnumerateFiles("*") // Needed?
+        var audioFilePaths = dir.EnumerateFiles("*")
                        .Where(f => Settings.SettingsService.ValidAudioFormats.Any(f.Extension.EndsWith));
-        printer.Print($"Renaming {files.Count()} audio file(s)...");
+        printer.Print($"Renaming {audioFilePaths.Count()} audio file(s)...");
 
-        foreach (var file in files)
+        foreach (var audioFile in audioFilePaths)
         {
-            var workingNewFileName = new StringBuilder(file.Name);
-            foreach(var pattern in RenamePatterns)
+            var workingNewFileName = new StringBuilder(audioFile.Name);
+            foreach(var pattern in RenamePatterns) // TODO: Look into using Aggregate().
             {
                 var match = pattern.Regex.Match(workingNewFileName.ToString());
                 if (!match.Success)
@@ -99,14 +99,14 @@ internal static class Renamer
             try
             {
                 File.Move(
-                    file.FullName,
+                    audioFile.FullName,
                     Path.Combine(workingDirectory, workingNewFileName.ToString()));
-                printer.Print($"- From: \"{file.Name}\"");
+                printer.Print($"- From: \"{audioFile.Name}\"");
                 printer.Print($"    To: \"{workingNewFileName}\"");
             }
             catch (Exception ex)
             {
-                printer.Error($"Could not rename \"{file.Name}\": {ex.Message}");
+                printer.Error($"Could not rename \"{audioFile.Name}\": {ex.Message}");
             }
         }
 
