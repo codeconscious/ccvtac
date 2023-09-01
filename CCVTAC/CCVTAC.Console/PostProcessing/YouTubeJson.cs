@@ -2,74 +2,9 @@ using System.Text.Json.Serialization;
 
 namespace CCVTAC.Console.PostProcessing;
 
-public sealed class YouTubeJson
+public record struct YouTubeJson
 {
-    // Root myDeserializedClass = JsonSerializer.Deserialize<Root>(myJsonResponse);
-    public sealed record AutomaticCaptions(
-
-    );
-
-    public sealed record DownloaderOptions(
-        [property: JsonPropertyName("http_chunk_size")] int? http_chunk_size
-    );
-
-    public sealed record Format(
-        [property: JsonPropertyName("format_id")] string format_id,
-        [property: JsonPropertyName("format_note")] string format_note,
-        [property: JsonPropertyName("ext")] string ext,
-        [property: JsonPropertyName("protocol")] string protocol,
-        [property: JsonPropertyName("acodec")] string acodec,
-        [property: JsonPropertyName("vcodec")] string vcodec,
-        [property: JsonPropertyName("url")] string url,
-        [property: JsonPropertyName("width")] int? width,
-        [property: JsonPropertyName("height")] int? height,
-        [property: JsonPropertyName("fps")] double? fps,
-        [property: JsonPropertyName("rows")] int? rows,
-        [property: JsonPropertyName("columns")] int? columns,
-        [property: JsonPropertyName("fragments")] IReadOnlyList<Fragment> fragments,
-        [property: JsonPropertyName("resolution")] string resolution,
-        [property: JsonPropertyName("aspect_ratio")] double? aspect_ratio,
-        [property: JsonPropertyName("http_headers")] HttpHeaders http_headers,
-        [property: JsonPropertyName("audio_ext")] string audio_ext,
-        [property: JsonPropertyName("video_ext")] string video_ext,
-        [property: JsonPropertyName("vbr")] double? vbr,
-        [property: JsonPropertyName("abr")] double? abr,
-        [property: JsonPropertyName("format")] string format,
-        [property: JsonPropertyName("manifest_url")] string manifest_url,
-        [property: JsonPropertyName("quality")] double? quality,
-        [property: JsonPropertyName("has_drm")] bool? has_drm,
-        [property: JsonPropertyName("source_preference")] int? source_preference,
-        [property: JsonPropertyName("asr")] int? asr,
-        [property: JsonPropertyName("filesize")] int? filesize,
-        [property: JsonPropertyName("audio_channels")] int? audio_channels,
-        [property: JsonPropertyName("tbr")] double? tbr,
-        [property: JsonPropertyName("language_preference")] int? language_preference,
-        [property: JsonPropertyName("container")] string container,
-        [property: JsonPropertyName("downloader_options")] DownloaderOptions downloader_options,
-        [property: JsonPropertyName("preference")] int? preference,
-        [property: JsonPropertyName("dynamic_range")] string dynamic_range,
-        [property: JsonPropertyName("filesize_approx")] int? filesize_approx
-    );
-
-    public sealed record Fragment(
-        [property: JsonPropertyName("url")] string url,
-        [property: JsonPropertyName("duration")] double? duration
-    );
-
-    public sealed record Heatmap(
-        [property: JsonPropertyName("start_time")] double? start_time,
-        [property: JsonPropertyName("end_time")] double? end_time,
-        [property: JsonPropertyName("value")] double? value
-    );
-
-    public sealed record HttpHeaders(
-        [property: JsonPropertyName("User-Agent")] string UserAgent,
-        [property: JsonPropertyName("Accept")] string Accept,
-        [property: JsonPropertyName("Accept-Language")] string AcceptLanguage,
-        [property: JsonPropertyName("Sec-Fetch-Mode")] string SecFetchMode
-    );
-
-    public sealed record Root(
+    public record struct Root(
         [property: JsonPropertyName("id")] string id,
         [property: JsonPropertyName("title")] string title,
         [property: JsonPropertyName("formats")] IReadOnlyList<Format> formats,
@@ -136,11 +71,75 @@ public sealed class YouTubeJson
         [property: JsonPropertyName("_version")] Version _version
     );
 
-    public sealed record Subtitles(
+    public record struct AutomaticCaptions(
 
     );
 
-    public sealed record Thumbnail(
+    public record struct DownloaderOptions(
+        [property: JsonPropertyName("http_chunk_size")] int? http_chunk_size
+    );
+
+    public record struct Format(
+        [property: JsonPropertyName("format_id")] string format_id,
+        [property: JsonPropertyName("format_note")] string format_note,
+        [property: JsonPropertyName("ext")] string ext,
+        [property: JsonPropertyName("protocol")] string protocol,
+        [property: JsonPropertyName("acodec")] string acodec,
+        [property: JsonPropertyName("vcodec")] string vcodec,
+        [property: JsonPropertyName("url")] string url,
+        [property: JsonPropertyName("width")] int? width,
+        [property: JsonPropertyName("height")] int? height,
+        [property: JsonPropertyName("fps")] double? fps,
+        [property: JsonPropertyName("rows")] int? rows,
+        [property: JsonPropertyName("columns")] int? columns,
+        [property: JsonPropertyName("fragments")] IReadOnlyList<Fragment> fragments,
+        [property: JsonPropertyName("resolution")] string resolution,
+        [property: JsonPropertyName("aspect_ratio")] double? aspect_ratio,
+        [property: JsonPropertyName("http_headers")] HttpHeaders http_headers,
+        [property: JsonPropertyName("audio_ext")] string audio_ext,
+        [property: JsonPropertyName("video_ext")] string video_ext,
+        [property: JsonPropertyName("vbr")] double? vbr,
+        [property: JsonPropertyName("abr")] double? abr,
+        [property: JsonPropertyName("format")] string format,
+        [property: JsonPropertyName("manifest_url")] string manifest_url,
+        [property: JsonPropertyName("quality")] double? quality,
+        [property: JsonPropertyName("has_drm")] bool? has_drm,
+        [property: JsonPropertyName("source_preference")] int? source_preference,
+        [property: JsonPropertyName("asr")] int? asr,
+        [property: JsonPropertyName("filesize")] int? filesize,
+        [property: JsonPropertyName("audio_channels")] int? audio_channels,
+        [property: JsonPropertyName("tbr")] double? tbr,
+        [property: JsonPropertyName("language_preference")] int? language_preference,
+        [property: JsonPropertyName("container")] string container,
+        [property: JsonPropertyName("downloader_options")] DownloaderOptions downloader_options,
+        [property: JsonPropertyName("preference")] int? preference,
+        [property: JsonPropertyName("dynamic_range")] string dynamic_range,
+        [property: JsonPropertyName("filesize_approx")] int? filesize_approx
+    );
+
+    public record struct Fragment(
+        [property: JsonPropertyName("url")] string url,
+        [property: JsonPropertyName("duration")] double? duration
+    );
+
+    public record struct Heatmap(
+        [property: JsonPropertyName("start_time")] double? start_time,
+        [property: JsonPropertyName("end_time")] double? end_time,
+        [property: JsonPropertyName("value")] double? value
+    );
+
+    public record struct HttpHeaders(
+        [property: JsonPropertyName("User-Agent")] string UserAgent,
+        [property: JsonPropertyName("Accept")] string Accept,
+        [property: JsonPropertyName("Accept-Language")] string AcceptLanguage,
+        [property: JsonPropertyName("Sec-Fetch-Mode")] string SecFetchMode
+    );
+
+    public record struct Subtitles(
+        // TODO: Look into deleting.
+    );
+
+    public record struct Thumbnail(
         [property: JsonPropertyName("url")] string url,
         [property: JsonPropertyName("preference")] int? preference,
         [property: JsonPropertyName("id")] string id,
@@ -149,11 +148,9 @@ public sealed class YouTubeJson
         [property: JsonPropertyName("resolution")] string resolution
     );
 
-    public sealed record Version(
+    public record struct Version(
         [property: JsonPropertyName("version")] string version,
         [property: JsonPropertyName("release_git_head")] string release_git_head,
         [property: JsonPropertyName("repository")] string repository
     );
-
-
 }

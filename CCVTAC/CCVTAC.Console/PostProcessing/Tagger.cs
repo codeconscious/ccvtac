@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
@@ -7,251 +6,355 @@ namespace CCVTAC.Console.PostProcessing;
 
 internal static class Tagger
 {
-    private const string _jsonFileSearchPattern = "*.json";
-
-    internal static void Run(string workingDirectory, Printer printer)
+    internal static Result<string> Run(string workingDirectory, Printer printer)
     {
+        printer.Print("Adding file tags...");
+
         var stopwatch = new System.Diagnostics.Stopwatch();
         stopwatch.Start();
 
-        List<string> jsonFiles;
+        var taggingSetsResult = GetTaggingSets(workingDirectory);
+        if (taggingSetsResult.IsFailed)
+            return Result.Fail("No tagging sets were generated, so tagging cannot be done.");
+
+        foreach (var taggingSet in taggingSetsResult.Value)
+        {
+            ProcessSingleTaggingSet(taggingSet, printer);
+        }
+
+        return Result.Ok($"Tagging done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
+    }
+
+    private static Result<ImmutableList<TaggingSet>> GetTaggingSets(string workingDirectory)
+    {
         try
         {
-            jsonFiles = Directory.GetFiles(workingDirectory, _jsonFileSearchPattern).ToList();
-            if (!jsonFiles.Any())
-            {
-                printer.Error($"No {_jsonFileSearchPattern} files found! Aborting...");
-                return;
-            }
+            var allFiles = Directory.GetFiles(workingDirectory);
+            var taggingSets = TaggingSet.CreateTaggingSets(allFiles);
+
+            return taggingSets is not null && taggingSets.Any()
+                ? Result.Ok(taggingSets)
+                : Result.Fail("No tagging sets were created.");
         }
         catch (Exception ex)
         {
-            printer.Error($"Error reading {_jsonFileSearchPattern} files: " + ex.Message);
+            return Result.Fail($"Error reading working directory files: {ex.Message}");
+        }
+    }
+
+    static void ProcessSingleTaggingSet(TaggingSet taggingSet, Printer printer)
+    {
+        printer.Print($"{taggingSet.AudioFilePaths.Count()} audio file(s) with resource ID \"{taggingSet.ResourceId}\"");
+
+        var parsedJsonResult = GetParsedJson(taggingSet);
+        if (parsedJsonResult.IsFailed)
+        {
+            printer.Errors(parsedJsonResult);
             return;
         }
 
-        var resourceIdRegex = new Regex(@".+\[([\w_\-]{11})\](?:.*)?\.(\w+)");
-        var idsWithFileNames = jsonFiles
-                        .Select(f => resourceIdRegex.Match(f))
-                        .Where(m => m.Success)
-                        .Select(m => m.Captures.OfType<Match>().First())
-                                      .GroupBy(m => m.Groups[1].Value,
-                                               m => m.Groups[0].Value);
-        var invalid = idsWithFileNames.Where(g => g.Count() != 1);
-        if (invalid.Any())
+        var confirmedTaggingSet = DeleteSourceFile(taggingSet, printer);
+
+        foreach (var audioFilePath in confirmedTaggingSet.AudioFilePaths)
         {
-            printer.Errors(
-                "JSON errors:",
-                invalid.Select(i => $"There was not one JSON file for ID {i.Key}, so this ID will be skipped.")
-            );
+            TagSingleFile(parsedJsonResult.Value, audioFilePath, taggingSet.ImageFilePath, printer);
         }
-        var valid = idsWithFileNames.Where(g => g.Count() == 1);
+    }
 
-        foreach (var idNamePair in valid)
+    static void TagSingleFile(
+        YouTubeJson.Root parsedJson,
+        string audioFilePath,
+        string imageFilePath,
+        Printer printer)
+    {
+        try
         {
-            var resourceId = idNamePair.Key;
-            var jsonFileName = idNamePair.Single();
+            var audioFileName = Path.GetFileName(audioFilePath);
+            printer.Print($"Current audio file: \"{audioFileName}\"");
 
-            string json;
-            try
+            using var taggedFile = TagLib.File.Create(audioFilePath);
+            taggedFile.Tag.Title = DetectTitle(parsedJson, printer, parsedJson.title);
+            var maybeArtist = DetectArtist(parsedJson, printer);
+            if (maybeArtist is not null)
             {
-                json = File.ReadAllText(jsonFileName.Trim());
+                taggedFile.Tag.Performers = new[] { maybeArtist };
             }
-            catch (Exception ex)
+            var maybeAlbum = DetectAlbum(parsedJson, printer);
+            if (maybeAlbum is not null)
             {
-                printer.Error($"Error reading JSON file \"{jsonFileName}\": {ex.Message}.");
-                continue;
+                taggedFile.Tag.Album = maybeAlbum;
             }
-
-            YouTubeJson.Root? parsedJson;
-            try
+            var maybeYear = DetectReleaseYear(parsedJson, printer);
+            if (maybeYear is not null)
             {
-                parsedJson = JsonSerializer.Deserialize<YouTubeJson.Root>(json);
-
-                if (parsedJson is null)
-                {
-                    printer.Error($"JSON from file \"{json}\" was unexpectedly null.");
-                    continue;
-                }
+                taggedFile.Tag.Year = (uint) maybeYear;
             }
-            catch (JsonException ex)
-            {
-                printer.Error($"Error deserializing JSON from file \"{json}\": {ex.Message}");
-                continue;
-            }
+            taggedFile.Tag.Comment = parsedJson.GenerateComment();
 
-            var audioFilesForThisID = Directory
-                .GetFiles(workingDirectory)
-                .Where(f => Settings.SettingsService.ValidAudioFormats.Any(f.ToLowerInvariant().EndsWith))
-                .ToImmutableList();
-            if (!audioFilesForThisID.Any())
-            {
-                printer.Error($"No supported audio files for ID {idNamePair.Key} were found.");
-                continue;
-            }
-            printer.Print($"Found {audioFilesForThisID.Count()} audio file(s) for resource ID \"{idNamePair.Key}\"");
+            WriteImage(taggedFile, imageFilePath, printer);
 
-            // For split videos, delete the source file.
-            if (audioFilesForThisID.Count() > 1)
-            {
-                var largestFileInfo = audioFilesForThisID
-                    .Select(fn => new FileInfo(fn))
-                    .OrderByDescending(fi => fi.Length)
-                    .First();
+            taggedFile.Save();
+            printer.Print($"Wrote tags to \"{audioFileName}\".");
+        }
+        catch (Exception ex)
+        {
+            printer.Error($"Error tagging file: {ex.Message}");
+        }
+    }
 
-                try
-                {
-                    File.Delete(largestFileInfo.FullName);
-                    audioFilesForThisID.Remove(largestFileInfo.FullName);
-                    printer.Print($"Deleted original file \"{largestFileInfo.Name}\"");
-                }
-                catch (Exception ex)
-                {
-                    printer.Error($"Error deleting file \"{largestFileInfo.Name}\": {ex.Message}");
-                }
-            }
-
-            foreach (var audioFilePath in audioFilesForThisID)
-            {
-                var audioFileName = Path.GetFileName(audioFilePath);
-                printer.Print($"Current audio file: \"{audioFileName}\"");
-
-                using var taggedFile = TagLib.File.Create(audioFilePath);
-                taggedFile.Tag.Title = parsedJson.title;
-                taggedFile.Tag.Year = DetectReleaseYear(parsedJson, printer);
-                taggedFile.Tag.Comment = GenerateComment(parsedJson);
-                AddImage(taggedFile, resourceId, workingDirectory, printer);
-                taggedFile.Save();
-                printer.Print($"Wrote tags to \"{audioFileName}\"");
-            }
+    static Result<YouTubeJson.Root> GetParsedJson(TaggingSet taggingSet)
+    {
+        string json;
+        try
+        {
+            json = File.ReadAllText(taggingSet.JsonFilePath);
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail($"Error reading JSON file \"{taggingSet.JsonFilePath}\": {ex.Message}.");
         }
 
-        printer.Print($"Tagging done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
+        YouTubeJson.Root? parsedJson;
+        try
+        {
+            parsedJson = JsonSerializer.Deserialize<YouTubeJson.Root>(json);
+
+            if (parsedJson is null)
+            {
+                return Result.Fail($"The JSON from file \"{taggingSet.JsonFilePath}\" was unexpectedly null.");
+            }
+
+            return Result.Ok(parsedJson.Value);
+        }
+        catch (JsonException ex)
+        {
+            return Result.Fail($"Error deserializing JSON from file \"{json}\": {ex.Message}");
+        }
+    }
+
+    static string? DetectTitle(YouTubeJson.Root data, Printer printer, string? defaultName = null)
+    {
+        // TODO: Put this somewhere where it can be static.
+        List<(string Regex, int Group, string Text, string Source)> parsePatterns = new()
+        {
+            (
+                @"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D",
+                1,
+                data.description,
+                "description (Topic style)"
+            ),
+        };
+
+        foreach (var pattern in parsePatterns)
+        {
+            var regex = new Regex(pattern.Regex);
+            var match = regex.Match(pattern.Text);
+
+            if (!match.Success)
+                continue;
+
+            printer.Print($"Writing title \"{match.Groups[pattern.Group].Value}\" (matched via {pattern.Source})");
+            return match.Groups[pattern.Group].Value.Trim();
+        }
+
+        printer.Print($"Writing title \"{defaultName}\" (taken from video title)");
+        return defaultName;
+    }
+
+    static string? DetectArtist(YouTubeJson.Root data, Printer printer, string? defaultName = null)
+    {
+        // TODO: Put this somewhere where it can be static.
+        List<(string Regex, int Group, string Text, string Source)> parsePatterns = new()
+        {
+            (
+                @"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D",
+                2,
+                data.description,
+                "description (Topic style)"
+            ),
+        };
+
+        foreach (var pattern in parsePatterns)
+        {
+            var regex = new Regex(pattern.Regex);
+            var match = regex.Match(pattern.Text);
+
+            if (!match.Success)
+                continue;
+
+            printer.Print($"Writing artist \"{match.Groups[pattern.Group].Value}\" (matched via {pattern.Source})");
+            return match.Groups[pattern.Group].Value.Trim();
+        }
+
+        return defaultName;
+    }
+
+    static string? DetectAlbum(YouTubeJson.Root data, Printer printer, string? defaultName = null)
+    {
+        // TODO: Put this somewhere where it can be static or else a setting.
+        List<(string Regex, int Group, string Text, string Source)> parsePatterns = new()
+        {
+            (
+                @"(?<=[Aa]lbum: ).+",
+                0,
+                data.description,
+                "description"
+            ),
+            (
+                @"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D",
+                3,
+                data.description,
+                "description (Topic style)"
+            ),
+            (
+                """(?<='s ['"]).+(?=['"] album)""",
+                0,
+                data.description,
+                "description"
+            ),
+        };
+
+        foreach (var pattern in parsePatterns)
+        {
+            var regex = new Regex(pattern.Regex);
+            var match = regex.Match(pattern.Text);
+
+            if (!match.Success)
+                continue;
+
+            printer.Print($"Writing album \"{match.Groups[pattern.Group].Value}\" (matched via {pattern.Source})");
+            return match.Groups[pattern.Group].Value.Trim();
+        }
+
+        return defaultName;
+    }
+
+    /// <summary>
+    /// Attempt to automatically detect a release year in the video metadata.
+    /// If none is found, return a default value.
+    /// </summary>
+    static ushort? DetectReleaseYear(YouTubeJson.Root data, Printer printer, ushort? defaultYear = null)
+    {
+        // TODO: Put this somewhere where it can be static or made a setting.
+        List<(string Regex, string Text, string Source)> parsePatterns = new()
+        {
+            (
+                @"(?<=[(（\[［【])[12]\d{3}(?=[)）\]］】])",
+                data.title,
+                "title"
+            ),
+            (
+                @"(?<=℗ )[12]\d{3}(?=\s)",
+                data.description,
+                "description's \"℗\" symbol"
+            ),
+            (
+                @"(?<=[Rr]eleased [io]n: )[12]\d{3}",
+                data.description,
+                "description 'released on' date"
+            ),
+            (
+                @"[12]\d{3}(?=年(?:\d{1,2}月\d{1,2}日)?リリース)",
+                data.description,
+                "description's リリース-style date"
+            ),
+            (
+                @"[12]\d{3}年(?=\d{1,2}月\d{1,2}日\s?[Rr]elease)",
+                data.description,
+                "description's 年月日-style release date"
+            ),
+        };
+
+        foreach (var pattern in parsePatterns)
+        {
+            var result = ParseYear(pattern.Regex, pattern.Text);
+            if (result is null)
+                continue;
+
+            printer.Print($"Writing year {result.Value} (matched via {pattern.Source})");
+            return result.Value;
+        }
+
+        printer.Print($"No year could be parsed{(defaultYear is null ? "." : $", so defaulting to {defaultYear}.")}");
+        return defaultYear;
 
         /// <summary>
-        /// Generate a comment using data parsed from the JSON file.
+        /// Applies a regex pattern against text, returning the matched value
+        /// or else null if there was no successful match.
         /// </summary>
-        /// <param name="data"></param>
-        /// <returns>The formatted comment.</returns>
-        static string GenerateComment(YouTubeJson.Root data)
+        /// <param name="regexPattern"></param>
+        /// <param name="text">Text that might contain a year.</param>
+        /// <returns>A number representing a year or null.</returns>
+        static ushort? ParseYear(string regexPattern, string text)
         {
-            StringBuilder sb = new();
-            sb.AppendLine("SOURCE DATA:");
-            sb.AppendLine($"• Downloaded: {DateTime.Now} using CCVTAC");
-            sb.AppendLine($"• Service: {data.extractor_key}");
-            sb.AppendLine($"• URL: {data.webpage_url}");
-            sb.AppendLine($"• Title: {data.fulltitle}");
-            sb.AppendLine($"• Uploader: {data.uploader} ({data.uploader_url})");
-            sb.AppendLine($"• Uploaded: {data.upload_date[4..6]}/{data.upload_date[6..8]}/{data.upload_date[0..4]}"); // "08/27/2023"
-            sb.AppendLine($"• Description: {data.description})");
-            return sb.ToString();
+            ArgumentNullException.ThrowIfNullOrEmpty(regexPattern);
+
+            var regex = new Regex(regexPattern);
+            var match = regex.Match(text);
+
+            if (match is null)
+                return null;
+            return ushort.TryParse(match.Value, out var matchYear)
+                ? matchYear
+                : null;
+        };
+    }
+
+    /// <summary>
+    /// Deletes the pre-split, source audio (if any) for split videos, each of which will have the same resource ID.
+    /// </summary>
+    /// <param name="taggingSet"></param>
+    /// <param name="printer"></param>
+    private static TaggingSet DeleteSourceFile(TaggingSet taggingSet, Printer printer)
+    {
+        if (taggingSet.AudioFilePaths.Count() <= 1)
+            return taggingSet;
+
+        var largestFileInfo =
+            taggingSet.AudioFilePaths
+                .Select(fn => new FileInfo(fn))
+                .OrderByDescending(fi => fi.Length)
+                .First();
+
+        try
+        {
+            File.Delete(largestFileInfo.FullName);
+            printer.Print($"Deleted pre-split source file \"{largestFileInfo.Name}\"");
+            return taggingSet with { AudioFilePaths = taggingSet.AudioFilePaths.Remove(largestFileInfo.FullName) };
         }
-
-        /// <summary>
-        /// Attempt to automatically detect a release year in the video metadata.
-        /// If none is found, return a default value.
-        /// </summary>
-        static uint DetectReleaseYear(YouTubeJson.Root data, Printer printer, ushort defaultYear = 0)
+        catch (Exception ex)
         {
-            // TODO: Put this somewhere where it can be static.
-            List<(string Regex, string Text, string Source)> parsePatterns = new()
-            {
-                (@"(?<=[(（\[［【])[12]\d{3}(?=[)）\]］】])", data.title, "title"),
-                (@"(?<=℗ )[12]\d{3}(?=\s)", data.description, "description's \"℗\" symbol"),
-                (@"(?<=[Rr]eleased [io]n: )[12]\d{3}", data.description, "description 'released on' date"),
-                (@"[12]\d{3}(?=年(?:\d{1,2}月\d{1,2}日)?リリース)", data.description, "description's リリース date"),
-            };
-
-            foreach (var pattern in parsePatterns)
-            {
-                var result = ParseYear(pattern.Regex, pattern.Text);
-                if (result is null)
-                    continue;
-
-                printer.Print($"Writing year {result.Value} (matched via {pattern.Source})");
-                return result.Value;
-            }
-
-            printer.Print($"No year could be parsed, so defaulting to {defaultYear}.");
-            return 0;
-
-            /// <summary>
-            /// Applies a regex pattern against text, returning the matched value
-            /// or else null if there was no successful match.
-            /// </summary>
-            /// <param name="regexPattern"></param>
-            /// <param name="text">Text that might contain a year.</param>
-            /// <returns>A number representing a year or null.</returns>
-            static uint? ParseYear(string regexPattern, string text)
-            {
-                ArgumentNullException.ThrowIfNullOrEmpty(regexPattern);
-
-                var regex = new Regex(regexPattern);
-                var match = regex.Match(text);
-
-                if (match is null)
-                    return null;
-                return uint.TryParse(match.Value, out var matchYear)
-                    ? matchYear
-                    : null;
-            };
+            printer.Error($"Error deleting pre-split source file \"{largestFileInfo.Name}\": {ex.Message}");
+            return taggingSet;
         }
     }
 
     /// <summary>
-    ///
+    /// Write the video thumbnail to the file tags.
     /// </summary>
     /// <param name="taggedFile"></param>
     /// <param name="workingDirectory"></param>
     /// <param name="printer"></param> <summary>
     /// <remarks>Heavily inspired by https://stackoverflow.com/a/61264720/11767771.</remarks>
-    private static void AddImage(TagLib.File taggedFile, string resourceId, string workingDirectory, Printer printer)
+    private static void WriteImage(TagLib.File taggedFile, string imageFilePath, Printer printer)
     {
-        string imageFile;
-        try
+        if (string.IsNullOrWhiteSpace(imageFilePath))
         {
-            imageFile = Directory.GetFiles(workingDirectory, $"*{resourceId}*.jpg").Single();
-        }
-        catch (Exception ex)
-        {
-            printer.Error($"Error finding image file in \"{workingDirectory}\": {ex.Message}");
-            printer.Print("Aborting image addition.");
+            printer.Error("No image file path was provided, so cannot add an image to the file.");
             return;
         }
 
         try
         {
             var pics = new TagLib.IPicture[1];
-            pics[0] = new TagLib.Picture(imageFile);
+            pics[0] = new TagLib.Picture(imageFilePath);
             taggedFile.Tag.Pictures = pics;
-            printer.Print("Image attached to file tags.");
+            printer.Print("Image written to file tags OK.");
         }
         catch (Exception ex)
         {
-            printer.Error($"Error attaching image to the audio file: {ex.Message}");
-            printer.Print("Aborting image addition.");
+            printer.Error($"Error writing image to the audio file: {ex.Message}");
             return;
         }
-    }
-
-    /// <summary>
-    /// Subversions of ID3 version 2 (such as 2.3 or 2.4).
-    /// </summary>
-    public enum Id3v2Version : byte
-    {
-        /// <summary>
-        /// Rarely, if ever, used. Not recommended.
-        /// </summary>
-        TwoPoint2 = 2,
-
-        /// <summary>
-        /// The most widely used and supported version. Highly recommended.
-        /// </summary>
-        TwoPoint3 = 3,
-
-        /// <summary>
-        /// The newest version, but is not often used or supported. Not particularly recommended.
-        /// </summary>
-        TwoPoint4 = 4,
     }
 }

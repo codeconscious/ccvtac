@@ -1,4 +1,3 @@
-using System.IO;
 using CCVTAC.Console.Downloading.DownloadEntities;
 using CCVTAC.Console.Settings;
 
@@ -18,12 +17,12 @@ public static class Downloader
                                ?? "An unknown error occurred parsing the resource type.");
         }
         var downloadEntity = downloadEntityResult.Value;
-        printer.Print($"Processing {downloadEntity.GetType()} URL...");
+        printer.Print($"{downloadEntity.Type} URL detected.");
 
         var downloadToolSettings = new ExternalUtilties.ExternalToolSettings(
             "video download and audio extraction",
             "yt-dlp",
-            GenerateDownloadArgs(settings, url),
+            GenerateDownloadArgs(settings, downloadEntity.Type, downloadEntity.FullResourceUrl),
             settings.WorkingDirectory!,
             printer
         );
@@ -37,7 +36,14 @@ public static class Downloader
         return Result.Ok($"Downloading done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
     }
 
-    private static string GenerateDownloadArgs(UserSettings settings, params string[]? additionalArgs)
+    /// <summary>
+    /// Generate the argument string from the download tool.
+    /// </summary>
+    /// <returns>A string of arguments that can be passed directly to the download tool.</returns>
+    private static string GenerateDownloadArgs(
+        UserSettings settings,
+        DownloadType downloadType,
+        params string[]? additionalArgs)
     {
         var args = new List<string>() {
             $"--extract-audio -f {settings.AudioFormat}",
@@ -47,6 +53,9 @@ public static class Downloader
 
         if (settings.SplitChapters)
             args.Add("--split-chapters");
+
+        if (downloadType is not DownloadType.Video)
+            args.Add($"--sleep-interval {settings.SleepBetweenDownloadsSeconds}");
 
         return string.Join(" ", args.Concat(additionalArgs ?? Enumerable.Empty<string>()));
     }

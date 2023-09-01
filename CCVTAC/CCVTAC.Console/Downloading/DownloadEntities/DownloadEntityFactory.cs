@@ -4,34 +4,33 @@ namespace CCVTAC.Console.Downloading.DownloadEntities;
 
 public static class DownloadEntityFactory
 {
-    private static readonly Dictionary<string, Regex> Patterns = new()
+    private static readonly string _unsupportedUrlText = "Unsupported or invalid URL.";
+
+    private static readonly Dictionary<DownloadType, Regex> Patterns = new()
     {
-        { nameof(Video), new Regex(@"^[\w-]{11}$|(?<=v=|v\\=)[\w-]{11}|(?<=youtu\.be/).{11}") },
-        { nameof(Playlist), new Regex(@"(?<=list=)[\w\-]+") },
-        { nameof(Channel), new Regex(@"(?:www\.)?youtube\.com/(?:c/|channel/|@|user/)[\w\-]+") },
+        { DownloadType.Video,    new Regex(@"^[\w-]{11}$|(?<=v=|v\\=)[\w-]{11}|(?<=youtu\.be/).{11}") },
+        { DownloadType.Playlist, new Regex(@"(?<=list=)[\w\-]+") },
+        { DownloadType.Channel,  new Regex(@"(?:www\.)?youtube\.com/(?:c/|channel/|@|user/)[\w\-]+") },
     };
 
     public static Result<IDownloadEntity> Create(string url)
     {
-        string type = string.Empty;
-        string resourceId = string.Empty;
+        var typesWithResourceIds =
+            Patterns.Select(pattern =>      (pattern.Key, pattern.Value.Match(url)))
+                    .Where(typeAndMatch =>  typeAndMatch.Item2.Success)
+                    .Select(typeAndMatch => (typeAndMatch.Key, typeAndMatch.Item2.Value));
 
-        foreach (var pair in Patterns)
-        {
-            var match = pair.Value.Matches(url);
-            if (match is null || match.Count == 0)
-                continue;
-            type = pair.Key;
-            resourceId = match[0].Value;
-            break;
-        };
+        if (!typesWithResourceIds.Any())
+            return Result.Fail(_unsupportedUrlText);
+
+        var (type, resourceId) = typesWithResourceIds.First();
 
         return type switch
         {
-            nameof(Video) => Result.Ok((IDownloadEntity) new Video(resourceId)),
-            nameof(Playlist) => Result.Ok((IDownloadEntity) new Playlist(resourceId)),
-            nameof(Channel) => Result.Ok((IDownloadEntity) new Channel(resourceId)),
-            _ => Result.Fail("Unsupported or invalid URL.")
+            DownloadType.Video =>    Result.Ok((IDownloadEntity) new Video(resourceId)),
+            DownloadType.Playlist => Result.Ok((IDownloadEntity) new Playlist(resourceId)),
+            DownloadType.Channel=>   Result.Ok((IDownloadEntity) new Channel(resourceId)),
+            _ =>                     Result.Fail(_unsupportedUrlText)
         };
     }
 }

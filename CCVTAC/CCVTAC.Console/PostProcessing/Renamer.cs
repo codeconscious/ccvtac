@@ -6,7 +6,7 @@ namespace CCVTAC.Console.PostProcessing;
 
 internal static class Renamer
 {
-    private record struct RenamePattern(Regex Regex, string ReplacementText, string Description);
+    private record struct RenamePattern(Regex Regex, string ReplaceWithPattern, string Description);
 
     // TODO: Convert this into a setting.
     private static readonly IReadOnlyList<RenamePattern> RenamePatterns = new List<RenamePattern>()
@@ -48,9 +48,9 @@ internal static class Renamer
             "%<1>s - %<2>s",
             "Reformat 'ARTIST [ TITLE ]'"),
         new RenamePattern(
-            new Regex(@"^(.+)\s{1,}-\s{1,}'(.+)'"),
+            new Regex(@"^(.+)\s{1,}-\s{1,}['＂](.+)['＂]"),
             "%<1>s - %<2>s",
-            "Reformat 'ARTIST - \'TITLE\' ]'"),
+            """Reformat 'ARTIST - 'TITLE' ]', etc."""),
         new RenamePattern(
             new Regex(@"^(.+?)(?: - [｢「『【])(.+)(?:[」｣』】]).*(?=（Full Ver.）)"),
             "%<1>s - %<2>s",
@@ -72,41 +72,57 @@ internal static class Renamer
 
         var dir = new DirectoryInfo(workingDirectory);
 
-        var files = dir.EnumerateFiles("*") // Needed?
+        var audioFilePaths = dir.EnumerateFiles("*")
                        .Where(f => Settings.SettingsService.ValidAudioFormats.Any(f.Extension.EndsWith));
-        printer.Print($"Renaming {files.Count()} audio file(s)...");
+        printer.Print($"Renaming {audioFilePaths.Count()} audio file(s)...");
 
-        foreach (var file in files)
+        foreach (var filePath in audioFilePaths)
         {
-            var workingNewFileName = new StringBuilder(file.Name);
-            foreach(var pattern in RenamePatterns)
-            {
-                var match = pattern.Regex.Match(workingNewFileName.ToString());
-                if (!match.Success)
-                    continue;
+            var newFileName = RenamePatterns.Aggregate(
+                new StringBuilder(filePath.Name),
+                (newFileNameSb, renamePattern) => {
+                    var match = renamePattern.Regex.Match(newFileNameSb.ToString());
+                    if (!match.Success)
+                        return newFileNameSb;
 
-                workingNewFileName.Remove(match.Index, match.Length);
+                    // Delete the matched substring.
+                    newFileNameSb.Remove(match.Index, match.Length);
 
-                var replacementText = new StringBuilder(pattern.ReplacementText);
-                for (int i = 0; i < match.Groups.Count - 1; i++)
-                {
-                    replacementText.Replace($"%<{i + 1}>s", match.Groups[i + 1].Value);
-                }
+                    // Work out the replacement text that should be inserted.
+                    var insertText =
+                        match.Groups.OfType<Group>()
+                             .Select((gr, i) =>
+                             (
+                                SearchFor:   $"%<{i + 1}>s",
+                                ReplaceWith: match.Groups[i + 1].Value
+                             ))
+                             .Aggregate(
+                                 new StringBuilder(renamePattern.ReplaceWithPattern),
+                                 (workingText, replacementParts) =>
+                                     workingText.Replace(
+                                        replacementParts.SearchFor,
+                                        replacementParts.ReplaceWith),
+                                 workingText => workingText.ToString()
+                             );
 
-                workingNewFileName.Insert(match.Index, replacementText.ToString());
-            }
+                    // Insert the replacement text at the same starting position.
+                    newFileNameSb.Insert(match.Index, insertText);
+
+                    return newFileNameSb;
+                },
+                newFileNameSb => newFileNameSb.ToString());
 
             try
             {
                 File.Move(
-                    file.FullName,
-                    Path.Combine(workingDirectory, workingNewFileName.ToString()));
-                printer.Print($"- From: \"{file.Name}\"");
-                printer.Print($"    To: \"{workingNewFileName}\"");
+                    filePath.FullName,
+                    Path.Combine(workingDirectory, newFileName));
+                printer.Print($"- From: \"{filePath.Name}\"");
+                printer.Print($"    To: \"{newFileName}\"");
             }
             catch (Exception ex)
             {
-                printer.Error($"Could not rename \"{file.Name}\": {ex.Message}");
+                printer.Error($"- Could not rename \"{filePath.Name}\": {ex.Message}");
             }
         }
 

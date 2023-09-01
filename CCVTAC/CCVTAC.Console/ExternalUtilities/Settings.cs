@@ -5,4 +5,5 @@ public sealed record ExternalToolSettings(
     string ProgramName,
     string Args,
     string WorkingDirectory,
-    Printer Printer);
+    Printer Printer
+);
