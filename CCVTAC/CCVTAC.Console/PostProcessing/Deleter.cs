@@ -7,9 +7,9 @@ internal static class Deleter
     public static void Run(string workingDirectory, Printer printer)
     {
         var dir = new DirectoryInfo(workingDirectory);
-        List<string> deletableExtensions = new() { ".json", ".jpg" };
+        var deletableExtensions = new List<string>() { ".json", ".jpg" };
 
-        printer.Print($"Deleting unneeded {string.Join(" and ", deletableExtensions)} files...");
+        printer.Print($"Deleting now-unnecessary {string.Join(" and ", deletableExtensions)} files...");
 
         foreach (var file in dir.EnumerateFiles("*")
                                 .Where(f => deletableExtensions.Contains(f.Extension)))
@@ -21,10 +21,10 @@ internal static class Deleter
             }
             catch (Exception ex)
             {
-                printer.Error($"Could not delete \"{file.Name}\": {ex.Message}");
+                printer.Error($"- Could not delete \"{file.Name}\": {ex.Message}");
             }
         }
 
-        printer.Print("Deletion done.");
+        printer.Print("Deletion completed OK.");
     }
 }
