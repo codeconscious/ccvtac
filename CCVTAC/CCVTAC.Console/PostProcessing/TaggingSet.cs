@@ -40,6 +40,8 @@ public readonly record struct TaggingSet
             throw new ArgumentException("The JSON file path must be provided.");
         if (string.IsNullOrWhiteSpace(imageFilePath))
             throw new ArgumentException("The image file path must be provided.");
+        if (audioFilePaths?.Any() != true)
+            throw new ArgumentException("At least one audio file path must be provided.", nameof(audioFilePaths));
 
         ResourceId = resourceId.Trim();
         AudioFilePaths = audioFilePaths.ToImmutableHashSet();
@@ -52,8 +54,8 @@ public readonly record struct TaggingSet
     /// related to several resource (video) IDs.
     /// </summary>
     /// <param name="filePaths">
-    ///     A collection of file paths. Expected to contain 1 JSON file and
-    ///     1 image file for each unique resource ID.
+    /// A collection of file paths. Expected to contain 1 JSON file and
+    /// 1 image file for each unique resource ID.
     /// </param>
     public static ImmutableList<TaggingSet> CreateTaggingSets(IEnumerable<string> filePaths)
     {
@@ -71,7 +73,7 @@ public readonly record struct TaggingSet
                     .Select(m => m.Captures.OfType<Match>().First())
                     .GroupBy(m => m.Groups[1].Value, // Resource ID
                              m => m.Groups[0].Value) // Full filename
-                    .Where(gr =>
+                    .Where(gr => // Ensure the correct count of metadata files.
                         gr.Count(f => f.EndsWith(jsonFileExtension, StringComparison.OrdinalIgnoreCase)) == 1 &&
                         gr.Count(f => f.EndsWith(imageFileExtension, StringComparison.OrdinalIgnoreCase)) == 1)
                     .Select(gr => {
