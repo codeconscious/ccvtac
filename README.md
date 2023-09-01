@@ -2,7 +2,7 @@
 
 A small .NET CLI tool that acts as a wrapper around [yt-dlp](https://github.com/yt-dlp/yt-dlp) to even more easily download audio from specific YouTube videos.
 
-I [originally created this tool in Ruby](https://github.com/codeconscious/youtube-audio-downloader-ruby) to get better acquainted with Ruby for work, but I've rewritten it in C# because I decided to move from MP3 to M4A files to avoid unnecessary file conversion (for better quality in smaller files), but the Ruby gem (library) I was using doesn't support M4A; and frankly, I simply enjoy working with C# much more. (I might find a way to force F# in here too.)
+I [originally created this tool in Ruby](https://github.com/codeconscious/youtube-audio-downloader-ruby) to get better acquainted with Ruby for work, but I've rewritten it in C# because I decided to move from MP3 to M4A files to avoid unnecessary file conversion (for better quality in smaller files), but the Ruby gem (library) I was using doesn't support M4A; and frankly, I simply enjoy working with C# much more. (I might find a way to force F# in here too...)
 
 Feel free to use it yourself, but please do so responsibly. No warranties or guarantees provided!
 
@@ -14,8 +14,8 @@ Feel free to use it yourself, but please do so responsibly. No warranties or gua
 - Renames files via specific regex patterns (to remove resource IDs, etc.)
 - Video thumbnails are auto-trimmed and written to files as album art
 - Post-processed files are automatically moved to a specified directory
-- File ID3 tags are automatically written where possible
-- All URLs entered are saved locally to a file named `history.log`
+- ID3 tags are automatically written where possible
+- Entered URLs are saved locally to a file named `history.log`
 
 ### TODOs and Ideas
 
