@@ -2,17 +2,21 @@ namespace CCVTAC.Console.PostProcessing;
 
 public static class YouTubeJsonExtensionMethods
 {
+    /// <summary>
+    /// Returns a string summarizing video uploader information.
+    /// </summary>
     public static string UploaderSummary(this YouTubeJson.Root data) =>
         $"{data.uploader} ({(!string.IsNullOrWhiteSpace(data.uploader_url) ? data.uploader_url : data.uploader_id)})";
 
     /// <summary>
-    /// Get a formatted version of the upload date (e.g., "08/27/2023") from the plain version in the JSON (e.g., "20230827").
+    /// Returns a formatted version of the upload date (e.g., "08/27/2023") from the
+    /// plain version (e.g., "20230827") within the parsed JSON file data.
     /// </summary>
     public static string FormattedUploadDate(this YouTubeJson.Root data) =>
         $"{data.upload_date[4..6]}/{data.upload_date[6..8]}/{data.upload_date[0..4]}";
 
     /// <summary>
-    /// Generate a formatted comment using data parsed from the JSON file.
+    /// Returns a formatted comment using data parsed from the JSON file.
     /// </summary>
     public static string GenerateComment(this YouTubeJson.Root data)
     {
