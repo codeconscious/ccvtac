@@ -18,6 +18,11 @@ internal static class Program
             return;
         }
 
+        System.Console.CancelKeyPress += delegate
+        {
+            printer.Warning("\nQuitting at user's request.");
+        };
+
         // Top-level `try` to catch and pretty-print unexpected exceptions.
         try
         {
