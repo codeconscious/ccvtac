@@ -6,7 +6,7 @@ internal static class Program
 {
     private static readonly string[] HelpCommands = new[] { "-h", "--help" };
     private static readonly string[] QuitCommands = new[] { "q", "quit", "exit", "bye" };
-    private static readonly string InputPrompt = "Enter a YouTube URL (or 'q' to quit):";
+    private const string InputPrompt = "Enter a YouTube URL (or 'q' to quit):";
 
     static void Main(string[] args)
     {
@@ -18,6 +18,7 @@ internal static class Program
             return;
         }
 
+        // Catch the user's pressing Ctrl-C (SIGINT).
         System.Console.CancelKeyPress += delegate
         {
             printer.Warning("\nQuitting at user's request.");
@@ -78,9 +79,11 @@ internal static class Program
         var mainStopwatch = new System.Diagnostics.Stopwatch();
         mainStopwatch.Start();
 
-        // TODO: Handle failures from bad input (e.g., 'w').
         var downloadResult = Downloading.Downloader.Run(userInput, settings, printer);
         resultHandler.RegisterResult(downloadResult);
+
+        if (downloadResult.IsFailed)
+            return false;
 
         History.Append(userInput, printer);
 
