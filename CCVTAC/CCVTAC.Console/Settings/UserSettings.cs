@@ -11,6 +11,7 @@ public sealed class UserSettings
     /// <summary>
     /// The directory where working files are temporarily stored during
     /// processing, before they are moved to the move-to directory.
+    /// Must be a fully qualified path.
     /// </summary>
     [JsonPropertyName("workingDirectory")]
     [JsonRequired]
@@ -18,6 +19,7 @@ public sealed class UserSettings
 
     /// <summary>
     /// The directory to which the final audio files should be moved.
+    /// Must be a fully qualified path.
     /// </summary>
     [JsonPropertyName("moveToDirectory")]
     [JsonRequired]

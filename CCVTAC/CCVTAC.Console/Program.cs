@@ -49,6 +49,7 @@ internal static class Program
             return;
         }
         var userSettings = settingsResult.Value;
+
         SettingsService.PrintSummary(userSettings, printer, "Settings loaded OK:");
 
         var resultCounter = new ResultTracker(printer);
