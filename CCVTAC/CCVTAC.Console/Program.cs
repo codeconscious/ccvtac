@@ -91,7 +91,7 @@ internal static class Program
         var postProcessor = new PostProcessing.Setup(settings, printer);
         postProcessor.Run();
 
-        printer.Print($"Done in {mainStopwatch.ElapsedMilliseconds:#,##0}ms.");
+        printer.Print($"Done processing {userInput} in {mainStopwatch.ElapsedMilliseconds:#,##0}ms.");
         return false;
     }
 }
