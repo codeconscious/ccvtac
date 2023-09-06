@@ -87,6 +87,10 @@ internal static class Tagger
                 taggedFile.Tag.Year = year;
             }
             taggedFile.Tag.Comment = parsedJson.GenerateComment();
+            if (DetectComposer(parsedJson, printer) is string composer)
+            {
+                taggedFile.Tag.Composers = new[] { composer };
+            }
 
             WriteImage(taggedFile, imageFilePath, printer);
 
@@ -224,6 +228,39 @@ internal static class Tagger
         }
 
         return defaultName;
+    }
+
+    static string? DetectComposer(YouTubeJson.Root data, Printer printer)
+    {
+        List<(string Regex, int Group, string Text, string Source)> parsePatterns = new()
+        {
+            (
+                @"(?<=[Cc]omposed by |[Cc]omposed by: |[Cc]omposer: ).+",
+                0,
+                data.description,
+                "description"
+            ),
+            (
+                @"(?<=[Cc]omposed by |[Cc]omposed by: |[Cc]omposer: ).+",
+                0,
+                data.title,
+                "title"
+            )
+        };
+
+        foreach (var pattern in parsePatterns)
+        {
+            var regex = new Regex(pattern.Regex);
+            var match = regex.Match(pattern.Text);
+
+            if (!match.Success)
+                continue;
+
+            printer.Print($"Writing composer \"{match.Groups[pattern.Group].Value}\" (matched via {pattern.Source})");
+            return match.Groups[pattern.Group].Value.Trim();
+        }
+
+        return null;
     }
 
     /// <summary>
