@@ -74,20 +74,17 @@ internal static class Tagger
 
             using var taggedFile = TagLib.File.Create(audioFilePath);
             taggedFile.Tag.Title = DetectTitle(parsedJson, printer, parsedJson.title);
-            var maybeArtist = DetectArtist(parsedJson, printer);
-            if (maybeArtist is not null)
+            if (DetectArtist(parsedJson, printer) is string artist)
             {
-                taggedFile.Tag.Performers = new[] { maybeArtist };
+                taggedFile.Tag.Performers = new[] { artist };
             }
-            var maybeAlbum = DetectAlbum(parsedJson, printer);
-            if (maybeAlbum is not null)
+            if (DetectAlbum(parsedJson, printer) is string album)
             {
-                taggedFile.Tag.Album = maybeAlbum;
+                taggedFile.Tag.Album = album;
             }
-            var maybeYear = DetectReleaseYear(parsedJson, printer);
-            if (maybeYear is not null)
+            if (DetectReleaseYear(parsedJson, printer, 0) is ushort year)
             {
-                taggedFile.Tag.Year = (uint) maybeYear;
+                taggedFile.Tag.Year = year;
             }
             taggedFile.Tag.Comment = parsedJson.GenerateComment();
 
