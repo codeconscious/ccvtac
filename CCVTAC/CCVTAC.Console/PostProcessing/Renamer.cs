@@ -11,55 +11,55 @@ internal static class Renamer
     // TODO: Convert this into a setting.
     private static readonly IReadOnlyList<RenamePattern> RenamePatterns = new List<RenamePattern>()
     {
-        new RenamePattern(
+        new(
             new Regex(@"\s\[[\w_-]{11}\](?=\.\w{3,5})"),
             string.Empty,
             "Remove trailing video IDs (recommend running this first)"),
-        new RenamePattern(
+        new(
             new Regex(@"\s{2,}"),
             " ",
             "Remove extra spaces"),
-        new RenamePattern(
+        new(
             new Regex(@"(?<= - )\d{3} (\d{1,3})\.?\s?"),
             "%<1>s - ",
             "Remove and reformat duplicate track numbers"),
-        new RenamePattern(
+        new(
             new Regex(@"(.+?)(?: - )(.+?) \[[\w⧸]+\] .+ \(([\d\?？]{4})\)"),
             "%<1>s - %<2>s [%<3>s]",
             "Custom reformat"),
-        new RenamePattern(
+        new(
             new Regex(@"\s*[(（【［\[\-]?(?:[Oo]fficial +|OFFICIAL +)?(?:[Mm]usic [Vv]ideo|MUSIC VIDEO|[Ll]yric [Vv]ideo|LYRIC VIDEO|[Vv]ideo|VIDEO|[Aa]udio|[Vv]isualizer|AUDIO|[Ff]ull (?:[Aa]lbum|LP|EP)|M(?:[_/])?V)[)】］）\]\-]?"),
             string.Empty,
             "Remove unneeded labels"),
-        new RenamePattern(
+        new(
             new Regex(@"^(.+?)(?: - )?\s?[｢「『【](.+)[」｣』】]\s?(\d{4})(?:\s?MV)?"),
             "%<1>s - %<2>s [%<3>s]",
             "Reformat 'PERSON「TITLE」YEAR'"),
-        new RenamePattern(
+        new(
             new Regex(@"^(.+?)(?: - )?\s?[｢「『【](.+?)[」｣』】](?:\s?MV)?(?=\.\w{3,4})"),
             "%<1>s - %<2>s",
             "Reformat 'PERSON「TITLE」' (alone, not followed by anything)"),
-        new RenamePattern(
+        new(
             new Regex(@"^(.+?)(?: - )?\s?([｢「『【].+?[」｣』】](?:\s?MV)?.*)(?=\.\w{3,4})"),
             "%<1>s - %<2>s",
             "Reformat 'PERSON「TITLE」' followed by other info"),
-        new RenamePattern(
+        new(
             new Regex(@"(^.+) \[\s(.+)\s\]"),
             "%<1>s - %<2>s",
             "Reformat 'ARTIST [ TITLE ]'"),
-        new RenamePattern(
+        new(
             new Regex(@"^(.+)\s{1,}-\s{1,}['＂](.+)['＂]"),
             "%<1>s - %<2>s",
             """Reformat 'ARTIST - 'TITLE' ]', etc."""),
-        new RenamePattern(
+        new(
             new Regex(@"^(.+?)(?: - [｢「『【])(.+)(?:[」｣』】]).*(?=（Full Ver.）)"),
             "%<1>s - %<2>s",
             "Reformat 'ARTIST - \'TITLE\' ]'"),
-        new RenamePattern(
+        new(
             new Regex(@" - - "),
             " - ",
             "Compress doubled hyphens"),
-        new RenamePattern(
+        new(
             new Regex(@" – "),
             " - ",
             "Replace en dashes with hyphens")
@@ -80,12 +80,14 @@ internal static class Renamer
         {
             var newFileName = RenamePatterns.Aggregate(
                 new StringBuilder(filePath.Name),
-                (newFileNameSb, renamePattern) => {
+                (newFileNameSb, renamePattern) =>
+                {
+                    // Only continue if the current regex is a match.
                     var match = renamePattern.Regex.Match(newFileNameSb.ToString());
                     if (!match.Success)
                         return newFileNameSb;
 
-                    // Delete the matched substring.
+                    // Delete the matched substring by index.
                     newFileNameSb.Remove(match.Index, match.Length);
 
                     // Work out the replacement text that should be inserted.
