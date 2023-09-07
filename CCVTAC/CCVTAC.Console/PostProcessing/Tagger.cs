@@ -1,25 +1,25 @@
 ﻿using System.IO;
 using System.Text.Json;
-using System.Text.RegularExpressions;
+using CCVTAC.Console.Settings;
 
 namespace CCVTAC.Console.PostProcessing;
 
 internal static class Tagger
 {
-    internal static Result<string> Run(string workingDirectory, Printer printer)
+    internal static Result<string> Run(UserSettings userSettings, Printer printer)
     {
         printer.Print("Adding file tags...");
 
         var stopwatch = new System.Diagnostics.Stopwatch();
         stopwatch.Start();
 
-        var taggingSetsResult = GetTaggingSets(workingDirectory);
+        var taggingSetsResult = GetTaggingSets(userSettings.WorkingDirectory);
         if (taggingSetsResult.IsFailed)
             return Result.Fail("No tagging sets were generated, so tagging cannot be done.");
 
         foreach (var taggingSet in taggingSetsResult.Value)
         {
-            ProcessSingleTaggingSet(taggingSet, printer);
+            ProcessSingleTaggingSet(userSettings, taggingSet, printer);
         }
 
         return Result.Ok($"Tagging done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
@@ -42,7 +42,7 @@ internal static class Tagger
         }
     }
 
-    static void ProcessSingleTaggingSet(TaggingSet taggingSet, Printer printer)
+    static void ProcessSingleTaggingSet(UserSettings userSettings, TaggingSet taggingSet, Printer printer)
     {
         printer.Print($"{taggingSet.AudioFilePaths.Count()} audio file(s) with resource ID \"{taggingSet.ResourceId}\"");
 
@@ -57,11 +57,12 @@ internal static class Tagger
 
         foreach (var audioFilePath in confirmedTaggingSet.AudioFilePaths)
         {
-            TagSingleFile(parsedJsonResult.Value, audioFilePath, taggingSet.ImageFilePath, printer);
+            TagSingleFile(userSettings, parsedJsonResult.Value, audioFilePath, taggingSet.ImageFilePath, printer);
         }
     }
 
     static void TagSingleFile(
+        UserSettings userSettings,
         YouTubeJson.Root parsedJson,
         string audioFilePath,
         string imageFilePath,
@@ -75,19 +76,29 @@ internal static class Tagger
             using var taggedFile = TagLib.File.Create(audioFilePath);
             var tagDetector = new TagDetector();
             taggedFile.Tag.Title = tagDetector.DetectTitle(parsedJson, printer, parsedJson.title);
+
             if (tagDetector.DetectArtist(parsedJson, printer) is string artist)
             {
                 taggedFile.Tag.Performers = new[] { artist };
             }
+
             if (tagDetector.DetectAlbum(parsedJson, printer) is string album)
             {
                 taggedFile.Tag.Album = album;
             }
-            if (tagDetector.DetectReleaseYear(parsedJson, printer, 0) is ushort year)
+
+            ushort? defaultYear =
+                userSettings.UseUploadYearForUploaders?.Contains(parsedJson.uploader) == true &&
+                ushort.TryParse(parsedJson.upload_date[0..4], out var parsedYear)
+                    ? parsedYear
+                    : null;
+            if (tagDetector.DetectReleaseYear(parsedJson, printer, defaultYear) is ushort year)
             {
                 taggedFile.Tag.Year = year;
             }
+
             taggedFile.Tag.Comment = parsedJson.GenerateComment();
+
             if (tagDetector.DetectComposer(parsedJson, printer) is string composer)
             {
                 taggedFile.Tag.Composers = new[] { composer };
@@ -141,6 +152,8 @@ internal static class Tagger
     /// <param name="printer"></param>
     private static TaggingSet DeleteSourceFile(TaggingSet taggingSet, Printer printer)
     {
+        // If there is only one file, then there are no child files, so no action is necessary.
+        // (Two files should never happen, but might be worth thinking about how to handle that.)
         if (taggingSet.AudioFilePaths.Count() <= 1)
             return taggingSet;
 

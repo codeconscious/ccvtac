@@ -15,7 +15,7 @@ public sealed class UserSettings
     /// </summary>
     [JsonPropertyName("workingDirectory")]
     [JsonRequired]
-    public string? WorkingDirectory { get; init; }
+    public string WorkingDirectory { get; init; } = string.Empty;
 
     /// <summary>
     /// The directory to which the final audio files should be moved.
@@ -23,7 +23,7 @@ public sealed class UserSettings
     /// </summary>
     [JsonPropertyName("moveToDirectory")]
     [JsonRequired]
-    public string? MoveToDirectory { get; init; }
+    public string MoveToDirectory { get; init; } = string.Empty;
 
     /// <summary>
     /// Specifies whether video chapters should be split into a separate
@@ -45,4 +45,7 @@ public sealed class UserSettings
     /// </summary>
     [JsonPropertyName("sleepBetweenDownloadsSeconds")]
     public ushort SleepBetweenDownloadsSeconds { get; init; } = 3;
+
+    [JsonPropertyName("useUploadYearForUploaders")]
+    public string[]? UseUploadYearForUploaders { get; init; }
 }
