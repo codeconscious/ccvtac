@@ -12,7 +12,7 @@ internal static class Mover
         uint successCount = 0;
         uint failureCount = 0;
         var workingDirInfo = new DirectoryInfo(workingDirectory);
-        printer.Print($"Moving audio files to \"{moveToDirectory}\"...");
+        printer.Print($"Moving audio file(s) to \"{moveToDirectory}\"...");
         foreach (var file in workingDirInfo.EnumerateFiles("*.m4a"))
         {
             try
@@ -22,12 +22,12 @@ internal static class Mover
                     $"{Path.Combine(moveToDirectory, file.Name)}",
                     shouldOverwrite);
                 successCount++;
-                printer.Print($"- Moved \"{file.Name}\"");
+                printer.Print($"• Moved \"{file.Name}\"");
             }
             catch (Exception ex)
             {
                 failureCount++;
-                printer.Error($"- Error moving file \"{file.Name}\": {ex.Message}");
+                printer.Error($"• Error moving file \"{file.Name}\": {ex.Message}");
             }
         }
 

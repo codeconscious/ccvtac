@@ -17,11 +17,11 @@ internal static class Deleter
             try
             {
                 file.Delete();
-                printer.Print($"- Deleted \"{file.Name}\"");
+                printer.Print($"• Deleted \"{file.Name}\"");
             }
             catch (Exception ex)
             {
-                printer.Error($"- Could not delete \"{file.Name}\": {ex.Message}");
+                printer.Error($"• Could not delete \"{file.Name}\": {ex.Message}");
             }
         }
 

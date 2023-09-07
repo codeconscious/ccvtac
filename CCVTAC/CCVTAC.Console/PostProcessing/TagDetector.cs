@@ -44,11 +44,11 @@ internal class TagDetector
             if (!match.Success)
                 continue;
 
-            printer.Print($"Writing title \"{match.Groups[pattern.Group].Value}\" (matched via {pattern.Source})");
+            printer.Print($"• Writing title \"{match.Groups[pattern.Group].Value}\" (matched via {pattern.Source})");
             return match.Groups[pattern.Group].Value.Trim();
         }
 
-        printer.Print($"Writing title \"{defaultName}\" (taken from video title)");
+        printer.Print($"• Writing title \"{defaultName}\" (taken from video title)");
         return defaultName;
     }
 
@@ -73,7 +73,7 @@ internal class TagDetector
             if (!match.Success)
                 continue;
 
-            printer.Print($"Writing artist \"{match.Groups[pattern.Group].Value}\" (matched via {pattern.Source})");
+            printer.Print($"• Writing artist \"{match.Groups[pattern.Group].Value}\" (matched via {pattern.Source})");
             return match.Groups[pattern.Group].Value.Trim();
         }
 
@@ -113,7 +113,7 @@ internal class TagDetector
             if (!match.Success)
                 continue;
 
-            printer.Print($"Writing album \"{match.Groups[pattern.Group].Value}\" (matched via {pattern.Source})");
+            printer.Print($"• Writing album \"{match.Groups[pattern.Group].Value}\" (matched via {pattern.Source})");
             return match.Groups[pattern.Group].Value.Trim();
         }
 
@@ -146,7 +146,7 @@ internal class TagDetector
             if (!match.Success)
                 continue;
 
-            printer.Print($"Writing composer \"{match.Groups[pattern.Group].Value}\" (matched via {pattern.Source})");
+            printer.Print($"• Writing composer \"{match.Groups[pattern.Group].Value}\" (matched via {pattern.Source})");
             return match.Groups[pattern.Group].Value.Trim();
         }
 
@@ -201,7 +201,7 @@ internal class TagDetector
             if (result is null)
                 continue;
 
-            printer.Print($"Writing year {result.Value} (matched via {pattern.Source})");
+            printer.Print($"• Writing year {result.Value} (matched via {pattern.Source})");
             return result.Value;
         }
 

@@ -32,10 +32,10 @@ public static class SettingsService
         if (!string.IsNullOrWhiteSpace(header))
             printer.Print(header);
 
-        printer.Print($"- Downloading {settings.AudioFormat!.ToUpperInvariant()} files");
-        printer.Print($"- Video chapters {(settings.SplitChapters ? "WILL" : "will NOT")} be split");
-        printer.Print($"- Working directory: {settings.WorkingDirectory}");
-        printer.Print($"- Move-to directory: {settings.MoveToDirectory}");
+        printer.Print($"• Downloading {settings.AudioFormat!.ToUpperInvariant()} files");
+        printer.Print($"• Video chapters {(settings.SplitChapters ? "WILL" : "will NOT")} be split");
+        printer.Print($"• Working directory: {settings.WorkingDirectory}");
+        printer.Print($"• Move-to directory: {settings.MoveToDirectory}");
     }
 
     public static Result<UserSettings> GetUserSettings()
