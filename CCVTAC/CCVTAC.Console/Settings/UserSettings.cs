@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using CCVTAC.Console.PostProcessing;
 
 namespace CCVTAC.Console.Settings;
 
@@ -15,7 +16,7 @@ public sealed class UserSettings
     /// </summary>
     [JsonPropertyName("workingDirectory")]
     [JsonRequired]
-    public string? WorkingDirectory { get; init; }
+    public string WorkingDirectory { get; init; } = string.Empty;
 
     /// <summary>
     /// The directory to which the final audio files should be moved.
@@ -23,7 +24,7 @@ public sealed class UserSettings
     /// </summary>
     [JsonPropertyName("moveToDirectory")]
     [JsonRequired]
-    public string? MoveToDirectory { get; init; }
+    public string MoveToDirectory { get; init; } = string.Empty;
 
     /// <summary>
     /// Specifies whether video chapters should be split into a separate
@@ -45,4 +46,25 @@ public sealed class UserSettings
     /// </summary>
     [JsonPropertyName("sleepBetweenDownloadsSeconds")]
     public ushort SleepBetweenDownloadsSeconds { get; init; } = 3;
+
+    /// <summary>
+    /// A list of uploader names for whom the video upload dates' year value
+    /// can be used at the video's release year. It should contain channel names.
+    /// Case can be ignored.
+    /// </summary>
+    [JsonPropertyName("useUploadYearUploaders")]
+    public string[]? UseUploadYearUploaders { get; init; }
+
+    /// <summary>
+    /// If the supplied video uploader is specified in the settings, returns the video's upload year.
+    /// Otherwise, returns null.
+    /// </summary>
+    public ushort? GetVideoUploadDateIfRegisteredUploader(YouTubeJson.Root videoData)
+    {
+        return
+            this.UseUploadYearUploaders?.Contains(videoData.uploader, StringComparer.OrdinalIgnoreCase) == true &&
+            ushort.TryParse(videoData.upload_date[0..4], out var parsedYear)
+                ? parsedYear
+                : null;
+    }
 }
