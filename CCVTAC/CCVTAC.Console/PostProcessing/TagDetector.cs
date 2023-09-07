@@ -125,13 +125,13 @@ internal class TagDetector
         List<DetectionScheme> parsePatterns = new()
         {
             new DetectionScheme(
-                @"(?<=[Cc]omposed by |[Cc]omposed by: |[Cc]omposer: ).+",
+                @"(?<=[Cc]omposed by |[Cc]omposed by: |[Cc]omposer: |作曲[:：]).+",
                 0,
                 data.description,
                 "description"
             ),
             new DetectionScheme(
-                @"(?<=[Cc]omposed by |[Cc]omposed by: |[Cc]omposer: ).+",
+                @"(?<=[Cc]omposed by |[Cc]omposed by: |[Cc]omposer: |作曲[:：]).+",
                 0,
                 data.title,
                 "title"
