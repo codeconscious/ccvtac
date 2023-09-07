@@ -88,7 +88,7 @@ internal static class Tagger
             }
 
             ushort? defaultYear =
-                userSettings.UseUploadYearForUploaders?.Contains(parsedJson.uploader) == true &&
+                userSettings.UseUploadYearForUploaders?.ContainsCaseInsensitive(parsedJson.uploader) == true &&
                 ushort.TryParse(parsedJson.upload_date[0..4], out var parsedYear)
                     ? parsedYear
                     : null;
