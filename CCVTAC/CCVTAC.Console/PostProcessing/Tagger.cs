@@ -87,11 +87,12 @@ internal static class Tagger
                 taggedFile.Tag.Album = album;
             }
 
-            ushort? defaultYear =
-                userSettings.UseUploadYearForUploaders?.ContainsCaseInsensitive(parsedJson.uploader) == true &&
-                ushort.TryParse(parsedJson.upload_date[0..4], out var parsedYear)
-                    ? parsedYear
-                    : null;
+            // Years
+            ushort? defaultYear = userSettings.GetVideoUploadDateIfRegisteredUploader(parsedJson);
+            if (defaultYear is not null)
+            {
+                printer.Print($"Will use upload year {defaultYear} for uploader \"{parsedJson.uploader}\" if no other year is detected.");
+            }
             if (tagDetector.DetectReleaseYear(parsedJson, printer, defaultYear) is ushort year)
             {
                 taggedFile.Tag.Year = year;
