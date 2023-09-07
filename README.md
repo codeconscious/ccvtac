@@ -1,8 +1,8 @@
-# CCVTAC-C#
+# CCVTAC
 
 A small .NET CLI tool that acts as a wrapper around [yt-dlp](https://github.com/yt-dlp/yt-dlp) to even more easily download audio from specific YouTube videos.
 
-I [originally created this tool in Ruby](https://github.com/codeconscious/youtube-audio-downloader-ruby) to get better acquainted with Ruby for work, but I've rewritten it in C# because I decided to move from MP3 to M4A files to avoid unnecessary file conversion (for better quality in smaller files), but the Ruby gem (library) I was using doesn't support M4A; and frankly, I simply enjoy working with C# much more. (I might find a way to force F# in here too...)
+I [originally created this tool in Ruby](https://github.com/codeconscious/youtube-audio-downloader-ruby) to get better acquainted with Ruby for work, but I've rewritten it in C# because I decided to move from MP3 to M4A files to avoid unnecessary file conversion (for better quality in smaller files), but the Ruby gem (library) I was using doesn't support M4A; and frankly, I find C# more enjoyable to work with. (I might find a way to even force F# in here too...)
 
 Feel free to use it yourself, but please do so responsibly. No warranties or guarantees provided!
 
@@ -19,14 +19,14 @@ Feel free to use it yourself, but please do so responsibly. No warranties or gua
 
 ### TODOs and Ideas
 
-- Add audio normalization
+- Add audio normalization (I need to find a command line tool or NuGet package that works with M4A files)
 - Add a post-processing–only option for already-downloaded temporary files (via aborted downloads, etc.)
 
 ## Running It
 
 Prerequisites:
 
-- .NET 7 (until I perhaps get some releases ready)
+- .NET 7 (until I perhaps get some proper releases ready)
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp)
 - Optional: [mogrify](https://imagemagick.org/script/mogrify.php) (for auto-trimming album art)
 

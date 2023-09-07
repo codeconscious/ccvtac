@@ -119,12 +119,12 @@ internal static class Renamer
                 File.Move(
                     filePath.FullName,
                     Path.Combine(workingDirectory, newFileName));
-                printer.Print($"- From: \"{filePath.Name}\"");
+                printer.Print($"• From: \"{filePath.Name}\"");
                 printer.Print($"    To: \"{newFileName}\"");
             }
             catch (Exception ex)
             {
-                printer.Error($"- Could not rename \"{filePath.Name}\": {ex.Message}");
+                printer.Error($"• Could not rename \"{filePath.Name}\": {ex.Message}");
             }
         }
 
