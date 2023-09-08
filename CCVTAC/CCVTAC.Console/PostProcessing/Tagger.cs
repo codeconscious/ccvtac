@@ -6,7 +6,7 @@ namespace CCVTAC.Console.PostProcessing;
 
 internal static class Tagger
 {
-    internal static Result<string> Run(UserSettings userSettings, Printer printer)
+    internal static Result<string> Run(UserSettings userSettings, YouTubePlaylistJson.Root? playlistJson, Printer printer)
     {
         printer.Print("Adding file tags...");
 
@@ -19,7 +19,7 @@ internal static class Tagger
 
         foreach (var taggingSet in taggingSetsResult.Value)
         {
-            ProcessSingleTaggingSet(userSettings, taggingSet, printer);
+            ProcessSingleTaggingSet(userSettings, taggingSet, playlistJson, printer);
         }
 
         return Result.Ok($"Tagging done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
@@ -42,7 +42,7 @@ internal static class Tagger
         }
     }
 
-    static void ProcessSingleTaggingSet(UserSettings userSettings, TaggingSet taggingSet, Printer printer)
+    static void ProcessSingleTaggingSet(UserSettings userSettings, TaggingSet taggingSet, YouTubePlaylistJson.Root? playlistJson, Printer printer)
     {
         printer.Print($"{taggingSet.AudioFilePaths.Count()} audio file(s) with resource ID \"{taggingSet.ResourceId}\"");
 
@@ -57,15 +57,16 @@ internal static class Tagger
 
         foreach (var audioFilePath in confirmedTaggingSet.AudioFilePaths)
         {
-            TagSingleFile(userSettings, parsedJsonResult.Value, audioFilePath, taggingSet.ImageFilePath, printer);
+            TagSingleFile(userSettings, parsedJsonResult.Value, audioFilePath, taggingSet.ImageFilePath, playlistJson, printer);
         }
     }
 
     static void TagSingleFile(
         UserSettings userSettings,
-        YouTubeJson.Root parsedJson,
+        YouTubeVideoJson.Root parsedJson,
         string audioFilePath,
         string imageFilePath,
+        YouTubePlaylistJson.Root? playlistJson,
         Printer printer)
     {
         try
@@ -82,7 +83,7 @@ internal static class Tagger
                 taggedFile.Tag.Performers = new[] { artist };
             }
 
-            if (tagDetector.DetectAlbum(parsedJson, printer) is string album)
+            if (tagDetector.DetectAlbum(parsedJson, printer, playlistJson?.Title ?? null) is string album)
             {
                 taggedFile.Tag.Album = album;
             }
@@ -98,7 +99,7 @@ internal static class Tagger
                 taggedFile.Tag.Year = year;
             }
 
-            taggedFile.Tag.Comment = parsedJson.GenerateComment();
+            taggedFile.Tag.Comment = parsedJson.GenerateComment(playlistJson);
 
             if (tagDetector.DetectComposer(parsedJson, printer) is string composer)
             {
@@ -116,7 +117,7 @@ internal static class Tagger
         }
     }
 
-    static Result<YouTubeJson.Root> GetParsedJson(TaggingSet taggingSet)
+    static Result<YouTubeVideoJson.Root> GetParsedJson(TaggingSet taggingSet)
     {
         string json;
         try
@@ -128,10 +129,10 @@ internal static class Tagger
             return Result.Fail($"Error reading JSON file \"{taggingSet.JsonFilePath}\": {ex.Message}.");
         }
 
-        YouTubeJson.Root? parsedJson;
+        YouTubeVideoJson.Root? parsedJson;
         try
         {
-            parsedJson = JsonSerializer.Deserialize<YouTubeJson.Root>(json);
+            parsedJson = JsonSerializer.Deserialize<YouTubeVideoJson.Root>(json);
 
             if (parsedJson is null)
             {

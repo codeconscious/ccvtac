@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace CCVTAC.Console.PostProcessing;
 
-public record struct YouTubeJson
+public record struct YouTubeVideoJson
 {
     public record struct Root(
         [property: JsonPropertyName("id")] string id,

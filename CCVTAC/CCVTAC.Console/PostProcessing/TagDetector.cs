@@ -23,7 +23,7 @@ public record struct DetectionScheme(
 
 internal class TagDetector
 {
-    public string? DetectTitle(YouTubeJson.Root data, Printer printer, string? defaultName = null)
+    public string? DetectTitle(YouTubeVideoJson.Root data, Printer printer, string? defaultName = null)
     {
         // TODO: Put this somewhere where it can be static.
         List<DetectionScheme> parsePatterns = new()
@@ -58,7 +58,7 @@ internal class TagDetector
         return defaultName;
     }
 
-    public string? DetectArtist(YouTubeJson.Root data, Printer printer, string? defaultName = null)
+    public string? DetectArtist(YouTubeVideoJson.Root data, Printer printer, string? defaultName = null)
     {
         // TODO: Put this somewhere where it can be static.
         List<DetectionScheme> parsePatterns = new()
@@ -93,7 +93,7 @@ internal class TagDetector
         return defaultName;
     }
 
-    public string? DetectAlbum(YouTubeJson.Root data, Printer printer, string? defaultName = null)
+    public string? DetectAlbum(YouTubeVideoJson.Root data, Printer printer, string? defaultName = null)
     {
         // TODO: Put this somewhere where it can be static or else a setting.
         List<DetectionScheme> parsePatterns = new()
@@ -130,10 +130,11 @@ internal class TagDetector
             return match.Groups[pattern.Group].Value.Trim();
         }
 
+        printer.Print($"• No album was parsed{(defaultName is null ? "." : $", so defaulting to \"{defaultName}\".")}");
         return defaultName;
     }
 
-    public string? DetectComposer(YouTubeJson.Root data, Printer printer)
+    public string? DetectComposer(YouTubeVideoJson.Root data, Printer printer)
     {
         List<DetectionScheme> parsePatterns = new()
         {
@@ -171,7 +172,7 @@ internal class TagDetector
     /// Attempt to automatically detect a release year in the video metadata.
     /// If none is found, return a default value.
     /// </summary>
-    public ushort? DetectReleaseYear(YouTubeJson.Root data, Printer printer, ushort? defaultYear = null)
+    public ushort? DetectReleaseYear(YouTubeVideoJson.Root data, Printer printer, ushort? defaultYear = null)
     {
         // TODO: Feature: Use the video upload date for uploaders specified in user settings.
         // TODO: Put this somewhere where it can be static or made a setting.
