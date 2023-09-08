@@ -34,6 +34,12 @@ internal class TagDetector
                 data.description,
                 "description (Topic style)"
             ),
+            new DetectionScheme(
+                @"(.+)(?: - )?[「『](.+)[」』]\[([12]\d{3})\]",
+                2,
+                data.title,
+                "title"
+            ),
         };
 
         foreach (var pattern in parsePatterns)
@@ -48,7 +54,7 @@ internal class TagDetector
             return match.Groups[pattern.Group].Value.Trim();
         }
 
-        printer.Print($"• Writing title \"{defaultName}\" (taken from video title)");
+        printer.Print($"• No title was parsed{(defaultName is null ? "." : $", so defaulting to \"{defaultName}\".")}");
         return defaultName;
     }
 
@@ -62,6 +68,12 @@ internal class TagDetector
                 2,
                 data.description,
                 "description (Topic style)"
+            ),
+            new DetectionScheme(
+                @"(.+)(?: - )?[「『](.+)[」』]\[([12]\d{3})\]",
+                1,
+                data.title,
+                "title"
             ),
         };
 
@@ -77,6 +89,7 @@ internal class TagDetector
             return match.Groups[pattern.Group].Value.Trim();
         }
 
+        printer.Print($"• No artist was parsed{(defaultName is null ? "." : $", so defaulting to \"{defaultName}\".")}");
         return defaultName;
     }
 
@@ -150,6 +163,7 @@ internal class TagDetector
             return match.Groups[pattern.Group].Value.Trim();
         }
 
+        printer.Print($"• No composer was parsed.");
         return null;
     }
 
@@ -193,6 +207,12 @@ internal class TagDetector
                 data.description,
                 "description's 年月日-style release date"
             ),
+            new DetectionScheme(
+                @"(.+)(?: - )?[「『](.+)[」』]\[([12]\d{3})\]",
+                3,
+                data.title,
+                "title"
+            ),
         };
 
         foreach (var pattern in parsePatterns)
@@ -205,7 +225,7 @@ internal class TagDetector
             return result.Value;
         }
 
-        printer.Print($"No year could be parsed{(defaultYear is null ? "." : $", so defaulting to {defaultYear}.")}");
+        printer.Print($"No year was parsed{(defaultYear is null ? "." : $", so defaulting to {defaultYear}.")}");
         return defaultYear;
 
         /// <summary>
