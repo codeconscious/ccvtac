@@ -37,9 +37,10 @@ public static class YouTubeJsonExtensionMethods
         if (playlistJson is not null)
         {
             sb.AppendLine($"• Playlist name: {playlistJson.Title}");
+            sb.AppendLine($"• Playlist URL: {playlistJson.WebpageUrl}");
             if (!string.IsNullOrWhiteSpace(playlistJson.Description))
             {
-                sb.AppendLine($"• Playlist name: {playlistJson.Description}");
+                sb.AppendLine($"• Playlist description: {playlistJson.Description}");
             }
         }
         sb.AppendLine($"• Description: {data.description})");
