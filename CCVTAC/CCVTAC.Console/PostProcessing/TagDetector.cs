@@ -31,13 +31,13 @@ internal class TagDetector
             new DetectionScheme(
                 @"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D",
                 1,
-                data.description,
+                data.Description,
                 "description (Topic style)"
             ),
             new DetectionScheme(
                 @"(.+)(?: - )?[「『](.+)[」』]\[([12]\d{3})\]",
                 2,
-                data.title,
+                data.Title,
                 "title"
             ),
         };
@@ -66,13 +66,13 @@ internal class TagDetector
             new DetectionScheme(
                 @"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D",
                 2,
-                data.description,
+                data.Description,
                 "description (Topic style)"
             ),
             new DetectionScheme(
                 @"(.+)(?: - )?[「『](.+)[」』]\[([12]\d{3})\]",
                 1,
-                data.title,
+                data.Title,
                 "title"
             ),
         };
@@ -101,19 +101,19 @@ internal class TagDetector
             new DetectionScheme(
                 @"(?<=[Aa]lbum: ).+",
                 0,
-                data.description,
+                data.Description,
                 "description"
             ),
             new DetectionScheme(
                 @"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D",
                 3,
-                data.description,
+                data.Description,
                 "description (Topic style)"
             ),
             new DetectionScheme(
                 """(?<='s ['"]).+(?=['"] album)""",
                 0,
-                data.description,
+                data.Description,
                 "description"
             ),
         };
@@ -141,13 +141,13 @@ internal class TagDetector
             new DetectionScheme(
                 @"(?<=[Cc]omposed by |[Cc]omposed by: |[Cc]omposer: |作曲[:：]).+",
                 0,
-                data.description,
+                data.Description,
                 "description"
             ),
             new DetectionScheme(
                 @"(?<=[Cc]omposed by |[Cc]omposed by: |[Cc]omposer: |作曲[:：]).+",
                 0,
-                data.title,
+                data.Title,
                 "title"
             )
         };
@@ -181,37 +181,37 @@ internal class TagDetector
             new DetectionScheme(
                 @"(?<=[(（\[［【])[12]\d{3}(?=[)）\]］】])",
                 0,
-                data.title,
+                data.Title,
                 "title"
             ),
             new DetectionScheme(
                 @"(?<=℗ )[12]\d{3}(?=\s)",
                 0,
-                data.description,
+                data.Description,
                 "description's \"℗\" symbol"
             ),
             new DetectionScheme(
                 @"(?<=[Rr]eleased [io]n: )[12]\d{3}",
                 0,
-                data.description,
+                data.Description,
                 "description 'released on' date"
             ),
             new DetectionScheme(
                 @"[12]\d{3}(?=年(?:\d{1,2}月\d{1,2}日)?リリース)",
                 0,
-                data.description,
+                data.Description,
                 "description's リリース-style date"
             ),
             new DetectionScheme(
                 @"[12]\d{3}年(?=\d{1,2}月\d{1,2}日\s?[Rr]elease)",
                 0,
-                data.description,
+                data.Description,
                 "description's 年月日-style release date"
             ),
             new DetectionScheme(
                 @"(.+)(?: - )?[「『](.+)[」』]\[([12]\d{3})\]",
                 3,
-                data.title,
+                data.Title,
                 "title"
             ),
         };

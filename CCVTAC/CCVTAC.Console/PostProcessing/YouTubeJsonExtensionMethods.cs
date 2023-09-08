@@ -7,11 +7,11 @@ public static class YouTubeJsonExtensionMethods
     /// </summary>
     public static string UploaderSummary(this YouTubeVideoJson.Root data)
     {
-        var uploaderLinkOrId = string.IsNullOrWhiteSpace(data.uploader_url)
-            ? data.uploader_id
-            : data.uploader_url;
+        var uploaderLinkOrId = string.IsNullOrWhiteSpace(data.Uploader_url)
+            ? data.Uploader_id
+            : data.Uploader_url;
 
-        return $"{data.uploader} ({uploaderLinkOrId})";
+        return $"{data.Uploader} ({uploaderLinkOrId})";
     }
 
     /// <summary>
@@ -19,7 +19,7 @@ public static class YouTubeJsonExtensionMethods
     /// plain YYYYMMDD version (e.g., "20230827") within the parsed JSON file data.
     /// </summary>
     public static string FormattedUploadDate(this YouTubeVideoJson.Root data) =>
-        $"{data.upload_date[4..6]}/{data.upload_date[6..8]}/{data.upload_date[0..4]}";
+        $"{data.Upload_date[4..6]}/{data.Upload_date[6..8]}/{data.Upload_date[0..4]}";
 
     /// <summary>
     /// Returns a formatted comment using data parsed from the JSON file.
@@ -29,9 +29,9 @@ public static class YouTubeJsonExtensionMethods
         System.Text.StringBuilder sb = new();
         sb.AppendLine("SOURCE DATA:");
         sb.AppendLine($"• Downloaded: {DateTime.Now} using CCVTAC");
-        sb.AppendLine($"• Service: {data.extractor_key}");
-        sb.AppendLine($"• URL: {data.webpage_url}");
-        sb.AppendLine($"• Title: {data.fulltitle}");
+        sb.AppendLine($"• Service: {data.Extractor_key}");
+        sb.AppendLine($"• URL: {data.Webpage_url}");
+        sb.AppendLine($"• Title: {data.Fulltitle}");
         sb.AppendLine($"• Uploader: {data.UploaderSummary()}");
         sb.AppendLine($"• Uploaded: {data.FormattedUploadDate()}");
         if (playlistJson is not null)
@@ -43,7 +43,7 @@ public static class YouTubeJsonExtensionMethods
                 sb.AppendLine($"• Playlist description: {playlistJson.Description}");
             }
         }
-        sb.AppendLine($"• Description: {data.description})");
+        sb.AppendLine($"• Description: {data.Description})");
         return sb.ToString();
     }
 }

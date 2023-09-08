@@ -76,7 +76,7 @@ internal static class Tagger
 
             using var taggedFile = TagLib.File.Create(audioFilePath);
             var tagDetector = new TagDetector();
-            taggedFile.Tag.Title = tagDetector.DetectTitle(parsedJson, printer, parsedJson.title);
+            taggedFile.Tag.Title = tagDetector.DetectTitle(parsedJson, printer, parsedJson.Title);
 
             if (tagDetector.DetectArtist(parsedJson, printer) is string artist)
             {
@@ -92,7 +92,7 @@ internal static class Tagger
             ushort? defaultYear = userSettings.GetVideoUploadDateIfRegisteredUploader(parsedJson);
             if (defaultYear is not null)
             {
-                printer.Print($"Will use upload year {defaultYear} for uploader \"{parsedJson.uploader}\" if no other year is detected.");
+                printer.Print($"Will use upload year {defaultYear} for uploader \"{parsedJson.Uploader}\" if no other year is detected.");
             }
             if (tagDetector.DetectReleaseYear(parsedJson, printer, defaultYear) is ushort year)
             {
