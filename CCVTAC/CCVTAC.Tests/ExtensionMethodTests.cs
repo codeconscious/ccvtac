@@ -4,7 +4,7 @@ namespace CCVTAC.Tests;
 
 public class ExtensionMethodTests
 {
-    private static readonly string _validBaseFileName = @"filename123あいうえお漢字 ";
+    private static readonly string _validBaseFileName = @"filename123あいうえお漢字!@#$%^()_+ ";
     private static readonly char _defaultReplaceWithChar = '_';
     private static readonly char[] _pathInvalidChars = new[] {
         Path.PathSeparator,
@@ -47,5 +47,12 @@ public class ExtensionMethodTests
         var goodFileName = _validBaseFileName + "++";
         var result = goodFileName.ReplaceInvalidPathChars(_defaultReplaceWithChar, customInvalidChars);
         Assert.Equal(goodFileName, result);
+    }
+
+    [Fact]
+    public void ReplaceInvalidPathChars_InvalidReplaceChar_ThrowsException()
+    {
+        const char knownInvalidChar = '/';
+        Assert.Throws<ArgumentException>(() => _validBaseFileName.ReplaceInvalidPathChars(knownInvalidChar));
     }
 }
