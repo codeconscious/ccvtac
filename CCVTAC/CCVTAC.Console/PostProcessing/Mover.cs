@@ -20,7 +20,7 @@ internal static class Mover
 
         var verifiedMoveToDir = playlistJson is null
             ? moveToDirectory
-            : Path.Combine(moveToDirectory, playlistJson.Title); // TODO: Handle invalid chars!
+            : Path.Combine(moveToDirectory, playlistJson.Title.ReplaceInvalidPathChars());
 
         try
         {
