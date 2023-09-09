@@ -8,8 +8,8 @@ internal static class Mover
         string workingDirectory,
         string moveToDirectory,
         YouTubePlaylistJson.Root? playlistJson,
-        Printer printer,
-        bool shouldOverwrite)
+        bool shouldOverwrite,
+        Printer printer)
     {
         var stopwatch = new System.Diagnostics.Stopwatch();
         stopwatch.Start();
