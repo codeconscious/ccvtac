@@ -62,7 +62,8 @@ public sealed class UserSettings
     public ushort? GetVideoUploadDateIfRegisteredUploader(YouTubeVideoJson.Root videoData)
     {
         return
-            this.UseUploadYearUploaders?.Contains(videoData.Uploader, StringComparer.OrdinalIgnoreCase) == true &&
+            this.UseUploadYearUploaders?.Contains(videoData.Uploader,
+                                                  StringComparer.OrdinalIgnoreCase) == true &&
             ushort.TryParse(videoData.Upload_date[0..4], out var parsedYear)
                 ? parsedYear
                 : null;

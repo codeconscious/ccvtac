@@ -27,7 +27,7 @@ public sealed class Setup
         YouTubePlaylistJson.Root? playlistJson;
         if (playlistJsonResult.IsFailed)
         {
-            Printer.Warning($"Error reading playlist JSON file: {playlistJsonResult.Errors.First().Message}");
+            Printer.Print($"No playlist data loaded: {playlistJsonResult.Errors.First().Message}");
             playlistJson = null;
         }
         else
@@ -35,8 +35,8 @@ public sealed class Setup
             playlistJson = playlistJsonResult.Value;
         }
 
-        // TODO: Create an interface and iterate through them, calling `Run()`?
         ImageProcessor.Run(UserSettings.WorkingDirectory, Printer);
+
         var tagResult = Tagger.Run(UserSettings, playlistJson, Printer);
         if (tagResult.IsSuccess)
         {
@@ -61,18 +61,27 @@ public sealed class Setup
 
         try
         {
-            var playlistJsonFileName = Directory.GetFiles(workingDirectory).Single(f => regex.IsMatch(f));
-            var playlistJson = File.ReadAllText(playlistJsonFileName);
-            var parsedJson = JsonSerializer.Deserialize<YouTubePlaylistJson.Root>(playlistJson);
+            var fileNames = Directory.GetFiles(workingDirectory)
+                                     .Where(f => regex.IsMatch(f))
+                                     .ToImmutableList();
+
+            if (fileNames.Count == 0)
+                return Result.Fail("No relevant files found (so this is likely not a playlist download).");
+            if (fileNames.Count > 1)
+                return Result.Fail("Unexpectedly found more than 1 relevant file, so none will be processed.");
+            var fileName = fileNames.Single();
+
+            var json = File.ReadAllText(fileName);
+            var parsedJson = JsonSerializer.Deserialize<YouTubePlaylistJson.Root>(json);
 
             if (parsedJson is null)
-                return Result.Fail($"The JSON from file \"{playlistJsonFileName}\" was unexpectedly null.");
+                return Result.Fail($"The parsed JSON from file \"{fileName}\" was unexpectedly null.");
 
             return Result.Ok(parsedJson);
         }
         catch (Exception ex)
         {
-            return Result.Fail($"Error reading or parsing playlist JSON file: {ex.Message}");
+            return Result.Fail($"{ex.Message}");
         }
     }
 }
