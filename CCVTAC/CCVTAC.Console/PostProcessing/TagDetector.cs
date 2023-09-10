@@ -197,10 +197,10 @@ internal class TagDetector
                 "description 'released on' date"
             ),
             new DetectionScheme(
-                @"[12]\d{3}(?=年(?:\d{1,2}月\d{1,2}日)?リリース)",
+                @"[12]\d{3}(?=(?:[.\/年]\d{1,2}[.\/月]\d{1,2}日?\s?)?\s?(?:[Rr]elease|リリース|発売))",
                 0,
                 data.Description,
-                "description's リリース-style date"
+                "description's year-first–style date"
             ),
             new DetectionScheme(
                 @"[12]\d{3}年(?=\d{1,2}月\d{1,2}日\s?[Rr]elease)",
