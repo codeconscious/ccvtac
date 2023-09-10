@@ -24,17 +24,17 @@ internal static class Renamer
             "%<1>s - ",
             "Remove and reformat duplicate track numbers"),
         new(
-            new Regex(@"(.+?)(?: - )(.+?) \[[\w⧸]+\] .+ \(([\d\?？]{4})\)"),
-            "%<1>s - %<2>s [%<3>s]",
-            "Custom reformat"),
-        new(
             new Regex(@"\s*[(（【［\[\-]?(?:[Oo]fficial +|OFFICIAL +)?(?:[Mm]usic [Vv]ideo|MUSIC VIDEO|[Ll]yric [Vv]ideo|LYRIC VIDEO|[Vv]ideo|VIDEO|[Aa]udio|[Vv]isualizer|AUDIO|[Ff]ull (?:[Aa]lbum|LP|EP)|M(?:[_/])?V)[)】］）\]\-]?"),
             string.Empty,
             "Remove unneeded labels"),
         new(
-            new Regex(@"^(.+?)(?: - )?\s?[｢「『【](.+)[」｣』】]\s?(\d{4})(?:\s?MV)?"),
+            new Regex(@"(.+?)(?: - )(.+?) \[[\w⧸]+\] .+ \(([\d\?？]{4})\)"),
             "%<1>s - %<2>s [%<3>s]",
-            "Reformat 'PERSON「TITLE」YEAR'"),
+            "PERSON - TRACK [YEAR]"),
+        new(
+            new Regex(@"^(.+?)(?: - )?\s?[｢「『【](.+)[」｣』】]\s?\[?([12]\d{3})\]?(?:\s?MV)?"),
+            "%<1>s - %<2>s [%<3>s]",
+            "Reformat 'PERSON「TITLE」YEAR' and 'PERSON「TITLE」[YEAR]'"),
         new(
             new Regex(@"^(.+?)(?: - )?\s?[｢「『【](.+?)[」｣』】](?:\s?MV)?(?=\.\w{3,4})"),
             "%<1>s - %<2>s",
