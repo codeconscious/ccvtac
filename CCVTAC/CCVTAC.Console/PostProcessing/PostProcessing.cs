@@ -23,21 +23,21 @@ public sealed class Setup
 
         Printer.Print("Starting post-processing...");
 
-        var playlistJsonResult = GetPlaylistJson(UserSettings.WorkingDirectory);
-        YouTubePlaylistJson.Root? playlistJson;
-        if (playlistJsonResult.IsFailed)
+        var jsonResult = GetCollectionJson(UserSettings.WorkingDirectory);
+        YouTubeCollectionJson.Root? collectionJson;
+        if (jsonResult.IsFailed)
         {
-            Printer.Print($"No playlist data loaded: {playlistJsonResult.Errors.First().Message}");
-            playlistJson = null;
+            Printer.Print($"No playlist or channel data loaded: {jsonResult.Errors.First().Message}");
+            collectionJson = null;
         }
         else
         {
-            playlistJson = playlistJsonResult.Value;
+            collectionJson = jsonResult.Value;
         }
 
         ImageProcessor.Run(UserSettings.WorkingDirectory, Printer);
 
-        var tagResult = Tagger.Run(UserSettings, playlistJson, Printer);
+        var tagResult = Tagger.Run(UserSettings, collectionJson, Printer);
         if (tagResult.IsSuccess)
         {
             Printer.Print(tagResult.Value);
@@ -45,7 +45,7 @@ public sealed class Setup
             // AudioNormalizer.Run(UserSettings.WorkingDirectory, Printer); // TODO: `mp3gain`は無理なので、別のnormalize方法を要検討。
             Renamer.Run(UserSettings.WorkingDirectory, Printer);
             Deleter.Run(UserSettings.WorkingDirectory, Printer);
-            Mover.Run(UserSettings.WorkingDirectory, UserSettings.MoveToDirectory, playlistJson, true, Printer);
+            Mover.Run(UserSettings.WorkingDirectory, UserSettings.MoveToDirectory, collectionJson, true, Printer);
         }
         else
         {
@@ -55,7 +55,7 @@ public sealed class Setup
         Printer.Print($"Post-processing done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
     }
 
-    internal Result<YouTubePlaylistJson.Root> GetPlaylistJson(string workingDirectory)
+    internal Result<YouTubeCollectionJson.Root> GetCollectionJson(string workingDirectory)
     {
         var regex = new Regex(@"(?<=\[)[\w\-]{20,}(?=\]\.info.json)"); // Assumes ID length > 20 chars.
 
@@ -72,7 +72,7 @@ public sealed class Setup
             var fileName = fileNames.Single();
 
             var json = File.ReadAllText(fileName);
-            var parsedJson = JsonSerializer.Deserialize<YouTubePlaylistJson.Root>(json);
+            var parsedJson = JsonSerializer.Deserialize<YouTubeCollectionJson.Root>(json);
 
             if (parsedJson is null)
                 return Result.Fail($"The parsed JSON from file \"{fileName}\" was unexpectedly null.");

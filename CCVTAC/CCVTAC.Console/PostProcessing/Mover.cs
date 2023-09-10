@@ -7,7 +7,7 @@ internal static class Mover
     internal static void Run(
         string workingDirectory,
         string moveToDirectory,
-        YouTubePlaylistJson.Root? playlistJson,
+        YouTubeCollectionJson.Root? collectionJson,
         bool shouldOverwrite,
         Printer printer)
     {
@@ -18,9 +18,9 @@ internal static class Mover
         uint failureCount = 0;
         var workingDirInfo = new DirectoryInfo(workingDirectory);
 
-        var verifiedMoveToDir = playlistJson is null
+        var verifiedMoveToDir = collectionJson is null
             ? moveToDirectory
-            : Path.Combine(moveToDirectory, playlistJson.Title.ReplaceInvalidPathChars());
+            : Path.Combine(moveToDirectory, collectionJson.Title.ReplaceInvalidPathChars());
 
         try
         {

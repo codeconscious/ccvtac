@@ -24,7 +24,9 @@ public static class YouTubeJsonExtensionMethods
     /// <summary>
     /// Returns a formatted comment using data parsed from the JSON file.
     /// </summary>
-    public static string GenerateComment(this YouTubeVideoJson.Root data, YouTubePlaylistJson.Root? playlistJson)
+    public static string GenerateComment(
+        this YouTubeVideoJson.Root data,
+        YouTubeCollectionJson.Root? collectionJson)
     {
         System.Text.StringBuilder sb = new();
         sb.AppendLine("SOURCE DATA:");
@@ -34,13 +36,13 @@ public static class YouTubeJsonExtensionMethods
         sb.AppendLine($"• Title: {data.Fulltitle}");
         sb.AppendLine($"• Uploader: {data.UploaderSummary()}");
         sb.AppendLine($"• Uploaded: {data.FormattedUploadDate()}");
-        if (playlistJson is not null)
+        if (collectionJson is not null)
         {
-            sb.AppendLine($"• Playlist name: {playlistJson.Title}");
-            sb.AppendLine($"• Playlist URL: {playlistJson.WebpageUrl}");
-            if (!string.IsNullOrWhiteSpace(playlistJson.Description))
+            sb.AppendLine($"• Playlist name: {collectionJson.Title}");
+            sb.AppendLine($"• Playlist URL: {collectionJson.WebpageUrl}");
+            if (!string.IsNullOrWhiteSpace(collectionJson.Description))
             {
-                sb.AppendLine($"• Playlist description: {playlistJson.Description}");
+                sb.AppendLine($"• Playlist description: {collectionJson.Description}");
             }
         }
         sb.AppendLine($"• Description: {data.Description})");
