@@ -48,6 +48,13 @@ public sealed class UserSettings
     public ushort SleepBetweenDownloadsSeconds { get; init; } = 3;
 
     /// <summary>
+    /// How many seconds the program should sleep between multiple batches.
+    /// A batch is defined as one input entry by the user.
+    /// </summary>
+    [JsonPropertyName("sleepBetweenBatchesSeconds")]
+    public ushort SleepBetweenBatchesSeconds { get; init; } = 15;
+
+    /// <summary>
     /// A list of uploader names for whom the video upload dates' year value
     /// can be used at the video's release year. It should contain channel names.
     /// Case can be ignored.
