@@ -35,7 +35,7 @@ internal class TagDetector
                 "description (Topic style)"
             ),
             new DetectionScheme(
-                @"(.+)(?: - )?[「『](.+)[」』]\[([12]\d{3})\]",
+                @"(.+) (?:\d\w{2}|Vol\.\d)?『(.+)』\[([12]\d{3})\]",
                 2,
                 data.Title,
                 "title"
@@ -115,6 +115,18 @@ internal class TagDetector
                 0,
                 data.Description,
                 "description"
+            ),
+            new DetectionScheme(
+                """(?<=Vol\.\d『).+(?=』\s?#\d)""",
+                0,
+                data.Description,
+                "description"
+            ),
+            new DetectionScheme(
+                """(?<=^\w{3}アルバム『).+(?=』)""",
+                0,
+                data.Description,
+                ""
             ),
         };
 
@@ -209,10 +221,16 @@ internal class TagDetector
                 "description's 年月日-style release date"
             ),
             new DetectionScheme(
-                @"(.+)(?: - )?[「『](.+)[」』]\[([12]\d{3})\]",
+                @"(.+) (?:\d\w{2}|Vol\.\d)?『(.+)』\[([12]\d{3})\]",
                 3,
                 data.Title,
                 "title"
+            ),
+            new DetectionScheme(
+                @"(.+) (?:\d\w{2}|Vol\.\d)?『(.+)』\[([12]\d{3})\]",
+                3,
+                data.Description,
+                "description"
             ),
         };
 
