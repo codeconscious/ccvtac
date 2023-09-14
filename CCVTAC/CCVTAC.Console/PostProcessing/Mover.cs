@@ -4,7 +4,12 @@ namespace CCVTAC.Console.PostProcessing;
 
 internal static class Mover
 {
-    internal static void Run(string workingDirectory, string moveToDirectory, Printer printer, bool shouldOverwrite)
+    internal static void Run(
+        string workingDirectory,
+        string moveToDirectory,
+        YouTubeCollectionJson.Root? collectionJson,
+        bool shouldOverwrite,
+        Printer printer)
     {
         var stopwatch = new System.Diagnostics.Stopwatch();
         stopwatch.Start();
@@ -12,14 +17,35 @@ internal static class Mover
         uint successCount = 0;
         uint failureCount = 0;
         var workingDirInfo = new DirectoryInfo(workingDirectory);
-        printer.Print($"Moving audio file(s) to \"{moveToDirectory}\"...");
+
+        var verifiedMoveToDir = collectionJson is null
+            ? moveToDirectory
+            : Path.Combine(moveToDirectory, collectionJson.Title.ReplaceInvalidPathChars());
+
+        try
+        {
+            if (!Path.Exists(verifiedMoveToDir))
+            {
+                printer.Print($"Creating custom move-to directory \"{verifiedMoveToDir}\" (based on playlist name)... ", appendLineBreak: false);
+                Directory.CreateDirectory(verifiedMoveToDir);
+                printer.Print("OK!");
+            }
+        }
+        catch (Exception ex)
+        {
+            printer.Error($"Error creating directory \"{verifiedMoveToDir}\": {ex.Message}");
+            printer.Warning($"Using default move-to directory \"{moveToDirectory}\" instead");
+            verifiedMoveToDir = moveToDirectory;
+        }
+
+        printer.Print($"Moving audio file(s) to \"{verifiedMoveToDir}\"...");
         foreach (var file in workingDirInfo.EnumerateFiles("*.m4a"))
         {
             try
             {
                 File.Move(
                     file.FullName,
-                    $"{Path.Combine(moveToDirectory, file.Name)}",
+                    $"{Path.Combine(verifiedMoveToDir, file.Name)}",
                     shouldOverwrite);
                 successCount++;
                 printer.Print($"• Moved \"{file.Name}\"");

@@ -4,15 +4,15 @@ namespace CCVTAC.Console;
 
 internal static class Program
 {
-    private static readonly string[] HelpCommands = new[] { "-h", "--help" };
-    private static readonly string[] QuitCommands = new[] { "q", "quit", "exit", "bye" };
-    private const string InputPrompt = "Enter a YouTube URL (or 'q' to quit):";
+    private static readonly string[] _helpCommands = new[] { "-h", "--help" };
+    private static readonly string[] _quitCommands = new[] { "q", "quit", "exit", "bye" };
+    private const string _inputPrompt = "Enter one or more YouTube resource URLs (or 'q' to quit):";
 
     static void Main(string[] args)
     {
         var printer = new Printer();
 
-        if (args.Length > 0 && HelpCommands.Contains(args[0].ToLowerInvariant()))
+        if (args.Length > 0 && _helpCommands.Contains(args[0].ToLowerInvariant()))
         {
             Help.Print(printer);
             return;
@@ -24,7 +24,7 @@ internal static class Program
             printer.Warning("\nQuitting at user's request.");
         };
 
-        // Top-level `try` to catch and pretty-print unexpected exceptions.
+        // Top-level `try` block to catch and pretty-print unexpected exceptions.
         try
         {
             Start(printer);
@@ -37,7 +37,7 @@ internal static class Program
     }
 
     /// <summary>
-     /// Does the initial setup and oversees the overall process.
+     /// Does the initial setup and drives the overall process.
     /// </summary>
     /// <param name="printer"></param>
     private static void Start(Printer printer)
@@ -55,7 +55,7 @@ internal static class Program
         var resultCounter = new ResultTracker(printer);
         while (true)
         {
-            bool shouldQuit = ProcessSingleResource(userSettings, resultCounter, printer);
+            bool shouldQuit = ProcessSingleInput(userSettings, resultCounter, printer);
             if (shouldQuit)
                 break;
         }
@@ -70,28 +70,56 @@ internal static class Program
     /// <param name="resultHandler"></param>
     /// <param name="printer"></param>
     /// <returns>A bool indicating whether to quit the program (true) or continue (false).</returns>
-    private static bool ProcessSingleResource(UserSettings settings, ResultTracker resultHandler, Printer printer)
+    private static bool ProcessSingleInput(UserSettings settings, ResultTracker resultHandler, Printer printer)
     {
-        string userInput = printer.GetInput(InputPrompt);
-
-        if (QuitCommands.Contains(userInput.ToLowerInvariant()))
-            return true;
+        string userInput = printer.GetInput(_inputPrompt);
 
         var mainStopwatch = new System.Diagnostics.Stopwatch();
         mainStopwatch.Start();
 
-        var downloadResult = Downloading.Downloader.Run(userInput, settings, printer);
-        resultHandler.RegisterResult(downloadResult);
+        var splitInput = userInput.Split(" ")
+                                  .Where(i => !string.IsNullOrWhiteSpace(i))
+                                  .ToImmutableArray();
 
-        if (downloadResult.IsFailed)
-            return false;
+        var haveProcessedAny = false;
 
-        History.Append(userInput, printer);
+        foreach (var input in splitInput)
+        {
+            if (_quitCommands.Contains(input.ToLowerInvariant()))
+                return true;
 
-        var postProcessor = new PostProcessing.Setup(settings, printer);
-        postProcessor.Run();
+            if (haveProcessedAny) // No need to sleep for the very first URL.
+            {
+                var sleepSeconds = settings.SleepBetweenBatchesSeconds;
+                printer.Print($"Sleeping for {sleepSeconds} seconds...", appendLines: 1);
+                System.Threading.Thread.Sleep(sleepSeconds * 1000);
+            }
+            else
+            {
+                haveProcessedAny = true;
+            }
 
-        printer.Print($"Done processing {userInput} in {mainStopwatch.ElapsedMilliseconds:#,##0}ms.");
+            var jobStopwatch = new System.Diagnostics.Stopwatch();
+            jobStopwatch.Start();
+
+            var downloadResult = Downloading.Downloader.Run(input, settings, printer);
+            resultHandler.RegisterResult(downloadResult);
+
+            if (downloadResult.IsFailed)
+                return false;
+
+            History.Append(input, printer);
+
+            var postProcessor = new PostProcessing.Setup(settings, printer);
+            postProcessor.Run(); // TODO: Think about if/how to handle leftover temp files due to errors.
+
+            printer.Print($"Done processing `{input}` in {jobStopwatch.ElapsedMilliseconds:#,##0}ms.",
+                          appendLines: 1);
+        }
+
+        if (splitInput.Length > 1)
+            printer.Print($"All done in {mainStopwatch.ElapsedMilliseconds:#,##0}ms.");
+
         return false;
     }
 }

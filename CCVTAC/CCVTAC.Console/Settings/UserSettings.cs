@@ -48,6 +48,13 @@ public sealed class UserSettings
     public ushort SleepBetweenDownloadsSeconds { get; init; } = 3;
 
     /// <summary>
+    /// How many seconds the program should sleep between multiple batches.
+    /// A batch is defined as one input entry by the user.
+    /// </summary>
+    [JsonPropertyName("sleepBetweenBatchesSeconds")]
+    public ushort SleepBetweenBatchesSeconds { get; init; } = 15;
+
+    /// <summary>
     /// A list of uploader names for whom the video upload dates' year value
     /// can be used at the video's release year. It should contain channel names.
     /// Case can be ignored.
@@ -59,11 +66,12 @@ public sealed class UserSettings
     /// If the supplied video uploader is specified in the settings, returns the video's upload year.
     /// Otherwise, returns null.
     /// </summary>
-    public ushort? GetVideoUploadDateIfRegisteredUploader(YouTubeJson.Root videoData)
+    public ushort? GetVideoUploadDateIfRegisteredUploader(YouTubeVideoJson.Root videoData)
     {
         return
-            this.UseUploadYearUploaders?.Contains(videoData.uploader, StringComparer.OrdinalIgnoreCase) == true &&
-            ushort.TryParse(videoData.upload_date[0..4], out var parsedYear)
+            this.UseUploadYearUploaders?.Contains(videoData.Uploader,
+                                                  StringComparer.OrdinalIgnoreCase) == true &&
+            ushort.TryParse(videoData.Upload_date[0..4], out var parsedYear)
                 ? parsedYear
                 : null;
     }

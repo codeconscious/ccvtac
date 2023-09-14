@@ -23,7 +23,7 @@ public record struct DetectionScheme(
 
 internal class TagDetector
 {
-    public string? DetectTitle(YouTubeJson.Root data, Printer printer, string? defaultName = null)
+    public string? DetectTitle(YouTubeVideoJson.Root data, Printer printer, string? defaultName = null)
     {
         // TODO: Put this somewhere where it can be static.
         List<DetectionScheme> parsePatterns = new()
@@ -31,13 +31,13 @@ internal class TagDetector
             new DetectionScheme(
                 @"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D",
                 1,
-                data.description,
+                data.Description,
                 "description (Topic style)"
             ),
             new DetectionScheme(
-                @"(.+)(?: - )?[「『](.+)[」』]\[([12]\d{3})\]",
+                @"(.+) (?:\d\w{2}|Vol\.\d)?『(.+)』\[([12]\d{3})\]",
                 2,
-                data.title,
+                data.Title,
                 "title"
             ),
         };
@@ -58,7 +58,7 @@ internal class TagDetector
         return defaultName;
     }
 
-    public string? DetectArtist(YouTubeJson.Root data, Printer printer, string? defaultName = null)
+    public string? DetectArtist(YouTubeVideoJson.Root data, Printer printer, string? defaultName = null)
     {
         // TODO: Put this somewhere where it can be static.
         List<DetectionScheme> parsePatterns = new()
@@ -66,13 +66,13 @@ internal class TagDetector
             new DetectionScheme(
                 @"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D",
                 2,
-                data.description,
+                data.Description,
                 "description (Topic style)"
             ),
             new DetectionScheme(
                 @"(.+)(?: - )?[「『](.+)[」』]\[([12]\d{3})\]",
                 1,
-                data.title,
+                data.Title,
                 "title"
             ),
         };
@@ -93,7 +93,7 @@ internal class TagDetector
         return defaultName;
     }
 
-    public string? DetectAlbum(YouTubeJson.Root data, Printer printer, string? defaultName = null)
+    public string? DetectAlbum(YouTubeVideoJson.Root data, Printer printer, string? defaultName = null)
     {
         // TODO: Put this somewhere where it can be static or else a setting.
         List<DetectionScheme> parsePatterns = new()
@@ -101,20 +101,32 @@ internal class TagDetector
             new DetectionScheme(
                 @"(?<=[Aa]lbum: ).+",
                 0,
-                data.description,
+                data.Description,
                 "description"
             ),
             new DetectionScheme(
                 @"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D",
                 3,
-                data.description,
+                data.Description,
                 "description (Topic style)"
             ),
             new DetectionScheme(
                 """(?<='s ['"]).+(?=['"] album)""",
                 0,
-                data.description,
+                data.Description,
                 "description"
+            ),
+            new DetectionScheme(
+                """(?<=Vol\.\d『).+(?=』\s?#\d)""",
+                0,
+                data.Description,
+                "description"
+            ),
+            new DetectionScheme(
+                """(?<=^\w{3}アルバム『).+(?=』)""",
+                0,
+                data.Description,
+                ""
             ),
         };
 
@@ -130,23 +142,24 @@ internal class TagDetector
             return match.Groups[pattern.Group].Value.Trim();
         }
 
+        printer.Print($"• No album was parsed{(defaultName is null ? "." : $", so defaulting to \"{defaultName}\".")}");
         return defaultName;
     }
 
-    public string? DetectComposer(YouTubeJson.Root data, Printer printer)
+    public string? DetectComposer(YouTubeVideoJson.Root data, Printer printer)
     {
         List<DetectionScheme> parsePatterns = new()
         {
             new DetectionScheme(
                 @"(?<=[Cc]omposed by |[Cc]omposed by: |[Cc]omposer: |作曲[:：]).+",
                 0,
-                data.description,
+                data.Description,
                 "description"
             ),
             new DetectionScheme(
                 @"(?<=[Cc]omposed by |[Cc]omposed by: |[Cc]omposer: |作曲[:：]).+",
                 0,
-                data.title,
+                data.Title,
                 "title"
             )
         };
@@ -171,7 +184,7 @@ internal class TagDetector
     /// Attempt to automatically detect a release year in the video metadata.
     /// If none is found, return a default value.
     /// </summary>
-    public ushort? DetectReleaseYear(YouTubeJson.Root data, Printer printer, ushort? defaultYear = null)
+    public ushort? DetectReleaseYear(YouTubeVideoJson.Root data, Printer printer, ushort? defaultYear = null)
     {
         // TODO: Feature: Use the video upload date for uploaders specified in user settings.
         // TODO: Put this somewhere where it can be static or made a setting.
@@ -180,38 +193,44 @@ internal class TagDetector
             new DetectionScheme(
                 @"(?<=[(（\[［【])[12]\d{3}(?=[)）\]］】])",
                 0,
-                data.title,
+                data.Title,
                 "title"
             ),
             new DetectionScheme(
                 @"(?<=℗ )[12]\d{3}(?=\s)",
                 0,
-                data.description,
+                data.Description,
                 "description's \"℗\" symbol"
             ),
             new DetectionScheme(
                 @"(?<=[Rr]eleased [io]n: )[12]\d{3}",
                 0,
-                data.description,
+                data.Description,
                 "description 'released on' date"
             ),
             new DetectionScheme(
-                @"[12]\d{3}(?=年(?:\d{1,2}月\d{1,2}日)?リリース)",
+                @"[12]\d{3}(?=(?:[.\/年]\d{1,2}[.\/月]\d{1,2}日?\s?)?\s?(?:[Rr]elease|リリース|発売))",
                 0,
-                data.description,
-                "description's リリース-style date"
+                data.Description,
+                "description's year-first–style date"
             ),
             new DetectionScheme(
                 @"[12]\d{3}年(?=\d{1,2}月\d{1,2}日\s?[Rr]elease)",
                 0,
-                data.description,
+                data.Description,
                 "description's 年月日-style release date"
             ),
             new DetectionScheme(
-                @"(.+)(?: - )?[「『](.+)[」』]\[([12]\d{3})\]",
+                @"(.+) (?:\d\w{2}|Vol\.\d)?『(.+)』\[([12]\d{3})\]",
                 3,
-                data.title,
+                data.Title,
                 "title"
+            ),
+            new DetectionScheme(
+                @"(.+) (?:\d\w{2}|Vol\.\d)?『(.+)』\[([12]\d{3})\]",
+                3,
+                data.Description,
+                "description"
             ),
         };
 
