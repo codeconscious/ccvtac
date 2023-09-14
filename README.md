@@ -1,21 +1,20 @@
 # CCVTAC
 
-A small .NET CLI tool that acts as a wrapper around [yt-dlp](https://github.com/yt-dlp/yt-dlp) to even more easily download audio from specific YouTube videos.
-
-I [originally created this tool in Ruby](https://github.com/codeconscious/youtube-audio-downloader-ruby) to get better acquainted with Ruby for work, but I've rewritten it in C# because I decided to move from MP3 to M4A files to avoid unnecessary file conversion (for better quality in smaller files), but the Ruby gem (library) I was using doesn't support M4A; and frankly, I find C# more enjoyable to work with. (I might find a way to even force F# in here too...)
+A small .NET CLI tool that acts as a wrapper around [yt-dlp](https://github.com/yt-dlp/yt-dlp) to even more easily download audio from specific YouTube videos, playlist, and channels and do some post-processing as well.
 
 Feel free to use it yourself, but please do so responsibly. No warranties or guarantees provided!
 
 ## Features
 
-- Easily convert YouTube videos to local audio files!
+- Converts YouTube videos to local audio files (mostly thanks to [yt-dlp](https://github.com/yt-dlp/yt-dlp))
 - Supports video, playlist, and channel URLs
-- Video metadata (uploader name and URL, source URL, etc.) saved to Comment tags
-- Renames files via specific regex patterns (to remove resource IDs, etc.)
-- Video thumbnails are auto-trimmed and written to files as album art
-- Post-processed files are automatically moved to a specified directory
+- Adds video metadata (uploader name and URL, source URL, etc.) to Comment tags
 - ID3 tags are automatically written where possible
-- Entered URLs are saved locally to a file named `history.log`
+- Renames files via specific regex patterns (to remove resource IDs, etc.)
+- Optionally auto-trims and writes video thumbnails to files as album art
+- Moves files to a specified directory
+- Saves entered URLs locally to a history file
+- Allows customized behavior via a user settings file
 
 ### TODOs and Ideas
 
