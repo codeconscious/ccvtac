@@ -34,7 +34,8 @@ public static class SettingsService
 
         printer.Print($"• Downloading {settings.AudioFormat!.ToUpperInvariant()} files");
         printer.Print($"• Video chapters {(settings.SplitChapters ? "WILL" : "will NOT")} be split");
-        printer.Print($"• Sleeping {settings.SleepBetweenDownloadsSeconds} second(s) between multiple downloads");
+        printer.Print($"• Sleeping {settings.SleepBetweenBatchesSeconds} second(s) between each batch");
+        printer.Print($"• Sleeping {settings.SleepBetweenDownloadsSeconds} second(s) between individual downloads");
         printer.Print($"• Found {settings.UseUploadYearUploaders?.Length.ToString() ?? "no"} channels for which upload year can be used");
         printer.Print($"• Working directory: {settings.WorkingDirectory}");
         printer.Print($"• Move-to directory: {settings.MoveToDirectory}");
