@@ -91,8 +91,8 @@ internal static class Program
             if (haveProcessedAny) // No need to sleep for the very first URL.
             {
                 var sleepSeconds = settings.SleepBetweenBatchesSeconds;
-                printer.Print($"Sleeping for {sleepSeconds} seconds...");
-                System.Threading.Thread.Sleep(sleepSeconds);
+                printer.Print($"Sleeping for {sleepSeconds} seconds...", appendLines: 1);
+                System.Threading.Thread.Sleep(sleepSeconds * 1000);
             }
             else
             {
