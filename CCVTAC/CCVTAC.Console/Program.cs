@@ -55,8 +55,8 @@ internal static class Program
         var resultCounter = new ResultTracker(printer);
         while (true)
         {
-            bool shouldQuit = ProcessSingleInput(userSettings, resultCounter, printer);
-            if (shouldQuit)
+            var nextAction = ProcessSingleInput(userSettings, resultCounter, printer);
+            if (nextAction == NextAction.Quit)
                 break;
         }
 
@@ -70,7 +70,7 @@ internal static class Program
     /// <param name="resultHandler"></param>
     /// <param name="printer"></param>
     /// <returns>A bool indicating whether to quit the program (true) or continue (false).</returns>
-    private static bool ProcessSingleInput(UserSettings settings, ResultTracker resultHandler, Printer printer)
+    private static NextAction ProcessSingleInput(UserSettings settings, ResultTracker resultHandler, Printer printer)
     {
         string userInput = printer.GetInput(_inputPrompt);
 
@@ -86,7 +86,7 @@ internal static class Program
         foreach (var input in splitInput)
         {
             if (_quitCommands.Contains(input.ToLowerInvariant()))
-                return true;
+                return NextAction.Quit;
 
             if (haveProcessedAny) // No need to sleep for the very first URL.
             {
@@ -106,20 +106,26 @@ internal static class Program
             resultHandler.RegisterResult(downloadResult);
 
             if (downloadResult.IsFailed)
-                return false;
+                return NextAction.Continue;
 
             History.Append(input, printer);
 
             var postProcessor = new PostProcessing.Setup(settings, printer);
             postProcessor.Run(); // TODO: Think about if/how to handle leftover temp files due to errors.
 
-            printer.Print($"Done processing `{input}` in {jobStopwatch.ElapsedMilliseconds:#,##0}ms.",
+            printer.Print($"Done processing '{input}' in {jobStopwatch.ElapsedMilliseconds:#,##0}ms.",
                           appendLines: 1);
         }
 
         if (splitInput.Length > 1)
             printer.Print($"All done in {mainStopwatch.ElapsedMilliseconds:#,##0}ms.");
 
-        return false;
+        return NextAction.Continue;
+    }
+
+    private enum NextAction : byte
+    {
+        Continue,
+        Quit
     }
 }
