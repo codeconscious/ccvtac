@@ -78,7 +78,8 @@ internal static class Program
         mainStopwatch.Start();
 
         var splitInput = userInput.Split(" ")
-                                  .Where(i => !string.IsNullOrWhiteSpace(i))
+                                  .Where(i => !string.IsNullOrWhiteSpace(i)) // Handle multiple spaces.
+                                  .Distinct()
                                   .ToImmutableArray();
 
         var haveProcessedAny = false;
@@ -86,7 +87,9 @@ internal static class Program
         foreach (var input in splitInput)
         {
             if (_quitCommands.Contains(input.ToLowerInvariant()))
+            {
                 return NextAction.Quit;
+            }
 
             if (haveProcessedAny) // No need to sleep for the very first URL.
             {
