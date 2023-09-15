@@ -244,7 +244,7 @@ internal class TagDetector
             return result.Value;
         }
 
-        printer.Print($"No year was parsed{(defaultYear is null ? "." : $", so defaulting to {defaultYear}.")}");
+        printer.Print($"• No year was parsed{(defaultYear is null ? "." : $", so defaulting to {defaultYear}.")}");
         return defaultYear;
 
         /// <summary>
