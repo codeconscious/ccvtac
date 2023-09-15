@@ -10,11 +10,12 @@ public static class ExtensionMethods
     /// have been replaced by specifed replacement character.
     /// Throws if the replacement character is an invalid path character.
     /// </summary>
-    /// <param name="text"></param>
+    /// <param name="sourceText"></param>
     /// <param name="replaceWith"></param>
+    /// <param name="customInvalidChars">Optional additional characters to consider invalid.</param>
     /// <returns></returns>
     public static string ReplaceInvalidPathChars(
-        this string text,
+        this string sourceText,
         char replaceWith = '_',
         char[]? customInvalidChars = null)
     {
@@ -32,7 +33,7 @@ public static class ExtensionMethods
             throw new ArgumentException($"The replacement char ('{replaceWith}') must be a valid path character.");
 
         return invalidChars.Aggregate(
-            new StringBuilder(text),
+            new StringBuilder(sourceText),
             (workingText, ch) => workingText.Replace(ch, replaceWith),
             (workingText)     => workingText.ToString()
         );
