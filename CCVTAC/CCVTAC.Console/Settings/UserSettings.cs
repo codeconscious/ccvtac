@@ -42,7 +42,8 @@ public sealed class UserSettings
     public string? AudioFormat { get; init; } = "m4a";
 
     /// <summary>
-    /// How many seconds the program should sleep between multiple downloads.
+    /// How many seconds to sleep between multiple downloads. This value is
+    /// passed to the download tool.
     /// </summary>
     [JsonPropertyName("sleepBetweenDownloadsSeconds")]
     public ushort SleepBetweenDownloadsSeconds { get; init; } = 3;
