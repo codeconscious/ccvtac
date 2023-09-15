@@ -1,4 +1,6 @@
-﻿using CCVTAC.Console.Settings;
+﻿using System.Threading;
+using CCVTAC.Console.Settings;
+using Spectre.Console;
 
 namespace CCVTAC.Console;
 
@@ -32,7 +34,7 @@ internal static class Program
         catch (Exception topLevelException)
         {
             printer.Error($"Fatal error: {topLevelException.Message}");
-            Spectre.Console.AnsiConsole.WriteException(topLevelException);
+            AnsiConsole.WriteException(topLevelException);
         }
     }
 
@@ -80,7 +82,14 @@ internal static class Program
         var splitInput = userInput.Split(" ")
                                   .Where(i => !string.IsNullOrWhiteSpace(i)) // Handle multiple spaces.
                                   .Distinct()
-                                  .ToImmutableArray();
+                                  .ToImmutableList();
+
+        if (splitInput.Count > 1)
+        {
+            printer.Print($"Batch of {splitInput.Count} URLs entered.");
+            splitInput.ForEach(i => printer.Print($"• {i}"));
+            printer.PrintEmptyLines(1);
+        }
 
         var haveProcessedAny = false;
 
@@ -94,8 +103,23 @@ internal static class Program
             if (haveProcessedAny) // No need to sleep for the very first URL.
             {
                 var sleepSeconds = settings.SleepBetweenBatchesSeconds;
-                printer.Print($"Sleeping for {sleepSeconds} seconds...", appendLines: 1);
-                System.Threading.Thread.Sleep(sleepSeconds * 1000);
+
+                AnsiConsole.Status()
+                    .Start($"Sleeping for {sleepSeconds} seconds...", ctx =>
+                    {
+                        ctx.Spinner(Spinner.Known.Star);
+                        ctx.SpinnerStyle(Style.Parse("blue"));
+
+                        var remainingSeconds = settings.SleepBetweenBatchesSeconds;
+                        while (remainingSeconds > 0)
+                        {
+                            ctx.Status($"Sleeping for {remainingSeconds} seconds...");
+                            remainingSeconds--;
+                            Thread.Sleep(1000);
+                        }
+                        printer.Print($"Slept for {settings.SleepBetweenBatchesSeconds} second(s).",
+                                      appendLines: 1);
+                    });
             }
             else
             {
@@ -120,7 +144,7 @@ internal static class Program
                           appendLines: 1);
         }
 
-        if (splitInput.Length > 1)
+        if (splitInput.Count > 1)
             printer.Print($"All done in {mainStopwatch.ElapsedMilliseconds:#,##0}ms.");
 
         return NextAction.Continue;

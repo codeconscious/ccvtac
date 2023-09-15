@@ -72,7 +72,7 @@ public sealed class Printer
     /// Prints the requested number of blank lines.
     /// </summary>
     /// <param name="count"></param>
-    private static void PrintEmptyLines(byte count)
+    public void PrintEmptyLines(byte count)
     {
         if (count == 0)
             return;
