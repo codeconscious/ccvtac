@@ -26,7 +26,7 @@ internal class TagDetector
 {
     public string? DetectTitle(YouTubeVideoJson.Root data, Printer printer, string? defaultName = null)
     {
-        // TODO: Put this somewhere where it can be static.
+        // TODO: Put this, and similar blocks in this file, somewhere where it can be static.
         List<DetectionScheme> parsePatterns = new()
         {
             new DetectionScheme(
@@ -36,6 +36,12 @@ internal class TagDetector
                 "description (Topic style)"
             ),
             new DetectionScheme(
+                @"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗",
+                1,
+                data.Description,
+                "description (pseudo-Topic style)"
+            ),
+            new DetectionScheme(
                 @"(.+) (?:\d\w{2}|Vol\.\d)?『(.+)』\[([12]\d{3})\]",
                 2,
                 data.Title,
@@ -43,20 +49,18 @@ internal class TagDetector
             ),
         };
 
-        foreach (var pattern in parsePatterns)
+        var output = DetectSingle<string>(parsePatterns, null);
+
+        if (output is null)
         {
-            var regex = new Regex(pattern.Regex);
-            var match = regex.Match(pattern.SourceText);
-
-            if (!match.Success)
-                continue;
-
-            printer.Print($"• Writing title \"{match.Groups[pattern.Group].Value}\" (matched via {pattern.Source})");
-            return match.Groups[pattern.Group].Value.Trim();
+            printer.Print($"• No title parsed.");
+            return null;
         }
-
-        printer.Print($"• No title was parsed{(defaultName is null ? "." : $", so defaulting to \"{defaultName}\".")}");
-        return defaultName;
+        else
+        {
+            printer.Print($"• Writing title \"{output}\"");
+            return output;
+        }
     }
 
     public string? DetectArtist(YouTubeVideoJson.Root data, Printer printer, string? defaultName = null)
@@ -71,6 +75,12 @@ internal class TagDetector
                 "description (Topic style)"
             ),
             new DetectionScheme(
+                @"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗",
+                2,
+                data.Description,
+                "description (pseudo-Topic style)"
+            ),
+            new DetectionScheme(
                 @"(.+)(?: - )?[「『](.+)[」』]\[([12]\d{3})\]",
                 1,
                 data.Title,
@@ -78,20 +88,18 @@ internal class TagDetector
             ),
         };
 
-        foreach (var pattern in parsePatterns)
+        var output = DetectSingle<string>(parsePatterns, null);
+
+        if (output is null)
         {
-            var regex = new Regex(pattern.Regex);
-            var match = regex.Match(pattern.SourceText);
-
-            if (!match.Success)
-                continue;
-
-            printer.Print($"• Writing artist \"{match.Groups[pattern.Group].Value}\" (matched via {pattern.Source})");
-            return match.Groups[pattern.Group].Value.Trim();
+            printer.Print($"• No artist parsed.");
+            return null;
         }
-
-        printer.Print($"• No artist was parsed{(defaultName is null ? "." : $", so defaulting to \"{defaultName}\".")}");
-        return defaultName;
+        else
+        {
+            printer.Print($"• Writing artist \"{output}\"");
+            return output;
+        }
     }
 
     public string? DetectAlbum(YouTubeVideoJson.Root data, Printer printer, string? defaultName = null)
@@ -112,6 +120,12 @@ internal class TagDetector
                 "description (Topic style)"
             ),
             new DetectionScheme(
+                @"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗",
+                3,
+                data.Description,
+                "description (pseudo-Topic style)"
+            ),
+            new DetectionScheme(
                 """(?<='s ['"]).+(?=['"] album)""",
                 0,
                 data.Description,
@@ -127,24 +141,22 @@ internal class TagDetector
                 """(?<=^\w{3}アルバム『).+(?=』)""",
                 0,
                 data.Description,
-                ""
+                "description"
             ),
         };
 
-        foreach (var pattern in parsePatterns)
+        var output = DetectSingle<string>(parsePatterns, null);
+
+        if (output is null)
         {
-            var regex = new Regex(pattern.Regex);
-            var match = regex.Match(pattern.SourceText);
-
-            if (!match.Success)
-                continue;
-
-            printer.Print($"• Writing album \"{match.Groups[pattern.Group].Value}\" (matched via {pattern.Source})");
-            return match.Groups[pattern.Group].Value.Trim();
+            printer.Print($"• No album parsed.");
+            return null;
         }
-
-        printer.Print($"• No album was parsed{(defaultName is null ? "." : $", so defaulting to \"{defaultName}\".")}");
-        return defaultName;
+        else
+        {
+            printer.Print($"• Writing album \"{output}\"");
+            return output;
+        }
     }
 
     public string? DetectComposers(YouTubeVideoJson.Root data, Printer printer)
@@ -217,14 +229,42 @@ internal class TagDetector
         }
     }
 
+    public T? DetectSingle<T>(IEnumerable<DetectionScheme> parsePatterns, T? defaultValue)
+    {
+        foreach (var pattern in parsePatterns)
+        {
+            var regex = new Regex(pattern.Regex);
+            var match = regex.Match(pattern.SourceText);
+
+            if (!match.Success)
+                continue;
+
+            var matchedValue = match.Groups[pattern.Group].Value.Trim();
+
+            if (matchedValue is T)
+            {
+                return (T)(object)matchedValue;
+            }
+
+            try
+            {
+                return (T)Convert.ChangeType(matchedValue, typeof(T));
+            }
+            catch (InvalidCastException)
+            {
+                return defaultValue;
+            }
+        }
+
+        return defaultValue;
+    }
+
     /// <summary>
     /// Attempt to automatically detect a release year in the video metadata.
     /// If none is found, return a default value.
     /// </summary>
     public ushort? DetectReleaseYear(YouTubeVideoJson.Root data, Printer printer, ushort? defaultYear = null)
     {
-        // TODO: Feature: Use the video upload date for uploaders specified in user settings.
-        // TODO: Put this somewhere where it can be static or made a setting.
         List<DetectionScheme> parsePatterns = new()
         {
             new DetectionScheme(
