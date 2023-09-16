@@ -147,7 +147,7 @@ internal class TagDetector
         return defaultName;
     }
 
-    public string? DetectComposer(YouTubeVideoJson.Root data, Printer printer)
+    public string? DetectComposers(YouTubeVideoJson.Root data, Printer printer)
     {
         List<DetectionScheme> parsePatterns = new()
         {
@@ -165,20 +165,9 @@ internal class TagDetector
             )
         };
 
-        var composers = new HashSet<string>();
+        var composers = DetectMultiple<string>(parsePatterns, null);
 
-        foreach (var pattern in parsePatterns)
-        {
-            var regex = new Regex(pattern.Regex);
-            var matches = regex.Matches(pattern.SourceText);
-
-            foreach (var match in matches.Where(m => m.Success))
-            {
-                composers.Add(match.Groups[pattern.Group].Value.Trim());
-            }
-        }
-
-        if (composers.Any())
+        if (composers?.Any() == true)
         {
             var composerText = string.Join("; ", composers);
             printer.Print($"• Writing composer(s) \"{composerText}\"");
@@ -188,6 +177,43 @@ internal class TagDetector
         {
             printer.Print($"• No composers parsed.");
             return null;
+        }
+    }
+
+    public T? DetectMultiple<T>(IEnumerable<DetectionScheme> parsePatterns, T? defaultValue, string separator = "; ")
+    {
+        var matchedValues = new HashSet<string>();
+
+        foreach (var pattern in parsePatterns)
+        {
+            var regex = new Regex(pattern.Regex);
+            var matches = regex.Matches(pattern.SourceText);
+
+            foreach (var match in matches.Where(m => m.Success))
+            {
+                matchedValues.Add(match.Groups[pattern.Group].Value.Trim());
+            }
+        }
+
+        if (!matchedValues.Any())
+        {
+            return defaultValue;
+        }
+
+        var output = string.Join(separator, matchedValues);
+
+        if (output is T)
+        {
+            return (T)(object)output;
+        }
+
+        try
+        {
+            return (T)Convert.ChangeType(output, typeof(T));
+        }
+        catch (InvalidCastException)
+        {
+            return defaultValue;
         }
     }
 

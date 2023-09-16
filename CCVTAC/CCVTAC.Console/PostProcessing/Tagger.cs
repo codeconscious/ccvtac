@@ -114,7 +114,7 @@ internal static class Tagger
 
             taggedFile.Tag.Comment = parsedVideoJson.GenerateComment(collectionJson);
 
-            if (tagDetector.DetectComposer(parsedVideoJson, printer) is string composer)
+            if (tagDetector.DetectComposers(parsedVideoJson, printer) is string composer)
             {
                 taggedFile.Tag.Composers = new[] { composer };
             }
