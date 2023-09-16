@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace CCVTAC.Console.PostProcessing;
@@ -164,20 +165,30 @@ internal class TagDetector
             )
         };
 
+        var composers = new HashSet<string>();
+
         foreach (var pattern in parsePatterns)
         {
             var regex = new Regex(pattern.Regex);
-            var match = regex.Match(pattern.SourceText);
+            var matches = regex.Matches(pattern.SourceText);
 
-            if (!match.Success)
-                continue;
-
-            printer.Print($"• Writing composer \"{match.Groups[pattern.Group].Value}\" (matched via {pattern.Source})");
-            return match.Groups[pattern.Group].Value.Trim();
+            foreach (var match in matches.Where(m => m.Success))
+            {
+                composers.Add(match.Groups[pattern.Group].Value.Trim());
+            }
         }
 
-        printer.Print($"• No composer was parsed.");
-        return null;
+        if (composers.Any())
+        {
+            var composerText = string.Join("; ", composers);
+            printer.Print($"• Writing composer(s) \"{composerText}\"");
+            return composerText;
+        }
+        else
+        {
+            printer.Print($"• No composers parsed.");
+            return null;
+        }
     }
 
     /// <summary>
