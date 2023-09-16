@@ -1,27 +1,6 @@
-using System.Text.RegularExpressions;
+namespace CCVTAC.Console.PostProcessing.Tagging;
 
-namespace CCVTAC.Console.PostProcessing;
-
-/// <summary>
-/// A scheme used to apply regex to search specific text to search for matches,
-/// then specify a regex match group
-/// </summary>
-/// <param name="Regex">A regex pattern that will be used to instantiate a new `Regex`.</param>
-/// <param name="Group">
-///     The regex match group whose value should be used.
-///     Use `(` and `)` in the pattern to make groups.
-///     Zero represents the entire match.
-/// </param>
-/// <param name="SearchText">The text to which the regex pattern should be applied.</param>
-/// <param name="Source">The source of the match, used only for user output.</param>
-public record struct DetectionScheme(
-    string Regex, // TODO: Might be worth instantiating the `Regex` instance in the ctor.
-    int    Group,
-    string SourceText,
-    string Source
-);
-
-internal class TagDetector
+internal class TagDetectionSchemes
 {
     public string? DetectTitle(YouTubeVideoJson.Root data, Printer printer, string? defaultName = null)
     {
@@ -48,7 +27,7 @@ internal class TagDetector
             ),
         };
 
-        var output = DetectSingle<string>(parsePatterns, null);
+        string? output = Detectors.DetectSingle<string>(parsePatterns, null);
 
         if (output is null)
         {
@@ -87,7 +66,7 @@ internal class TagDetector
             ),
         };
 
-        var output = DetectSingle<string>(parsePatterns, null);
+        string? output = Detectors.DetectSingle<string>(parsePatterns, null);
 
         if (output is null)
         {
@@ -144,7 +123,7 @@ internal class TagDetector
             ),
         };
 
-        var output = DetectSingle<string>(parsePatterns, null);
+        var output = Detectors.DetectSingle<string>(parsePatterns, null);
 
         if (output is null)
         {
@@ -210,7 +189,7 @@ internal class TagDetector
             ),
         };
 
-        ushort output = DetectSingle<ushort>(parsePatterns, default);
+        ushort output = Detectors.DetectSingle<ushort>(parsePatterns, default);
 
         if (output is default(ushort))
         {
@@ -242,11 +221,11 @@ internal class TagDetector
             )
         };
 
-        var composers = DetectMultiple<string>(parsePatterns, null);
+        string? output = Detectors.DetectMultiple<string>(parsePatterns, null);
 
-        if (composers?.Any() == true)
+        if (output?.Any() == true)
         {
-            var composerText = string.Join("; ", composers);
+            var composerText = string.Join("; ", output);
             printer.Print($"• Found composer(s) \"{composerText}\"");
             return composerText;
         }
@@ -255,72 +234,5 @@ internal class TagDetector
             printer.Print($"• No composers parsed.");
             return null;
         }
-    }
-
-    public T? DetectMultiple<T>(IEnumerable<DetectionScheme> schemes, T? defaultValue, string separator = "; ")
-    {
-        var matchedValues = new HashSet<string>();
-
-        foreach (var scheme in schemes)
-        {
-            var regex = new Regex(scheme.Regex);
-            var matches = regex.Matches(scheme.SourceText);
-
-            foreach (var match in matches.Where(m => m.Success))
-            {
-                matchedValues.Add(match.Groups[scheme.Group].Value.Trim());
-            }
-        }
-
-        if (!matchedValues.Any())
-        {
-            return defaultValue;
-        }
-
-        var output = string.Join(separator, matchedValues);
-
-        if (output is T)
-        {
-            return (T)(object)output;
-        }
-
-        try
-        {
-            return (T)Convert.ChangeType(output, typeof(T));
-        }
-        catch (InvalidCastException)
-        {
-            return defaultValue;
-        }
-    }
-
-    public T? DetectSingle<T>(IEnumerable<DetectionScheme> schemes, T? defaultValue)
-    {
-        foreach (var scheme in schemes)
-        {
-            var regex = new Regex(scheme.Regex);
-            var match = regex.Match(scheme.SourceText);
-
-            if (!match.Success)
-                continue;
-
-            string? output = match.Groups[scheme.Group].Value.Trim();
-
-            if (output is T)
-            {
-                return (T)(object)output;
-            }
-
-            try
-            {
-                return (T?)Convert.ChangeType(output, typeof(T));
-            }
-            catch (InvalidCastException)
-            {
-                return defaultValue;
-            }
-        }
-
-        return defaultValue;
     }
 }

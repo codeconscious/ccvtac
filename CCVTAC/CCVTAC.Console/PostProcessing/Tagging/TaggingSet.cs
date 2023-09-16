@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace CCVTAC.Console.PostProcessing;
+namespace CCVTAC.Console.PostProcessing.Tagging;
 
 /// <summary>
 /// Contains all of the data necessary for tagging files.

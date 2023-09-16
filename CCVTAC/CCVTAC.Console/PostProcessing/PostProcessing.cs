@@ -2,6 +2,7 @@ using System.IO;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using CCVTAC.Console.Settings;
+using CCVTAC.Console.PostProcessing.Tagging;
 
 namespace CCVTAC.Console.PostProcessing;
 

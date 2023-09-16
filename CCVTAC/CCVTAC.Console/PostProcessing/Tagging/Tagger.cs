@@ -2,7 +2,7 @@
 using System.Text.Json;
 using CCVTAC.Console.Settings;
 
-namespace CCVTAC.Console.PostProcessing;
+namespace CCVTAC.Console.PostProcessing.Tagging;
 
 internal static class Tagger
 {
@@ -88,7 +88,7 @@ internal static class Tagger
             printer.Print($"Current audio file: \"{audioFileName}\"");
 
             using var taggedFile = TagLib.File.Create(audioFilePath);
-            var tagDetector = new TagDetector();
+            var tagDetector = new TagDetectionSchemes();
             taggedFile.Tag.Title = tagDetector.DetectTitle(parsedVideoJson, printer, parsedVideoJson.Title);
 
             if (tagDetector.DetectArtist(parsedVideoJson, printer) is string artist)
