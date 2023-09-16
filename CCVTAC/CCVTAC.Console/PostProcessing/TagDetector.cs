@@ -159,6 +159,72 @@ internal class TagDetector
         }
     }
 
+    /// <summary>
+    /// Attempt to automatically detect a release year in the video metadata.
+    /// If none is found, return a default value.
+    /// </summary>
+    public ushort? DetectReleaseYear(YouTubeVideoJson.Root data, Printer printer, ushort? defaultYear = null)
+    {
+        List<DetectionScheme> parsePatterns = new()
+        {
+            new DetectionScheme(
+                @"(?<=[(（\[［【])[12]\d{3}(?=[)）\]］】])",
+                0,
+                data.Title,
+                "title"
+            ),
+            new DetectionScheme(
+                @"(?<=℗ )[12]\d{3}(?=\s)",
+                0,
+                data.Description,
+                "description's \"℗\" symbol"
+            ),
+            new DetectionScheme(
+                @"(?<=[Rr]eleased [io]n: )[12]\d{3}",
+                0,
+                data.Description,
+                "description 'released on' date"
+            ),
+            new DetectionScheme(
+                @"[12]\d{3}(?=(?:[.\/年]\d{1,2}[.\/月]\d{1,2}日?\s?)?\s?(?:[Rr]elease|リリース|発売))",
+                0,
+                data.Description,
+                "description's year-first–style date"
+            ),
+            new DetectionScheme(
+                @"[12]\d{3}年(?=\d{1,2}月\d{1,2}日\s?[Rr]elease)",
+                0,
+                data.Description,
+                "description's 年月日-style release date"
+            ),
+            new DetectionScheme(
+                @"(.+) (?:\d\w{2}|Vol\.\d)?『(.+)』\[([12]\d{3})\]",
+                3,
+                data.Title,
+                "title"
+            ),
+            new DetectionScheme(
+                @"(.+) (?:\d\w{2}|Vol\.\d)?『(.+)』\[([12]\d{3})\]",
+                3,
+                data.Description,
+                "description"
+            ),
+        };
+
+        ushort output = DetectSingle<ushort>(parsePatterns, default);
+
+        if (output is default(ushort))
+        {
+            printer.Print($"• No year parsed.");
+            return null;
+        }
+        else
+        {
+            printer.Print($"• Writing year \"{output}\"");
+            return output;
+        }
+    }
+
     public string? DetectComposers(YouTubeVideoJson.Root data, Printer printer)
     {
         List<DetectionScheme> parsePatterns = new()
@@ -239,16 +305,16 @@ internal class TagDetector
             if (!match.Success)
                 continue;
 
-            var matchedValue = match.Groups[pattern.Group].Value.Trim();
+            string? output = match.Groups[pattern.Group].Value.Trim();
 
-            if (matchedValue is T)
+            if (output is T)
             {
-                return (T)(object)matchedValue;
+                return (T)(object)output;
             }
 
             try
             {
-                return (T)Convert.ChangeType(matchedValue, typeof(T));
+                return (T?)Convert.ChangeType(output, typeof(T));
             }
             catch (InvalidCastException)
             {
@@ -257,92 +323,5 @@ internal class TagDetector
         }
 
         return defaultValue;
-    }
-
-    /// <summary>
-    /// Attempt to automatically detect a release year in the video metadata.
-    /// If none is found, return a default value.
-    /// </summary>
-    public ushort? DetectReleaseYear(YouTubeVideoJson.Root data, Printer printer, ushort? defaultYear = null)
-    {
-        List<DetectionScheme> parsePatterns = new()
-        {
-            new DetectionScheme(
-                @"(?<=[(（\[［【])[12]\d{3}(?=[)）\]］】])",
-                0,
-                data.Title,
-                "title"
-            ),
-            new DetectionScheme(
-                @"(?<=℗ )[12]\d{3}(?=\s)",
-                0,
-                data.Description,
-                "description's \"℗\" symbol"
-            ),
-            new DetectionScheme(
-                @"(?<=[Rr]eleased [io]n: )[12]\d{3}",
-                0,
-                data.Description,
-                "description 'released on' date"
-            ),
-            new DetectionScheme(
-                @"[12]\d{3}(?=(?:[.\/年]\d{1,2}[.\/月]\d{1,2}日?\s?)?\s?(?:[Rr]elease|リリース|発売))",
-                0,
-                data.Description,
-                "description's year-first–style date"
-            ),
-            new DetectionScheme(
-                @"[12]\d{3}年(?=\d{1,2}月\d{1,2}日\s?[Rr]elease)",
-                0,
-                data.Description,
-                "description's 年月日-style release date"
-            ),
-            new DetectionScheme(
-                @"(.+) (?:\d\w{2}|Vol\.\d)?『(.+)』\[([12]\d{3})\]",
-                3,
-                data.Title,
-                "title"
-            ),
-            new DetectionScheme(
-                @"(.+) (?:\d\w{2}|Vol\.\d)?『(.+)』\[([12]\d{3})\]",
-                3,
-                data.Description,
-                "description"
-            ),
-        };
-
-        foreach (var pattern in parsePatterns)
-        {
-            var result = ParseYear(pattern.Regex, pattern.SourceText);
-            if (result is null)
-                continue;
-
-            printer.Print($"• Writing year {result.Value} (matched via {pattern.Source})");
-            return result.Value;
-        }
-
-        printer.Print($"• No year was parsed{(defaultYear is null ? "." : $", so defaulting to {defaultYear}.")}");
-        return defaultYear;
-
-        /// <summary>
-        /// Applies a regex pattern against text, returning the matched value
-        /// or else null if there was no successful match.
-        /// </summary>
-        /// <param name="regexPattern"></param>
-        /// <param name="text">Text that might contain a year.</param>
-        /// <returns>A number representing a year or null.</returns>
-        static ushort? ParseYear(string regexPattern, string text)
-        {
-            ArgumentNullException.ThrowIfNullOrEmpty(regexPattern);
-
-            var regex = new Regex(regexPattern);
-            var match = regex.Match(text);
-
-            if (match is null)
-                return null;
-            return ushort.TryParse(match.Value, out var matchYear)
-                ? matchYear
-                : null;
-        };
     }
 }
