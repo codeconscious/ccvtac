@@ -1,4 +1,3 @@
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace CCVTAC.Console.PostProcessing;
@@ -54,11 +53,11 @@ internal class TagDetector
         if (output is null)
         {
             printer.Print($"• No title parsed.");
-            return null;
+            return defaultName;
         }
         else
         {
-            printer.Print($"• Writing title \"{output}\"");
+            printer.Print($"• Found title \"{output}\"");
             return output;
         }
     }
@@ -93,11 +92,11 @@ internal class TagDetector
         if (output is null)
         {
             printer.Print($"• No artist parsed.");
-            return null;
+            return defaultName;
         }
         else
         {
-            printer.Print($"• Writing artist \"{output}\"");
+            printer.Print($"• Found artist \"{output}\"");
             return output;
         }
     }
@@ -150,11 +149,11 @@ internal class TagDetector
         if (output is null)
         {
             printer.Print($"• No album parsed.");
-            return null;
+            return defaultName;
         }
         else
         {
-            printer.Print($"• Writing album \"{output}\"");
+            printer.Print($"• Found album \"{output}\"");
             return output;
         }
     }
@@ -216,11 +215,11 @@ internal class TagDetector
         if (output is default(ushort))
         {
             printer.Print($"• No year parsed.");
-            return null;
+            return defaultYear;
         }
         else
         {
-            printer.Print($"• Writing year \"{output}\"");
+            printer.Print($"• Found year \"{output}\"");
             return output;
         }
     }
@@ -248,7 +247,7 @@ internal class TagDetector
         if (composers?.Any() == true)
         {
             var composerText = string.Join("; ", composers);
-            printer.Print($"• Writing composer(s) \"{composerText}\"");
+            printer.Print($"• Found composer(s) \"{composerText}\"");
             return composerText;
         }
         else
@@ -258,18 +257,18 @@ internal class TagDetector
         }
     }
 
-    public T? DetectMultiple<T>(IEnumerable<DetectionScheme> parsePatterns, T? defaultValue, string separator = "; ")
+    public T? DetectMultiple<T>(IEnumerable<DetectionScheme> schemes, T? defaultValue, string separator = "; ")
     {
         var matchedValues = new HashSet<string>();
 
-        foreach (var pattern in parsePatterns)
+        foreach (var scheme in schemes)
         {
-            var regex = new Regex(pattern.Regex);
-            var matches = regex.Matches(pattern.SourceText);
+            var regex = new Regex(scheme.Regex);
+            var matches = regex.Matches(scheme.SourceText);
 
             foreach (var match in matches.Where(m => m.Success))
             {
-                matchedValues.Add(match.Groups[pattern.Group].Value.Trim());
+                matchedValues.Add(match.Groups[scheme.Group].Value.Trim());
             }
         }
 
@@ -295,17 +294,17 @@ internal class TagDetector
         }
     }
 
-    public T? DetectSingle<T>(IEnumerable<DetectionScheme> parsePatterns, T? defaultValue)
+    public T? DetectSingle<T>(IEnumerable<DetectionScheme> schemes, T? defaultValue)
     {
-        foreach (var pattern in parsePatterns)
+        foreach (var scheme in schemes)
         {
-            var regex = new Regex(pattern.Regex);
-            var match = regex.Match(pattern.SourceText);
+            var regex = new Regex(scheme.Regex);
+            var match = regex.Match(scheme.SourceText);
 
             if (!match.Success)
                 continue;
 
-            string? output = match.Groups[pattern.Group].Value.Trim();
+            string? output = match.Groups[scheme.Group].Value.Trim();
 
             if (output is T)
             {
