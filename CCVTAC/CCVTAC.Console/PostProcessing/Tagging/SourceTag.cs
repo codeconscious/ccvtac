@@ -1,6 +1,6 @@
 namespace CCVTAC.Console.PostProcessing.Tagging;
 
-public enum DetectionTarget : byte
+public enum SourceTag : byte
 {
     Title,
     Description

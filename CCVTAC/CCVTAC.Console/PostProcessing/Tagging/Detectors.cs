@@ -4,27 +4,29 @@ namespace CCVTAC.Console.PostProcessing.Tagging;
 
 public static class Detectors
 {
-    private static string ExtractText(YouTubeVideoJson.Root data, DetectionTarget target) =>
+    private static string ExtractText(YouTubeVideoJson.Root videoMetadata, SourceTag target) =>
         target switch
         {
-            DetectionTarget.Title       => data.Title,
-            DetectionTarget.Description => data.Description,
-            _                           => throw new InvalidOperationException(
-                                                $"\"{target}\" is an invalid {nameof(DetectionTarget)}.")
+            SourceTag.Title       => videoMetadata.Title,
+            SourceTag.Description => videoMetadata.Description,
+            _ => throw new ArgumentException($"\"{target}\" is an invalid {nameof(SourceTag)}.")
         };
 
-    public static T? DetectSingle<T>(YouTubeVideoJson.Root data, IEnumerable<DetectionScheme> schemes, T? defaultValue)
+    public static T? DetectSingle<T>(
+        YouTubeVideoJson.Root videoMetadata,
+        IEnumerable<DetectionScheme> schemes,
+        T? defaultValue)
     {
         foreach (var scheme in schemes)
         {
-            var regex = new Regex(scheme.Regex);
-            var searchText = ExtractText(data, scheme.SourceText);
+            var regex = new Regex(scheme.RegexPattern);
+            var searchText = ExtractText(videoMetadata, scheme.TagName);
             var match = regex.Match(searchText);
 
             if (!match.Success)
                 continue;
 
-            string? output = match.Groups[scheme.Group].Value.Trim();
+            string? output = match.Groups[scheme.MatchGroup].Value.Trim();
 
             if (output is T)
             {
@@ -44,19 +46,23 @@ public static class Detectors
         return defaultValue;
     }
 
-    public static T? DetectMultiple<T>(YouTubeVideoJson.Root data, IEnumerable<DetectionScheme> schemes, T? defaultValue, string separator = "; ")
+    public static T? DetectMultiple<T>(
+        YouTubeVideoJson.Root data,
+        IEnumerable<DetectionScheme> schemes,
+        T? defaultValue,
+        string separator = "; ")
     {
         var matchedValues = new HashSet<string>();
 
         foreach (var scheme in schemes)
         {
-            var regex = new Regex(scheme.Regex);
-            var searchText = ExtractText(data, scheme.SourceText);
+            var regex = new Regex(scheme.RegexPattern);
+            var searchText = ExtractText(data, scheme.TagName);
             var matches = regex.Matches(searchText);
 
             foreach (var match in matches.Where(m => m.Success))
             {
-                matchedValues.Add(match.Groups[scheme.Group].Value.Trim());
+                matchedValues.Add(match.Groups[scheme.MatchGroup].Value.Trim());
             }
         }
 
