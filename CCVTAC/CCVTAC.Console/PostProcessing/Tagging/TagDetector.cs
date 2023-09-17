@@ -2,19 +2,19 @@ namespace CCVTAC.Console.PostProcessing.Tagging;
 
 internal class TagDetectionSchemes
 {
-    public string? DetectTitle(YouTubeVideoJson.Root data, Printer printer, string? defaultName = null)
+    public string? DetectTitle(YouTubeVideoJson.Root data, string? defaultName = null)
     {
         // TODO: Put this, and similar blocks in this file, somewhere where it can be static.
         List<DetectionScheme> parsePatterns = new()
         {
             new DetectionScheme(
-                @"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D",
+                @"(.+?) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D",
                 1,
                 data.Description,
                 "description (Topic style)"
             ),
             new DetectionScheme(
-                @"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗",
+                @"(.+?) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗",
                 1,
                 data.Description,
                 "description (pseudo-Topic style)"
@@ -27,33 +27,22 @@ internal class TagDetectionSchemes
             ),
         };
 
-        string? output = Detectors.DetectSingle<string>(parsePatterns, null);
-
-        if (output is null)
-        {
-            printer.Print($"• No title parsed.");
-            return defaultName;
-        }
-        else
-        {
-            printer.Print($"• Found title \"{output}\"");
-            return output;
-        }
+        return Detectors.DetectSingle<string>(parsePatterns, null) ?? defaultName;
     }
 
-    public string? DetectArtist(YouTubeVideoJson.Root data, Printer printer, string? defaultName = null)
+    public string? DetectArtist(YouTubeVideoJson.Root data, string? defaultArtist = null)
     {
         // TODO: Put this somewhere where it can be static.
         List<DetectionScheme> parsePatterns = new()
         {
             new DetectionScheme(
-                @"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D",
+                @"(.+?) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D",
                 2,
                 data.Description,
                 "description (Topic style)"
             ),
             new DetectionScheme(
-                @"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗",
+                @"(.+?) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗",
                 2,
                 data.Description,
                 "description (pseudo-Topic style)"
@@ -66,21 +55,10 @@ internal class TagDetectionSchemes
             ),
         };
 
-        string? output = Detectors.DetectSingle<string>(parsePatterns, null);
-
-        if (output is null)
-        {
-            printer.Print($"• No artist parsed.");
-            return defaultName;
-        }
-        else
-        {
-            printer.Print($"• Found artist \"{output}\"");
-            return output;
-        }
+        return Detectors.DetectSingle<string>(parsePatterns, null) ?? defaultArtist;
     }
 
-    public string? DetectAlbum(YouTubeVideoJson.Root data, Printer printer, string? defaultName = null)
+    public string? DetectAlbum(YouTubeVideoJson.Root data, string? defaultAlbum = null)
     {
         // TODO: Put this somewhere where it can be static or else a setting.
         List<DetectionScheme> parsePatterns = new()
@@ -92,13 +70,13 @@ internal class TagDetectionSchemes
                 "description"
             ),
             new DetectionScheme(
-                @"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D",
+                @"(.+?) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D",
                 3,
                 data.Description,
                 "description (Topic style)"
             ),
             new DetectionScheme(
-                @"(.+) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗",
+                @"(.+?) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗",
                 3,
                 data.Description,
                 "description (pseudo-Topic style)"
@@ -123,26 +101,16 @@ internal class TagDetectionSchemes
             ),
         };
 
-        var output = Detectors.DetectSingle<string>(parsePatterns, null);
-
-        if (output is null)
-        {
-            printer.Print($"• No album parsed.");
-            return defaultName;
-        }
-        else
-        {
-            printer.Print($"• Found album \"{output}\"");
-            return output;
-        }
+        return Detectors.DetectSingle<string>(parsePatterns, null) ?? defaultAlbum;
     }
 
     /// <summary>
     /// Attempt to automatically detect a release year in the video metadata.
     /// If none is found, return a default value.
     /// </summary>
-    public ushort? DetectReleaseYear(YouTubeVideoJson.Root data, Printer printer, ushort? defaultYear = null)
+    public ushort? DetectReleaseYear(YouTubeVideoJson.Root data, ushort? defaultYear = null)
     {
+        // TODO: Put this somewhere where it can be static or else a setting.
         List<DetectionScheme> parsePatterns = new()
         {
             new DetectionScheme(
@@ -190,21 +158,12 @@ internal class TagDetectionSchemes
         };
 
         ushort output = Detectors.DetectSingle<ushort>(parsePatterns, default);
-
-        if (output is default(ushort))
-        {
-            printer.Print($"• No year parsed.");
-            return defaultYear;
-        }
-        else
-        {
-            printer.Print($"• Found year \"{output}\"");
-            return output;
-        }
+        return output is default(ushort) ? defaultYear : output;
     }
 
-    public string? DetectComposers(YouTubeVideoJson.Root data, Printer printer)
+    public string? DetectComposers(YouTubeVideoJson.Root data)
     {
+        // TODO: Put this somewhere where it can be static or else a setting.
         List<DetectionScheme> parsePatterns = new()
         {
             new DetectionScheme(
@@ -221,18 +180,6 @@ internal class TagDetectionSchemes
             )
         };
 
-        string? output = Detectors.DetectMultiple<string>(parsePatterns, null);
-
-        if (output?.Any() == true)
-        {
-            var composerText = string.Join("; ", output);
-            printer.Print($"• Found composer(s) \"{composerText}\"");
-            return composerText;
-        }
-        else
-        {
-            printer.Print($"• No composers parsed.");
-            return null;
-        }
+        return Detectors.DetectMultiple<string>(parsePatterns, null, "; ");
     }
 }

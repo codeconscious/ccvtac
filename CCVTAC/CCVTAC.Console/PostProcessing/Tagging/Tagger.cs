@@ -16,7 +16,7 @@ internal static class Tagger
         var stopwatch = new System.Diagnostics.Stopwatch();
         stopwatch.Start();
 
-        var taggingSetsResult = GetTaggingSets(userSettings.WorkingDirectory);
+        var taggingSetsResult = GetTaggingSetsForFiles(userSettings.WorkingDirectory);
         if (taggingSetsResult.IsFailed)
             return Result.Fail("No tagging sets were generated, so tagging cannot be done.");
 
@@ -28,7 +28,7 @@ internal static class Tagger
         return Result.Ok($"Tagging done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
     }
 
-    private static Result<ImmutableList<TaggingSet>> GetTaggingSets(string workingDirectory)
+    private static Result<ImmutableList<TaggingSet>> GetTaggingSetsForFiles(string workingDirectory)
     {
         try
         {
@@ -89,35 +89,40 @@ internal static class Tagger
 
             using var taggedFile = TagLib.File.Create(audioFilePath);
             var tagDetector = new TagDetectionSchemes();
-            taggedFile.Tag.Title = tagDetector.DetectTitle(parsedVideoJson, printer, parsedVideoJson.Title);
 
-            if (tagDetector.DetectArtist(parsedVideoJson, printer) is string artist)
+            taggedFile.Tag.Title = tagDetector.DetectTitle(parsedVideoJson, parsedVideoJson.Title);
+            printer.Print($"• Using title \"{taggedFile.Tag.Title}\"");
+
+            if (tagDetector.DetectArtist(parsedVideoJson) is string artist)
             {
+                printer.Print($"• Found artist \"{artist}\"");
                 taggedFile.Tag.Performers = new[] { artist };
             }
 
-            if (tagDetector.DetectAlbum(parsedVideoJson, printer, collectionJson?.Title ?? null) is string album)
+            if (tagDetector.DetectAlbum(parsedVideoJson, collectionJson?.Title) is string album)
             {
+                printer.Print($"• Found album \"{album}\"");
                 taggedFile.Tag.Album = album;
             }
 
-            // Years
+            if (tagDetector.DetectComposers(parsedVideoJson) is string composers)
+            {
+                printer.Print($"• Found composer(s) \"{composers}\"");
+                taggedFile.Tag.Composers = new[] { composers };
+            }
+
             ushort? defaultYear = userSettings.GetVideoUploadDateIfRegisteredUploader(parsedVideoJson);
             if (defaultYear is not null)
             {
                 printer.Print($"Will use upload year {defaultYear} for uploader \"{parsedVideoJson.Uploader}\" if no other year is detected.");
             }
-            if (tagDetector.DetectReleaseYear(parsedVideoJson, printer, defaultYear) is ushort year)
+            if (tagDetector.DetectReleaseYear(parsedVideoJson, defaultYear) is ushort year)
             {
+                printer.Print($"• Found year \"{year}\"");
                 taggedFile.Tag.Year = year;
             }
 
             taggedFile.Tag.Comment = parsedVideoJson.GenerateComment(collectionJson);
-
-            if (tagDetector.DetectComposers(parsedVideoJson, printer) is string composer)
-            {
-                taggedFile.Tag.Composers = new[] { composer };
-            }
 
             WriteImage(taggedFile, imageFilePath, printer);
 
