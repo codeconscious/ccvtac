@@ -15,6 +15,6 @@ namespace CCVTAC.Console.PostProcessing.Tagging;
 public record struct DetectionScheme(
     string Regex, // TODO: Might be worth instantiating the `Regex` instance in the ctor.
     int    Group,
-    string SourceText,
-    string Source
+    DetectionTarget SourceText, // TODO: Update name
+    string? Source = null
 );
