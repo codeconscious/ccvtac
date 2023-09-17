@@ -28,7 +28,7 @@ public sealed class Setup
         YouTubeCollectionJson.Root? collectionJson;
         if (jsonResult.IsFailed)
         {
-            Printer.Print($"No playlist or channel data loaded: {jsonResult.Errors.First().Message}");
+            Printer.Print($"No playlist or channel metadata found: {jsonResult.Errors.First().Message}");
             collectionJson = null;
         }
         else
@@ -67,9 +67,9 @@ public sealed class Setup
                                      .ToImmutableList();
 
             if (fileNames.Count == 0)
-                return Result.Fail("No relevant files found (so this is likely not a playlist download).");
+                return Result.Fail("No relevant files found.");
             if (fileNames.Count > 1)
-                return Result.Fail("Unexpectedly found more than 1 relevant file, so none will be processed.");
+                return Result.Fail("Unexpectedly found more than one relevant file, so none will be processed.");
             var fileName = fileNames.Single();
 
             var json = File.ReadAllText(fileName);
