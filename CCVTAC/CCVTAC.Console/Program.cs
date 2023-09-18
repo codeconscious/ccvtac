@@ -35,6 +35,7 @@ internal static class Program
         {
             printer.Error($"Fatal error: {topLevelException.Message}");
             AnsiConsole.WriteException(topLevelException);
+            printer.Print("Please help improve this program by reporting this error and the URL you entered at https://github.com/codeconscious/ccvtac/issues.");
         }
     }
 
