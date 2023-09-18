@@ -35,6 +35,7 @@ internal static class Program
         {
             printer.Error($"Fatal error: {topLevelException.Message}");
             AnsiConsole.WriteException(topLevelException);
+            printer.Print("Please help improve this program by reporting this error and the URL you entered at https://github.com/codeconscious/ccvtac/issues.");
         }
     }
 
@@ -102,10 +103,8 @@ internal static class Program
 
             if (haveProcessedAny) // No need to sleep for the very first URL.
             {
-                var sleepSeconds = settings.SleepBetweenBatchesSeconds;
-
                 AnsiConsole.Status()
-                    .Start($"Sleeping for {sleepSeconds} seconds...", ctx =>
+                    .Start($"Sleeping for {settings.SleepBetweenBatchesSeconds} seconds...", ctx =>
                     {
                         ctx.Spinner(Spinner.Known.Star);
                         ctx.SpinnerStyle(Style.Parse("blue"));
@@ -140,6 +139,7 @@ internal static class Program
             var postProcessor = new PostProcessing.Setup(settings, printer);
             postProcessor.Run(); // TODO: Think about if/how to handle leftover temp files due to errors.
 
+            // TODO: Use minutes or hours for longer times.
             printer.Print($"Done processing '{input}' in {jobStopwatch.ElapsedMilliseconds:#,##0}ms.",
                           appendLines: 1);
         }
