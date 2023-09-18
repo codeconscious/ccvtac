@@ -6,17 +6,16 @@ namespace CCVTAC.Console.PostProcessing.Tagging;
 
 internal static class Tagger
 {
-    internal static Result<string> Run(
-        UserSettings userSettings,
-        YouTubeCollectionJson.Root? collectionJson,
-        Printer printer)
+    internal static Result<string> Run(UserSettings userSettings,
+                                       YouTubeCollectionJson.Root? collectionJson,
+                                       Printer printer)
     {
         printer.Print("Adding file tags...");
 
         var stopwatch = new System.Diagnostics.Stopwatch();
         stopwatch.Start();
 
-        var taggingSetsResult = GetTaggingSetsForFiles(userSettings.WorkingDirectory);
+        var taggingSetsResult = GenerateTaggingSets(userSettings.WorkingDirectory);
         if (taggingSetsResult.IsFailed)
             return Result.Fail("No tagging sets were generated, so tagging cannot be done.");
 
@@ -28,16 +27,20 @@ internal static class Tagger
         return Result.Ok($"Tagging done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
     }
 
-    private static Result<ImmutableList<TaggingSet>> GetTaggingSetsForFiles(string workingDirectory)
+    private static Result<ImmutableList<TaggingSet>> GenerateTaggingSets(string directory)
     {
         try
         {
-            var allFiles = Directory.GetFiles(workingDirectory);
+            var allFiles = Directory.GetFiles(directory);
             var taggingSets = TaggingSet.CreateTaggingSets(allFiles);
 
             return taggingSets is not null && taggingSets.Any()
                 ? Result.Ok(taggingSets)
-                : Result.Fail($"No tagging sets were created using working directory \"{workingDirectory}\".");
+                : Result.Fail($"No tagging sets were created using working directory \"{directory}\".");
+        }
+        catch (DirectoryNotFoundException)
+        {
+            return Result.Fail($"Directory \"{directory}\" does not exist.");
         }
         catch (Exception ex)
         {

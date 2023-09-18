@@ -20,9 +20,9 @@ internal record struct DetectionScheme
     internal string?     Note;
 
     internal DetectionScheme(string      regexPattern,
-                           int         matchGroup,
-                           SourceField sourceField,
-                           string?     note = null
+                             int         matchGroup,
+                             SourceField sourceField,
+                             string?     note = null
     )
     {
         Regex = new Regex(regexPattern, RegexOptions.None);
