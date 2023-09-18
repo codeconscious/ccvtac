@@ -4,6 +4,9 @@ namespace CCVTAC.Console.PostProcessing.Tagging;
 
 public static class Detectors
 {
+    /// <summary>
+    /// Extracts the value of the specified tag field from the given data.
+    /// </summary>
     private static string ExtractText(YouTubeVideoJson.Root videoMetadata, SourceTag target) =>
         target switch
         {
@@ -12,6 +15,15 @@ public static class Detectors
             _ => throw new ArgumentException($"\"{target}\" is an invalid {nameof(SourceTag)}.")
         };
 
+    /// <summary>
+    /// Finds and returns the first instance of text matching a given detection scheme pattern,
+    /// parsing into T if necessary.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="videoMetadata"></param>
+    /// <param name="schemes"></param>
+    /// <param name="defaultValue"></param>
+    /// <returns>A match of type T if there was a match; otherwise, the default value provided.</returns>
     public static T? DetectSingle<T>(
         YouTubeVideoJson.Root videoMetadata,
         IEnumerable<DetectionScheme> schemes,
@@ -46,6 +58,16 @@ public static class Detectors
         return defaultValue;
     }
 
+    /// <summary>
+    /// Finds and returns all instances of text matching a given detection scheme pattern,
+    /// concatentating them into a single string, then casting to type T if necessary.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="data"></param>
+    /// <param name="schemes"></param>
+    /// <param name="defaultValue"></param>
+    /// <param name="separator"></param>
+    /// <returns>A match of type T if there were any matches; otherwise, the default value provided.</returns>
     public static T? DetectMultiple<T>(
         YouTubeVideoJson.Root data,
         IEnumerable<DetectionScheme> schemes,
