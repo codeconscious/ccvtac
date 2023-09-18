@@ -3,36 +3,46 @@ using System.Text.RegularExpressions;
 namespace CCVTAC.Console.PostProcessing.Tagging;
 
 /// <summary>
-/// Contains all of the data necessary for tagging files.
+/// Contains all of the data necessary for tagging a related set of files.
 /// </summary>
-public readonly record struct TaggingSet
+/// <remarks>
+/// Files are "related" if they share the same resource ID. Generally, only a single downloaded video
+/// has a certain video ID, but if the split-chapter option is used, all the child videos that were
+/// split out will also have the same resource ID.
+/// </remarks>
+internal readonly record struct TaggingSet
 {
     /// <summary>
-    /// The ID of a download resource (i.e., a video).
+    /// The ID of a single video and perhaps its child video (if "split chapters" was used).
     /// </summary>
-    public string ResourceId { get; init; }
+    internal string ResourceId { get; init; }
 
     /// <summary>
     /// All audio files for the associated resource ID. Several indicate
     /// that the original video was split into several audio files.
     /// </summary>
-    public ImmutableHashSet<string> AudioFilePaths { get; init; }
+    internal ImmutableHashSet<string> AudioFilePaths { get; init; }
 
     /// <summary>
-    /// The path to the JSON file containing metadata about the source video.
+    /// The path to the JSON file containing metadata related to the source video.
     /// </summary>
-    public string JsonFilePath { get; init; }
+    internal string JsonFilePath { get; init; }
 
     /// <summary>
-    /// The path to the image file containing the thumbnail of the source video.
+    /// The path to the image file containing the thumbnail related to the source video.
     /// </summary>
-    public string ImageFilePath { get; init; }
+    internal string ImageFilePath { get; init; }
 
-    public TaggingSet(
-        string resourceId,
-        IEnumerable<string> audioFilePaths,
-        string jsonFilePath,
-        string imageFilePath)
+    /// <summary>
+    /// A regex that finds all files whose filename includes a video ID.
+    /// Group 1 contains the video ID itself.
+    /// </summary>
+    internal static Regex FileNamesWithVideoIdsRegex = new(@".+\[([\w_\-]{11})\](?:.*)?\.(\w+)");
+
+    internal TaggingSet(string              resourceId,
+                        IEnumerable<string> audioFilePaths,
+                        string              jsonFilePath,
+                        string              imageFilePath)
     {
         if (string.IsNullOrWhiteSpace(resourceId))
             throw new ArgumentException("The resource ID must be provided.");
@@ -51,29 +61,28 @@ public readonly record struct TaggingSet
 
     /// <summary>
     /// Create a collection of TaggingSets from a collection of filePaths
-    /// related to several resource (video) IDs.
+    /// related to several video IDs.
     /// </summary>
     /// <param name="filePaths">
     /// A collection of file paths. Expected to contain 1 JSON file and
-    /// 1 image file for each unique resource ID.
+    /// 1 image file for each unique video ID.
     /// </param>
-    public static ImmutableList<TaggingSet> CreateTaggingSets(IEnumerable<string> filePaths)
+    internal static ImmutableList<TaggingSet> CreateTaggingSets(IEnumerable<string> filePaths)
     {
         if (filePaths is null || !filePaths.Any())
             return Enumerable.Empty<TaggingSet>().ToImmutableList();
 
-        var regex = new Regex(@".+\[([\w_\-]{11})\](?:.*)?\.(\w+)");
         const string jsonFileExtension = ".json";
-        const string audioFileExtension = ".m4a";  // TODO: Support multiple formats.
+        const string audioFileExtension = ".m4a"; // TODO: Support multiple formats (maybe).
         const string imageFileExtension = ".jpg";
 
         return filePaths
-                    .Select(f => regex.Match(f))
+                    .Select(f => FileNamesWithVideoIdsRegex.Match(f))
                     .Where(m => m.Success)
                     .Select(m => m.Captures.OfType<Match>().First())
-                    .GroupBy(m => m.Groups[1].Value, // Resource ID
+                    .GroupBy(m => m.Groups[1].Value, // Video ID
                              m => m.Groups[0].Value) // Full filename
-                    .Where(gr => // Ensure the correct count of metadata files.
+                    .Where(gr => // Ensure the correct count of image and JSON files.
                         gr.Count(f => f.EndsWith(jsonFileExtension, StringComparison.OrdinalIgnoreCase)) == 1 &&
                         gr.Count(f => f.EndsWith(imageFileExtension, StringComparison.OrdinalIgnoreCase)) == 1)
                     .Select(gr => {
@@ -83,6 +92,7 @@ public readonly record struct TaggingSet
                             gr.Where(f => f.EndsWith(jsonFileExtension)).First(),
                             gr.Where(f => f.EndsWith(imageFileExtension)).First()
                         );
-                    }).ToImmutableList();
+                    })
+                    .ToImmutableList();
     }
 }

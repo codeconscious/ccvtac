@@ -37,7 +37,7 @@ internal static class Tagger
 
             return taggingSets is not null && taggingSets.Any()
                 ? Result.Ok(taggingSets)
-                : Result.Fail("No tagging sets were created.");
+                : Result.Fail($"No tagging sets were created using working directory \"{workingDirectory}\".");
         }
         catch (Exception ex)
         {
@@ -45,7 +45,7 @@ internal static class Tagger
         }
     }
 
-    static void ProcessSingleTaggingSet(
+    private static void ProcessSingleTaggingSet(
         UserSettings userSettings,
         TaggingSet taggingSet,
         YouTubeCollectionJson.Root? collectionJson,
@@ -88,7 +88,7 @@ internal static class Tagger
             printer.Print($"Current audio file: \"{audioFileName}\"");
 
             using var taggedFile = TagLib.File.Create(audioFilePath);
-            var tagDetector = new TagDetectionSchemes();
+            var tagDetector = new TagDetector();
 
             taggedFile.Tag.Title = tagDetector.DetectTitle(parsedVideoJson, parsedVideoJson.Title);
             printer.Print($"• Using title \"{taggedFile.Tag.Title}\"");
