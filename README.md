@@ -1,6 +1,6 @@
-# CCVTAC (CodeConscious Video-to-Audio Converter)
+# CCVTAC
 
-This is a small .NET CLI tool that acts as a wrapper around [yt-dlp](https://github.com/yt-dlp/yt-dlp) to enable even easier downloads of audio from specific YouTube videos, playlist, and channels, plus do some automatic post-processing (tagging and moving) as well.
+CCVTAC (CodeConscious Video-to-Audio Converter) is a small .NET CLI tool that acts as a wrapper around [yt-dlp](https://github.com/yt-dlp/yt-dlp) to enable even easier downloads of audio from specific YouTube videos, playlist, and channels, plus do some automatic post-processing (tagging and moving) as well.
 
 Feel free to use it yourself, but please do so responsibly. No warranties or guarantees provided!
 
@@ -31,8 +31,8 @@ Prerequisites:
 
 Run the program with `dotnet run`. Pass `-h` or `--help` for the instructions.
 
-If your `settings.json` file does not exist, it will created in the application directory with default settings. At minimum, you will need to enter paths to two existing directories: (1) a working directory for temporary files and (2) the directory to which the final audio files should be moved.
+If your `settings.json` file does not exist, it will created in the application directory with default settings. At minimum, you will need to enter paths to two existing directories: (1) a working directory for temporary files and (2) the directory to which the final audio files should be moved. The other settings are optional.
 
-Once the program is running, simply enter a YouTube video or playlist URL at the prompt and press Enter.
+Once the program is running, simply enter a YouTube video, playlist, or channel URL at the prompt and press Enter.
 
 Recommended: Periodically ensure you're running the latest version of yt-dlp using `sudo yt-dlp -U` (or whatever command is appropriate for your system).
