@@ -24,8 +24,12 @@ internal static class DetectionSchemeBank
         new(
             @"(.+) (?:\d\w{2}|Vol\.\d)?『(.+)』\[([12]\d{3})\]",
             2,
-            SourceField.Title,
-            "title"
+            SourceField.Title
+        ),
+        new(
+            """(.+?) ['"](.+)['"]""",
+            2,
+            SourceField.Title
         ),
     };
 
@@ -45,6 +49,11 @@ internal static class DetectionSchemeBank
         ),
         new (
             @"(.+)(?: - )?[「『](.+)[」』]\[([12]\d{3})\]",
+            1,
+            SourceField.Title
+        ),
+        new(
+            """(.+?) ['"](.+)['"]""", // Artist 'TrackName'
             1,
             SourceField.Title
         ),
