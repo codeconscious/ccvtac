@@ -7,17 +7,20 @@ internal class TagDetector
 {
     internal string? DetectTitle(YouTubeVideoJson.Root data, string? defaultName = null)
     {
-        return Detectors.DetectSingle<string>(data, DetectionSchemeBank.Title, null) ?? defaultName;
+        return Detectors.DetectSingle<string>(data, DetectionSchemeBank.Title, null)
+               ?? defaultName;
     }
 
     internal string? DetectArtist(YouTubeVideoJson.Root data, string? defaultArtist = null)
     {
-        return Detectors.DetectSingle<string>(data, DetectionSchemeBank.Artist, null) ?? defaultArtist;
+        return Detectors.DetectSingle<string>(data, DetectionSchemeBank.Artist, null)
+               ?? defaultArtist;
     }
 
     internal string? DetectAlbum(YouTubeVideoJson.Root data, string? defaultAlbum = null)
     {
-        return Detectors.DetectSingle<string>(data, DetectionSchemeBank.Album, null) ?? defaultAlbum;
+        return Detectors.DetectSingle<string>(data, DetectionSchemeBank.Album, null)
+               ?? defaultAlbum;
     }
 
     internal string? DetectComposers(YouTubeVideoJson.Root data)

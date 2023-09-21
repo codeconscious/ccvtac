@@ -13,8 +13,8 @@ internal static class Detectors
     /// </summary>
     /// <returns>A match of type T if there was a match; otherwise, the default value provided.</returns>
     internal static T? DetectSingle<T>(YouTubeVideoJson.Root        videoMetadata,
-                                     IEnumerable<DetectionScheme> schemes,
-                                     T?                           defaultValue)
+                                       IEnumerable<DetectionScheme> schemes,
+                                       T?                           defaultValue)
     {
         foreach (var scheme in schemes)
         {
@@ -42,9 +42,9 @@ internal static class Detectors
     /// <param name="separator"></param>
     /// <returns>A match of type T if there were any matches; otherwise, the default value provided.</returns>
     internal static T? DetectMultiple<T>(YouTubeVideoJson.Root        data,
-                                       IEnumerable<DetectionScheme> schemes,
-                                       T?                           defaultValue,
-                                       string                       separator = "; ")
+                                         IEnumerable<DetectionScheme> schemes,
+                                         T?                           defaultValue,
+                                         string                       separator = "; ")
     {
         var matchedValues = new HashSet<string>();
 
@@ -91,11 +91,15 @@ internal static class Detectors
     /// <summary>
     /// Extracts the value of the specified tag field from the given data.
     /// </summary>
-    private static string ExtractMetadataText(YouTubeVideoJson.Root videoMetadata, SourceField target) =>
-        target switch
+    private static string ExtractMetadataText(
+        YouTubeVideoJson.Root videoMetadata,
+        SourceField target)
+    {
+        return target switch
         {
             SourceField.Title       => videoMetadata.Title,
             SourceField.Description => videoMetadata.Description,
             _                       => throw new ArgumentException($"\"{target}\" is an invalid {nameof(SourceField)}.")
         };
+    }
 }

@@ -70,27 +70,29 @@ internal readonly record struct TaggingSet
     internal static ImmutableList<TaggingSet> CreateTaggingSets(IEnumerable<string> filePaths)
     {
         if (filePaths is null || !filePaths.Any())
+        {
             return Enumerable.Empty<TaggingSet>().ToImmutableList();
+        }
 
-        const string jsonFileExtension = ".json";
-        const string audioFileExtension = ".m4a"; // TODO: Support multiple formats (maybe).
-        const string imageFileExtension = ".jpg";
+        const string jsonFileExt = ".json";
+        const string audioFileExt = ".m4a"; // TODO: Support multiple formats (maybe).
+        const string imageFileExt = ".jpg";
 
         return filePaths
                     .Select(f => FileNamesWithVideoIdsRegex.Match(f))
                     .Where(m => m.Success)
                     .Select(m => m.Captures.OfType<Match>().First())
                     .GroupBy(m => m.Groups[1].Value, // Video ID
-                             m => m.Groups[0].Value) // Full filename
+                             m => m.Groups[0].Value) // Full filenames
                     .Where(gr => // Ensure the correct count of image and JSON files.
-                        gr.Count(f => f.EndsWith(jsonFileExtension, StringComparison.OrdinalIgnoreCase)) == 1 &&
-                        gr.Count(f => f.EndsWith(imageFileExtension, StringComparison.OrdinalIgnoreCase)) == 1)
+                        gr.Count(f => f.EndsWith(jsonFileExt, StringComparison.OrdinalIgnoreCase)) == 1 &&
+                        gr.Count(f => f.EndsWith(imageFileExt, StringComparison.OrdinalIgnoreCase)) == 1)
                     .Select(gr => {
                         return new TaggingSet(
-                            gr.Key,
-                            gr.Where(f => f.EndsWith(audioFileExtension)),
-                            gr.Where(f => f.EndsWith(jsonFileExtension)).First(),
-                            gr.Where(f => f.EndsWith(imageFileExtension)).First()
+                            gr.Key, // Video ID
+                            gr.Where(f => f.EndsWith(audioFileExt)),
+                            gr.Where(f => f.EndsWith(jsonFileExt)).First(),
+                            gr.Where(f => f.EndsWith(imageFileExt)).First()
                         );
                     })
                     .ToImmutableList();

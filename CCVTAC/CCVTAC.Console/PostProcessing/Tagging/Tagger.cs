@@ -17,7 +17,9 @@ internal static class Tagger
 
         var taggingSetsResult = GenerateTaggingSets(userSettings.WorkingDirectory);
         if (taggingSetsResult.IsFailed)
+        {
             return Result.Fail("No tagging sets were generated, so tagging cannot be done.");
+        }
 
         foreach (var taggingSet in taggingSetsResult.Value)
         {
@@ -78,12 +80,12 @@ internal static class Tagger
     }
 
     static void TagSingleFile(
-        UserSettings userSettings,
-        YouTubeVideoJson.Root parsedVideoJson,
-        string audioFilePath,
-        string imageFilePath,
+        UserSettings                userSettings,
+        YouTubeVideoJson.Root       parsedVideoJson,
+        string                      audioFilePath,
+        string                      imageFilePath,
         YouTubeCollectionJson.Root? collectionJson,
-        Printer printer)
+        Printer                     printer)
     {
         try
         {
@@ -178,7 +180,9 @@ internal static class Tagger
         // If there is only one file, then there are no child files, so no action is necessary.
         // (Two files should never happen, but might be worth thinking about how to handle that.)
         if (taggingSet.AudioFilePaths.Count() <= 1)
+        {
             return taggingSet;
+        }
 
         var largestFileInfo =
             taggingSet.AudioFilePaths

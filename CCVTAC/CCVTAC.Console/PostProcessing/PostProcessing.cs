@@ -67,16 +67,22 @@ public sealed class Setup
                                      .ToImmutableList();
 
             if (fileNames.Count == 0)
+            {
                 return Result.Fail("No relevant files found.");
+            }
             if (fileNames.Count > 1)
+            {
                 return Result.Fail("Unexpectedly found more than one relevant file, so none will be processed.");
-            var fileName = fileNames.Single();
+            }
 
+            var fileName = fileNames.Single();
             var json = File.ReadAllText(fileName);
             var parsedJson = JsonSerializer.Deserialize<YouTubeCollectionJson.Root>(json);
 
             if (parsedJson is null)
+            {
                 return Result.Fail($"The parsed JSON from file \"{fileName}\" was unexpectedly null.");
+            }
 
             return Result.Ok(parsedJson);
         }

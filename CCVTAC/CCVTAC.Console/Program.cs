@@ -60,7 +60,9 @@ internal static class Program
         {
             var nextAction = ProcessSingleInput(userSettings, resultCounter, printer);
             if (nextAction == NextAction.Quit)
+            {
                 break;
+            }
         }
 
         resultCounter.PrintFinalSummary();
@@ -132,7 +134,9 @@ internal static class Program
             resultHandler.RegisterResult(downloadResult);
 
             if (downloadResult.IsFailed)
+            {
                 return NextAction.Continue;
+            }
 
             History.Append(input, printer);
 
@@ -145,7 +149,9 @@ internal static class Program
         }
 
         if (splitInput.Count > 1)
+        {
             printer.Print($"All done in {mainStopwatch.ElapsedMilliseconds:#,##0}ms.");
+        }
 
         return NextAction.Continue;
     }
