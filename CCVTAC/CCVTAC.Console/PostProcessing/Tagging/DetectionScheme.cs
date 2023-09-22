@@ -5,28 +5,45 @@ namespace CCVTAC.Console.PostProcessing.Tagging;
 /// <summary>
 /// A scheme used to detect specific information (artist, title, year, etc.) within video metadata.
 /// </summary>
-/// <param name="Regex">Provides the search pattern.</param>
-/// <param name="MatchGroup">
-///     The regex match group number whose value should be returned. Zero represents the entire matched text,
-///     and 1 and greater represent groups specified within the regex pattern.
-/// </param>
-/// <param name="TagName">The video metadata field to attempt searching in.</param>
-/// <param name="Note">An optional note that can be used to summarize what the regex is searching for, etc.</param>
 internal record struct DetectionScheme
 {
-    internal Regex       Regex;
-    internal int         MatchGroup;
-    internal SourceField SourceField;
-    internal string?     Note;
+    /// <summary>
+    /// The regular expression to be applied to the text of the SourceField.
+    /// </summary>
+    internal Regex Regex;
 
-    internal DetectionScheme(string      regexPattern,
-                             int         matchGroup,
-                             SourceField sourceField,
-                             string?     note = null
+    /// <summary>
+    /// The number of the regular expression match group whose value should be used.
+    /// (Matches can contain several groups. Group 0 represents the entire match.)
+    /// </summary>
+    internal int MatchGroup;
+
+    /// <summary>
+    /// The video metadata field to which the regex should be applied (i.e., should search within).
+    /// </summary>
+    internal SourceField SourceField;
+
+    /// <summary>
+    /// An optional memo about the match pattern.
+    /// </summary>
+    internal string? Note;
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="regexPattern">Provides the search pattern to be applied to the source field.</param>
+    /// <param name="groupNumber">The regex match group number whose value should be returned.</param>
+    /// <param name="sourceField">The video metadata field to attempt searching in.</param>
+    /// <param name="note">An optional memo about the match pattern.</param>
+    internal DetectionScheme(
+        string      regexPattern,
+        MatchGroup  groupNumber,
+        SourceField sourceField,
+        string?     note = null
     )
     {
         Regex = new Regex(regexPattern, RegexOptions.None);
-        MatchGroup = matchGroup;
+        MatchGroup = (int) groupNumber;
         SourceField = sourceField;
         Note = note;
     }
