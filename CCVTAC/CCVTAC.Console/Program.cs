@@ -156,9 +156,19 @@ internal static class Program
         return NextAction.Continue;
     }
 
+    /// <summary>
+    /// Actions that inform the program what it should do after the current step is done.
+    /// </summary>
     private enum NextAction : byte
     {
+        /// <summary>
+        /// Program execution should continue and not end.
+        /// </summary>
         Continue,
+
+        /// <summary>
+        /// Program execution should end.
+        /// </summary>
         Quit
     }
 }
