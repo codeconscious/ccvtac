@@ -20,6 +20,16 @@ internal static class Program
             return;
         }
 
+        // Verify the external program for downloading is installed on the system. // TODO: Refactor this.
+        if (Downloading.Downloader.ExternalProgram.ProgramExists() is { IsFailed: true })
+        {
+            printer.Error(
+                $"To use this program, please first install {Downloading.Downloader.ExternalProgram.Name} " +
+                $"({Downloading.Downloader.ExternalProgram.Url}) on this system.");
+            printer.Print("Pass '--help' to this program for more information.");
+            return;
+        }
+
         // Catch the user's pressing Ctrl-C (SIGINT).
         System.Console.CancelKeyPress += delegate
         {

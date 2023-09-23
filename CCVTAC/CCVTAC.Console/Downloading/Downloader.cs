@@ -1,10 +1,14 @@
 using CCVTAC.Console.Downloading.DownloadEntities;
+using CCVTAC.Console.ExternalUtilities;
 using CCVTAC.Console.Settings;
 
 namespace CCVTAC.Console.Downloading;
 
-public static class Downloader
+internal static class Downloader
 {
+    internal static string Description = "video download and audio extraction";
+    internal static ExternalProgram ExternalProgram = new("yt-dlp-2", "https://github.com/yt-dlp/yt-dlp/");
+
     internal static Result<string> Run(string url, UserSettings settings, Printer printer)
     {
         var stopwatch = new System.Diagnostics.Stopwatch();
@@ -20,8 +24,8 @@ public static class Downloader
         printer.Print($"{downloadEntity.Type} URL '{url}' detected.");
 
         var downloadToolSettings = new ExternalUtilties.ExternalToolSettings(
-            "video download and audio extraction",
-            "yt-dlp",
+            Description,
+            ExternalProgram.Name,
             GenerateDownloadArgs(settings, downloadEntity.Type, downloadEntity.FullResourceUrl),
             settings.WorkingDirectory!,
             printer
