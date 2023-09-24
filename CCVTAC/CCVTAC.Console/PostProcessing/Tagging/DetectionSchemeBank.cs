@@ -12,29 +12,29 @@ internal static class DetectionSchemeBank
         new(
             """(.+?) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D""",
             MatchGroup.First,
-            SourceField.Description,
+            SourceMetadataField.Description,
             "Topic style"
         ),
         new(
             """(.+?) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗""",
             MatchGroup.First,
-            SourceField.Description,
+            SourceMetadataField.Description,
             "pseudo-Topic style"
         ),
         new(
             """(.+) (?:\d\w{2}|Vol\.\d)?『(.+)』\[([12]\d{3})\]""",
             MatchGroup.Second,
-            SourceField.Title
+            SourceMetadataField.Title
         ),
         new(
             """(.+?) ['"](.+)['"]""",
             MatchGroup.Second,
-            SourceField.Title
+            SourceMetadataField.Title
         ),
         new(
             """^(.+?)「(.+)」""", // ARTIST「TITLE」 on one line
             MatchGroup.Second,
-            SourceField.Title
+            SourceMetadataField.Title
         ),
     };
 
@@ -43,29 +43,29 @@ internal static class DetectionSchemeBank
         new (
             """(.+?) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D""",
             MatchGroup.Second,
-            SourceField.Description,
+            SourceMetadataField.Description,
             "Topic style"
         ),
         new (
             """(.+?) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗""",
             MatchGroup.Second,
-            SourceField.Description,
+            SourceMetadataField.Description,
             "pseudo-Topic style"
         ),
         new (
             """(.+)(?: - )?[「『](.+)[」』]\[([12]\d{3})\]""",
             MatchGroup.First,
-            SourceField.Title
+            SourceMetadataField.Title
         ),
         new(
             """(.+?) ['"](.+)['"]""", // Artist 'TrackName'
             MatchGroup.First,
-            SourceField.Title
+            SourceMetadataField.Title
         ),
         new(
             """^(.+?)「(.+)」""", // ARTIST「TITLE」 on one line
             MatchGroup.First,
-            SourceField.Title
+            SourceMetadataField.Title
         ),
     };
 
@@ -74,34 +74,34 @@ internal static class DetectionSchemeBank
         new (
             """(?<=[Aa]lbum: ).+""",
             MatchGroup.Zero,
-            SourceField.Description
+            SourceMetadataField.Description
         ),
         new (
             """(.+?) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D""",
             MatchGroup.Third,
-            SourceField.Description,
+            SourceMetadataField.Description,
             "Topic style"
         ),
         new (
             """(.+?) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗""",
             MatchGroup.Third,
-            SourceField.Description,
+            SourceMetadataField.Description,
             "pseudo-Topic style"
         ),
         new (
             """(?<='s ['"]).+(?=['"] album)""",
             MatchGroup.Zero,
-            SourceField.Description
+            SourceMetadataField.Description
         ),
         new (
             """(?<=Vol\.\d『).+(?=』)""",
             MatchGroup.Zero,
-            SourceField.Description
+            SourceMetadataField.Description
         ),
         new (
             """(?<=^\w{3}アルバム『).+(?=』)""",
             MatchGroup.Zero,
-            SourceField.Description
+            SourceMetadataField.Description
         ),
     };
 
@@ -110,12 +110,12 @@ internal static class DetectionSchemeBank
         new (
             """(?<=[Cc]omposed by |[Cc]omposed by: |[Cc]omposer: |作曲[:：]).+""",
             MatchGroup.Zero,
-            SourceField.Description
+            SourceMetadataField.Description
         ),
         new (
             """(?<=[Cc]omposed by |[Cc]omposed by: |[Cc]omposer: |作曲[:：]).+""",
             MatchGroup.Zero,
-            SourceField.Title
+            SourceMetadataField.Title
         )
     };
 
@@ -124,41 +124,41 @@ internal static class DetectionSchemeBank
         new (
             """(?<=[(（\[［【])[12]\d{3}(?=[)）\]］】])""",
             MatchGroup.Zero,
-            SourceField.Title
+            SourceMetadataField.Title
         ),
         new (
             """(?<=℗ )[12]\d{3}(?=\s)""",
             MatchGroup.Zero,
-            SourceField.Description,
+            SourceMetadataField.Description,
             "℗\" symbol"
         ),
         new (
             """(?<=[Rr]eleased [io]n: )[12]\d{3}""",
             MatchGroup.Zero,
-            SourceField.Description,
+            SourceMetadataField.Description,
             "'released on' date"
         ),
         new (
             """[12]\d{3}(?=(?:[.\/年]\d{1,2}[.\/月]\d{1,2}日?\s?)?\s?(?:[Rr]elease|リリース|発売))""",
             MatchGroup.Zero,
-            SourceField.Description,
+            SourceMetadataField.Description,
             "'year first'-style year"
         ),
         new (
             """[12]\d{3}年(?=\d{1,2}月\d{1,2}日\s?[Rr]elease)""",
             MatchGroup.Zero,
-            SourceField.Description,
+            SourceMetadataField.Description,
             "description's 年月日-style release date"
         ),
         new (
             """(.+) (?:\d\w{2}|Vol\.\d)?『(.+)』\[([12]\d{3})\]""",
             MatchGroup.Third,
-            SourceField.Title
+            SourceMetadataField.Title
         ),
         new (
             """(.+) (?:\d\w{2}|Vol\.\d)?『(.+)』\[([12]\d{3})\]""",
             MatchGroup.Third,
-            SourceField.Description
+            SourceMetadataField.Description
         )
     };
 }

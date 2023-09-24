@@ -21,7 +21,7 @@ internal record struct DetectionScheme
     /// <summary>
     /// The video metadata field to which the regex should be applied (i.e., should search within).
     /// </summary>
-    internal SourceField SourceField;
+    internal SourceMetadataField SourceField;
 
     /// <summary>
     /// An optional memo about the match pattern.
@@ -38,7 +38,7 @@ internal record struct DetectionScheme
     internal DetectionScheme(
         string      regexPattern,
         MatchGroup  groupNumber,
-        SourceField sourceField,
+        SourceMetadataField sourceField,
         string?     note = null
     )
     {

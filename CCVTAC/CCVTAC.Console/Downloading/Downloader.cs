@@ -9,7 +9,8 @@ internal static class Downloader
     internal static ExternalProgram ExternalProgram = new(
         "yt-dlp",
         "https://github.com/yt-dlp/yt-dlp/",
-        "video download and audio extraction");
+        "video download and audio extraction"
+    );
 
     internal static Result<string> Run(string url, UserSettings userSettings, Printer printer)
     {

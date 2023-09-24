@@ -4,7 +4,7 @@ namespace CCVTAC.Console.PostProcessing.Tagging;
 /// Video metadata fields that can contain information to be detected
 /// and later assigned to audio file tags.
 /// </summary>
-internal enum SourceField : byte
+internal enum SourceMetadataField : byte
 {
     /// <summary>
     /// The video metadata's `title` field.

@@ -93,13 +93,13 @@ internal static class Detectors
     /// </summary>
     private static string ExtractMetadataText(
         YouTubeVideoJson.Root videoMetadata,
-        SourceField target)
+        SourceMetadataField target)
     {
         return target switch
         {
-            SourceField.Title       => videoMetadata.Title,
-            SourceField.Description => videoMetadata.Description,
-            _                       => throw new ArgumentException($"\"{target}\" is an invalid {nameof(SourceField)}.")
+            SourceMetadataField.Title       => videoMetadata.Title,
+            SourceMetadataField.Description => videoMetadata.Description,
+            _                       => throw new ArgumentException($"\"{target}\" is an invalid {nameof(SourceMetadataField)}.")
         };
     }
 }
