@@ -23,6 +23,8 @@ public static class Help
         printer.Print("Instructions:");
         printer.Print("• Run the program once to generate a blank settings.json file, then populate it with directory paths.");
         printer.Print("• After the application starts, enter single video or playlist URLs to start the download process.");
-        printer.Print("• Enter \"q\" or \"quit\" to quit.");
+        printer.Print("• Enter \"q\" or \"quit\" to quit.", appendLines: 1);
+
+        printer.Print("Please help improve this tool by reporting errors (with any entered URLs) at https://github.com/codeconscious/ccvtac/issues.");
     }
 }
