@@ -4,7 +4,7 @@ namespace CCVTAC.Console.ExternalUtilties;
 
 public static class Caller
 {
-    public static Result<int> Run(ExternalToolSettings toolSettings)
+    public static Result<int> Run(ToolSettings toolSettings)
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();

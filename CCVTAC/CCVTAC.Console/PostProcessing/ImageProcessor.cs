@@ -4,7 +4,7 @@ internal static class ImageProcessor
 {
     internal static void Run(string workingDirectory, Printer printer)
     {
-        var imageEditToolSettings = new ExternalUtilties.ExternalToolSettings(
+        var imageEditToolSettings = new ExternalUtilties.ToolSettings(
             "image cropping",
             "mogrify",
             "-trim -fuzz 10% *.jpg",
