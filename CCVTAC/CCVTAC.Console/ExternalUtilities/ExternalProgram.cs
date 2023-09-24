@@ -15,22 +15,28 @@ internal record ExternalProgram
 
     internal Result ProgramExists()
     {
-        var processInfo = new ProcessStartInfo()
+        var processStartInfo = new ProcessStartInfo()
         {
             FileName = this.Name,
             UseShellExecute = false,
-            RedirectStandardOutput = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
             CreateNoWindow = true,
         };
 
         try
         {
-            using var process = Process.Start(processInfo);
+            using var process = Process.Start(processStartInfo);
+            if (process is null)
+            {
+                return Result.Fail($"The program \"{Name}\" was not found. (The process was null.)");
+            }
+            process.WaitForExit();
             return Result.Ok();
         }
         catch (Exception)
         {
-            return Result.Fail($"The program \"{Name}\" is not installed.");
+            return Result.Fail($"The program \"{Name}\" was not found.");
         }
     }
 }
