@@ -18,6 +18,6 @@ internal static class ImageProcessor
             workingDirectory
         );
 
-        ExternalUtilties.Caller.Run(imageEditToolSettings, printer);
+        ExternalUtilties.Runner.Run(imageEditToolSettings, printer);
     }
 }

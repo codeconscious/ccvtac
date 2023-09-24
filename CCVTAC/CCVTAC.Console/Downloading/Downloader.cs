@@ -37,7 +37,7 @@ internal static class Downloader
             userSettings.WorkingDirectory!
         );
 
-        var downloadResult = ExternalUtilties.Caller.Run(downloadToolSettings, printer);
+        var downloadResult = ExternalUtilties.Runner.Run(downloadToolSettings, printer);
 
         if (downloadResult.IsFailed)
         {
