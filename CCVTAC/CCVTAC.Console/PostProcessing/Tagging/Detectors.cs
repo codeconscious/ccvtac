@@ -1,5 +1,3 @@
-using System.Text.RegularExpressions;
-
 namespace CCVTAC.Console.PostProcessing.Tagging;
 
 /// <summary>
@@ -11,6 +9,10 @@ internal static class Detectors
     /// Finds and returns the first instance of text matching a given detection scheme pattern,
     /// parsing into T if necessary.
     /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="videoMetadata"></param>
+    /// <param name="schemes"></param>
+    /// <param name="defaultValue">The value to return if nothing is matched.</param>
     /// <returns>A match of type T if there was a match; otherwise, the default value provided.</returns>
     internal static T? DetectSingle<T>(YouTubeVideoJson.Root        videoMetadata,
                                        IEnumerable<DetectionScheme> schemes,
@@ -38,7 +40,7 @@ internal static class Detectors
     /// <typeparam name="T"></typeparam>
     /// <param name="data"></param>
     /// <param name="schemes"></param>
-    /// <param name="defaultValue"></param>
+    /// <param name="defaultValue">The value to return if nothing is matched.</param>
     /// <param name="separator"></param>
     /// <returns>A match of type T if there were any matches; otherwise, the default value provided.</returns>
     internal static T? DetectMultiple<T>(YouTubeVideoJson.Root        data,
@@ -91,15 +93,14 @@ internal static class Detectors
     /// <summary>
     /// Extracts the value of the specified tag field from the given data.
     /// </summary>
-    private static string ExtractMetadataText(
-        YouTubeVideoJson.Root videoMetadata,
-        SourceMetadataField target)
+    private static string ExtractMetadataText(YouTubeVideoJson.Root videoMetadata,
+                                              SourceMetadataField   target)
     {
         return target switch
         {
             SourceMetadataField.Title       => videoMetadata.Title,
             SourceMetadataField.Description => videoMetadata.Description,
-            _                       => throw new ArgumentException($"\"{target}\" is an invalid {nameof(SourceMetadataField)}.")
+            _ => throw new ArgumentException($"\"{target}\" is an invalid {nameof(SourceMetadataField)}.")
         };
     }
 }
