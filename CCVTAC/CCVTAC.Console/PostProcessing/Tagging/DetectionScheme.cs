@@ -37,7 +37,7 @@ internal record struct DetectionScheme
     /// <param name="note">An optional memo about the match pattern.</param>
     internal DetectionScheme(
         string      regexPattern,
-        MatchGroup  groupNumber,
+        MatchGroupId  groupNumber,
         SourceMetadataField sourceField,
         string?     note = null
     )

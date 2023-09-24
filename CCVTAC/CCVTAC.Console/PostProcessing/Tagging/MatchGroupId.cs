@@ -3,7 +3,7 @@ namespace CCVTAC.Console.PostProcessing.Tagging;
 /// <summary>
 /// Represents the index of a specific regular expression match group.
 /// </summary>
-internal enum MatchGroup : byte
+internal enum MatchGroupId : byte
 {
     /// <summary>
     /// Represents the value of the entire match (and not a specified group within it).
