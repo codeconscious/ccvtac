@@ -12,17 +12,18 @@ public static class Caller
         toolSettings.Printer.Print($"Starting {toolSettings.Description}...");
         toolSettings.Printer.Print($"Running command: {toolSettings.ProgramName} {toolSettings.Args}");
 
-        var processInfo = new ProcessStartInfo()
+        var processStartInfo = new ProcessStartInfo()
         {
             FileName = toolSettings.ProgramName,
             Arguments = toolSettings.Args,
             UseShellExecute = false,
             RedirectStandardOutput = false,
+            RedirectStandardError = false,
             CreateNoWindow = true,
             WorkingDirectory = toolSettings.WorkingDirectory
         };
 
-        using var process = Process.Start(processInfo);
+        using var process = Process.Start(processStartInfo);
         if (process is null)
         {
             return Result.Fail($"Could not start {toolSettings.ProgramName} -- is it installed?");
