@@ -23,14 +23,14 @@ internal static class Downloader
         var downloadEntity = downloadEntityResult.Value;
         printer.Print($"{downloadEntity.Type} URL '{url}' detected.");
 
-        var downloadToolSettings = new ExternalUtilties.ToolSettings(
+        var downloadToolSettings = new ExternalUtilties.UtilitySettings(
             Description,
             ExternalProgram.Name,
             GenerateDownloadArgs(settings, downloadEntity.Type, downloadEntity.FullResourceUrl),
-            settings.WorkingDirectory!,
-            printer
+            settings.WorkingDirectory!
         );
-        var downloadResult = ExternalUtilties.Caller.Run(downloadToolSettings);
+        var downloadResult = ExternalUtilties.Caller.Run(downloadToolSettings, printer);
+
         if (downloadResult.IsFailed)
         {
             downloadResult.Errors.ForEach(e => printer.Error(e.Message));

@@ -4,13 +4,13 @@ internal static class ImageProcessor
 {
     internal static void Run(string workingDirectory, Printer printer)
     {
-        var imageEditToolSettings = new ExternalUtilties.ToolSettings(
+        var imageEditToolSettings = new ExternalUtilties.UtilitySettings(
             "image cropping",
             "mogrify",
             "-trim -fuzz 10% *.jpg",
-            workingDirectory,
-            printer
+            workingDirectory
         );
-        ExternalUtilties.Caller.Run(imageEditToolSettings);
+
+        ExternalUtilties.Caller.Run(imageEditToolSettings, printer);
     }
 }
