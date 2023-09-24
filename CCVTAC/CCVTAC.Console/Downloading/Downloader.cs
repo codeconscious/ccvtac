@@ -7,7 +7,7 @@ namespace CCVTAC.Console.Downloading;
 internal static class Downloader
 {
     internal static string Description = "video download and audio extraction";
-    internal static ExternalProgram ExternalProgram = new("yt-dlp-2", "https://github.com/yt-dlp/yt-dlp/");
+    internal static ExternalProgram ExternalProgram = new("yt-dlp", "https://github.com/yt-dlp/yt-dlp/");
 
     internal static Result<string> Run(string url, UserSettings settings, Printer printer)
     {
