@@ -11,7 +11,7 @@ internal static class Downloader
         "https://github.com/yt-dlp/yt-dlp/",
         "video download and audio extraction");
 
-    internal static Result<string> Run(string url, UserSettings settings, Printer printer)
+    internal static Result<string> Run(string url, UserSettings userSettings, Printer printer)
     {
         var stopwatch = new System.Diagnostics.Stopwatch();
         stopwatch.Start();
@@ -25,11 +25,17 @@ internal static class Downloader
         var downloadEntity = downloadEntityResult.Value;
         printer.Print($"{downloadEntity.Type} URL '{url}' detected.");
 
+        var args = GenerateDownloadArgs(
+            userSettings,
+            downloadEntity.Type,
+            downloadEntity.FullResourceUrl);
+
         var downloadToolSettings = new ExternalUtilties.UtilitySettings(
             ExternalProgram,
-            GenerateDownloadArgs(settings, downloadEntity.Type, downloadEntity.FullResourceUrl),
-            settings.WorkingDirectory!
+            args,
+            userSettings.WorkingDirectory!
         );
+
         var downloadResult = ExternalUtilties.Caller.Run(downloadToolSettings, printer);
 
         if (downloadResult.IsFailed)
@@ -57,7 +63,9 @@ internal static class Downloader
         };
 
         if (settings.SplitChapters)
+        {
             args.Add("--split-chapters");
+        }
 
         if (downloadType is not DownloadType.Video)
         {
