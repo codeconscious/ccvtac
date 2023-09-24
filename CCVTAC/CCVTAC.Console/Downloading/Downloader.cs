@@ -6,8 +6,10 @@ namespace CCVTAC.Console.Downloading;
 
 internal static class Downloader
 {
-    internal static string Description = "video download and audio extraction";
-    internal static ExternalProgram ExternalProgram = new("yt-dlp", "https://github.com/yt-dlp/yt-dlp/");
+    internal static ExternalProgram ExternalProgram = new(
+        "yt-dlp",
+        "https://github.com/yt-dlp/yt-dlp/",
+        "video download and audio extraction");
 
     internal static Result<string> Run(string url, UserSettings settings, Printer printer)
     {
@@ -24,8 +26,7 @@ internal static class Downloader
         printer.Print($"{downloadEntity.Type} URL '{url}' detected.");
 
         var downloadToolSettings = new ExternalUtilties.UtilitySettings(
-            Description,
-            ExternalProgram.Name,
+            ExternalProgram,
             GenerateDownloadArgs(settings, downloadEntity.Type, downloadEntity.FullResourceUrl),
             settings.WorkingDirectory!
         );
@@ -45,21 +46,23 @@ internal static class Downloader
     /// </summary>
     /// <returns>A string of arguments that can be passed directly to the download tool.</returns>
     private static string GenerateDownloadArgs(
-        UserSettings settings,
-        DownloadType downloadType,
+        UserSettings     settings,
+        DownloadType     downloadType,
         params string[]? additionalArgs)
     {
         var args = new List<string>() {
             $"--extract-audio -f {settings.AudioFormat}",
-            "--write-thumbnail --convert-thumbnails jpg", // For writing album art
-            "--write-info-json", // For parsing and writing metadata
+            "--write-thumbnail --convert-thumbnails jpg", // For album art
+            "--write-info-json", // For parsing metadata
         };
 
         if (settings.SplitChapters)
             args.Add("--split-chapters");
 
         if (downloadType is not DownloadType.Video)
+        {
             args.Add($"--sleep-interval {settings.SleepBetweenDownloadsSeconds}");
+        }
 
         return string.Join(" ", args.Concat(additionalArgs ?? Enumerable.Empty<string>()));
     }
