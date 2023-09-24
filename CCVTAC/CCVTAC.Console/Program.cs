@@ -31,21 +31,20 @@ internal static class Program
         {
             Start(printer);
         }
-        catch (Exception topLevelException)
+        catch (Exception topException)
         {
-            printer.Error($"Fatal error: {topLevelException.Message}");
-            AnsiConsole.WriteException(topLevelException);
-            printer.Print("Please help improve this program by reporting this error and the URL you entered at https://github.com/codeconscious/ccvtac/issues.");
+            printer.Error($"Fatal error: {topException.Message}");
+            AnsiConsole.WriteException(topException);
+            printer.Print("Please help improve this tool by reporting this error and the URL you entered at https://github.com/codeconscious/ccvtac/issues.");
         }
     }
 
     /// <summary>
-     /// Does the initial setup and drives the overall process.
+     /// Performs initial setup, initiates each download request, and prints the final summary when the user requests to end the program.
     /// </summary>
-    /// <param name="printer"></param>
     private static void Start(Printer printer)
     {
-        // Verify the external program for downloading is installed on the system. // TODO: Refactor this.
+        // Verify the external program for downloading is installed on the system.
         if (Downloading.Downloader.ExternalProgram.ProgramExists() is { IsFailed: true })
         {
             printer.Error(
