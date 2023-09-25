@@ -71,8 +71,9 @@ public sealed class UserSettings
     {
         return
             this.UseUploadYearUploaders?.Contains(videoData.Uploader,
-                                                  StringComparer.OrdinalIgnoreCase) == true &&
-            ushort.TryParse(videoData.Upload_date[0..4], out var parsedYear)
+                                                  StringComparer.OrdinalIgnoreCase) == true
+            &&
+            ushort.TryParse(videoData.UploadDate[0..4], out var parsedYear)
                 ? parsedYear
                 : null;
     }

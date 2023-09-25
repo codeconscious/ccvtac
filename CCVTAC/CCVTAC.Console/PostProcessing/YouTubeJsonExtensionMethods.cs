@@ -7,9 +7,9 @@ public static class YouTubeJsonExtensionMethods
     /// </summary>
     public static string UploaderSummary(this YouTubeVideoJson.Root data)
     {
-        var uploaderLinkOrId = string.IsNullOrWhiteSpace(data.Uploader_url)
-            ? data.Uploader_id
-            : data.Uploader_url;
+        var uploaderLinkOrId = string.IsNullOrWhiteSpace(data.UploaderUrl)
+            ? data.UploaderId
+            : data.UploaderUrl;
 
         return $"{data.Uploader} ({uploaderLinkOrId})";
     }
@@ -19,7 +19,7 @@ public static class YouTubeJsonExtensionMethods
     /// plain YYYYMMDD version (e.g., "20230827") within the parsed JSON file data.
     /// </summary>
     public static string FormattedUploadDate(this YouTubeVideoJson.Root data) =>
-        $"{data.Upload_date[4..6]}/{data.Upload_date[6..8]}/{data.Upload_date[0..4]}";
+        $"{data.UploadDate[4..6]}/{data.UploadDate[6..8]}/{data.UploadDate[0..4]}";
 
     /// <summary>
     /// Returns a formatted comment using data parsed from the JSON file.
@@ -31,8 +31,8 @@ public static class YouTubeJsonExtensionMethods
         System.Text.StringBuilder sb = new();
         sb.AppendLine("SOURCE DATA:");
         sb.AppendLine($"• Downloaded: {DateTime.Now} using CCVTAC");
-        sb.AppendLine($"• Service: {data.Extractor_key}");
-        sb.AppendLine($"• URL: {data.Webpage_url}");
+        sb.AppendLine($"• Service: {data.ExtractorKey}");
+        sb.AppendLine($"• URL: {data.WebpageUrl}");
         sb.AppendLine($"• Title: {data.Fulltitle}");
         sb.AppendLine($"• Uploader: {data.UploaderSummary()}");
         sb.AppendLine($"• Uploaded: {data.FormattedUploadDate()}");
