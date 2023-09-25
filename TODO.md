@@ -4,6 +4,7 @@ Features that I might consider as features or improvements in the future. Not al
 
 - Changing, saving, and reloading of settings while running the program.
 - JSON history that stores more data than just URLs?
+- Save errors to a file with details
 - Lighter logging option
 - Possible to include yt-dlp as a binary? (Even if so, does it make sense to?)
 
