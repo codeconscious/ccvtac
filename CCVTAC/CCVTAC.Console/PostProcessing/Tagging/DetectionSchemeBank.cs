@@ -159,6 +159,11 @@ internal static class DetectionSchemeBank
             """(.+) (?:\d\w{2}|Vol\.\d)?『(.+)』\[([12]\d{3})\]""",
             MatchGroupId.Third,
             SourceMetadataField.Description
+        ),
+        new (
+            """(?<=\(C\)\s|\(C\))[12]\d{3}""", // (C) 2000
+            MatchGroupId.Zero,
+            SourceMetadataField.Description
         )
     };
 }
