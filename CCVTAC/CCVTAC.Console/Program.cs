@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.IO;
+using System.Threading;
 using CCVTAC.Console.Settings;
 using Spectre.Console;
 
@@ -31,20 +32,29 @@ internal static class Program
         {
             Start(printer);
         }
-        catch (Exception topLevelException)
+        catch (Exception topException)
         {
-            printer.Error($"Fatal error: {topLevelException.Message}");
-            AnsiConsole.WriteException(topLevelException);
-            printer.Print("Please help improve this program by reporting this error and the URL you entered at https://github.com/codeconscious/ccvtac/issues.");
+            printer.Error($"Fatal error: {topException.Message}");
+            AnsiConsole.WriteException(topException);
+            printer.Print("Please help improve this tool by reporting this error and the URL you entered at https://github.com/codeconscious/ccvtac/issues.");
         }
     }
 
     /// <summary>
-     /// Does the initial setup and drives the overall process.
+     /// Performs initial setup, initiates each download request, and prints the final summary when the user requests to end the program.
     /// </summary>
-    /// <param name="printer"></param>
     private static void Start(Printer printer)
     {
+        // Verify the external program for downloading is installed on the system.
+        if (Downloading.Downloader.ExternalProgram.ProgramExists() is { IsFailed: true })
+        {
+            printer.Error(
+                $"To use this program, please first install {Downloading.Downloader.ExternalProgram.Name} " +
+                $"({Downloading.Downloader.ExternalProgram.Url}) on this system.");
+            printer.Print("Pass '--help' to this program for more information.");
+            return;
+        }
+
         var settingsResult = SettingsService.GetUserSettings();
         if (settingsResult.IsFailed)
         {
@@ -55,11 +65,18 @@ internal static class Program
 
         SettingsService.PrintSummary(userSettings, printer, "Settings loaded OK:");
 
+        // TODO: Refactor with the similar code below.
+        if (Directory.GetFiles(userSettings.WorkingDirectory).Any())
+        {
+            printer.Error("There are unexpectedly files in the working directory, so will abort.");
+            return;
+        }
+
         var resultCounter = new ResultTracker(printer);
         while (true)
         {
             var nextAction = ProcessSingleInput(userSettings, resultCounter, printer);
-            if (nextAction == NextAction.Quit)
+            if (nextAction != NextAction.Continue)
             {
                 break;
             }
@@ -100,7 +117,14 @@ internal static class Program
         {
             if (_quitCommands.Contains(input.ToLowerInvariant()))
             {
-                return NextAction.Quit;
+                return NextAction.QuitAtUserRequest;
+            }
+
+            // TODO: Refactor with the similar code above.
+            if (Directory.GetFiles(settings.WorkingDirectory).Any())
+            {
+                printer.Error("There are unexpectedly files in the working directory, so will abort.");
+                return NextAction.QuitDueToErrors;
             }
 
             if (haveProcessedAny) // No need to sleep for the very first URL.
@@ -167,8 +191,13 @@ internal static class Program
         Continue,
 
         /// <summary>
-        /// Program execution should end.
+        /// Program execution should end at the user's request.
         /// </summary>
-        Quit
+        QuitAtUserRequest,
+
+        /// <summary>
+        /// Program execution should end due to an inability to continue.
+        /// </summary>
+        QuitDueToErrors,
     }
 }

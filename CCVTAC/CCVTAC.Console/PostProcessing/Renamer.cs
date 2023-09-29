@@ -28,6 +28,10 @@ internal static class Renamer
             string.Empty,
             "Remove unneeded labels"),
         new(
+            new Regex("""【(.+)】(.+)"""), // 【person】title
+            "%<1>s - %<2>s",
+            "PERSON - TRACK"),
+        new(
             new Regex(@"(.+?)(?: - )(.+?) \[[\w⧸]+\] .+ \(([\d\?？]{4})\)"),
             "%<1>s - %<2>s [%<3>s]",
             "PERSON - TRACK [YEAR]"),

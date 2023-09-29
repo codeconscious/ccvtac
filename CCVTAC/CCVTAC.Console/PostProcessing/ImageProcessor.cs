@@ -1,16 +1,23 @@
-﻿namespace CCVTAC.Console.PostProcessing;
+﻿using CCVTAC.Console.ExternalUtilities;
+
+namespace CCVTAC.Console.PostProcessing;
 
 internal static class ImageProcessor
 {
     internal static void Run(string workingDirectory, Printer printer)
     {
-        var imageEditToolSettings = new ExternalUtilties.ExternalToolSettings(
-            "image cropping",
+        var imageProgram = new ExternalProgram(
             "mogrify",
-            "-trim -fuzz 10% *.jpg",
-            workingDirectory,
-            printer
+            "https://imagemagick.org/script/mogrify.php",
+            "image cropping"
         );
-        ExternalUtilties.Caller.Run(imageEditToolSettings);
+
+        var imageEditToolSettings = new UtilitySettings(
+            imageProgram,
+            "-trim -fuzz 10% *.jpg",
+            workingDirectory
+        );
+
+        Runner.Run(imageEditToolSettings, printer);
     }
 }

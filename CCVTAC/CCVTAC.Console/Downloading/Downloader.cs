@@ -1,11 +1,18 @@
 using CCVTAC.Console.Downloading.DownloadEntities;
+using CCVTAC.Console.ExternalUtilities;
 using CCVTAC.Console.Settings;
 
 namespace CCVTAC.Console.Downloading;
 
-public static class Downloader
+internal static class Downloader
 {
-    internal static Result<string> Run(string url, UserSettings settings, Printer printer)
+    internal static ExternalProgram ExternalProgram = new(
+        "yt-dlp",
+        "https://github.com/yt-dlp/yt-dlp/",
+        "video download and audio extraction"
+    );
+
+    internal static Result<string> Run(string url, UserSettings userSettings, Printer printer)
     {
         var stopwatch = new System.Diagnostics.Stopwatch();
         stopwatch.Start();
@@ -19,14 +26,19 @@ public static class Downloader
         var downloadEntity = downloadEntityResult.Value;
         printer.Print($"{downloadEntity.Type} URL '{url}' detected.");
 
-        var downloadToolSettings = new ExternalUtilties.ExternalToolSettings(
-            "video download and audio extraction",
-            "yt-dlp",
-            GenerateDownloadArgs(settings, downloadEntity.Type, downloadEntity.FullResourceUrl),
-            settings.WorkingDirectory!,
-            printer
+        var args = GenerateDownloadArgs(
+            userSettings,
+            downloadEntity.Type,
+            downloadEntity.FullResourceUrl);
+
+        var downloadToolSettings = new ExternalUtilities.UtilitySettings(
+            ExternalProgram,
+            args,
+            userSettings.WorkingDirectory!
         );
-        var downloadResult = ExternalUtilties.Caller.Run(downloadToolSettings);
+
+        var downloadResult = ExternalUtilities.Runner.Run(downloadToolSettings, printer);
+
         if (downloadResult.IsFailed)
         {
             downloadResult.Errors.ForEach(e => printer.Error(e.Message));
@@ -41,21 +53,25 @@ public static class Downloader
     /// </summary>
     /// <returns>A string of arguments that can be passed directly to the download tool.</returns>
     private static string GenerateDownloadArgs(
-        UserSettings settings,
-        DownloadType downloadType,
+        UserSettings     settings,
+        DownloadType     downloadType,
         params string[]? additionalArgs)
     {
         var args = new List<string>() {
             $"--extract-audio -f {settings.AudioFormat}",
-            "--write-thumbnail --convert-thumbnails jpg", // For writing album art
-            "--write-info-json", // For parsing and writing metadata
+            "--write-thumbnail --convert-thumbnails jpg", // For album art
+            "--write-info-json", // For parsing metadata
         };
 
         if (settings.SplitChapters)
+        {
             args.Add("--split-chapters");
+        }
 
         if (downloadType is not DownloadType.Video)
+        {
             args.Add($"--sleep-interval {settings.SleepBetweenDownloadsSeconds}");
+        }
 
         return string.Join(" ", args.Concat(additionalArgs ?? Enumerable.Empty<string>()));
     }
