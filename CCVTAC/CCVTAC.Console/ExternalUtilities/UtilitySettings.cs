@@ -1,6 +1,4 @@
-using CCVTAC.Console.ExternalUtilities;
-
-namespace CCVTAC.Console.ExternalUtilties;
+namespace CCVTAC.Console.ExternalUtilities;
 
 /// <summary>
 /// Settings to govern the behavior of an external program.

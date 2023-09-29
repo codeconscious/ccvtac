@@ -31,13 +31,13 @@ internal static class Downloader
             downloadEntity.Type,
             downloadEntity.FullResourceUrl);
 
-        var downloadToolSettings = new ExternalUtilties.UtilitySettings(
+        var downloadToolSettings = new ExternalUtilities.UtilitySettings(
             ExternalProgram,
             args,
             userSettings.WorkingDirectory!
         );
 
-        var downloadResult = ExternalUtilties.Runner.Run(downloadToolSettings, printer);
+        var downloadResult = ExternalUtilities.Runner.Run(downloadToolSettings, printer);
 
         if (downloadResult.IsFailed)
         {

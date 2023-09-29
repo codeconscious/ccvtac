@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace CCVTAC.Console.ExternalUtilties;
+namespace CCVTAC.Console.ExternalUtilities;
 
 internal static class Runner
 {

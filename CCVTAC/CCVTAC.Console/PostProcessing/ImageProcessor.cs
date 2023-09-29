@@ -12,12 +12,12 @@ internal static class ImageProcessor
             "image cropping"
         );
 
-        var imageEditToolSettings = new ExternalUtilties.UtilitySettings(
+        var imageEditToolSettings = new UtilitySettings(
             imageProgram,
             "-trim -fuzz 10% *.jpg",
             workingDirectory
         );
 
-        ExternalUtilties.Runner.Run(imageEditToolSettings, printer);
+        Runner.Run(imageEditToolSettings, printer);
     }
 }
