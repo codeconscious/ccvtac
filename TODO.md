@@ -3,6 +3,7 @@
 Features that I might consider as features or improvements in the future. Not all ideas might be viable, or even _good_, but this helps me avoid forgetting them until I decide what to do.
 
 - Do not begin downloading if the working directory is not empty
+- Show current batch number during processing
 - Stop if there are repeated errors from yt-dlp
 - Logging levels (current/full vs. light)
 - Logging to a file
