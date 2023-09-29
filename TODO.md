@@ -4,7 +4,8 @@ Features that I might consider as features or improvements in the future. Not al
 
 - Do not begin downloading if the working directory is not empty
 - Show current batch number during processing
-- Stop if there are repeated errors from yt-dlp
+- Stop downloading if there are repeated errors from yt-dlp
+- Delete hidden `.DS_Store` files on macOS
 - Logging levels (current/full vs. light)
 - Logging to a file
 - yt-dlp can handle tabs on YouTube channels too, so look into supporting those
