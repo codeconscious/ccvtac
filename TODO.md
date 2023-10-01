@@ -14,6 +14,7 @@ Features that I might consider as features or improvements in the future. Not al
 - Save errors to a file with details
 - Possible to include yt-dlp as a binary? (Even if so, does it make sense to?)
 - Count generated files for final output
+- Don't show Topic urls in tag comments because they are empty (Double-check this)
 
 ## Rejected
 
