@@ -213,7 +213,7 @@ internal static class Tagger
 
         FileInfo largestFileInfo =
             taggingSet.AudioFilePaths
-                .Select(fn => new FileInfo(fn))
+                .Select(fileName => new FileInfo(fileName))
                 .OrderByDescending(fi => fi.Length)
                 .First();
 
