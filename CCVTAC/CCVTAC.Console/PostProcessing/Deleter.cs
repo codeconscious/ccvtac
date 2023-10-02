@@ -6,13 +6,13 @@ internal static class Deleter
 {
     public static void Run(string workingDirectory, Printer printer)
     {
-        var dir = new DirectoryInfo(workingDirectory);
-        var deletableExtensions = new List<string>() { ".json", ".jpg" };
+        DirectoryInfo dir = new(workingDirectory);
+        List<string> deletableExtensions = new() { ".json", ".jpg" };
 
         printer.Print($"Deleting now-unnecessary {string.Join(" and ", deletableExtensions)} files...");
 
-        foreach (var file in dir.EnumerateFiles("*")
-                                .Where(f => deletableExtensions.Contains(f.Extension)))
+        foreach (FileInfo file in dir.EnumerateFiles("*")
+                                     .Where(f => deletableExtensions.Contains(f.Extension)))
         {
             try
             {

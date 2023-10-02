@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
 using System.Text.Json;
 using CCVTAC.Console.Settings;
 
@@ -12,7 +13,7 @@ internal static class Tagger
     {
         printer.Print("Adding file tags...");
 
-        var stopwatch = new System.Diagnostics.Stopwatch();
+        Stopwatch stopwatch = new();
         stopwatch.Start();
 
         var taggingSetsResult = GenerateTaggingSets(userSettings.WorkingDirectory);
@@ -21,7 +22,7 @@ internal static class Tagger
             return Result.Fail("No tagging sets were generated, so tagging cannot be done.");
         }
 
-        foreach (var taggingSet in taggingSetsResult.Value)
+        foreach (TaggingSet taggingSet in taggingSetsResult.Value)
         {
             ProcessSingleTaggingSet(userSettings, taggingSet, collectionJson, printer);
         }
@@ -33,8 +34,8 @@ internal static class Tagger
     {
         try
         {
-            var allFiles = Directory.GetFiles(directory);
-            var taggingSets = TaggingSet.CreateTaggingSets(allFiles); // TODO: Refactor? 名がそのメソッドと被りすぎている。
+            string[] allFiles = Directory.GetFiles(directory);
+            ImmutableList<TaggingSet> taggingSets = TaggingSet.CreateTaggingSets(allFiles); // TODO: Refactor? 名がこのメソッドと被りすぎている。
 
             return taggingSets is not null && taggingSets.Any()
                 ? Result.Ok(taggingSets)
@@ -65,9 +66,9 @@ internal static class Tagger
             return;
         }
 
-        var confirmedTaggingSet = DeleteSourceFile(taggingSet, printer);
+        TaggingSet confirmedTaggingSet = DeleteSourceFile(taggingSet, printer);
 
-        foreach (var audioFilePath in confirmedTaggingSet.AudioFilePaths)
+        foreach (string audioFilePath in confirmedTaggingSet.AudioFilePaths)
         {
             TagSingleFile(
                 userSettings,
@@ -88,11 +89,11 @@ internal static class Tagger
     {
         try
         {
-            var audioFileName = Path.GetFileName(audioFilePath);
+            string audioFileName = Path.GetFileName(audioFilePath);
             printer.Print($"Current audio file: \"{audioFileName}\"");
 
             using var taggedFile = TagLib.File.Create(audioFilePath);
-            var tagDetector = new TagDetector();
+            TagDetector tagDetector = new();
 
             if (parsedVideoJson.Track is string officialTitle)
             {
@@ -216,7 +217,7 @@ internal static class Tagger
             return taggingSet;
         }
 
-        var largestFileInfo =
+        FileInfo largestFileInfo =
             taggingSet.AudioFilePaths
                 .Select(fn => new FileInfo(fn))
                 .OrderByDescending(fi => fi.Length)

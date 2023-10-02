@@ -32,8 +32,8 @@ sealed class ResultTracker
 
     public void PrintFinalSummary()
     {
-        var successLabel = _successCount == 1 ? "success" : "successes";
-        var failureLabel = _failureCount == 1 ? "failure" : "failures";
+        string successLabel = _successCount == 1 ? "success" : "successes";
+        string failureLabel = _failureCount == 1 ? "failure" : "failures";
         _printer.Print($"Quitting with {_successCount} {successLabel} and {_failureCount} {failureLabel}.");
     }
 }

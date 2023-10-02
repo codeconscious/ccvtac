@@ -18,9 +18,9 @@ internal static class Detectors
                                        IEnumerable<DetectionScheme> schemes,
                                        T?                           defaultValue)
     {
-        foreach (var scheme in schemes)
+        foreach (DetectionScheme scheme in schemes)
         {
-            var searchText = ExtractMetadataText(videoMetadata, scheme.SourceField);
+            string searchText = ExtractMetadataText(videoMetadata, scheme.SourceField);
             var match = scheme.Regex.Match(searchText);
 
             if (!match.Success)
@@ -48,11 +48,11 @@ internal static class Detectors
                                          T?                           defaultValue,
                                          string                       separator = "; ")
     {
-        var matchedValues = new HashSet<string>();
+        HashSet<string> matchedValues = new();
 
-        foreach (var scheme in schemes)
+        foreach (DetectionScheme scheme in schemes)
         {
-            var searchText = ExtractMetadataText(data, scheme.SourceField);
+            string searchText = ExtractMetadataText(data, scheme.SourceField);
             var matches = scheme.Regex.Matches(searchText);
 
             foreach (var match in matches.Where(m => m.Success))
@@ -66,7 +66,7 @@ internal static class Detectors
             return defaultValue;
         }
 
-        var joinedMatchedText = string.Join(separator, matchedValues);
+        string joinedMatchedText = string.Join(separator, matchedValues);
         return Cast(joinedMatchedText, defaultValue);
     }
 

@@ -6,13 +6,13 @@ internal static class Runner
 {
     internal static Result<int> Run(UtilitySettings settings, Printer printer)
     {
-        var stopwatch = new Stopwatch();
+        Stopwatch stopwatch = new();
         stopwatch.Start();
 
         printer.Print($"Starting {settings.Program.Name} for {settings.Program.Purpose}...");
         printer.Print($"Running command: {settings.Program.Name} {settings.Args}");
 
-        var processStartInfo = new ProcessStartInfo()
+        ProcessStartInfo processStartInfo = new()
         {
             FileName = settings.Program.Name,
             Arguments = settings.Args,
@@ -23,7 +23,7 @@ internal static class Runner
             WorkingDirectory = settings.WorkingDirectory
         };
 
-        using var process = Process.Start(processStartInfo);
+        using Process? process = Process.Start(processStartInfo);
 
         if (process is null)
         {

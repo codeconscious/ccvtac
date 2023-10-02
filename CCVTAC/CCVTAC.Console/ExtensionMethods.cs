@@ -27,7 +27,7 @@ public static class ExtensionMethods
                                     Path.AltDirectorySeparatorChar,
                                     Path.VolumeSeparatorChar })
                                .Concat(customInvalidChars ?? Enumerable.Empty<char>())
-                               .Distinct();
+                               .ToImmutableHashSet();
 
         if (invalidChars.Contains(replaceWith))
             throw new ArgumentException($"The replacement char ('{replaceWith}') must be a valid path character.");

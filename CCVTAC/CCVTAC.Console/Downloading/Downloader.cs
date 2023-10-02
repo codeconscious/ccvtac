@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using CCVTAC.Console.Downloading.DownloadEntities;
 using CCVTAC.Console.ExternalUtilities;
 using CCVTAC.Console.Settings;
@@ -14,7 +15,7 @@ internal static class Downloader
 
     internal static Result<string> Run(string url, UserSettings userSettings, Printer printer)
     {
-        var stopwatch = new System.Diagnostics.Stopwatch();
+        Stopwatch stopwatch = new();
         stopwatch.Start();
 
         var downloadEntityResult = DownloadEntityFactory.Create(url);
@@ -23,26 +24,26 @@ internal static class Downloader
             return Result.Fail(downloadEntityResult.Errors?.First().Message
                                ?? "An unknown error occurred parsing the resource type.");
         }
-        var downloadEntity = downloadEntityResult.Value;
+        IDownloadEntity downloadEntity = downloadEntityResult.Value;
         printer.Print($"{downloadEntity.Type} URL '{url}' detected.");
 
-        var args = GenerateDownloadArgs(
+        string args = GenerateDownloadArgs(
             userSettings,
             downloadEntity.Type,
             downloadEntity.FullResourceUrl);
 
-        var downloadToolSettings = new ExternalUtilities.UtilitySettings(
+        UtilitySettings downloadToolSettings = new(
             ExternalProgram,
             args,
             userSettings.WorkingDirectory!
         );
 
-        var downloadResult = ExternalUtilities.Runner.Run(downloadToolSettings, printer);
+        var downloadResult = Runner.Run(downloadToolSettings, printer);
 
         if (downloadResult.IsFailed)
         {
             downloadResult.Errors.ForEach(e => printer.Error(e.Message));
-            printer.Warning("However, post-processing will still be attempted.");
+            printer.Warning("However, post-processing will still be attempted."); // TODO: これで良い？
         }
 
         return Result.Ok($"Downloading done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
@@ -57,7 +58,8 @@ internal static class Downloader
         DownloadType     downloadType,
         params string[]? additionalArgs)
     {
-        var args = new List<string>() {
+        HashSet<string> args = new()
+        {
             $"--extract-audio -f {settings.AudioFormat}",
             "--write-thumbnail --convert-thumbnails jpg", // For album art
             "--write-info-json", // For parsing metadata

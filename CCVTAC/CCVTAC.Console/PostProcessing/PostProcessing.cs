@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using CCVTAC.Console.Settings;
 using CCVTAC.Console.PostProcessing.Tagging;
+using System.Diagnostics;
 
 namespace CCVTAC.Console.PostProcessing;
 
@@ -19,7 +20,7 @@ public sealed class Setup
 
     internal void Run()
     {
-        var stopwatch = new System.Diagnostics.Stopwatch();
+        Stopwatch stopwatch = new();
         stopwatch.Start();
 
         Printer.Print("Starting post-processing...");
@@ -58,13 +59,13 @@ public sealed class Setup
 
     internal Result<YouTubeCollectionJson.Root> GetCollectionJson(string workingDirectory)
     {
-        var regex = new Regex(@"(?<=\[)[\w\-]{20,}(?=\]\.info.json)"); // Assumes ID length > 20 chars.
+        Regex regex = new(@"(?<=\[)[\w\-]{20,}(?=\]\.info.json)"); // Assumes ID length > 20 chars.
 
         try
         {
             var fileNames = Directory.GetFiles(workingDirectory)
                                      .Where(f => regex.IsMatch(f))
-                                     .ToImmutableList();
+                                     .ToImmutableHashSet();
 
             if (fileNames.Count == 0)
             {
@@ -75,16 +76,16 @@ public sealed class Setup
                 return Result.Fail("Unexpectedly found more than one relevant file, so none will be processed.");
             }
 
-            var fileName = fileNames.Single();
-            var json = File.ReadAllText(fileName);
-            var parsedJson = JsonSerializer.Deserialize<YouTubeCollectionJson.Root>(json);
+            string fileName = fileNames.Single();
+            string json = File.ReadAllText(fileName);
+            var collectionJson = JsonSerializer.Deserialize<YouTubeCollectionJson.Root>(json);
 
-            if (parsedJson is null)
+            if (collectionJson is null)
             {
                 return Result.Fail($"The parsed JSON from file \"{fileName}\" was unexpectedly null.");
             }
 
-            return Result.Ok(parsedJson);
+            return Result.Ok(collectionJson);
         }
         catch (Exception ex)
         {

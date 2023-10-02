@@ -7,11 +7,14 @@ public static class YouTubeJsonExtensionMethods
     /// </summary>
     public static string UploaderSummary(this YouTubeVideoJson.Root data)
     {
-        var uploaderLinkOrId = string.IsNullOrWhiteSpace(data.UploaderUrl)
-            ? data.UploaderId
-            : data.UploaderUrl;
+        string uploaderLinkOrId = !string.IsNullOrWhiteSpace(data.UploaderUrl)
+            ? data.UploaderUrl
+            : !string.IsNullOrWhiteSpace(data.UploaderId)
+                ? data.UploaderId
+                : string.Empty;
 
-        return $"{data.Uploader} ({uploaderLinkOrId})";
+        return data.Uploader +
+               (string.IsNullOrWhiteSpace(uploaderLinkOrId) ? string.Empty : $" ({uploaderLinkOrId})");
     }
 
     /// <summary>

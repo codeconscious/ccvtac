@@ -6,13 +6,13 @@ internal static class ImageProcessor
 {
     internal static void Run(string workingDirectory, Printer printer)
     {
-        var imageProgram = new ExternalProgram(
+        ExternalProgram imageProgram = new(
             "mogrify",
             "https://imagemagick.org/script/mogrify.php",
             "image cropping"
         );
 
-        var imageEditToolSettings = new UtilitySettings(
+        UtilitySettings imageEditToolSettings = new(
             imageProgram,
             "-trim -fuzz 10% *.jpg",
             workingDirectory

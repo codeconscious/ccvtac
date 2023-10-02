@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using CCVTAC.Console.Settings;
 using Spectre.Console;
@@ -13,7 +14,7 @@ internal static class Program
 
     static void Main(string[] args)
     {
-        var printer = new Printer();
+        Printer printer = new();
 
         if (args.Length > 0 && _helpCommands.Contains(args[0].ToLowerInvariant()))
         {
@@ -61,7 +62,7 @@ internal static class Program
             printer.Errors("Settings file errors:", settingsResult);
             return;
         }
-        var userSettings = settingsResult.Value;
+        UserSettings userSettings = settingsResult.Value;
 
         SettingsService.PrintSummary(userSettings, printer, "Settings loaded OK:");
 
@@ -72,11 +73,11 @@ internal static class Program
             return;
         }
 
-        var resultCounter = new ResultTracker(printer);
+        ResultTracker resultCounter = new(printer);
 
         while (true)
         {
-            var nextAction = ProcessBatch(userSettings, resultCounter, printer);
+            NextAction nextAction = ProcessBatch(userSettings, resultCounter, printer);
             if (nextAction != NextAction.Continue)
             {
                 break;
@@ -97,8 +98,8 @@ internal static class Program
     {
         string userInput = printer.GetInput(_inputPrompt);
 
-        var mainStopwatch = new System.Diagnostics.Stopwatch();
-        mainStopwatch.Start();
+        Stopwatch topStopwatch = new();
+        topStopwatch.Start();
 
         var batchUrls = userInput.Split(" ")
                                  .Where(i => !string.IsNullOrWhiteSpace(i)) // Remove multiple spaces.
@@ -113,7 +114,7 @@ internal static class Program
         }
 
         nuint currentBatch = 0;
-        var haveProcessedAny = false;
+        bool haveProcessedAny = false;
 
         foreach (string url in batchUrls)
         {
@@ -137,7 +138,7 @@ internal static class Program
                         ctx.Spinner(Spinner.Known.Star);
                         ctx.SpinnerStyle(Style.Parse("blue"));
 
-                        var remainingSeconds = settings.SleepBetweenBatchesSeconds;
+                        ushort remainingSeconds = settings.SleepBetweenBatchesSeconds;
                         while (remainingSeconds > 0)
                         {
                             ctx.Status($"Sleeping for {remainingSeconds} seconds...");
@@ -156,12 +157,11 @@ internal static class Program
             if (batchUrls.Count > 1)
                 printer.Print($"Processing batch {++currentBatch} of {batchUrls.Count}...");
 
-            var jobStopwatch = new System.Diagnostics.Stopwatch();
+            Stopwatch jobStopwatch = new();
             jobStopwatch.Start();
 
             var downloadResult = Downloading.Downloader.Run(url, settings, printer);
             resultHandler.RegisterResult(downloadResult);
-
             if (downloadResult.IsFailed)
             {
                 return NextAction.Continue;
@@ -172,8 +172,10 @@ internal static class Program
             var postProcessor = new PostProcessing.Setup(settings, printer);
             postProcessor.Run(); // TODO: Think about if/how to handle leftover temp files due to errors.
 
+            string batchClause = batchUrls.Count > 1
+                ? $"batch {currentBatch} of {batchUrls.Count}"
+                : string.Empty;
             // TODO: Use minutes or hours for longer times.
-            var batchClause = batchUrls.Count > 1 ? $"batch {currentBatch} of {batchUrls.Count}" : string.Empty;
             printer.Print($"Done processing '{url}' ({batchClause}) in {jobStopwatch.ElapsedMilliseconds:#,##0}ms.",
                           appendLines: 1);
         }
@@ -181,7 +183,7 @@ internal static class Program
         if (batchUrls.Count > 1)
         {
             // TODO: Use minutes or hours for longer times.
-            printer.Print($"All done with {batchUrls.Count} batches in {mainStopwatch.ElapsedMilliseconds:#,##0}ms.");
+            printer.Print($"All done with {batchUrls.Count} batches in {topStopwatch.ElapsedMilliseconds:#,##0}ms.");
         }
 
         return NextAction.Continue;
