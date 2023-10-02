@@ -185,17 +185,11 @@ internal static class Tagger
             return Result.Fail($"Error reading JSON file \"{taggingSet.JsonFilePath}\": {ex.Message}.");
         }
 
-        VideoMetadata? videoData;
+        VideoMetadata videoData;
         try
         {
             videoData = JsonSerializer.Deserialize<VideoMetadata>(json);
-
-            if (videoData is null)
-            {
-                return Result.Fail($"The JSON from file \"{taggingSet.JsonFilePath}\" was unexpectedly null.");
-            }
-
-            return Result.Ok(videoData.Value);
+            return Result.Ok(videoData);
         }
         catch (JsonException ex)
         {

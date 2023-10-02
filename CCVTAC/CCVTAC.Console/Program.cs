@@ -173,10 +173,10 @@ internal static class Program
             postProcessor.Run(); // TODO: Think about if/how to handle leftover temp files due to errors.
 
             string batchClause = batchUrls.Count > 1
-                ? $"batch {currentBatch} of {batchUrls.Count}"
+                ? $" (batch {currentBatch} of {batchUrls.Count})"
                 : string.Empty;
             // TODO: Use minutes or hours for longer times.
-            printer.Print($"Done processing '{url}' ({batchClause}) in {jobStopwatch.ElapsedMilliseconds:#,##0}ms.",
+            printer.Print($"Done processing '{url}'{batchClause} in {jobStopwatch.ElapsedMilliseconds:#,##0}ms.",
                           appendLines: 1);
         }
 
