@@ -66,9 +66,9 @@ internal static class Tagger
             return;
         }
 
-        TaggingSet confirmedTaggingSet = DeleteSourceFile(taggingSet, printer);
+        TaggingSet finalTaggingSet = DeleteSourceFile(taggingSet, printer);
 
-        foreach (string audioFilePath in confirmedTaggingSet.AudioFilePaths)
+        foreach (string audioFilePath in finalTaggingSet.AudioFilePaths)
         {
             TagSingleFile(
                 userSettings,
@@ -76,7 +76,8 @@ internal static class Tagger
                 audioFilePath,
                 taggingSet.ImageFilePath,
                 collectionJson,
-                printer);
+                printer
+            );
         }
     }
 
@@ -198,7 +199,8 @@ internal static class Tagger
     }
 
     /// <summary>
-    /// Deletes the pre-split, source audio (if any) for split videos, each of which will have the same resource ID.
+    /// Deletes the pre-split source audio for split videos (if any), each of which will have the same resource ID.
+    /// Returns a modified TaggingSet with the deleted files removed.
     /// </summary>
     /// <param name="taggingSet"></param>
     /// <param name="printer"></param>
