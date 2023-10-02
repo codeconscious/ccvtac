@@ -2,6 +2,7 @@
 
 Features that I might consider as features or improvements in the future. Not all ideas might be viable, or even _good_, but this helps me avoid forgetting them until I decide what to do.
 
+- Ignore, or remove, .DS_Store files in the working directory
 - Do not begin downloading if the working directory is not empty
 - Show current batch number during processing
 - Stop downloading if there are repeated errors from yt-dlp
@@ -14,6 +15,7 @@ Features that I might consider as features or improvements in the future. Not al
 - Save errors to a file with details
 - Possible to include yt-dlp as a binary? (Even if so, does it make sense to?)
 - Count generated files for final output
+- Don't show Topic urls in tag comments because they are empty (Double-check this)
 
 ## Rejected
 

@@ -34,7 +34,7 @@ internal static class Tagger
         try
         {
             var allFiles = Directory.GetFiles(directory);
-            var taggingSets = TaggingSet.CreateTaggingSets(allFiles);
+            var taggingSets = TaggingSet.CreateTaggingSets(allFiles); // TODO: Refactor? 名がそのメソッドと被りすぎている。
 
             return taggingSets is not null && taggingSets.Any()
                 ? Result.Ok(taggingSets)
@@ -79,13 +79,12 @@ internal static class Tagger
         }
     }
 
-    static void TagSingleFile(
-        UserSettings                userSettings,
-        YouTubeVideoJson.Root       parsedVideoJson,
-        string                      audioFilePath,
-        string                      imageFilePath,
-        YouTubeCollectionJson.Root? collectionJson,
-        Printer                     printer)
+    static void TagSingleFile(UserSettings                userSettings,
+                              YouTubeVideoJson.Root       parsedVideoJson,
+                              string                      audioFilePath,
+                              string                      imageFilePath,
+                              YouTubeCollectionJson.Root? collectionJson,
+                              Printer                     printer)
     {
         try
         {
@@ -95,16 +94,34 @@ internal static class Tagger
             using var taggedFile = TagLib.File.Create(audioFilePath);
             var tagDetector = new TagDetector();
 
-            taggedFile.Tag.Title = tagDetector.DetectTitle(parsedVideoJson, parsedVideoJson.Title);
-            printer.Print($"• Using title \"{taggedFile.Tag.Title}\"");
+            if (parsedVideoJson.Track is string officialTitle)
+            {
+                printer.Print($"• Using official title \"{officialTitle}\"");
+                taggedFile.Tag.Title = officialTitle;
+            }
+            else
+            {
+                taggedFile.Tag.Title = tagDetector.DetectTitle(parsedVideoJson, parsedVideoJson.Title);
+                printer.Print($"• Found title \"{taggedFile.Tag.Title}\"");
+            }
 
-            if (tagDetector.DetectArtist(parsedVideoJson) is string artist)
+            if (parsedVideoJson.Artist is string officialArtist)
+            {
+                printer.Print($"• Using official artist \"{officialArtist}\"");
+                taggedFile.Tag.Performers = new[] { officialArtist };
+            }
+            else if (tagDetector.DetectArtist(parsedVideoJson) is string artist)
             {
                 printer.Print($"• Found artist \"{artist}\"");
                 taggedFile.Tag.Performers = new[] { artist };
             }
 
-            if (tagDetector.DetectAlbum(parsedVideoJson, collectionJson?.Title) is string album)
+            if (parsedVideoJson.Album is string officialAlbum)
+            {
+                printer.Print($"• Using official album \"{officialAlbum}\"");
+                taggedFile.Tag.Album = officialAlbum;
+            }
+            else if (tagDetector.DetectAlbum(parsedVideoJson, collectionJson?.Title) is string album)
             {
                 printer.Print($"• Found album \"{album}\"");
                 taggedFile.Tag.Album = album;
@@ -116,15 +133,30 @@ internal static class Tagger
                 taggedFile.Tag.Composers = new[] { composers };
             }
 
-            ushort? defaultYear = userSettings.GetVideoUploadDateIfRegisteredUploader(parsedVideoJson);
-            if (defaultYear is not null)
+            if (parsedVideoJson.PlaylistIndex is uint trackNo)
             {
-                printer.Print($"Will use upload year {defaultYear} for uploader \"{parsedVideoJson.Uploader}\" if no other year is detected.");
+                printer.Print($"• Using playlist index of {trackNo} for track number");
+                taggedFile.Tag.Track = trackNo;
             }
-            if (tagDetector.DetectReleaseYear(parsedVideoJson, defaultYear) is ushort year)
+
+            if (parsedVideoJson.ReleaseYear is uint releaseYear)
             {
-                printer.Print($"• Found year \"{year}\"");
-                taggedFile.Tag.Year = year;
+                printer.Print($"• Using official release year \"{releaseYear}\"");
+                taggedFile.Tag.Year = releaseYear;
+            }
+            else
+            {
+                ushort? defaultYear = userSettings.GetVideoUploadDateIfRegisteredUploader(parsedVideoJson);
+                if (defaultYear is not null)
+                {
+                    printer.Print($"Will use upload year {defaultYear} for uploader \"{parsedVideoJson.Uploader}\" if no other year is detected.");
+                }
+
+                if (tagDetector.DetectReleaseYear(parsedVideoJson, defaultYear) is ushort year)
+                {
+                    printer.Print($"• Found year \"{year}\"");
+                    taggedFile.Tag.Year = year;
+                }
             }
 
             taggedFile.Tag.Comment = parsedVideoJson.GenerateComment(collectionJson);

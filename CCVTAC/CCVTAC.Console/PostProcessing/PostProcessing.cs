@@ -24,16 +24,16 @@ public sealed class Setup
 
         Printer.Print("Starting post-processing...");
 
-        var jsonResult = GetCollectionJson(UserSettings.WorkingDirectory);
+        var collectionJsonResult = GetCollectionJson(UserSettings.WorkingDirectory);
         YouTubeCollectionJson.Root? collectionJson;
-        if (jsonResult.IsFailed)
+        if (collectionJsonResult.IsFailed)
         {
-            Printer.Print($"No playlist or channel metadata found: {jsonResult.Errors.First().Message}");
+            Printer.Print($"No playlist or channel metadata found: {collectionJsonResult.Errors.First().Message}");
             collectionJson = null;
         }
         else
         {
-            collectionJson = jsonResult.Value;
+            collectionJson = collectionJsonResult.Value;
         }
 
         ImageProcessor.Run(UserSettings.WorkingDirectory, Printer);
