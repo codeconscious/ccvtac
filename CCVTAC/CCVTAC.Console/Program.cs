@@ -66,8 +66,11 @@ internal static class Program
 
         SettingsService.PrintSummary(userSettings, printer, "Settings loaded OK:");
 
-        // TODO: Refactor with the similar code below.
-        if (Directory.GetFiles(userSettings.WorkingDirectory).Any())
+        // TODO: Refactor with the similar code below and elsewhere.
+        string[] ignoreFiles = new[] { ".DS_Store" }; // Ignore macOS system files
+        if (Directory.GetFiles(userSettings.WorkingDirectory)
+                     .Where(dirFile => !ignoreFiles.Any(file => dirFile.EndsWith(file)))
+                     .Any())
         {
             printer.Error("There are unexpectedly files in the working directory, so will abort.");
             return;

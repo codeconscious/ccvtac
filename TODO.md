@@ -2,7 +2,6 @@
 
 Features that I might consider as features or improvements in the future. Not all ideas might be viable, or even _good_, but this helps me avoid forgetting them until I decide what to do.
 
-- Ignore, or remove, `.DS_Store` files in the working directory
 - Stop downloading if there are repeated errors from yt-dlp
 - Logging levels (current/full vs. light)
 - Logging to a file
