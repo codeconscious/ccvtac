@@ -76,7 +76,7 @@ internal static class Mover
     {
         string[] ignoreFiles = new[] { ".DS_Store" }; // Ignore macOS system files
 
-        var files = Directory.GetFiles(workingDirectory, "*")
+        var files = Directory.GetFiles(workingDirectory)
                              .Where(dirFile => !ignoreFiles.Any(ignoreFile => dirFile.EndsWith(ignoreFile)));
 
         if (files.Any())
