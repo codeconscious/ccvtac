@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text.Json;
 using CCVTAC.Console.Settings;
+using TaggedFile = TagLib.File;
 
 namespace CCVTAC.Console.PostProcessing.Tagging;
 
@@ -93,13 +94,13 @@ internal static class Tagger
             string audioFileName = Path.GetFileName(audioFilePath);
             printer.Print($"Current audio file: \"{audioFileName}\"");
 
-            using var taggedFile = TagLib.File.Create(audioFilePath);
+            using TaggedFile taggedFile = TaggedFile.Create(audioFilePath);
             TagDetector tagDetector = new();
 
-            if (videoData.Track is string officialTitle)
+            if (videoData.Track is string metadataTitle)
             {
-                printer.Print($"• Using official title \"{officialTitle}\"");
-                taggedFile.Tag.Title = officialTitle;
+                printer.Print($"• Using metadata title \"{metadataTitle}\"");
+                taggedFile.Tag.Title = metadataTitle;
             }
             else
             {
@@ -107,10 +108,10 @@ internal static class Tagger
                 printer.Print($"• Found title \"{taggedFile.Tag.Title}\"");
             }
 
-            if (videoData.Artist is string officialArtist)
+            if (videoData.Artist is string metadataArtist)
             {
-                printer.Print($"• Using official artist \"{officialArtist}\"");
-                taggedFile.Tag.Performers = new[] { officialArtist };
+                printer.Print($"• Using metadata artist \"{metadataArtist}\"");
+                taggedFile.Tag.Performers = new[] { metadataArtist };
             }
             else if (tagDetector.DetectArtist(videoData) is string artist)
             {
@@ -118,10 +119,10 @@ internal static class Tagger
                 taggedFile.Tag.Performers = new[] { artist };
             }
 
-            if (videoData.Album is string officialAlbum)
+            if (videoData.Album is string metadataAlbum)
             {
-                printer.Print($"• Using official album \"{officialAlbum}\"");
-                taggedFile.Tag.Album = officialAlbum;
+                printer.Print($"• Using metadata album \"{metadataAlbum}\"");
+                taggedFile.Tag.Album = metadataAlbum;
             }
             else if (tagDetector.DetectAlbum(videoData, collectionData?.Title) is string album)
             {
@@ -143,7 +144,7 @@ internal static class Tagger
 
             if (videoData.ReleaseYear is uint releaseYear)
             {
-                printer.Print($"• Using official release year \"{releaseYear}\"");
+                printer.Print($"• Using metadata release year \"{releaseYear}\"");
                 taggedFile.Tag.Year = releaseYear;
             }
             else
@@ -235,11 +236,8 @@ internal static class Tagger
     /// <summary>
     /// Write the video thumbnail to the file tags.
     /// </summary>
-    /// <param name="taggedFile"></param>
-    /// <param name="workingDirectory"></param>
-    /// <param name="printer"></param> <summary>
     /// <remarks>Heavily inspired by https://stackoverflow.com/a/61264720/11767771.</remarks>
-    private static void WriteImage(TagLib.File taggedFile, string imageFilePath, Printer printer)
+    private static void WriteImage(TaggedFile taggedFile, string imageFilePath, Printer printer)
     {
         if (string.IsNullOrWhiteSpace(imageFilePath))
         {
