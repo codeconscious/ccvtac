@@ -14,9 +14,9 @@ internal static class Detectors
     /// <param name="schemes"></param>
     /// <param name="defaultValue">The value to return if nothing is matched.</param>
     /// <returns>A match of type T if there was a match; otherwise, the default value provided.</returns>
-    internal static T? DetectSingle<T>(YouTubeVideoJson.Root        videoMetadata,
+    internal static T? DetectSingle<T>(VideoMetadata videoMetadata,
                                        IEnumerable<DetectionScheme> schemes,
-                                       T?                           defaultValue)
+                                       T? defaultValue)
     {
         foreach (DetectionScheme scheme in schemes)
         {
@@ -43,10 +43,10 @@ internal static class Detectors
     /// <param name="defaultValue">The value to return if nothing is matched.</param>
     /// <param name="separator"></param>
     /// <returns>A match of type T if there were any matches; otherwise, the default value provided.</returns>
-    internal static T? DetectMultiple<T>(YouTubeVideoJson.Root        data,
+    internal static T? DetectMultiple<T>(VideoMetadata data,
                                          IEnumerable<DetectionScheme> schemes,
-                                         T?                           defaultValue,
-                                         string                       separator = "; ")
+                                         T? defaultValue,
+                                         string separator = "; ")
     {
         HashSet<string> matchedValues = new();
 
@@ -93,8 +93,8 @@ internal static class Detectors
     /// <summary>
     /// Extracts the value of the specified tag field from the given data.
     /// </summary>
-    private static string ExtractMetadataText(YouTubeVideoJson.Root videoMetadata,
-                                              SourceMetadataField   target)
+    private static string ExtractMetadataText(VideoMetadata videoMetadata,
+                                              SourceMetadataField target)
     {
         return target switch
         {

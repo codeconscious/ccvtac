@@ -8,7 +8,7 @@ namespace CCVTAC.Console.PostProcessing.Tagging;
 internal static class Tagger
 {
     internal static Result<string> Run(UserSettings userSettings,
-                                       YouTubeCollectionJson.Root? collectionJson,
+                                       CollectionMetadata? collectionJson,
                                        Printer printer)
     {
         printer.Print("Adding file tags...");
@@ -54,7 +54,7 @@ internal static class Tagger
     private static void ProcessSingleTaggingSet(
         UserSettings userSettings,
         TaggingSet taggingSet,
-        YouTubeCollectionJson.Root? collectionJson,
+        CollectionMetadata? collectionJson,
         Printer printer)
     {
         printer.Print($"{taggingSet.AudioFilePaths.Count()} audio file(s) with resource ID \"{taggingSet.ResourceId}\"");
@@ -80,12 +80,12 @@ internal static class Tagger
         }
     }
 
-    static void TagSingleFile(UserSettings                userSettings,
-                              YouTubeVideoJson.Root       parsedVideoJson,
-                              string                      audioFilePath,
-                              string                      imageFilePath,
-                              YouTubeCollectionJson.Root? collectionJson,
-                              Printer                     printer)
+    static void TagSingleFile(UserSettings userSettings,
+                              VideoMetadata videoData,
+                              string audioFilePath,
+                              string imageFilePath,
+                              CollectionMetadata? collectionData,
+                              Printer printer)
     {
         try
         {
@@ -95,72 +95,72 @@ internal static class Tagger
             using var taggedFile = TagLib.File.Create(audioFilePath);
             TagDetector tagDetector = new();
 
-            if (parsedVideoJson.Track is string officialTitle)
+            if (videoData.Track is string officialTitle)
             {
                 printer.Print($"• Using official title \"{officialTitle}\"");
                 taggedFile.Tag.Title = officialTitle;
             }
             else
             {
-                taggedFile.Tag.Title = tagDetector.DetectTitle(parsedVideoJson, parsedVideoJson.Title);
+                taggedFile.Tag.Title = tagDetector.DetectTitle(videoData, videoData.Title);
                 printer.Print($"• Found title \"{taggedFile.Tag.Title}\"");
             }
 
-            if (parsedVideoJson.Artist is string officialArtist)
+            if (videoData.Artist is string officialArtist)
             {
                 printer.Print($"• Using official artist \"{officialArtist}\"");
                 taggedFile.Tag.Performers = new[] { officialArtist };
             }
-            else if (tagDetector.DetectArtist(parsedVideoJson) is string artist)
+            else if (tagDetector.DetectArtist(videoData) is string artist)
             {
                 printer.Print($"• Found artist \"{artist}\"");
                 taggedFile.Tag.Performers = new[] { artist };
             }
 
-            if (parsedVideoJson.Album is string officialAlbum)
+            if (videoData.Album is string officialAlbum)
             {
                 printer.Print($"• Using official album \"{officialAlbum}\"");
                 taggedFile.Tag.Album = officialAlbum;
             }
-            else if (tagDetector.DetectAlbum(parsedVideoJson, collectionJson?.Title) is string album)
+            else if (tagDetector.DetectAlbum(videoData, collectionData?.Title) is string album)
             {
                 printer.Print($"• Found album \"{album}\"");
                 taggedFile.Tag.Album = album;
             }
 
-            if (tagDetector.DetectComposers(parsedVideoJson) is string composers)
+            if (tagDetector.DetectComposers(videoData) is string composers)
             {
                 printer.Print($"• Found composer(s) \"{composers}\"");
                 taggedFile.Tag.Composers = new[] { composers };
             }
 
-            if (parsedVideoJson.PlaylistIndex is uint trackNo)
+            if (videoData.PlaylistIndex is uint trackNo)
             {
                 printer.Print($"• Using playlist index of {trackNo} for track number");
                 taggedFile.Tag.Track = trackNo;
             }
 
-            if (parsedVideoJson.ReleaseYear is uint releaseYear)
+            if (videoData.ReleaseYear is uint releaseYear)
             {
                 printer.Print($"• Using official release year \"{releaseYear}\"");
                 taggedFile.Tag.Year = releaseYear;
             }
             else
             {
-                ushort? defaultYear = userSettings.GetVideoUploadDateIfRegisteredUploader(parsedVideoJson);
+                ushort? defaultYear = userSettings.GetVideoUploadDateIfRegisteredUploader(videoData);
                 if (defaultYear is not null)
                 {
-                    printer.Print($"Will use upload year {defaultYear} for uploader \"{parsedVideoJson.Uploader}\" if no other year is detected.");
+                    printer.Print($"Will use upload year {defaultYear} for uploader \"{videoData.Uploader}\" if no other year is detected.");
                 }
 
-                if (tagDetector.DetectReleaseYear(parsedVideoJson, defaultYear) is ushort year)
+                if (tagDetector.DetectReleaseYear(videoData, defaultYear) is ushort year)
                 {
                     printer.Print($"• Found year \"{year}\"");
                     taggedFile.Tag.Year = year;
                 }
             }
 
-            taggedFile.Tag.Comment = parsedVideoJson.GenerateComment(collectionJson);
+            taggedFile.Tag.Comment = videoData.GenerateComment(collectionData);
 
             WriteImage(taggedFile, imageFilePath, printer);
 
@@ -173,7 +173,7 @@ internal static class Tagger
         }
     }
 
-    static Result<YouTubeVideoJson.Root> GetParsedJson(TaggingSet taggingSet)
+    static Result<VideoMetadata> GetParsedJson(TaggingSet taggingSet)
     {
         string json;
         try
@@ -185,17 +185,17 @@ internal static class Tagger
             return Result.Fail($"Error reading JSON file \"{taggingSet.JsonFilePath}\": {ex.Message}.");
         }
 
-        YouTubeVideoJson.Root? parsedJson;
+        VideoMetadata? videoData;
         try
         {
-            parsedJson = JsonSerializer.Deserialize<YouTubeVideoJson.Root>(json);
+            videoData = JsonSerializer.Deserialize<VideoMetadata>(json);
 
-            if (parsedJson is null)
+            if (videoData is null)
             {
                 return Result.Fail($"The JSON from file \"{taggingSet.JsonFilePath}\" was unexpectedly null.");
             }
 
-            return Result.Ok(parsedJson.Value);
+            return Result.Ok(videoData.Value);
         }
         catch (JsonException ex)
         {
