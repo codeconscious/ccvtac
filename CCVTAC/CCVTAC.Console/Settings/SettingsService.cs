@@ -43,11 +43,11 @@ public static class SettingsService
         table.Expand();
         table.Border(TableBorder.HeavyEdge);
         table.BorderColor(Color.Grey27);
-        table.AddColumns("Setting Name", "Setting Value");
-        settingPairs.ForEach(pair =>
-        {
-            table.AddRow(pair.Key, pair.Value);
-        });
+        table.AddColumns("Name", "Value");
+        table.HideHeaders();
+        table.Columns[1].Width = 100; // Ensure its at maximum width.
+
+        settingPairs.ForEach(pair => table.AddRow(pair.Key, pair.Value));
 
         printer.Print(table);
 
