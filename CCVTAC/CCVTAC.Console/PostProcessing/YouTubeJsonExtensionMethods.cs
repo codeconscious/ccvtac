@@ -41,17 +41,18 @@ public static class YouTubeJsonExtensionMethods
             sb.AppendLine($"• Creator: {videoData.Creator}");
         }
         sb.AppendLine($"• Uploaded: {videoData.FormattedUploadDate()}");
-        if (maybeCollectionData is CollectionMetadata collectionMetadata)
+        if (maybeCollectionData is CollectionMetadata collectionData)
         {
-            sb.AppendLine($"• Playlist name: {collectionMetadata.Title}");
-            sb.AppendLine($"• Playlist URL: {collectionMetadata.WebpageUrl}");
+            sb.AppendLine($"• Playlist name: {collectionData.Title}");
+            sb.AppendLine($"• Playlist URL: {collectionData.WebpageUrl}");
             sb.AppendLine($"• Playlist index: {videoData.PlaylistIndex}");
-            if (!string.IsNullOrWhiteSpace(collectionMetadata.Description))
+            if (!string.IsNullOrWhiteSpace(collectionData.Description))
             {
-                sb.AppendLine($"• Playlist description: {collectionMetadata.Description}");
+                sb.AppendLine($"• Playlist description: {collectionData.Description}");
             }
         }
-        sb.AppendLine($"• Description: {videoData.Description})");
+        var description = string.IsNullOrWhiteSpace(videoData.Description) ? "None." : videoData.Description;
+        sb.AppendLine($"• Video description: {description}");
         return sb.ToString();
     }
 }
