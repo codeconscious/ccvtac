@@ -1,5 +1,6 @@
 using System.IO;
 using System.Text.Json;
+using Spectre.Console;
 
 namespace CCVTAC.Console.Settings;
 
@@ -32,16 +33,24 @@ public static class SettingsService
         if (!string.IsNullOrWhiteSpace(header))
             printer.Print(header);
 
-        const string formatStart = "[bold]";
-        const string formatEnd = "[/]";
+        // const string formatStart = "[bold]";
+        // const string formatEnd = "[/]";
 
-        printer.Print($"• Downloading {formatStart}{settings.AudioFormat.ToUpperInvariant()}{formatEnd} files", processMarkup: true);
-        printer.Print($"• Video chapters {formatStart}{(settings.SplitChapters ? "WILL" : "will NOT")}{formatEnd} be split", processMarkup: true);
-        printer.Print($"• Sleeping {formatStart}{settings.SleepSecondsBetweenBatches}{formatEnd} second(s) between each batch", processMarkup: true);
-        printer.Print($"• Sleeping {formatStart}{settings.SleepSecondsBetweenDownloads}{formatEnd} second(s) between individual downloads", processMarkup: true);
-        printer.Print($"• Found {formatStart}{settings.UseUploadYearUploaders?.Length.ToString() ?? "no"}{formatEnd} channels for which upload year can be used as release year", processMarkup: true);
-        printer.Print($"• Working directory: {formatStart}{settings.WorkingDirectory}{formatEnd}", processMarkup: true);
-        printer.Print($"• Move-to directory: {formatStart}{settings.MoveToDirectory}{formatEnd}", processMarkup: true);
+        var table = new Table();
+        table.Expand();
+        table.Border(TableBorder.HeavyEdge);
+        table.AddColumns("Setting Name", "Setting Value");
+
+        table.AddRow($"Audio file format", settings.AudioFormat.ToUpperInvariant());
+        table.AddRow($"Split video chapters", settings.SplitChapters ? "ON" : "OFF");
+        table.AddRow($"Sleep between batches", $"{settings.SleepSecondsBetweenBatches} second(s)");
+        table.AddRow($"Sleep between downloads", $"{settings.SleepSecondsBetweenDownloads} second(s)");
+        table.AddRow($"Use-upload-year channels",
+                     $"{settings.UseUploadYearUploaders?.Length.ToString() ?? "no"} channel(s)");
+        table.AddRow("Working directory", $"{settings.WorkingDirectory}");
+        table.AddRow("Move-to directory", $"{settings.MoveToDirectory}");
+
+        AnsiConsole.Write(table);
     }
 
     public static Result<UserSettings> GetUserSettings()
