@@ -77,9 +77,13 @@ internal static class Renamer
 
         DirectoryInfo dir = new(workingDirectory);
 
-        var audioFilePaths = dir.EnumerateFiles("*")
-                                .Where(f => Settings.SettingsService
-                                                    .ValidAudioFormats.Any(f.Extension.EndsWith));
+        var audioFilePaths = dir.EnumerateFiles("*.m4a");
+        if (!audioFilePaths.Any())
+        {
+            printer.Warning("No audio files to rename were found.");
+            return;
+        }
+
         printer.Print($"Renaming {audioFilePaths.Count()} audio file(s)...");
 
         foreach (FileInfo filePath in audioFilePaths)
