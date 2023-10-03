@@ -37,9 +37,18 @@ public static class SettingsService
         {
             { $"Audio file format", settings.AudioFormat.ToUpperInvariant() },
             { $"Split video chapters", settings.SplitChapters ? "ON" : "OFF" },
-            { $"Sleep between batches", $"{settings.SleepSecondsBetweenBatches} second(s)" },
-            { $"Sleep between downloads", $"{settings.SleepSecondsBetweenDownloads} second(s)" },
-            { $"Use-upload-year channels",  $"{settings.UseUploadYearUploaders?.Length.ToString() ?? "no"} channel(s)" },
+            {
+                $"Sleep between batches",
+                $"{settings.SleepSecondsBetweenBatches} {PluralizeIfNeeded("second", settings.SleepSecondsBetweenBatches)}"
+            },
+            {
+                $"Sleep between downloads",
+                $"{settings.SleepSecondsBetweenDownloads} {PluralizeIfNeeded("second", settings.SleepSecondsBetweenDownloads)}"
+            },
+            {
+                $"Use-upload-year channels",
+                $"{settings.UseUploadYearUploaders?.Length.ToString() ?? "no"} {PluralizeIfNeeded("channel", settings.UseUploadYearUploaders?.Length ?? 0)}"
+            },
             { "Working directory", settings.WorkingDirectory },
             { "Move-to directory", settings.MoveToDirectory },
         }.ToImmutableList();
@@ -48,17 +57,25 @@ public static class SettingsService
         table.Expand();
         table.Border(TableBorder.HeavyEdge);
         table.BorderColor(Color.Grey27);
-
         table.AddColumns("Setting Name", "Setting Value");
-        table.Columns[0].Width = 8; // Not sure what the unit is...
-        table.Columns[1].Width = null;
-
         settingPairs.ForEach(pair =>
         {
             table.AddRow(pair.Key, pair.Value);
         });
 
         printer.Print(table);
+
+        static string PluralizeIfNeeded(string term, int count)
+        {
+            return (term, count) switch
+            {
+                { term: "second", count: 1 } => term,
+                { term: "second", count: _ } => "seconds",
+                { term: "channel", count: 1 } => term,
+                { term: "channel", count: _ } => "channels",
+                _ => term
+            };
+        }
     }
 
     public static Result<UserSettings> GetUserSettings()
