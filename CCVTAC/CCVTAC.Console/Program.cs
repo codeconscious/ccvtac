@@ -136,19 +136,19 @@ internal static class Program
             if (haveProcessedAny) // No need to sleep for the very first URL.
             {
                 AnsiConsole.Status()
-                    .Start($"Sleeping for {settings.SleepBetweenBatchesSeconds} seconds...", ctx =>
+                    .Start($"Sleeping for {settings.SleepSecondsBetweenBatches} seconds...", ctx =>
                     {
                         ctx.Spinner(Spinner.Known.Star);
                         ctx.SpinnerStyle(Style.Parse("blue"));
 
-                        ushort remainingSeconds = settings.SleepBetweenBatchesSeconds;
+                        ushort remainingSeconds = settings.SleepSecondsBetweenBatches;
                         while (remainingSeconds > 0)
                         {
                             ctx.Status($"Sleeping for {remainingSeconds} seconds...");
                             remainingSeconds--;
                             Thread.Sleep(1000);
                         }
-                        printer.Print($"Slept for {settings.SleepBetweenBatchesSeconds} second(s).",
+                        printer.Print($"Slept for {settings.SleepSecondsBetweenBatches} second(s).",
                                       appendLines: 1);
                     });
             }

@@ -72,7 +72,7 @@ internal static class Downloader
 
         if (downloadType is not DownloadType.Video)
         {
-            args.Add($"--sleep-interval {settings.SleepBetweenDownloadsSeconds}");
+            args.Add($"--sleep-interval {settings.SleepSecondsBetweenDownloads}");
         }
 
         return string.Join(" ", args.Concat(additionalArgs ?? Enumerable.Empty<string>()));

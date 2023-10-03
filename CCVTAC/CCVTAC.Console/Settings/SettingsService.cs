@@ -32,13 +32,16 @@ public static class SettingsService
         if (!string.IsNullOrWhiteSpace(header))
             printer.Print(header);
 
-        printer.Print($"• Downloading {settings.AudioFormat!.ToUpperInvariant()} files");
-        printer.Print($"• Video chapters {(settings.SplitChapters ? "WILL" : "will NOT")} be split");
-        printer.Print($"• Sleeping {settings.SleepBetweenBatchesSeconds} second(s) between each batch");
-        printer.Print($"• Sleeping {settings.SleepBetweenDownloadsSeconds} second(s) between individual downloads");
-        printer.Print($"• Found {settings.UseUploadYearUploaders?.Length.ToString() ?? "no"} channels for which upload year can be used");
-        printer.Print($"• Working directory: {settings.WorkingDirectory}");
-        printer.Print($"• Move-to directory: {settings.MoveToDirectory}");
+        const string formatStart = "[bold]";
+        const string formatEnd = "[/]";
+
+        printer.Print($"• Downloading {formatStart}{settings.AudioFormat.ToUpperInvariant()}{formatEnd} files", processMarkup: true);
+        printer.Print($"• Video chapters {formatStart}{(settings.SplitChapters ? "WILL" : "will NOT")}{formatEnd} be split", processMarkup: true);
+        printer.Print($"• Sleeping {formatStart}{settings.SleepSecondsBetweenBatches}{formatEnd} second(s) between each batch", processMarkup: true);
+        printer.Print($"• Sleeping {formatStart}{settings.SleepSecondsBetweenDownloads}{formatEnd} second(s) between individual downloads", processMarkup: true);
+        printer.Print($"• Found {formatStart}{settings.UseUploadYearUploaders?.Length.ToString() ?? "no"}{formatEnd} channels for which upload year can be used as release year", processMarkup: true);
+        printer.Print($"• Working directory: {formatStart}{settings.WorkingDirectory}{formatEnd}", processMarkup: true);
+        printer.Print($"• Move-to directory: {formatStart}{settings.MoveToDirectory}{formatEnd}", processMarkup: true);
     }
 
     public static Result<UserSettings> GetUserSettings()
