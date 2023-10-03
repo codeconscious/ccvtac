@@ -27,9 +27,7 @@ public static class YouTubeJsonExtensionMethods
     /// <summary>
     /// Returns a formatted comment using data parsed from the JSON file.
     /// </summary>
-    public static string GenerateComment(
-        this VideoMetadata videoData,
-        CollectionMetadata? maybeCollectionData)
+    public static string GenerateComment(this VideoMetadata videoData, CollectionMetadata? maybeCollectionData)
     {
         System.Text.StringBuilder sb = new();
         sb.AppendLine("SOURCE DATA:");
@@ -38,6 +36,10 @@ public static class YouTubeJsonExtensionMethods
         sb.AppendLine($"• URL: {videoData.WebpageUrl}");
         sb.AppendLine($"• Title: {videoData.Fulltitle}");
         sb.AppendLine($"• Uploader: {videoData.UploaderSummary()}");
+        if (videoData.Creator != videoData.Uploader && !string.IsNullOrWhiteSpace(videoData.Creator))
+        {
+            sb.AppendLine($"• Creator: {videoData.Creator}");
+        }
         sb.AppendLine($"• Uploaded: {videoData.FormattedUploadDate()}");
         if (maybeCollectionData is CollectionMetadata collectionMetadata)
         {
