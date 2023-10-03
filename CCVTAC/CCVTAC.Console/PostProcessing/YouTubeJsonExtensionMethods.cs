@@ -30,8 +30,8 @@ public static class YouTubeJsonExtensionMethods
     public static string GenerateComment(this VideoMetadata videoData, CollectionMetadata? maybeCollectionData)
     {
         System.Text.StringBuilder sb = new();
-        sb.AppendLine("SOURCE DATA:");
-        sb.AppendLine($"• Downloaded: {DateTime.Now} using CCVTAC");
+        sb.AppendLine("CCVTAC SOURCE DATA:");
+        sb.AppendLine($"• Downloaded: {DateTime.Now}");
         sb.AppendLine($"• Service: {videoData.ExtractorKey}");
         sb.AppendLine($"• URL: {videoData.WebpageUrl}");
         sb.AppendLine($"• Title: {videoData.Fulltitle}");
