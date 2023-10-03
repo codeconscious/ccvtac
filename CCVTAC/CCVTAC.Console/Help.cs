@@ -5,8 +5,7 @@ public static class Help
     internal static void Print(Printer printer)
     {
         printer.Print("CodeConscious Video-to-Audio Converter (CCVTAC)");
-        printer.Print("• Easily convert YouTube videos to local audio files with ID3v2 tags!");
-        printer.Print($"  (Supported audio formats: {string.Join(", ", Settings.SettingsService.ValidAudioFormats)})");
+        printer.Print("• Easily convert YouTube videos to local M4A audio files with ID3v2 tags!");
         printer.Print("• Supports video and playlist URLs");
         printer.Print("• Video metadata (uploader name and URL, source URL, etc.) saved to Comment tags");
         printer.Print("• Auto-renames files via specific regex patterns (to remove resource IDs, etc.)");

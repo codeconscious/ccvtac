@@ -38,22 +38,23 @@ public sealed class UserSettings
     /// The audio file format that should be downloaded. It must be
     /// a format supported by both yt-dlp and TagLib#.
     /// </summary>
+    /// <remarks>I'm only supporting M4A, which requires no conversion, for now. (See PR #21.)</remarks>
     [JsonPropertyName("audioFormat")]
-    public string? AudioFormat { get; init; } = "m4a";
+    public string AudioFormat = "m4a";
 
     /// <summary>
     /// How many seconds to sleep between multiple downloads. This value is
     /// passed to the download tool.
     /// </summary>
     [JsonPropertyName("sleepBetweenDownloadsSeconds")]
-    public ushort SleepBetweenDownloadsSeconds { get; init; } = 3;
+    public ushort SleepSecondsBetweenDownloads { get; init; } = 3;
 
     /// <summary>
     /// How many seconds the program should sleep between multiple batches.
     /// A batch is defined as one input entry by the user.
     /// </summary>
     [JsonPropertyName("sleepBetweenBatchesSeconds")]
-    public ushort SleepBetweenBatchesSeconds { get; init; } = 15;
+    public ushort SleepSecondsBetweenBatches { get; init; } = 15;
 
     /// <summary>
     /// A list of uploader names for whom the video upload dates' year value

@@ -24,6 +24,11 @@ public sealed class Printer
         PrintEmptyLines(appendLines);
     }
 
+    public void Print(Table table)
+    {
+        AnsiConsole.Write(table);
+    }
+
     public void Error(string message, byte appendLines = 0)
     {
         AnsiConsole.MarkupLineInterpolated($"[red]{message}[/]");

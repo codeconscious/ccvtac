@@ -1,25 +1,12 @@
 using System.IO;
 using System.Text.Json;
+using Spectre.Console;
 
 namespace CCVTAC.Console.Settings;
 
 public static class SettingsService
 {
     private const string _settingsFileName = "settings.json";
-
-    /// <summary>
-    /// A list of audio file format codes used by yt-dlp and that are supported
-    /// by TagLib# (for tagging) as well.
-    /// </summary>
-    public static readonly string[] ValidAudioFormats =
-        new string[] {
-            // "aac",
-            // "flac",
-            "m4a", // Recommended for most or all videos since conversation is unnecessary.
-            // "mp3",
-            // "vorbis",
-            // "wav"
-        };
 
     /// <summary>
     /// Prints a summary of the given settings.
@@ -32,13 +19,49 @@ public static class SettingsService
         if (!string.IsNullOrWhiteSpace(header))
             printer.Print(header);
 
-        printer.Print($"• Downloading {settings.AudioFormat!.ToUpperInvariant()} files");
-        printer.Print($"• Video chapters {(settings.SplitChapters ? "WILL" : "will NOT")} be split");
-        printer.Print($"• Sleeping {settings.SleepBetweenBatchesSeconds} second(s) between each batch");
-        printer.Print($"• Sleeping {settings.SleepBetweenDownloadsSeconds} second(s) between individual downloads");
-        printer.Print($"• Found {settings.UseUploadYearUploaders?.Length.ToString() ?? "no"} channels for which upload year can be used");
-        printer.Print($"• Working directory: {settings.WorkingDirectory}");
-        printer.Print($"• Move-to directory: {settings.MoveToDirectory}");
+        var settingPairs = new Dictionary<string, string>()
+        {
+            { $"Audio file format", settings.AudioFormat.ToUpperInvariant() },
+            { $"Split video chapters", settings.SplitChapters ? "ON" : "OFF" },
+            {
+                $"Sleep between batches",
+                $"{settings.SleepSecondsBetweenBatches} {PluralizeIfNeeded("second", settings.SleepSecondsBetweenBatches)}"
+            },
+            {
+                $"Sleep between downloads",
+                $"{settings.SleepSecondsBetweenDownloads} {PluralizeIfNeeded("second", settings.SleepSecondsBetweenDownloads)}"
+            },
+            {
+                $"Use-upload-year channels",
+                $"{settings.UseUploadYearUploaders?.Length.ToString() ?? "no"} {PluralizeIfNeeded("channel", settings.UseUploadYearUploaders?.Length ?? 0)}"
+            },
+            { "Working directory", settings.WorkingDirectory },
+            { "Move-to directory", settings.MoveToDirectory },
+        }.ToImmutableList();
+
+        var table = new Table();
+        table.Expand();
+        table.Border(TableBorder.HeavyEdge);
+        table.BorderColor(Color.Grey27);
+        table.AddColumns("Setting Name", "Setting Value");
+        settingPairs.ForEach(pair =>
+        {
+            table.AddRow(pair.Key, pair.Value);
+        });
+
+        printer.Print(table);
+
+        static string PluralizeIfNeeded(string term, int count)
+        {
+            return (term, count) switch
+            {
+                { term: "second", count: 1 } => term,
+                { term: "second", count: _ } => "seconds",
+                { term: "channel", count: 1 } => term,
+                { term: "channel", count: _ } => "channels",
+                _ => term
+            };
+        }
     }
 
     public static Result<UserSettings> GetUserSettings()
@@ -120,7 +143,7 @@ public static class SettingsService
                 {
                     WriteIndented = true,
                     Encoder = System.Text.Encodings.Web.JavaScriptEncoder.Create(
-                        System.Text.Unicode.UnicodeRanges.All)
+                                 System.Text.Unicode.UnicodeRanges.All)
                 });
             File.WriteAllText(_settingsFileName, json);
             return Result.Ok();
@@ -148,13 +171,6 @@ public static class SettingsService
             errors.Add($"No working directory was specified in the settings.");
         else if (!Directory.Exists(settings.WorkingDirectory))
             errors.Add($"Working directory \"{settings.WorkingDirectory}\" does not exist.");
-
-        if (!ValidAudioFormats.Contains(settings.AudioFormat))
-        {
-            errors.Add(
-                $"Invalid audio format in settings: \"{settings.AudioFormat}\". " +
-                $"Please use one of the following: \"{string.Join("\", \"", ValidAudioFormats)}\".");
-        }
 
         return errors.Any()
             ? Result.Fail(errors)
