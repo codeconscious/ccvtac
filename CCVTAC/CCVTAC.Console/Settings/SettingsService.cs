@@ -39,6 +39,7 @@ public static class SettingsService
         var table = new Table();
         table.Expand();
         table.Border(TableBorder.HeavyEdge);
+        table.BorderColor(Color.Grey27);
         table.AddColumns("Setting Name", "Setting Value");
 
         table.AddRow($"Audio file format", settings.AudioFormat.ToUpperInvariant());
