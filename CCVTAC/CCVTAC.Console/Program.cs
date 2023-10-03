@@ -66,8 +66,11 @@ internal static class Program
 
         SettingsService.PrintSummary(userSettings, printer, "Settings loaded OK:");
 
-        // TODO: Refactor with the similar code below.
-        if (Directory.GetFiles(userSettings.WorkingDirectory).Any())
+        // TODO: Refactor with the similar code below and elsewhere.
+        string[] ignoreFiles = new[] { ".DS_Store" }; // Ignore macOS system files
+        if (Directory.GetFiles(userSettings.WorkingDirectory)
+                     .Where(dirFile => !ignoreFiles.Any(file => dirFile.EndsWith(file)))
+                     .Any())
         {
             printer.Error("There are unexpectedly files in the working directory, so will abort.");
             return;
@@ -173,10 +176,10 @@ internal static class Program
             postProcessor.Run(); // TODO: Think about if/how to handle leftover temp files due to errors.
 
             string batchClause = batchUrls.Count > 1
-                ? $"batch {currentBatch} of {batchUrls.Count}"
+                ? $" (batch {currentBatch} of {batchUrls.Count})"
                 : string.Empty;
             // TODO: Use minutes or hours for longer times.
-            printer.Print($"Done processing '{url}' ({batchClause}) in {jobStopwatch.ElapsedMilliseconds:#,##0}ms.",
+            printer.Print($"Done processing '{url}'{batchClause} in {jobStopwatch.ElapsedMilliseconds:#,##0}ms.",
                           appendLines: 1);
         }
 

@@ -8,7 +8,7 @@ internal static class Mover
     internal static void Run(
         string workingDirectory,
         string moveToDirectory,
-        YouTubeCollectionJson.Root? collectionJson,
+        CollectionMetadata? maybeCollectionData,
         bool shouldOverwrite,
         Printer printer)
     {
@@ -19,9 +19,10 @@ internal static class Mover
         uint failureCount = 0;
         DirectoryInfo workingDirInfo = new(workingDirectory);
 
-        string verifiedMoveToDir = collectionJson is null
-            ? moveToDirectory
-            : Path.Combine(moveToDirectory, collectionJson.Title.ReplaceInvalidPathChars());
+        // Create a subdirectory if this is a collection (playlist or channel) download.
+        string verifiedMoveToDir = maybeCollectionData is CollectionMetadata collectionData
+            ? Path.Combine(moveToDirectory, collectionData.Title.ReplaceInvalidPathChars())
+            : moveToDirectory;
 
         try
         {
@@ -75,7 +76,7 @@ internal static class Mover
     {
         string[] ignoreFiles = new[] { ".DS_Store" }; // Ignore macOS system files
 
-        var files = Directory.GetFiles(workingDirectory, "*")
+        var files = Directory.GetFiles(workingDirectory)
                              .Where(dirFile => !ignoreFiles.Any(ignoreFile => dirFile.EndsWith(ignoreFile)));
 
         if (files.Any())

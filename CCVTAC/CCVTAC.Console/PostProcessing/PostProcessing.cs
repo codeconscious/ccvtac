@@ -26,7 +26,7 @@ public sealed class Setup
         Printer.Print("Starting post-processing...");
 
         var collectionJsonResult = GetCollectionJson(UserSettings.WorkingDirectory);
-        YouTubeCollectionJson.Root? collectionJson;
+        CollectionMetadata? collectionJson;
         if (collectionJsonResult.IsFailed)
         {
             Printer.Print($"No playlist or channel metadata found: {collectionJsonResult.Errors.First().Message}");
@@ -57,7 +57,7 @@ public sealed class Setup
         Printer.Print($"Post-processing done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
     }
 
-    internal Result<YouTubeCollectionJson.Root> GetCollectionJson(string workingDirectory)
+    internal Result<CollectionMetadata> GetCollectionJson(string workingDirectory)
     {
         Regex regex = new(@"(?<=\[)[\w\-]{20,}(?=\]\.info.json)"); // Assumes ID length > 20 chars.
 
@@ -78,14 +78,8 @@ public sealed class Setup
 
             string fileName = fileNames.Single();
             string json = File.ReadAllText(fileName);
-            var collectionJson = JsonSerializer.Deserialize<YouTubeCollectionJson.Root>(json);
-
-            if (collectionJson is null)
-            {
-                return Result.Fail($"The parsed JSON from file \"{fileName}\" was unexpectedly null.");
-            }
-
-            return Result.Ok(collectionJson);
+            var collectionData = JsonSerializer.Deserialize<CollectionMetadata>(json);
+            return Result.Ok(collectionData);
         }
         catch (Exception ex)
         {

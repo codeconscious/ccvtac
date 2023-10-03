@@ -5,32 +5,32 @@ namespace CCVTAC.Console.PostProcessing.Tagging;
 /// </summary>
 internal class TagDetector
 {
-    internal string? DetectTitle(YouTubeVideoJson.Root data, string? defaultName = null)
+    internal string? DetectTitle(VideoMetadata videoData, string? defaultName = null)
     {
-        return Detectors.DetectSingle<string>(data, DetectionSchemeBank.Title, null)
+        return Detectors.DetectSingle<string>(videoData, DetectionSchemeBank.Title, null)
                ?? defaultName;
     }
 
-    internal string? DetectArtist(YouTubeVideoJson.Root data, string? defaultArtist = null)
+    internal string? DetectArtist(VideoMetadata videoData, string? defaultArtist = null)
     {
-        return Detectors.DetectSingle<string>(data, DetectionSchemeBank.Artist, null)
+        return Detectors.DetectSingle<string>(videoData, DetectionSchemeBank.Artist, null)
                ?? defaultArtist;
     }
 
-    internal string? DetectAlbum(YouTubeVideoJson.Root data, string? defaultAlbum = null)
+    internal string? DetectAlbum(VideoMetadata videoData, string? defaultAlbum = null)
     {
-        return Detectors.DetectSingle<string>(data, DetectionSchemeBank.Album, null)
+        return Detectors.DetectSingle<string>(videoData, DetectionSchemeBank.Album, null)
                ?? defaultAlbum;
     }
 
-    internal string? DetectComposers(YouTubeVideoJson.Root data)
+    internal string? DetectComposers(VideoMetadata videoData)
     {
-        return Detectors.DetectMultiple<string>(data, DetectionSchemeBank.Composers, null, "; ");
+        return Detectors.DetectMultiple<string>(videoData, DetectionSchemeBank.Composers, null, "; ");
     }
 
-    internal ushort? DetectReleaseYear(YouTubeVideoJson.Root data, ushort? defaultYear = null)
+    internal ushort? DetectReleaseYear(VideoMetadata videoData, ushort? defaultYear = null)
     {
-        ushort output = Detectors.DetectSingle<ushort>(data, DetectionSchemeBank.Year, default);
+        ushort output = Detectors.DetectSingle<ushort>(videoData, DetectionSchemeBank.Year, default);
 
         return output is default(ushort) // The default ushort value indicates no match was found.
             ? defaultYear
