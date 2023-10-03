@@ -33,25 +33,32 @@ public static class SettingsService
         if (!string.IsNullOrWhiteSpace(header))
             printer.Print(header);
 
-        // const string formatStart = "[bold]";
-        // const string formatEnd = "[/]";
+        var settingPairs = new Dictionary<string, string>()
+        {
+            { $"Audio file format", settings.AudioFormat.ToUpperInvariant() },
+            { $"Split video chapters", settings.SplitChapters ? "ON" : "OFF" },
+            { $"Sleep between batches", $"{settings.SleepSecondsBetweenBatches} second(s)" },
+            { $"Sleep between downloads", $"{settings.SleepSecondsBetweenDownloads} second(s)" },
+            { $"Use-upload-year channels",  $"{settings.UseUploadYearUploaders?.Length.ToString() ?? "no"} channel(s)" },
+            { "Working directory", settings.WorkingDirectory },
+            { "Move-to directory", settings.MoveToDirectory },
+        }.ToImmutableList();
 
         var table = new Table();
         table.Expand();
         table.Border(TableBorder.HeavyEdge);
         table.BorderColor(Color.Grey27);
+
         table.AddColumns("Setting Name", "Setting Value");
+        table.Columns[0].Width = 8; // Not sure what the unit is...
+        table.Columns[1].Width = null;
 
-        table.AddRow($"Audio file format", settings.AudioFormat.ToUpperInvariant());
-        table.AddRow($"Split video chapters", settings.SplitChapters ? "ON" : "OFF");
-        table.AddRow($"Sleep between batches", $"{settings.SleepSecondsBetweenBatches} second(s)");
-        table.AddRow($"Sleep between downloads", $"{settings.SleepSecondsBetweenDownloads} second(s)");
-        table.AddRow($"Use-upload-year channels",
-                     $"{settings.UseUploadYearUploaders?.Length.ToString() ?? "no"} channel(s)");
-        table.AddRow("Working directory", $"{settings.WorkingDirectory}");
-        table.AddRow("Move-to directory", $"{settings.MoveToDirectory}");
+        settingPairs.ForEach(pair =>
+        {
+            table.AddRow(pair.Key, pair.Value);
+        });
 
-        AnsiConsole.Write(table);
+        printer.Print(table);
     }
 
     public static Result<UserSettings> GetUserSettings()
