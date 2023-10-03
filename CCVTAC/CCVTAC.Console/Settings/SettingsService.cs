@@ -9,20 +9,6 @@ public static class SettingsService
     private const string _settingsFileName = "settings.json";
 
     /// <summary>
-    /// A list of audio file format codes used by yt-dlp and that are supported
-    /// by TagLib# (for tagging) as well.
-    /// </summary>
-    public static readonly string[] ValidAudioFormats =
-        new string[] {
-            // "aac", // TODO: Determine if this and other commented formats are worth supporting.
-            // "flac",
-            "m4a", // Recommended for most or all videos since conversation is unnecessary.
-            // "mp3",
-            // "vorbis",
-            // "wav"
-        };
-
-    /// <summary>
     /// Prints a summary of the given settings.
     /// </summary>
     /// <param name="settings"></param>
@@ -157,7 +143,7 @@ public static class SettingsService
                 {
                     WriteIndented = true,
                     Encoder = System.Text.Encodings.Web.JavaScriptEncoder.Create(
-                        System.Text.Unicode.UnicodeRanges.All)
+                                 System.Text.Unicode.UnicodeRanges.All)
                 });
             File.WriteAllText(_settingsFileName, json);
             return Result.Ok();
@@ -185,13 +171,6 @@ public static class SettingsService
             errors.Add($"No working directory was specified in the settings.");
         else if (!Directory.Exists(settings.WorkingDirectory))
             errors.Add($"Working directory \"{settings.WorkingDirectory}\" does not exist.");
-
-        if (!ValidAudioFormats.Contains(settings.AudioFormat))
-        {
-            errors.Add(
-                $"Invalid audio format in settings: \"{settings.AudioFormat}\". " +
-                $"Please use one of the following: \"{string.Join("\", \"", ValidAudioFormats)}\".");
-        }
 
         return errors.Any()
             ? Result.Fail(errors)
