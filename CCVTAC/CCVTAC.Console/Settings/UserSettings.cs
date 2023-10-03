@@ -38,7 +38,7 @@ public sealed class UserSettings
     /// The audio file format that should be downloaded. It must be
     /// a format supported by both yt-dlp and TagLib#.
     /// </summary>
-    /// <remarks>I"m only supporting M4A, which requires no conversion, for now.</remarks>
+    /// <remarks>I'm only supporting M4A, which requires no conversion, for now. (See PR #21.)</remarks>
     [JsonPropertyName("audioFormat")]
     public string AudioFormat = "m4a";
 
