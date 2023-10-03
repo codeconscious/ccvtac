@@ -42,7 +42,7 @@ internal record ExternalProgram
     /// <returns>A Result indicating whether the program is available or not.</returns>
     internal Result ProgramExists()
     {
-        var processStartInfo = new ProcessStartInfo()
+        ProcessStartInfo processStartInfo = new()
         {
             FileName = this.Name,
             UseShellExecute = false,
@@ -53,7 +53,7 @@ internal record ExternalProgram
 
         try
         {
-            using var process = Process.Start(processStartInfo);
+            using Process? process = Process.Start(processStartInfo);
 
             if (process is null)
             {

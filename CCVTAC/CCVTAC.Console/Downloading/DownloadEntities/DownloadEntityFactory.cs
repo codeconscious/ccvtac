@@ -23,7 +23,7 @@ public static class DownloadEntityFactory
         if (!typesWithResourceIds.Any())
             return Result.Fail(_unsupportedUrlText);
 
-        var (type, resourceId) = typesWithResourceIds.First();
+        (DownloadType type, string resourceId) = typesWithResourceIds.First();
 
         return type switch
         {

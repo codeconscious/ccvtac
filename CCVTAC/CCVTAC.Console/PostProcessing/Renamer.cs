@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -71,18 +72,19 @@ internal static class Renamer
 
     public static void Run(string workingDirectory, Printer printer)
     {
-        var stopwatch = new System.Diagnostics.Stopwatch();
+        Stopwatch stopwatch = new();
         stopwatch.Start();
 
-        var dir = new DirectoryInfo(workingDirectory);
+        DirectoryInfo dir = new(workingDirectory);
 
         var audioFilePaths = dir.EnumerateFiles("*")
-                       .Where(f => Settings.SettingsService.ValidAudioFormats.Any(f.Extension.EndsWith));
+                                .Where(f => Settings.SettingsService
+                                                    .ValidAudioFormats.Any(f.Extension.EndsWith));
         printer.Print($"Renaming {audioFilePaths.Count()} audio file(s)...");
 
-        foreach (var filePath in audioFilePaths)
+        foreach (FileInfo filePath in audioFilePaths)
         {
-            var newFileName = RenamePatterns.Aggregate(
+            string newFileName = RenamePatterns.Aggregate(
                 new StringBuilder(filePath.Name),
                 (newFileNameSb, renamePattern) =>
                 {
@@ -95,7 +97,7 @@ internal static class Renamer
                     newFileNameSb.Remove(match.Index, match.Length);
 
                     // Work out the replacement text that should be inserted.
-                    var insertText =
+                    string insertText =
                         match.Groups.OfType<Group>()
                              .Select((gr, i) =>
                              (

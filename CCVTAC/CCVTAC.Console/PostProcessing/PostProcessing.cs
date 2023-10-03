@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using CCVTAC.Console.Settings;
 using CCVTAC.Console.PostProcessing.Tagging;
+using System.Diagnostics;
 
 namespace CCVTAC.Console.PostProcessing;
 
@@ -19,13 +20,13 @@ public sealed class Setup
 
     internal void Run()
     {
-        var stopwatch = new System.Diagnostics.Stopwatch();
+        Stopwatch stopwatch = new();
         stopwatch.Start();
 
         Printer.Print("Starting post-processing...");
 
         var collectionJsonResult = GetCollectionJson(UserSettings.WorkingDirectory);
-        YouTubeCollectionJson.Root? collectionJson;
+        CollectionMetadata? collectionJson;
         if (collectionJsonResult.IsFailed)
         {
             Printer.Print($"No playlist or channel metadata found: {collectionJsonResult.Errors.First().Message}");
@@ -56,15 +57,15 @@ public sealed class Setup
         Printer.Print($"Post-processing done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
     }
 
-    internal Result<YouTubeCollectionJson.Root> GetCollectionJson(string workingDirectory)
+    internal Result<CollectionMetadata> GetCollectionJson(string workingDirectory)
     {
-        var regex = new Regex(@"(?<=\[)[\w\-]{20,}(?=\]\.info.json)"); // Assumes ID length > 20 chars.
+        Regex regex = new(@"(?<=\[)[\w\-]{20,}(?=\]\.info.json)"); // Assumes ID length > 20 chars.
 
         try
         {
             var fileNames = Directory.GetFiles(workingDirectory)
                                      .Where(f => regex.IsMatch(f))
-                                     .ToImmutableList();
+                                     .ToImmutableHashSet();
 
             if (fileNames.Count == 0)
             {
@@ -75,16 +76,10 @@ public sealed class Setup
                 return Result.Fail("Unexpectedly found more than one relevant file, so none will be processed.");
             }
 
-            var fileName = fileNames.Single();
-            var json = File.ReadAllText(fileName);
-            var parsedJson = JsonSerializer.Deserialize<YouTubeCollectionJson.Root>(json);
-
-            if (parsedJson is null)
-            {
-                return Result.Fail($"The parsed JSON from file \"{fileName}\" was unexpectedly null.");
-            }
-
-            return Result.Ok(parsedJson);
+            string fileName = fileNames.Single();
+            string json = File.ReadAllText(fileName);
+            var collectionData = JsonSerializer.Deserialize<CollectionMetadata>(json);
+            return Result.Ok(collectionData);
         }
         catch (Exception ex)
         {

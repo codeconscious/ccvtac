@@ -67,13 +67,13 @@ public sealed class UserSettings
     /// If the supplied video uploader is specified in the settings, returns the video's upload year.
     /// Otherwise, returns null.
     /// </summary>
-    public ushort? GetVideoUploadDateIfRegisteredUploader(YouTubeVideoJson.Root videoData)
+    public ushort? GetVideoUploadDateIfRegisteredUploader(VideoMetadata videoData)
     {
         return
             this.UseUploadYearUploaders?.Contains(videoData.Uploader,
                                                   StringComparer.OrdinalIgnoreCase) == true
             &&
-            ushort.TryParse(videoData.UploadDate[0..4], out var parsedYear)
+            ushort.TryParse(videoData.UploadDate[0..4], out ushort parsedYear)
                 ? parsedYear
                 : null;
     }

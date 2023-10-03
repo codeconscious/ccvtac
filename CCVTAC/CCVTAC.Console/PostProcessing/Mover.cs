@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
 
 namespace CCVTAC.Console.PostProcessing;
 
@@ -7,20 +8,21 @@ internal static class Mover
     internal static void Run(
         string workingDirectory,
         string moveToDirectory,
-        YouTubeCollectionJson.Root? collectionJson,
+        CollectionMetadata? maybeCollectionData,
         bool shouldOverwrite,
         Printer printer)
     {
-        var stopwatch = new System.Diagnostics.Stopwatch();
+        Stopwatch stopwatch = new();
         stopwatch.Start();
 
         uint successCount = 0;
         uint failureCount = 0;
-        var workingDirInfo = new DirectoryInfo(workingDirectory);
+        DirectoryInfo workingDirInfo = new(workingDirectory);
 
-        var verifiedMoveToDir = collectionJson is null
-            ? moveToDirectory
-            : Path.Combine(moveToDirectory, collectionJson.Title.ReplaceInvalidPathChars());
+        // Create a subdirectory if this is a collection (playlist or channel) download.
+        string verifiedMoveToDir = maybeCollectionData is CollectionMetadata collectionData
+            ? Path.Combine(moveToDirectory, collectionData.Title.ReplaceInvalidPathChars())
+            : moveToDirectory;
 
         try
         {
@@ -39,7 +41,7 @@ internal static class Mover
         }
 
         printer.Print($"Moving audio file(s) to \"{verifiedMoveToDir}\"...");
-        foreach (var file in workingDirInfo.EnumerateFiles("*.m4a"))
+        foreach (FileInfo file in workingDirInfo.EnumerateFiles("*.m4a"))
         {
             try
             {
@@ -74,7 +76,7 @@ internal static class Mover
     {
         string[] ignoreFiles = new[] { ".DS_Store" }; // Ignore macOS system files
 
-        var files = Directory.GetFiles(workingDirectory, "*")
+        var files = Directory.GetFiles(workingDirectory)
                              .Where(dirFile => !ignoreFiles.Any(ignoreFile => dirFile.EndsWith(ignoreFile)));
 
         if (files.Any())

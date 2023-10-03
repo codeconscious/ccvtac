@@ -89,9 +89,9 @@ public static class SettingsService
             if (createFileIfMissing && CreateIfMissing().IsFailed)
                 return Result.Fail($"Settings file \"{_settingsFileName}\" missing.");
 
-            var text = File.ReadAllText(_settingsFileName);
-            var settings = JsonSerializer.Deserialize<UserSettings>(text)
-                           ?? throw new JsonException();
+            string text = File.ReadAllText(_settingsFileName);
+            UserSettings settings = JsonSerializer.Deserialize<UserSettings>(text)
+                                    ?? throw new JsonException();
             return Result.Ok(settings);
         }
         catch (FileNotFoundException)
@@ -114,7 +114,7 @@ public static class SettingsService
     {
         try
         {
-            var json = JsonSerializer.Serialize(
+            string json = JsonSerializer.Serialize(
                 settings,
                 new JsonSerializerOptions
                 {
