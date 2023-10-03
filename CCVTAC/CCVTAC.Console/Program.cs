@@ -63,8 +63,7 @@ internal static class Program
             return;
         }
         UserSettings userSettings = settingsResult.Value;
-
-        SettingsService.PrintSummary(userSettings, printer, "Settings loaded OK:");
+        SettingsService.PrintSummary(userSettings, printer, "Settings loaded OK.");
 
         // TODO: Refactor with the similar code below and elsewhere.
         string[] ignoreFiles = new[] { ".DS_Store" }; // Ignore macOS system files

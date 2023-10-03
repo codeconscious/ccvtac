@@ -14,7 +14,7 @@ public static class SettingsService
     /// </summary>
     public static readonly string[] ValidAudioFormats =
         new string[] {
-            // "aac",
+            // "aac", // TODO: Determine if this and other commented formats are worth supporting.
             // "flac",
             "m4a", // Recommended for most or all videos since conversation is unnecessary.
             // "mp3",
