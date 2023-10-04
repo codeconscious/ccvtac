@@ -65,10 +65,12 @@ internal static class Program
         UserSettings userSettings = settingsResult.Value;
         SettingsService.PrintSummary(userSettings, printer, "Settings loaded OK.");
 
-        var tempFileCount = IoUtilties.Directories.DirectoryFileCount(userSettings.WorkingDirectory);
-        if (tempFileCount > 0)
+        // The working directory should be empty.
+        var tempFiles = IoUtilties.Directories.GetDirectoryFiles(userSettings.WorkingDirectory);
+        if (tempFiles.Any())
         {
-            printer.Error($"{tempFileCount} file(s) unexpectedly found in the working directory, so will abort.");
+            printer.Error($"{tempFiles.Count} file(s) unexpectedly found in the working directory, so will abort:");
+            tempFiles.ForEach(file => printer.Print($"• {file}"));
             return;
         }
 

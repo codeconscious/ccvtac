@@ -9,18 +9,14 @@ internal static class Directories
     /// </summary>
     /// <param name="workingDirectory"></param>
     /// <param name="customIgnoreFiles">An optional list of files to be excluded.</param>
-    internal static int DirectoryFileCount(
+    internal static ImmutableList<string> GetDirectoryFiles(
         string workingDirectory,
         IEnumerable<string>? customIgnoreFiles = null)
     {
-        HashSet<string> ignoreFiles = new() { ".DS_Store" }; // Ignore macOS system files
+        var ignoreFiles = customIgnoreFiles?.Distinct() ?? Enumerable.Empty<string>();
 
-        if (customIgnoreFiles?.Any() == true)
-        {
-            ignoreFiles.UnionWith(customIgnoreFiles);
-        }
-
-        return Directory.GetFiles(workingDirectory)
-                        .Count(dirFile => !ignoreFiles.Any(ignoreFile => dirFile.EndsWith(ignoreFile)));
+        return Directory.GetFiles(workingDirectory, "*", new EnumerationOptions())
+                        .Where(dirFile => !ignoreFiles.Any(ignoreFile => dirFile.EndsWith(ignoreFile)))
+                        .ToImmutableList();
     }
 }

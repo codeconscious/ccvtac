@@ -61,10 +61,15 @@ internal static class Mover
 
         printer.Print($"{successCount} file(s) moved in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
         if (failureCount > 0)
+        {
             printer.Warning($"However, {failureCount} file(s) could not be moved.");
+        }
 
-        int tempFileCount = IoUtilties.Directories.DirectoryFileCount(workingDirectory);
-        if (tempFileCount > 0)
-            printer.Warning($"{tempFileCount} file(s) unexpectedly remain in the working folder.");
+        var tempFiles = IoUtilties.Directories.GetDirectoryFiles(workingDirectory);
+        if (tempFiles.Any())
+        {
+            printer.Warning($"{tempFiles.Count} file(s) unexpectedly remain in the working folder:");
+            tempFiles.ForEach(file => printer.Print($"• {file}"));
+        }
     }
 }
