@@ -36,6 +36,11 @@ internal static class DetectionSchemeBank
             MatchGroupId.Second,
             SourceMetadataField.Title
         ),
+        new(
+            """(.+) ?⧸ ?(.+)(?= ：(?: \w+)?\.\w{3,4})""", // TITLE ⧸ ARTIST ：
+            MatchGroupId.First,
+            SourceMetadataField.Title
+        ),
     };
 
     internal static IReadOnlyList<DetectionScheme> Artist = new List<DetectionScheme>()
@@ -65,6 +70,11 @@ internal static class DetectionSchemeBank
         new(
             """^(.+?)「(.+)」""", // ARTIST「TITLE」 on one line
             MatchGroupId.First,
+            SourceMetadataField.Title
+        ),
+        new(
+            """(.+) ?⧸ ?(.+)(?= ：(?: \w+)?\.\w{3,4})""", // TITLE ⧸ ARTIST ：
+            MatchGroupId.Second,
             SourceMetadataField.Title
         ),
     };
