@@ -8,18 +8,13 @@ Feel free to use it yourself, but please do so responsibly. No warranties or gua
 
 - Converts YouTube videos to local M4A audio files (mostly thanks to [yt-dlp](https://github.com/yt-dlp/yt-dlp))
 - Supports video, playlist, and channel URLs
-- Adds video metadata (uploader name and URL, source URL, etc.) to Comment tags
-- ID3 tags are automatically written where possible
-- Renames files via specific regex patterns (to remove resource IDs, etc.)
-- Optionally auto-trims and writes video thumbnails to files as album art
-- Moves files to a specified directory
+- Adds formatted video metadata (uploader name and URL, source URL, etc.) to Comment tags
+- ID3 tags are automatically written where possible (via metadata or regex-based detection)
+- Auto-renames files via specified regex patterns (to remove resource IDs, etc.)
+- Optionally auto-trims and writes video thumbnails to files as album art (if [mogrify](https://imagemagick.org/script/mogrify.php) is installed)
+- Moves files to a specified output directory
 - Saves entered URLs locally to a history file
-- Allows customized behavior via a user settings file
-
-### TODOs and Ideas
-
-- Add audio normalization (I need to find a command line tool or NuGet package that works with M4A files)
-- Add a post-processing–only option for already-downloaded temporary files (via aborted downloads, etc.)
+- Allows for customized behavior (sleep times, etc.) via a user settings file
 
 ## Running It
 
@@ -33,6 +28,6 @@ Run the program with `dotnet run`. Pass `-h` or `--help` for the instructions.
 
 If your `settings.json` file does not exist, it will created in the application directory with default settings. At minimum, you will need to enter paths to two existing directories: (1) a working directory for temporary files and (2) the directory to which the final audio files should be moved. The other settings are optional.
 
-Once the program is running, simply enter a YouTube video, playlist, or channel URL at the prompt and press Enter.
+Once the program is running, simply enter at least one YouTube video, playlist, or channel URL at the prompt and press Enter.
 
-Recommended: Periodically ensure you're running the latest version of yt-dlp using `sudo yt-dlp -U` (or whatever command is appropriate for your system).
+Recommended: Periodically ensure you're running the latest version of yt-dlp using `sudo yt-dlp -U` (or whatever command is appropriate for your system), especially if you start experiencing download errors.
