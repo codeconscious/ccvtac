@@ -8,9 +8,9 @@ Features that I might consider as features or improvements in the future. Not al
 - Stop downloading if there are repeated errors from yt-dlp
 - Logging levels (current/full vs. light)
 - Logging to a file
+- JSON history that stores more data than just URLs (Or maybe the log file would be sufficient? If so, is the history file even needed? Maybe allow up-and-down scrolling through history?)
 - yt-dlp can handle tabs on YouTube channels too, so look into supporting those
 - Changing, saving, and reloading of settings while running the program
-- JSON history that stores more data than just URLs?
 - Save errors to a file with details
 - Possible to include yt-dlp as a binary? (Even if so, does it make sense to?)
 - Count generated files for final output

@@ -36,6 +36,11 @@ internal static class DetectionSchemeBank
             MatchGroupId.Second,
             SourceMetadataField.Title
         ),
+        new(
+            """(.+) ?⧸ ?(.+)(?= ：(?: \w+)?\.\w{3,4})""", // TITLE ⧸ ARTIST ：
+            MatchGroupId.First,
+            SourceMetadataField.Title
+        ),
     };
 
     internal static IReadOnlyList<DetectionScheme> Artist = new List<DetectionScheme>()
@@ -67,6 +72,11 @@ internal static class DetectionSchemeBank
             MatchGroupId.First,
             SourceMetadataField.Title
         ),
+        new(
+            """(.+) ?⧸ ?(.+)(?= ：(?: \w+)?\.\w{3,4})""", // TITLE ⧸ ARTIST ：
+            MatchGroupId.Second,
+            SourceMetadataField.Title
+        ),
     };
 
     internal static IReadOnlyList<DetectionScheme> Album = new List<DetectionScheme>()
@@ -87,6 +97,11 @@ internal static class DetectionSchemeBank
             MatchGroupId.Third,
             SourceMetadataField.Description,
             "pseudo-Topic style"
+        ),
+        new (
+            """(?<=アルバム[『「]).+(?=[」』])""", // アルバム「NAME」
+            MatchGroupId.Zero,
+            SourceMetadataField.Title
         ),
         new (
             """(?<='s ['"]).+(?=['"] album)""",
@@ -164,6 +179,11 @@ internal static class DetectionSchemeBank
             """(?<=\(C\)\s|\(C\))[12]\d{3}""", // (C) 2000
             MatchGroupId.Zero,
             SourceMetadataField.Description
+        ),
+        new (
+            """^(.+?)「(.+)」\s?([12]\d{3})\s?""", // ARTIST「TITLE」YEAR
+            MatchGroupId.Third,
+            SourceMetadataField.Title
         )
     };
 }

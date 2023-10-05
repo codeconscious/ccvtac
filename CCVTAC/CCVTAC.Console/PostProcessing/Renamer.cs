@@ -7,11 +7,12 @@ namespace CCVTAC.Console.PostProcessing;
 
 internal static class Renamer
 {
-    private record struct RenamePattern(Regex Regex, string ReplaceWithPattern, string Description);
+    private record struct RenamePattern(Regex Regex, string ReplaceWithPattern, string? Description = null);
 
     // TODO: Convert this into a setting.
     private static readonly IReadOnlyList<RenamePattern> RenamePatterns = new List<RenamePattern>()
     {
+        // Universal, to always be run first.
         new(
             new Regex(@"\s\[[\w_-]{11}\](?=\.\w{3,5})"),
             string.Empty,
@@ -20,6 +21,7 @@ internal static class Renamer
             new Regex(@"\s{2,}"),
             " ",
             "Remove extra spaces"),
+        // Various patterns
         new(
             new Regex(@"(?<= - )\d{3} (\d{1,3})\.?\s?"),
             "%<1>s - ",
@@ -60,6 +62,15 @@ internal static class Renamer
             new Regex(@"^(.+?)(?: - [｢「『【])(.+)(?:[」｣』】]).*(?=（Full Ver.）)"),
             "%<1>s - %<2>s",
             "Reformat 'ARTIST - \'TITLE\' ]'"),
+        new(
+            new Regex(@"(\d+) - \[(feat.+)\] (.+) ⧸ (.+)(?=\.\w{3,4})"),
+            "%<4>s - %<4>s - %<1>s - %<3>s (%<2>s)"
+        ),
+        new(
+            new Regex(@"(.+) ?⧸ ?(.+)(?= ：(?: \w+)?\.\w{3,4})"),
+            "%<2>s - %<1>s"
+        ),
+        // Cleanup:
         new(
             new Regex(@" - - "),
             " - ",
