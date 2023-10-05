@@ -70,7 +70,7 @@ internal static class Program
         if (tempFiles.Any())
         {
             printer.Error($"{tempFiles.Count} file(s) unexpectedly found in the working directory, so will abort:");
-            tempFiles.ForEach(file => printer.Print($"• {file}"));
+            tempFiles.ForEach(file => printer.Warning($"• {file}"));
             return;
         }
 
@@ -91,11 +91,11 @@ internal static class Program
     /// <summary>
     /// Processes a single user request, from input to downloading and file post-processing.
     /// </summary>
-    /// <param name="settings"></param>
+    /// <param name="userSettings"></param>
     /// <param name="resultHandler"></param>
     /// <param name="printer"></param>
     /// <returns>A bool indicating whether to quit the program (true) or continue (false).</returns>
-    private static NextAction ProcessBatch(UserSettings settings, ResultTracker resultHandler, Printer printer)
+    private static NextAction ProcessBatch(UserSettings userSettings, ResultTracker resultHandler, Printer printer)
     {
         string userInput = printer.GetInput(_inputPrompt);
 
@@ -124,29 +124,30 @@ internal static class Program
                 return NextAction.QuitAtUserRequest;
             }
 
-            // TODO: Refactor with the similar code above.
-            if (Directory.GetFiles(settings.WorkingDirectory).Any())
+            var tempFiles = IoUtilties.Directories.GetDirectoryFiles(userSettings.WorkingDirectory);
+            if (tempFiles.Any())
             {
-                printer.Error("There are unexpectedly files in the working directory, so will abort.");
+                printer.Error($"{tempFiles.Count} file(s) unexpectedly found in the working directory, so will abort:");
+                tempFiles.ForEach(file => printer.Warning($"• {file}"));
                 return NextAction.QuitDueToErrors;
             }
 
             if (haveProcessedAny) // No need to sleep for the very first URL.
             {
                 AnsiConsole.Status()
-                    .Start($"Sleeping for {settings.SleepSecondsBetweenBatches} seconds...", ctx =>
+                    .Start($"Sleeping for {userSettings.SleepSecondsBetweenBatches} seconds...", ctx =>
                     {
                         ctx.Spinner(Spinner.Known.Star);
                         ctx.SpinnerStyle(Style.Parse("blue"));
 
-                        ushort remainingSeconds = settings.SleepSecondsBetweenBatches;
+                        ushort remainingSeconds = userSettings.SleepSecondsBetweenBatches;
                         while (remainingSeconds > 0)
                         {
                             ctx.Status($"Sleeping for {remainingSeconds} seconds...");
                             remainingSeconds--;
                             Thread.Sleep(1000);
                         }
-                        printer.Print($"Slept for {settings.SleepSecondsBetweenBatches} second(s).",
+                        printer.Print($"Slept for {userSettings.SleepSecondsBetweenBatches} second(s).",
                                       appendLines: 1);
                     });
             }
@@ -161,7 +162,7 @@ internal static class Program
             Stopwatch jobStopwatch = new();
             jobStopwatch.Start();
 
-            var downloadResult = Downloading.Downloader.Run(url, settings, printer);
+            var downloadResult = Downloading.Downloader.Run(url, userSettings, printer);
             resultHandler.RegisterResult(downloadResult);
             if (downloadResult.IsFailed)
             {
@@ -170,7 +171,7 @@ internal static class Program
 
             History.Append(url, printer);
 
-            var postProcessor = new PostProcessing.Setup(settings, printer);
+            var postProcessor = new PostProcessing.Setup(userSettings, printer);
             postProcessor.Run(); // TODO: Think about if/how to handle leftover temp files due to errors.
 
             string batchClause = batchUrls.Count > 1
