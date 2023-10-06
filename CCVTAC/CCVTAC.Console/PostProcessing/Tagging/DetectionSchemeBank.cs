@@ -160,6 +160,12 @@ internal static class DetectionSchemeBank
             "'year first'-style year"
         ),
         new (
+            """[12]\d{3}(?=年(?:\d{1,2}月\d{1,2}日)?(?:配信)?リリース)""",
+            MatchGroupId.Zero,
+            SourceMetadataField.Description,
+            "YEAR年MONTH月DATE日配信リリース, YEAR年配信リリース, YEAR年リリース"
+        ),
+        new (
             """[12]\d{3}年(?=\d{1,2}月\d{1,2}日\s?[Rr]elease)""",
             MatchGroupId.Zero,
             SourceMetadataField.Description,
