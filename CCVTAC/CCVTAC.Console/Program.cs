@@ -74,18 +74,18 @@ internal static class Program
             return;
         }
 
-        ResultTracker resultCounter = new(printer);
+        ResultTracker resultTracker = new(printer);
 
         while (true)
         {
-            NextAction nextAction = ProcessBatch(userSettings, resultCounter, printer);
+            NextAction nextAction = ProcessBatch(userSettings, resultTracker, printer);
             if (nextAction != NextAction.Continue)
             {
                 break;
             }
         }
 
-        resultCounter.PrintFinalSummary();
+        resultTracker.PrintFinalSummary();
     }
 
     /// <summary>
