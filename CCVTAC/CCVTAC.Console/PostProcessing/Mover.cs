@@ -61,27 +61,15 @@ internal static class Mover
 
         printer.Print($"{successCount} file(s) moved in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
         if (failureCount > 0)
-            printer.Warning($"However, {failureCount} file(s) could not be moved.");
-
-        WarnAboutOrphanedWorkingFiles(workingDirectory, printer);
-    }
-
-    /// <summary>
-    /// If the working directory contains files when it is expected to be empty,
-    /// then shows a warning message to the user.
-    /// </summary>
-    /// <param name="workingDirectory"></param>
-    /// <param name="printer"></param>
-    private static void WarnAboutOrphanedWorkingFiles(string workingDirectory, Printer printer)
-    {
-        string[] ignoreFiles = new[] { ".DS_Store" }; // Ignore macOS system files
-
-        var files = Directory.GetFiles(workingDirectory)
-                             .Where(dirFile => !ignoreFiles.Any(ignoreFile => dirFile.EndsWith(ignoreFile)));
-
-        if (files.Any())
         {
-            printer.Warning($"{files.Count()} file(s) unexpectedly remain in the working folder.");
+            printer.Warning($"However, {failureCount} file(s) could not be moved.");
+        }
+
+        var tempFiles = IoUtilties.Directories.GetDirectoryFiles(workingDirectory);
+        if (tempFiles.Any())
+        {
+            printer.Warning($"{tempFiles.Count} file(s) unexpectedly remain in the working folder:");
+            tempFiles.ForEach(file => printer.Print($"• {file}"));
         }
     }
 }

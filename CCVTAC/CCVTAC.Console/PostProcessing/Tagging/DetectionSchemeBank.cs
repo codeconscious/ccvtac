@@ -99,6 +99,11 @@ internal static class DetectionSchemeBank
             "pseudo-Topic style"
         ),
         new (
+            """(?<=アルバム[『「]).+(?=[」』])""", // アルバム「NAME」
+            MatchGroupId.Zero,
+            SourceMetadataField.Title
+        ),
+        new (
             """(?<='s ['"]).+(?=['"] album)""",
             MatchGroupId.Zero,
             SourceMetadataField.Description
@@ -174,6 +179,11 @@ internal static class DetectionSchemeBank
             """(?<=\(C\)\s|\(C\))[12]\d{3}""", // (C) 2000
             MatchGroupId.Zero,
             SourceMetadataField.Description
+        ),
+        new (
+            """^(.+?)「(.+)」\s?([12]\d{3})\s?""", // ARTIST「TITLE」YEAR
+            MatchGroupId.Third,
+            SourceMetadataField.Title
         )
     };
 }
