@@ -32,7 +32,7 @@ public static class YouTubeJsonExtensionMethods
         System.Text.StringBuilder sb = new();
         sb.AppendLine("CCVTAC SOURCE DATA:");
         sb.AppendLine($"• Downloaded: {DateTime.Now}");
-        sb.AppendLine($"• Service: {videoData.ExtractorKey}");
+        // sb.AppendLine($"• Service: {videoData.ExtractorKey}");
         sb.AppendLine($"• URL: {videoData.WebpageUrl}");
         sb.AppendLine($"• Title: {videoData.Fulltitle}");
         sb.AppendLine($"• Uploader: {videoData.UploaderSummary()}");
