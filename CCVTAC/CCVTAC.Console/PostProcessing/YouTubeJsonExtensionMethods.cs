@@ -30,9 +30,10 @@ public static class YouTubeJsonExtensionMethods
     public static string GenerateComment(this VideoMetadata videoData, CollectionMetadata? maybeCollectionData)
     {
         System.Text.StringBuilder sb = new();
+
         sb.AppendLine("CCVTAC SOURCE DATA:");
         sb.AppendLine($"• Downloaded: {DateTime.Now}");
-        // sb.AppendLine($"• Service: {videoData.ExtractorKey}");
+        // sb.AppendLine($"• Service: {videoData.ExtractorKey}"); // "Youtube"
         sb.AppendLine($"• URL: {videoData.WebpageUrl}");
         sb.AppendLine($"• Title: {videoData.Fulltitle}");
         sb.AppendLine($"• Uploader: {videoData.UploaderSummary()}");
@@ -41,6 +42,8 @@ public static class YouTubeJsonExtensionMethods
             sb.AppendLine($"• Creator: {videoData.Creator}");
         }
         sb.AppendLine($"• Uploaded: {videoData.FormattedUploadDate()}");
+        var description = string.IsNullOrWhiteSpace(videoData.Description) ? "None." : videoData.Description;
+        sb.AppendLine($"• Video description: {description}");
         if (maybeCollectionData is CollectionMetadata collectionData)
         {
             sb.AppendLine($"• Playlist name: {collectionData.Title}");
@@ -51,8 +54,7 @@ public static class YouTubeJsonExtensionMethods
                 sb.AppendLine($"• Playlist description: {collectionData.Description}");
             }
         }
-        var description = string.IsNullOrWhiteSpace(videoData.Description) ? "None." : videoData.Description;
-        sb.AppendLine($"• Video description: {description}");
+
         return sb.ToString();
     }
 }
