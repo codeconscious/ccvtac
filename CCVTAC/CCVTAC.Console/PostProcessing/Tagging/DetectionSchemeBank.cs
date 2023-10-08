@@ -37,7 +37,7 @@ internal static class DetectionSchemeBank
             SourceMetadataField.Title
         ),
         new(
-            """(.+) ?⧸ ?(.+)(?= ：(?: \w+)?\.\w{3,4})""", // TITLE ⧸ ARTIST ：
+            """(.+) ?⧸ ?(.+)(?= ?：(?: \w+)?\.\w{3,4})""", // TITLE ⧸ ARTIST ：
             MatchGroupId.First,
             SourceMetadataField.Title
         ),
@@ -102,6 +102,11 @@ internal static class DetectionSchemeBank
             """(?<=アルバム[『「]).+(?=[」』])""", // アルバム「NAME」
             MatchGroupId.Zero,
             SourceMetadataField.Title
+        ),
+        new (
+            """(?<=EP[『「]).+(?=[」』]収録)""", // EP「NAME」収録
+            MatchGroupId.Zero,
+            SourceMetadataField.Description
         ),
         new (
             """(?<='s ['"]).+(?=['"] album)""",
