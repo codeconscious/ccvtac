@@ -46,6 +46,11 @@ internal static class DetectionSchemeBank
             MatchGroupId.Second,
             SourceMetadataField.Title
         ),
+        new(
+            """^【(.+)】(.+)$""", // 【ARTIST】TITLE
+            MatchGroupId.Second,
+            SourceMetadataField.Title
+        ),
     };
 
     internal static IReadOnlyList<DetectionScheme> Artist = new List<DetectionScheme>()
@@ -84,6 +89,11 @@ internal static class DetectionSchemeBank
         ),
         new(
             """(.+) ⧸ (.+)(?=\.m4a)""", // ARTIST ⧸ TITLE
+            MatchGroupId.First,
+            SourceMetadataField.Title
+        ),
+        new(
+            """^【(.+)】(.+)$""", // 【ARTIST】TITLE
             MatchGroupId.First,
             SourceMetadataField.Title
         ),
@@ -129,7 +139,7 @@ internal static class DetectionSchemeBank
             SourceMetadataField.Description
         ),
         new (
-            """(?<=^\w{3}アルバム『).+(?=』)""",
+            """(?<=\w{3}アルバム『).+(?=』)""",
             MatchGroupId.Zero,
             SourceMetadataField.Description
         ),
@@ -157,9 +167,15 @@ internal static class DetectionSchemeBank
             SourceMetadataField.Title
         ),
         new (
-            """(?<=℗ )[12]\d{3}(?=\s)""",
+            """(?<=℗ )[12]\d{3}""",
             MatchGroupId.Zero,
             SourceMetadataField.Description,
+            "℗\" symbol"
+        ),
+        new (
+            """(?<=℗ )[12]\d{3}""",
+            MatchGroupId.Zero,
+            SourceMetadataField.Title,
             "℗\" symbol"
         ),
         new (
