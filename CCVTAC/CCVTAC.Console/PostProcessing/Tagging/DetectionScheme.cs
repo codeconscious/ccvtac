@@ -36,10 +36,10 @@ internal record struct DetectionScheme
     /// <param name="sourceField">The video metadata field to attempt searching in.</param>
     /// <param name="note">An optional memo about the match pattern.</param>
     internal DetectionScheme(
-        string      regexPattern,
-        MatchGroupId  groupNumber,
+        string regexPattern,
+        MatchGroupId groupNumber,
         SourceMetadataField sourceField,
-        string?     note = null
+        string? note = null
     )
     {
         Regex = new Regex(regexPattern, RegexOptions.None);
