@@ -209,7 +209,7 @@ internal static class Tagger
     {
         // If there is only one file, then there are no child files, so no action is necessary.
         // (Two files should never happen, but might be worth thinking about how to handle that.)
-        if (taggingSet.AudioFilePaths.Count() <= 1)
+        if (taggingSet.AudioFilePaths.Count <= 1)
         {
             return taggingSet;
         }
