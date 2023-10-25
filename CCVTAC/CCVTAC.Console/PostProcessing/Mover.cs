@@ -5,12 +5,11 @@ namespace CCVTAC.Console.PostProcessing;
 
 internal static class Mover
 {
-    internal static void Run(
-        string workingDirectory,
-        string moveToDirectory,
-        CollectionMetadata? maybeCollectionData,
-        bool shouldOverwrite,
-        Printer printer)
+    internal static void Run(string workingDirectory,
+                             string moveToDirectory,
+                             CollectionMetadata? maybeCollectionData,
+                             bool shouldOverwrite,
+                             Printer printer)
     {
         Stopwatch stopwatch = new();
         stopwatch.Start();
@@ -21,23 +20,25 @@ internal static class Mover
 
         // Create a subdirectory if this is a collection (playlist or channel) download.
         string verifiedMoveToDir = maybeCollectionData is CollectionMetadata collectionData
-            ? Path.Combine(moveToDirectory, collectionData.Title.ReplaceInvalidPathChars())
+            ? Path.Combine(
+                moveToDirectory,
+                $"{collectionData.Uploader} - {collectionData.Title}".ReplaceInvalidPathChars())
             : moveToDirectory;
 
         try
         {
             if (!Path.Exists(verifiedMoveToDir))
             {
-                printer.Print($"Creating custom move-to directory \"{verifiedMoveToDir}\" (based on playlist name)... ", appendLineBreak: false);
+                printer.Print($"Creating move-to directory \"{verifiedMoveToDir}\" (based on playlist metadata)... ",
+                              appendLineBreak: false);
                 Directory.CreateDirectory(verifiedMoveToDir);
                 printer.Print("OK!");
             }
         }
         catch (Exception ex)
         {
-            printer.Error($"Error creating directory \"{verifiedMoveToDir}\": {ex.Message}");
-            printer.Warning($"Using default move-to directory \"{moveToDirectory}\" instead");
-            verifiedMoveToDir = moveToDirectory;
+            printer.Error($"Error creating move-to directory \"{verifiedMoveToDir}\": {ex.Message}");
+            throw;
         }
 
         printer.Print($"Moving audio file(s) to \"{verifiedMoveToDir}\"...");
