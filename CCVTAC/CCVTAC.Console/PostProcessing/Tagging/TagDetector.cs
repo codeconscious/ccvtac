@@ -30,10 +30,10 @@ internal class TagDetector
 
     internal ushort? DetectReleaseYear(VideoMetadata videoData, ushort? defaultYear)
     {
-        ushort output = Detectors.DetectSingle<ushort>(videoData, DetectionSchemeBank.Year, default);
+        ushort detectedYear = Detectors.DetectSingle<ushort>(videoData, DetectionSchemeBank.Year, default);
 
-        return output is default(ushort) // The default ushort value indicates no match was found.
+        return detectedYear is default(ushort) // The default ushort value indicates no match was found.
             ? defaultYear
-            : output;
+            : detectedYear;
     }
 }
