@@ -28,7 +28,7 @@ internal class TagDetector
         return Detectors.DetectMultiple<string>(videoData, DetectionSchemeBank.Composers, null, "; ");
     }
 
-    internal ushort? DetectReleaseYear(VideoMetadata videoData, ushort? defaultYear = null)
+    internal ushort? DetectReleaseYear(VideoMetadata videoData, ushort? defaultYear)
     {
         ushort output = Detectors.DetectSingle<ushort>(videoData, DetectionSchemeBank.Year, default);
 

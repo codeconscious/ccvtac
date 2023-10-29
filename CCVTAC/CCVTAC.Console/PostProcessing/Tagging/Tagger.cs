@@ -149,13 +149,13 @@ internal static class Tagger
             }
             else
             {
-                ushort? defaultYear = userSettings.GetVideoUploadDateIfRegisteredUploader(videoData);
-                if (defaultYear is not null)
+                ushort? maybeDefaultYear = userSettings.GetAppropriateReleaseDateIfAny(videoData);
+                if (maybeDefaultYear is not null)
                 {
-                    printer.Print($"Will use upload year {defaultYear} for uploader \"{videoData.Uploader}\" if no other year is detected.");
+                    printer.Print($"Will use video upload year \"{maybeDefaultYear}\" by default no other is detected.");
                 }
 
-                if (tagDetector.DetectReleaseYear(videoData, defaultYear) is ushort year)
+                if (tagDetector.DetectReleaseYear(videoData, maybeDefaultYear) is ushort year)
                 {
                     printer.Print($"• Found year \"{year}\"");
                     taggedFile.Tag.Year = year;
