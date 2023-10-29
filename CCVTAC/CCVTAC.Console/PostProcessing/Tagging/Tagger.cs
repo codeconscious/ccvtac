@@ -150,10 +150,6 @@ internal static class Tagger
             else
             {
                 ushort? maybeDefaultYear = userSettings.GetAppropriateReleaseDateIfAny(videoData);
-                if (maybeDefaultYear is not null)
-                {
-                    printer.Print($"Will use video upload year \"{maybeDefaultYear}\" by default no other is detected.");
-                }
 
                 if (tagDetector.DetectReleaseYear(videoData, maybeDefaultYear) is ushort year)
                 {
