@@ -19,7 +19,8 @@ internal static class Mover
         DirectoryInfo workingDirInfo = new(workingDirectory);
 
         // Create a subdirectory if this is a collection (playlist or channel) download.
-        string verifiedMoveToDir = maybeCollectionData is CollectionMetadata collectionData
+        string verifiedMoveToDir = maybeCollectionData is CollectionMetadata collectionData &&
+                                   !string.IsNullOrWhiteSpace(collectionData.Uploader)
             ? Path.Combine(
                 moveToDirectory,
                 $"{collectionData.Uploader} - {collectionData.Title}".ReplaceInvalidPathChars())
