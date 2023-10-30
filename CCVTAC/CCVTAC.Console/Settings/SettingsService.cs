@@ -32,8 +32,8 @@ public static class SettingsService
                 $"{settings.SleepSecondsBetweenDownloads} {PluralizeIfNeeded("second", settings.SleepSecondsBetweenDownloads)}"
             },
             {
-                $"Use-upload-year channels",
-                $"{settings.UseUploadYearUploaders?.Length.ToString() ?? "no"} {PluralizeIfNeeded("channel", settings.UseUploadYearUploaders?.Length ?? 0)}"
+                $"Ignore-upload-year channels",
+                $"{settings.IgnoreUploadYearUploaders?.Length.ToString() ?? "no"} {PluralizeIfNeeded("channel", settings.IgnoreUploadYearUploaders?.Length ?? 0)}"
             },
             { "Working directory", settings.WorkingDirectory },
             { "Move-to directory", settings.MoveToDirectory },

@@ -58,24 +58,25 @@ public sealed class UserSettings
 
     /// <summary>
     /// A list of uploader names for whom the video upload dates' year value
-    /// can be used at the video's release year. It should contain channel names.
-    /// Case can be ignored.
+    /// should not be used at the video's release year. It should contain channel names.
     /// </summary>
-    [JsonPropertyName("useUploadYearUploaders")]
-    public string[]? UseUploadYearUploaders { get; init; }
+    [JsonPropertyName("ignoreUploadYearUploaders")]
+    public string[]? IgnoreUploadYearUploaders { get; init; }
 
     /// <summary>
     /// If the supplied video uploader is specified in the settings, returns the video's upload year.
     /// Otherwise, returns null.
     /// </summary>
-    public ushort? GetVideoUploadDateIfRegisteredUploader(VideoMetadata videoData)
+    public ushort? GetAppropriateReleaseDateIfAny(VideoMetadata videoData)
     {
-        return
-            this.UseUploadYearUploaders?.Contains(videoData.Uploader,
-                                                  StringComparer.OrdinalIgnoreCase) == true
-            &&
-            ushort.TryParse(videoData.UploadDate[0..4], out ushort parsedYear)
-                ? parsedYear
-                : null;
+        if (this.IgnoreUploadYearUploaders?.Contains(videoData.Uploader,
+                                                     StringComparer.OrdinalIgnoreCase) == true)
+        {
+            return null;
+        }
+
+        return ushort.TryParse(videoData.UploadDate[0..4], out ushort parsedYear)
+            ? parsedYear
+            : null;
     }
 }
