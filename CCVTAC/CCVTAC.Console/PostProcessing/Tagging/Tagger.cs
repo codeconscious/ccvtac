@@ -9,6 +9,7 @@ namespace CCVTAC.Console.PostProcessing.Tagging;
 internal static class Tagger
 {
     internal static Result<string> Run(UserSettings userSettings,
+                                       IEnumerable<TaggingSet> taggingSets,
                                        CollectionMetadata? collectionJson,
                                        Printer printer)
     {
@@ -17,39 +18,12 @@ internal static class Tagger
         Stopwatch stopwatch = new();
         stopwatch.Start();
 
-        var taggingSetsResult = GenerateTaggingSets(userSettings.WorkingDirectory);
-        if (taggingSetsResult.IsFailed)
-        {
-            return Result.Fail("No tagging sets were generated, so tagging cannot be done.");
-        }
-
-        foreach (TaggingSet taggingSet in taggingSetsResult.Value)
+        foreach (TaggingSet taggingSet in taggingSets)
         {
             ProcessSingleTaggingSet(userSettings, taggingSet, collectionJson, printer);
         }
 
         return Result.Ok($"Tagging done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
-    }
-
-    private static Result<ImmutableList<TaggingSet>> GenerateTaggingSets(string directory)
-    {
-        try
-        {
-            string[] allFiles = Directory.GetFiles(directory);
-            ImmutableList<TaggingSet> taggingSets = TaggingSet.CreateTaggingSets(allFiles); // TODO: Refactor? 名がこのメソッドと被りすぎている。
-
-            return taggingSets is not null && taggingSets.Any()
-                ? Result.Ok(taggingSets)
-                : Result.Fail($"No tagging sets were created using working directory \"{directory}\".");
-        }
-        catch (DirectoryNotFoundException)
-        {
-            return Result.Fail($"Directory \"{directory}\" does not exist.");
-        }
-        catch (Exception ex)
-        {
-            return Result.Fail($"Error reading working directory files: {ex.Message}");
-        }
     }
 
     private static void ProcessSingleTaggingSet(
@@ -58,9 +32,9 @@ internal static class Tagger
         CollectionMetadata? collectionJson,
         Printer printer)
     {
-        printer.Print($"{taggingSet.AudioFilePaths.Count()} audio file(s) with resource ID \"{taggingSet.ResourceId}\"");
+        printer.Print($"{taggingSet.AudioFilePaths.Count} audio file(s) with resource ID \"{taggingSet.ResourceId}\"");
 
-        var parsedJsonResult = GetParsedJson(taggingSet);
+        var parsedJsonResult = GetParsedVideoJson(taggingSet);
         if (parsedJsonResult.IsFailed)
         {
             printer.Errors(parsedJsonResult);
@@ -171,7 +145,7 @@ internal static class Tagger
         }
     }
 
-    static Result<VideoMetadata> GetParsedJson(TaggingSet taggingSet)
+    static Result<VideoMetadata> GetParsedVideoJson(TaggingSet taggingSet)
     {
         string json;
         try

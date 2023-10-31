@@ -26,5 +26,12 @@ internal static class Deleter
         }
 
         printer.Print("Deletion completed OK.");
+
+        var tempFiles = IoUtilties.Directories.GetDirectoryFiles(workingDirectory);
+        if (tempFiles.Any())
+        {
+            printer.Warning($"{tempFiles.Count} file(s) unexpectedly remain in the working folder:");
+            tempFiles.ForEach(file => printer.Print($"• {file}"));
+        }
     }
 }

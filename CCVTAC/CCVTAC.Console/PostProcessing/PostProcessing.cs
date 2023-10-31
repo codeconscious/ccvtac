@@ -25,6 +25,14 @@ public sealed class Setup
 
         Printer.Print("Starting post-processing...");
 
+        var taggingSetsResult = GenerateTaggingSets(UserSettings.WorkingDirectory);
+        if (taggingSetsResult.IsFailed)
+        {
+            Printer.Error("No tagging sets were generated, so tagging cannot be done.");
+            return;
+        }
+        var taggingSets = taggingSetsResult.Value;
+
         var collectionJsonResult = GetCollectionJson(UserSettings.WorkingDirectory);
         CollectionMetadata? collectionJson;
         if (collectionJsonResult.IsFailed)
@@ -39,15 +47,15 @@ public sealed class Setup
 
         ImageProcessor.Run(UserSettings.WorkingDirectory, Printer);
 
-        var tagResult = Tagger.Run(UserSettings, collectionJson, Printer);
+        var tagResult = Tagger.Run(UserSettings, taggingSets, collectionJson, Printer);
         if (tagResult.IsSuccess)
         {
             Printer.Print(tagResult.Value);
 
             // AudioNormalizer.Run(UserSettings.WorkingDirectory, Printer); // TODO: `mp3gain`は無理なので、別のnormalize方法を要検討。
             Renamer.Run(UserSettings.WorkingDirectory, Printer);
+            Mover.Run(UserSettings.WorkingDirectory, UserSettings.MoveToDirectory, taggingSets, collectionJson, true, Printer);
             Deleter.Run(UserSettings.WorkingDirectory, Printer);
-            Mover.Run(UserSettings.WorkingDirectory, UserSettings.MoveToDirectory, collectionJson, true, Printer);
         }
         else
         {
@@ -84,6 +92,27 @@ public sealed class Setup
         catch (Exception ex)
         {
             return Result.Fail($"{ex.Message}");
+        }
+    }
+
+    private static Result<ImmutableList<TaggingSet>> GenerateTaggingSets(string directory)
+    {
+        try
+        {
+            string[] allFiles = Directory.GetFiles(directory);
+            ImmutableList<TaggingSet> taggingSets = TaggingSet.CreateTaggingSets(allFiles); // TODO: Refactor? 名がこのメソッドと被りすぎている。
+
+            return taggingSets is not null && taggingSets.Any()
+                ? Result.Ok(taggingSets)
+                : Result.Fail($"No tagging sets were created using working directory \"{directory}\".");
+        }
+        catch (DirectoryNotFoundException)
+        {
+            return Result.Fail($"Directory \"{directory}\" does not exist.");
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail($"Error reading working directory files: {ex.Message}");
         }
     }
 }
