@@ -6,21 +6,25 @@ Feel free to use it yourself, but please do so responsibly. No warranties or gua
 
 ## Features
 
-- Converts YouTube videos to local M4A audio files (mostly thanks to [yt-dlp](https://github.com/yt-dlp/yt-dlp))
+- Converts YouTube videos to local M4A audio files (via [yt-dlp](https://github.com/yt-dlp/yt-dlp))
 - Supports video, playlist, and channel URLs
-- Adds formatted video metadata (uploader name and URL, source URL, etc.) to Comment tags
-- ID3 tags are automatically written where possible (via metadata or regex-based detection)
+- Adds video metadata (channel name, channel URL, video URL, etc.) summary to Comment tags
+- ID3 tags (artists, title, etc.) are automatically written where possible (via metadata or regex-based detection)
 - Auto-renames files via specified regex patterns (to remove resource IDs, etc.)
 - Optionally auto-trims and writes video thumbnails to files as album art (if [mogrify](https://imagemagick.org/script/mogrify.php) is installed)
-- Moves files to a specified output directory
+- Customizes behavior via a user settings file
+  - Optionally split video chapters
+  - Specify the working directory for temporary files
+  - Specify an output directory for final audio files
+  - List channels for whom video upload years should _not_ be added to the tags' Year field (Adding years is the default behavior)
+  - Sleep times between batches (multiple URLs entered at once) and individual video downloads
 - Saves entered URLs locally to a history file
-- Allows for customized behavior (sleep times, etc.) via a user settings file
 
 ## Running It
 
 Prerequisites:
 
-- .NET 7 (until I perhaps get some proper releases ready)
+- .NET 7 (until I perhaps get some proper releases ready, likely once .NET 8 is released)
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp)
 - Optional: [mogrify](https://imagemagick.org/script/mogrify.php) (for auto-trimming album art)
 
