@@ -158,6 +158,10 @@ public static class SettingsService
         }
     }
 
+    /// <summary>
+    /// Ensure the mandatory settings are present and valid.
+    /// </summary>
+    /// <returns>A Result indicating success or failure.</returns>
     private static Result EnsureValidSettings(UserSettings settings)
     {
         List<string> errors = new();
