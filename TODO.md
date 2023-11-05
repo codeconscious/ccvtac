@@ -13,8 +13,8 @@ Features that I might consider as features or improvements in the future. Not al
 - Save errors to a file with details
 - Possible to include yt-dlp as a binary? (Even if so, does it make sense to?)
 - Count generated files for final output
-- Don't show Topic urls in tag comments because they are empty (Double-check this)
-- Set up actual releases
+- Set up actual releases (likely once .NET 8 is released)
+- When a video URL also contains a playlist ID, download the playlist JSON and add it to the tags
 - Add audio normalization, maybe (I need to find a command line tool or NuGet package that works with M4A files)
 
 ## Rejected
