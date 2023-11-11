@@ -5,19 +5,12 @@ namespace CCVTAC.Console.Downloading.DownloadEntities;
 public interface IDownloadEntity
 {
     public DownloadType Type { get; }
-    public static Regex Regex { get; } = new("");
-    public static string UrlBase { get; } = string.Empty;
-    public string ResourceId { get; }
+    public static IEnumerable<Regex> Regexes { get; } = Enumerable.Empty<Regex>();
 
-    public string FullResourceUrl => UrlBase + ResourceId;
+    public ResourceUrlSet PrimaryResource { get; init; }
+    public ResourceUrlSet? SupplementaryResource { get; init; }
 
     public static bool IsMatch(string input) =>
-        input is not null && Regex.IsMatch(input);
-}
-
-public enum DownloadType
-{
-    Video,
-    Playlist,
-    Channel
+        input is not null &&
+        Regexes.Any(r => r.IsMatch(input));
 }

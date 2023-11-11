@@ -14,7 +14,7 @@ Features that I might consider as features or improvements in the future. Not al
 - Possible to include yt-dlp as a binary? (Even if so, does it make sense to?)
 - Count generated files for final output
 - Set up actual releases (likely once .NET 8 is released)
-- When a video URL also contains a playlist ID, download the playlist JSON and add it to the tags
+- When a video URL also contains a playlist ID, download the playlist JSON and add its info to the tags
 - Add audio normalization, maybe (I need to find a command line tool or NuGet package that works with M4A files)
 
 ## Rejected

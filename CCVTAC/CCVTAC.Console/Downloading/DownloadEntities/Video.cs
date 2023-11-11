@@ -4,15 +4,26 @@ namespace CCVTAC.Console.Downloading.DownloadEntities;
 
 public sealed class Video : IDownloadEntity
 {
-    public static Regex Regex => new(@"^[\w-]{11}$|(?<=v=|v\\=)[\w-]{11}|(?<=youtu\.be/).{11}");
+    public static IEnumerable<Regex> Regexes => new List<Regex>
+    {
+        new("""^([\w-]{11})$"""),
+        new("""(?<=v=|v\\=)([\w-]{11})"""),
+        new("""(?<=youtu\.be/)(.{11})""")
+    };
+
     public static string UrlBase => "https://www.youtube.com/watch?v=";
 
     public DownloadType Type => DownloadType.Video;
-    public string ResourceId { get; init; }
-    public string FullResourceUrl => UrlBase + ResourceId;
+
+    // public string ResourceId { get; init; }
+    // public string? SecondaryResourceId { get; }
+    // public string FullResourceUrl => UrlBase + ResourceId;
+
+    public ResourceUrlSet PrimaryResource { get; init; }
+    public ResourceUrlSet? SupplementaryResource { get; init; }
 
     public Video(string resourceId)
     {
-        ResourceId = resourceId.Trim();
+        PrimaryResource = new ResourceUrlSet(UrlBase, resourceId.Trim());
     }
 }

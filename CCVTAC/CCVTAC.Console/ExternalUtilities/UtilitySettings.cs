@@ -9,5 +9,6 @@ namespace CCVTAC.Console.ExternalUtilities;
 internal sealed record UtilitySettings(
     ExternalProgram Program,
     string Args,
-    string WorkingDirectory
+    string WorkingDirectory,
+    bool RedirectStandardOutput = false
 );
