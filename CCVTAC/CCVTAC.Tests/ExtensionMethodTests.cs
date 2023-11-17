@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using CCVTAC.Console;
 
 namespace CCVTAC.Tests;
