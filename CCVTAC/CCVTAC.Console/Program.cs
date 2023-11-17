@@ -8,8 +8,8 @@ namespace CCVTAC.Console;
 
 internal static class Program
 {
-    private static readonly string[] _helpCommands = new[] { "-h", "--help" };
-    private static readonly string[] _quitCommands = new[] { "q", "quit", "exit", "bye" };
+    private static readonly string[] _helpCommands = ["-h", "--help"];
+    private static readonly string[] _quitCommands = ["q", "quit", "exit", "bye"];
     private const string _inputPrompt = "Enter one or more YouTube resource URLs (or 'q' to quit):";
 
     static void Main(string[] args)

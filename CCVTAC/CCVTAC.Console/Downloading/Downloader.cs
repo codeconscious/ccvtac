@@ -58,12 +58,12 @@ internal static class Downloader
         DownloadType     downloadType,
         params string[]? additionalArgs)
     {
-        HashSet<string> args = new()
-        {
+        HashSet<string> args =
+        [
             $"--extract-audio -f {settings.AudioFormat}",
             "--write-thumbnail --convert-thumbnails jpg", // For album art
             "--write-info-json", // For parsing metadata
-        };
+        ];
 
         if (settings.SplitChapters)
         {

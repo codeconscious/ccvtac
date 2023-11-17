@@ -67,7 +67,7 @@ internal readonly record struct TaggingSet
     /// A collection of file paths. Expected to contain 1 JSON file and
     /// 1 image file for each unique video ID.
     /// </param>
-    internal static ImmutableList<TaggingSet> CreateTaggingSets(IEnumerable<string> filePaths)
+    internal static ImmutableList<TaggingSet> CreateSets(IEnumerable<string> filePaths)
     {
         if (filePaths is null || !filePaths.Any())
         {
@@ -75,24 +75,32 @@ internal readonly record struct TaggingSet
         }
 
         const string jsonFileExt = ".json";
-        const string audioFileExt = ".m4a"; // TODO: Support multiple formats (maybe).
+        const string audioFileExt = ".m4a";
         const string imageFileExt = ".jpg";
 
         return filePaths
+                    // First, get a list of all files whose filenames contain a video ID regex.
                     .Select(f => FileNamesWithVideoIdsRegex.Match(f))
                     .Where(m => m.Success)
                     .Select(m => m.Captures.OfType<Match>().First())
+
+                    // Then, group those files as key-value pairs using the video ID as the key.
                     .GroupBy(m => m.Groups[1].Value, // Video ID
-                             m => m.Groups[0].Value) // Full filenames
-                    .Where(gr => // Ensure the correct count of image and JSON files.
+                             m => m.Groups[0].Value) // Full filenames (1 or more for each video ID)
+
+                    // Next, ensure the correct count of image and JSON files, ignoring those that don't match.
+                    // (For thought: It might be an option to track and report the invalid ones as well.)
+                    .Where(gr =>
                         gr.Count(f => f.EndsWith(jsonFileExt, StringComparison.OrdinalIgnoreCase)) == 1 &&
                         gr.Count(f => f.EndsWith(imageFileExt, StringComparison.OrdinalIgnoreCase)) == 1)
+
+                    // Lastly, group everything into new TaggingSets.
                     .Select(gr => {
                         return new TaggingSet(
                             gr.Key, // Video ID
                             gr.Where(f => f.EndsWith(audioFileExt)),
-                            gr.Where(f => f.EndsWith(jsonFileExt)).First(),
-                            gr.Where(f => f.EndsWith(imageFileExt)).First()
+                            gr.Where(f => f.EndsWith(jsonFileExt)).Single(),
+                            gr.Where(f => f.EndsWith(imageFileExt)).Single()
                         );
                     })
                     .ToImmutableList();

@@ -7,16 +7,10 @@ using System.Diagnostics;
 
 namespace CCVTAC.Console.PostProcessing;
 
-public sealed class Setup
+public sealed class Setup(UserSettings userSettings, Printer printer)
 {
-    public UserSettings UserSettings { get; }
-    public Printer Printer { get; }
-
-    public Setup(UserSettings userSettings, Printer printer)
-    {
-        UserSettings = userSettings;
-        Printer = printer;
-    }
+    public UserSettings UserSettings { get; } = userSettings;
+    public Printer Printer { get; } = printer;
 
     internal void Run()
     {
@@ -67,18 +61,19 @@ public sealed class Setup
 
     internal Result<CollectionMetadata> GetCollectionJson(string workingDirectory)
     {
-        Regex regex = new("""(?<=\[)[\w\-]{20,}(?=\]\.info.json)"""); // Assumes ID length > 20 chars.
+        Regex regex = new("""(?<=\[)[\w\-]{20,}(?=\]\.info.json)"""); // Assumes ID length is >= 20 chars.
 
         try
         {
             var fileNames = Directory.GetFiles(workingDirectory)
                                      .Where(f => regex.IsMatch(f))
-                                     .ToImmutableHashSet();
+                                     .ToFrozenSet();
 
             if (fileNames.Count == 0)
             {
                 return Result.Fail("No relevant files found.");
             }
+
             if (fileNames.Count > 1)
             {
                 return Result.Fail("Unexpectedly found more than one relevant file, so none will be processed.");
@@ -86,7 +81,7 @@ public sealed class Setup
 
             string fileName = fileNames.Single();
             string json = File.ReadAllText(fileName);
-            var collectionData = JsonSerializer.Deserialize<CollectionMetadata>(json);
+            CollectionMetadata collectionData = JsonSerializer.Deserialize<CollectionMetadata>(json);
             return Result.Ok(collectionData);
         }
         catch (Exception ex)
@@ -99,8 +94,8 @@ public sealed class Setup
     {
         try
         {
-            string[] allFiles = Directory.GetFiles(directory);
-            ImmutableList<TaggingSet> taggingSets = TaggingSet.CreateTaggingSets(allFiles); // TODO: Refactor? 名がこのメソッドと被りすぎている。
+            string[] files = Directory.GetFiles(directory);
+            ImmutableList<TaggingSet> taggingSets = TaggingSet.CreateSets(files);
 
             return taggingSets is not null && taggingSets.Any()
                 ? Result.Ok(taggingSets)
