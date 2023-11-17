@@ -67,7 +67,7 @@ public sealed class Setup
 
     internal Result<CollectionMetadata> GetCollectionJson(string workingDirectory)
     {
-        Regex regex = new(@"(?<=\[)[\w\-]{20,}(?=\]\.info.json)"); // Assumes ID length > 20 chars.
+        Regex regex = new("""(?<=\[)[\w\-]{20,}(?=\]\.info.json)"""); // Assumes ID length > 20 chars.
 
         try
         {
