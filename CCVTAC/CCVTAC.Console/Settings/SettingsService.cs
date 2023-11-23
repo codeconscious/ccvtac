@@ -33,7 +33,7 @@ public static class SettingsService
             },
             {
                 $"Ignore-upload-year channels",
-                $"{settings.IgnoreUploadYearUploaders?.Length.ToString() ?? "no"} {PluralizeIfNeeded("channel", settings.IgnoreUploadYearUploaders?.Length ?? 0)}"
+                $"{settings.IgnoreUploadYearUploaders?.Length.ToString() ?? "No"} {PluralizeIfNeeded("channel", settings.IgnoreUploadYearUploaders?.Length ?? 0)}"
             },
             { "Working directory", settings.WorkingDirectory },
             { "Move-to directory", settings.MoveToDirectory },
