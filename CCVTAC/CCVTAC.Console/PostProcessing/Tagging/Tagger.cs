@@ -85,12 +85,12 @@ internal static class Tagger
             if (videoData.Artist is string metadataArtist)
             {
                 printer.Print($"• Using metadata artist \"{metadataArtist}\"");
-                taggedFile.Tag.Performers = new[] { metadataArtist };
+                taggedFile.Tag.Performers = [metadataArtist];
             }
             else if (tagDetector.DetectArtist(videoData) is string artist)
             {
                 printer.Print($"• Found artist \"{artist}\"");
-                taggedFile.Tag.Performers = new[] { artist };
+                taggedFile.Tag.Performers = [artist];
             }
 
             if (videoData.Album is string metadataAlbum)
@@ -107,7 +107,7 @@ internal static class Tagger
             if (tagDetector.DetectComposers(videoData) is string composers)
             {
                 printer.Print($"• Found composer(s) \"{composers}\"");
-                taggedFile.Tag.Composers = new[] { composers };
+                taggedFile.Tag.Composers = [composers];
             }
 
             if (videoData.PlaylistIndex is uint trackNo)

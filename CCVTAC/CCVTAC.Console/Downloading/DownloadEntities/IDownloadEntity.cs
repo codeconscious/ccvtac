@@ -5,7 +5,7 @@ namespace CCVTAC.Console.Downloading.DownloadEntities;
 public interface IDownloadEntity
 {
     public DownloadType Type { get; }
-    public static Regex Regex { get; } = new("");
+    public static Regex Regex { get; } = new(string.Empty);
     public static string UrlBase { get; } = string.Empty;
     public string ResourceId { get; }
 
