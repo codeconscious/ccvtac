@@ -178,8 +178,7 @@ internal static class Program
                 ? $" (batch {currentBatch} of {batchUrls.Count})"
                 : string.Empty;
             // TODO: Use minutes or hours for longer times.
-            printer.Print($"Done processing '{url}'{batchClause} in {jobStopwatch.ElapsedMilliseconds:#,##0}ms.",
-                          appendLines: 1);
+            printer.Print($"Done processing '{url}'{batchClause} in {jobStopwatch.ElapsedMilliseconds:#,##0}ms.");
         }
 
         if (batchUrls.Count > 1)
