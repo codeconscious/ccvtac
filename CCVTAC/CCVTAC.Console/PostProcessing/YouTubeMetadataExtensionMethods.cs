@@ -45,6 +45,18 @@ public static class YouTubeMetadataExtensionMethods
         {
             sb.AppendLine($"■ Creator: {videoData.Creator}");
         }
+        if (!string.IsNullOrWhiteSpace(videoData.Artist))
+        {
+            sb.AppendLine($"■ Artist: {videoData.Artist}");
+        }
+        if (!string.IsNullOrWhiteSpace(videoData.Album))
+        {
+            sb.AppendLine($"■ Album: {videoData.Album}");
+        }
+        if (!string.IsNullOrWhiteSpace(videoData.Title))
+        {
+            sb.AppendLine($"■ Title: {videoData.Title}");
+        }
         sb.AppendLine($"■ Uploaded: {videoData.FormattedUploadDate()}");
         var description = string.IsNullOrWhiteSpace(videoData.Description) ? "None." : videoData.Description;
         sb.AppendLine($"■ Video description: {description}");
