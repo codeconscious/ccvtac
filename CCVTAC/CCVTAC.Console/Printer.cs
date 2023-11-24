@@ -16,10 +16,13 @@ public sealed class Printer
 
         PrintEmptyLines(prependLines);
 
-        if (processMarkup) AnsiConsole.Markup(message);
-        else               AnsiConsole.Write(message);
+        if (processMarkup)
+            AnsiConsole.Markup(message);
+        else
+            AnsiConsole.Write(message);
 
-        if (appendLineBreak) AnsiConsole.WriteLine();
+        if (appendLineBreak)
+            AnsiConsole.WriteLine();
 
         PrintEmptyLines(appendLines);
     }

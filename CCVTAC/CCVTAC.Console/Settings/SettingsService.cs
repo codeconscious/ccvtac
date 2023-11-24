@@ -16,8 +16,8 @@ public static class SettingsService
     /// <param name="header">An optional line of text to appear above the settings.</param>
     public static void PrintSummary(UserSettings settings, Printer printer, string? header = null)
     {
-        if (!string.IsNullOrWhiteSpace(header))
-            printer.Print(header);
+        if (header.HasText())
+            printer.Print(header!);
 
         var settingPairs = new Dictionary<string, string>()
         {

@@ -103,7 +103,7 @@ internal static class Program
         topStopwatch.Start();
 
         var batchUrls = userInput.Split(" ")
-                                 .Where(i => !string.IsNullOrWhiteSpace(i)) // Remove multiple spaces.
+                                 .Where(i => i.HasText()) // Remove multiple spaces.
                                  .Distinct()
                                  .ToImmutableList();
 

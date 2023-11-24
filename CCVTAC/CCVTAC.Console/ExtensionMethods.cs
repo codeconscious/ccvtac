@@ -37,4 +37,11 @@ public static class ExtensionMethods
             (workingText)     => workingText.ToString()
         );
     }
+
+    public static bool HasText(this string? maybeText, bool allowWhiteSpace = false)
+    {
+        return allowWhiteSpace
+            ? !string.IsNullOrEmpty(maybeText)
+            : !string.IsNullOrWhiteSpace(maybeText);
+    }
 }
