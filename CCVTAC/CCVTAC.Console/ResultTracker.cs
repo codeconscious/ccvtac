@@ -18,7 +18,7 @@ sealed class ResultTracker
         {
             _successCount++;
 
-            if (!string.IsNullOrWhiteSpace(downloadResult?.Value))
+            if (downloadResult.Value.HasText())
                 _printer.Print(downloadResult.Value);
         }
         else
