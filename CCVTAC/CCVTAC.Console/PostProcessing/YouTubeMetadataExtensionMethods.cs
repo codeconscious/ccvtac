@@ -7,16 +7,16 @@ public static class YouTubeMetadataExtensionMethods
     /// </summary>
     public static string UploaderSummary(this VideoMetadata videoData)
     {
-        string uploaderLinkOrIdOrEmpty = !string.IsNullOrWhiteSpace(videoData.UploaderUrl)
+        string uploaderLinkOrIdOrEmpty = videoData.UploaderUrl.HasText()
             ? videoData.UploaderUrl
-            : !string.IsNullOrWhiteSpace(videoData.UploaderId)
+            : videoData.UploaderId.HasText()
                 ? videoData.UploaderId
                 : string.Empty;
 
         return videoData.Uploader +
-               (string.IsNullOrWhiteSpace(uploaderLinkOrIdOrEmpty)
-                    ? string.Empty :
-                    $" ({uploaderLinkOrIdOrEmpty})");
+               (uploaderLinkOrIdOrEmpty.HasText()
+                    ? $" ({uploaderLinkOrIdOrEmpty})"
+                    : string.Empty);
     }
 
     /// <summary>
@@ -41,9 +41,21 @@ public static class YouTubeMetadataExtensionMethods
         sb.AppendLine($"■ URL: {videoData.WebpageUrl}");
         sb.AppendLine($"■ Title: {videoData.Fulltitle}");
         sb.AppendLine($"■ Uploader: {videoData.UploaderSummary()}");
-        if (videoData.Creator != videoData.Uploader && !string.IsNullOrWhiteSpace(videoData.Creator))
+        if (videoData.Creator != videoData.Uploader && videoData.Creator.HasText())
         {
             sb.AppendLine($"■ Creator: {videoData.Creator}");
+        }
+        if (videoData.Artist.HasText())
+        {
+            sb.AppendLine($"■ Artist: {videoData.Artist}");
+        }
+        if (videoData.Album.HasText())
+        {
+            sb.AppendLine($"■ Album: {videoData.Album}");
+        }
+        if (videoData.Title.HasText())
+        {
+            sb.AppendLine($"■ Title: {videoData.Title}");
         }
         sb.AppendLine($"■ Uploaded: {videoData.FormattedUploadDate()}");
         var description = string.IsNullOrWhiteSpace(videoData.Description) ? "None." : videoData.Description;
@@ -55,7 +67,7 @@ public static class YouTubeMetadataExtensionMethods
             sb.AppendLine($"■ Playlist name: {collectionData.Title}");
             sb.AppendLine($"■ Playlist URL: {collectionData.WebpageUrl}");
             sb.AppendLine($"■ Playlist index: {videoData.PlaylistIndex}");
-            if (!string.IsNullOrWhiteSpace(collectionData.Description))
+            if (collectionData.Description.HasText())
             {
                 sb.AppendLine($"■ Playlist description: {collectionData.Description}");
             }

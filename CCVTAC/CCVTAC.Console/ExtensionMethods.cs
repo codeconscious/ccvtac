@@ -14,10 +14,9 @@ public static class ExtensionMethods
     /// <param name="replaceWith"></param>
     /// <param name="customInvalidChars">Optional additional characters to consider invalid.</param>
     /// <returns></returns>
-    public static string ReplaceInvalidPathChars(
-        this string sourceText,
-        char replaceWith = '_',
-        char[]? customInvalidChars = null)
+    public static string ReplaceInvalidPathChars(this string sourceText,
+                                                char replaceWith = '_',
+                                                char[]? customInvalidChars = null)
     {
         var invalidChars = Path.GetInvalidFileNameChars()
                                .Concat(Path.GetInvalidPathChars())
@@ -27,7 +26,7 @@ public static class ExtensionMethods
                                     Path.AltDirectorySeparatorChar,
                                     Path.VolumeSeparatorChar })
                                .Concat(customInvalidChars ?? Enumerable.Empty<char>())
-                               .ToImmutableHashSet();
+                               .ToFrozenSet();
 
         if (invalidChars.Contains(replaceWith))
             throw new ArgumentException($"The replacement char ('{replaceWith}') must be a valid path character.");
@@ -37,5 +36,12 @@ public static class ExtensionMethods
             (workingText, ch) => workingText.Replace(ch, replaceWith),
             (workingText)     => workingText.ToString()
         );
+    }
+
+    public static bool HasText(this string? maybeText, bool allowWhiteSpace = false)
+    {
+        return allowWhiteSpace
+            ? !string.IsNullOrEmpty(maybeText)
+            : !string.IsNullOrWhiteSpace(maybeText);
     }
 }

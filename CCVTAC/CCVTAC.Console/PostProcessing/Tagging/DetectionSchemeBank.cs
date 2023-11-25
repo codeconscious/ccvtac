@@ -119,7 +119,7 @@ internal static class DetectionSchemeBank
             "pseudo-Topic style"
         ),
         new (
-            """(?<=アルバム[『「]).+(?=[」』])""", // アルバム「NAME」
+            """(?<=アルバム|シングル[『「]).+(?=[」』])""", // アルバム「NAME」
             MatchGroupId.Zero,
             SourceMetadataField.Title
         ),

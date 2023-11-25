@@ -8,8 +8,8 @@ namespace CCVTAC.Console;
 
 internal static class Program
 {
-    private static readonly string[] _helpCommands = new[] { "-h", "--help" };
-    private static readonly string[] _quitCommands = new[] { "q", "quit", "exit", "bye" };
+    private static readonly string[] _helpCommands = ["-h", "--help"];
+    private static readonly string[] _quitCommands = ["q", "quit", "exit", "bye"];
     private const string _inputPrompt = "Enter one or more YouTube resource URLs (or 'q' to quit):";
 
     static void Main(string[] args)
@@ -103,7 +103,7 @@ internal static class Program
         topStopwatch.Start();
 
         var batchUrls = userInput.Split(" ")
-                                 .Where(i => !string.IsNullOrWhiteSpace(i)) // Remove multiple spaces.
+                                 .Where(i => i.HasText()) // Remove multiple spaces.
                                  .Distinct()
                                  .ToImmutableList();
 
@@ -178,8 +178,7 @@ internal static class Program
                 ? $" (batch {currentBatch} of {batchUrls.Count})"
                 : string.Empty;
             // TODO: Use minutes or hours for longer times.
-            printer.Print($"Done processing '{url}'{batchClause} in {jobStopwatch.ElapsedMilliseconds:#,##0}ms.",
-                          appendLines: 1);
+            printer.Print($"Done processing '{url}'{batchClause} in {jobStopwatch.ElapsedMilliseconds:#,##0}ms.");
         }
 
         if (batchUrls.Count > 1)

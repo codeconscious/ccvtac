@@ -71,8 +71,8 @@ internal static class Mover
         string workingName;
 
         if (maybeCollectionData is CollectionMetadata collectionData &&
-            !string.IsNullOrWhiteSpace(collectionData.Uploader) &&
-            !string.IsNullOrWhiteSpace(collectionData.Title))
+            collectionData.Uploader.HasText() &&
+            collectionData.Title.HasText())
         {
             workingName = $"{collectionData.Uploader} - {collectionData.Title}";
         }
