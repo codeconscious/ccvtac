@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 
 namespace CCVTAC.Console.Downloading.DownloadEntities;
 
-public sealed class Playlist(string resourceId) : IDownloadEntity
+public sealed class Playlist : IDownloadEntity
 {
     public static IEnumerable<Regex> Regexes => new List<Regex>
     {

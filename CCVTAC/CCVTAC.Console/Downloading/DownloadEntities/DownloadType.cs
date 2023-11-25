@@ -18,6 +18,11 @@ public enum DownloadType
     Playlist,
 
     /// <summary>
+    /// The metadata for a playlist. No videos are downloaded.
+    /// </summary>
+    PlaylistMetadata,
+
+    /// <summary>
     /// A user's channel, which contains videos and maybe playlists.
     /// </summary>
     Channel

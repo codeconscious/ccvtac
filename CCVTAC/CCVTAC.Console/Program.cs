@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.IO;
 using System.Threading;
 using CCVTAC.Console.Settings;
 using Spectre.Console;
@@ -171,8 +170,8 @@ internal static class Program
 
             History.Append(url, printer);
 
-            // var postProcessor = new PostProcessing.Setup(userSettings, printer);
-            // postProcessor.Run(); // TODO: Think about if/how to handle leftover temp files due to errors.
+            var postProcessor = new PostProcessing.Setup(userSettings, printer);
+            postProcessor.Run(); // TODO: Think about if/how to handle leftover temp files due to errors.
 
             string batchClause = batchUrls.Count > 1
                 ? $" (batch {currentBatch} of {batchUrls.Count})"

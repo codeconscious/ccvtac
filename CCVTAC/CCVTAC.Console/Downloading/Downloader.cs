@@ -10,7 +10,7 @@ internal static class Downloader
     internal static ExternalProgram ExternalProgram = new(
         "yt-dlp",
         "https://github.com/yt-dlp/yt-dlp/",
-        "video download and audio extraction"
+        "YouTube video, playlist, and/or channel download and audio extraction and/or metadata download"
     );
 
     internal static Result<string> Run(string url,
@@ -54,17 +54,17 @@ internal static class Downloader
             // TODO: Extract this content and the near-duplicate one above into a new method.
             string supplementaryArgs = GenerateDownloadArgs(
                 userSettings,
-                downloadEntity.Type,
-                supplementary.FullResourceUrl,
+                DownloadType.PlaylistMetadata,
+                supplementary.FullResourceUrl
                 // Download the list of video IDs in the associated playlist:
-                "--flat-playlist --print id --skip-download --write-info-json"
+                // "--skip-download --no-write-info-json --write-playlist-metafiles"
             );
 
             UtilitySettings supplementaryDownloadToolSettings = new(
                 ExternalProgram,
                 supplementaryArgs,
                 userSettings.WorkingDirectory!,
-                true
+                false //true
             );
 
             var supplementaryDownloadResult = Runner.Run(supplementaryDownloadToolSettings, printer);
@@ -91,21 +91,25 @@ internal static class Downloader
                                                DownloadType downloadType,
                                                params string[]? additionalArgs)
     {
-        HashSet<string> args =
-        [
+        // TODO: This is only appropriate for initial downloads!
+        HashSet<string> args = downloadType == DownloadType.PlaylistMetadata
+        ? [
+            "--flat-playlist --write-info-json"
+        ]
+        : [
             $"--extract-audio -f {settings.AudioFormat}",
             "--write-thumbnail --convert-thumbnails jpg", // For album art
             "--write-info-json", // For parsing metadata
         ];
 
-        if (settings.SplitChapters)
+        if (settings.SplitChapters && downloadType != DownloadType.PlaylistMetadata)
         {
             args.Add("--split-chapters");
         }
 
         // TODO: Move this logic to the individual types, via the interface.
         if (downloadType is not DownloadType.Video &&
-            downloadType is not DownloadType.VideoOnPlaylist)
+            downloadType is not DownloadType.PlaylistMetadata)
         {
             args.Add($"--sleep-interval {settings.SleepSecondsBetweenDownloads}");
         }

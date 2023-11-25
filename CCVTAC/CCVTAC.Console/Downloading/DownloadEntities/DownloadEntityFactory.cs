@@ -19,7 +19,7 @@ public static class DownloadEntityFactory
 
     public static Result<IDownloadEntity> Create(string url)
     {
-        List<(DownloadType Key, string Value, string? Supplementary)> typesWithResourceIds =
+        List<(DownloadType Key, string PrimaryUrl, string? SupplementaryUrl)> typesWithResourceIds =
             Patterns.SelectMany(pattern =>  pattern.Value.Select(regex => (pattern.Key, regex.Match(url)))
                     .Where(typeAndMatch =>  typeAndMatch.Item2.Success)
                     .Select(typeAndMatch => (
