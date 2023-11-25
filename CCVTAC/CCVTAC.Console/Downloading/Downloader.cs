@@ -75,8 +75,8 @@ internal static class Downloader
             }
             else
             {
+                printer.Error("Supplementary download failed.");
                 supplementaryDownloadResult.Errors.ForEach(e => printer.Error(e.Message));
-                printer.Warning("However, post-processing will still be attempted."); // TODO: これで良い？
             }
         }
 
