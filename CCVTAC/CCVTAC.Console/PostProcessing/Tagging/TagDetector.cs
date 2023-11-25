@@ -3,7 +3,7 @@ namespace CCVTAC.Console.PostProcessing.Tagging;
 /// <summary>
 /// Provides methods to search for specific tag field data (artist, album, etc.) within video metadata.
 /// </summary>
-internal class TagDetector
+internal sealed class TagDetector
 {
     internal string? DetectTitle(VideoMetadata videoData, string? defaultName = null)
     {

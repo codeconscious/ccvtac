@@ -4,7 +4,7 @@ using CCVTAC.Console;
 
 namespace CCVTAC.Tests;
 
-public class ExtensionMethodTests
+public sealed class ExtensionMethodTests
 {
     private static readonly string _validBaseFileName = @"filename123あいうえお漢字!@#$%^()_+ ";
     private static readonly char _defaultReplaceWithChar = '_';
