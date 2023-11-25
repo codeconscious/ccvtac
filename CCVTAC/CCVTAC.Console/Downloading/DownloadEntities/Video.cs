@@ -13,7 +13,8 @@ public sealed class Video : IDownloadEntity
 
     public static string UrlBase => "https://www.youtube.com/watch?v=";
 
-    public DownloadType Type => DownloadType.Video;
+    public DownloadType DownloadType => DownloadType.Media;
+    public MediaDownloadType VideoDownloadType => MediaDownloadType.Video;
 
     // public string ResourceId { get; init; }
     // public string? SecondaryResourceId { get; }

@@ -2,9 +2,13 @@ using System.Text.RegularExpressions;
 
 namespace CCVTAC.Console.Downloading.DownloadEntities;
 
+/// <summary>
+/// An interface representing a media resource that can be downloaded.
+/// </summary>
 public interface IDownloadEntity
 {
-    public DownloadType Type { get; }
+    public DownloadType DownloadType { get; }
+    public MediaDownloadType VideoDownloadType { get; }
     public static IEnumerable<Regex> Regexes { get; } = Enumerable.Empty<Regex>();
 
     public ResourceUrlSet PrimaryResource { get; init; }

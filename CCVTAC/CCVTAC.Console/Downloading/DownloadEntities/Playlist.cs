@@ -9,7 +9,8 @@ public sealed class Playlist : IDownloadEntity
         new(@"(?<=list=)([\w\-]+)")
     };
 
-    public DownloadType Type => DownloadType.Playlist;
+    public DownloadType DownloadType => DownloadType.Media;
+    public MediaDownloadType VideoDownloadType => MediaDownloadType.Playlist;
 
     public static string UrlBase => "https://www.youtube.com/playlist?list=";
     // public string ResourceId { get; init; }

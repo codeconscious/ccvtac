@@ -7,12 +7,12 @@ namespace CCVTAC.Console.Downloading.DownloadEntities;
 /// </summary>
 public static class DownloadEntityFactory
 {
-    private static readonly Dictionary<DownloadType, IEnumerable<Regex>> Patterns = new()
+    private static readonly Dictionary<MediaDownloadType, IEnumerable<Regex>> Patterns = new()
     {
-        { DownloadType.VideoOnPlaylist, VideoOnPlaylist.Regexes },
-        { DownloadType.Video,           Video.Regexes },
-        { DownloadType.Playlist,        Playlist.Regexes },
-        { DownloadType.Channel,         Channel.Regexes }
+        { MediaDownloadType.VideoOnPlaylist, VideoOnPlaylist.Regexes },
+        { MediaDownloadType.Video,           Video.Regexes },
+        { MediaDownloadType.Playlist,        Playlist.Regexes },
+        { MediaDownloadType.Channel,         Channel.Regexes }
     };
 
     /// <summary>
@@ -21,7 +21,7 @@ public static class DownloadEntityFactory
     /// <param name="url"></param>
     public static Result<IDownloadEntity> Create(string url)
     {
-        List<(DownloadType type, string resourceId, string? supplementaryResourceId)> typesWithResourceIds =
+        List<(MediaDownloadType type, string resourceId, string? supplementaryResourceId)> typesWithResourceIds =
             Patterns.SelectMany(pattern =>  pattern.Value.Select(regex => (pattern.Key, regex.Match(url.Trim())))
                     .Where(typeAndMatch =>  typeAndMatch.Item2.Success)
                     .Select(typeAndMatch => (
@@ -40,14 +40,14 @@ public static class DownloadEntityFactory
             return Result.Fail("More than one matching regex pattern was unexpectedly found.");
         }
 
-        (DownloadType type, string resourceId, string? supplementaryResourceId) = typesWithResourceIds.Single();
+        (MediaDownloadType type, string resourceId, string? supplementaryResourceId) = typesWithResourceIds.Single();
 
         return type switch
         {
-            DownloadType.VideoOnPlaylist => Result.Ok((IDownloadEntity) new VideoOnPlaylist(resourceId, supplementaryResourceId!)),
-            DownloadType.Video =>           Result.Ok((IDownloadEntity) new Video(resourceId)),
-            DownloadType.Playlist =>        Result.Ok((IDownloadEntity) new Playlist(resourceId)),
-            DownloadType.Channel=>          Result.Ok((IDownloadEntity) new Channel(resourceId)),
+            MediaDownloadType.VideoOnPlaylist => Result.Ok((IDownloadEntity) new VideoOnPlaylist(resourceId, supplementaryResourceId!)),
+            MediaDownloadType.Video =>           Result.Ok((IDownloadEntity) new Video(resourceId)),
+            MediaDownloadType.Playlist =>        Result.Ok((IDownloadEntity) new Playlist(resourceId)),
+            MediaDownloadType.Channel=>          Result.Ok((IDownloadEntity) new Channel(resourceId)),
             _ =>                            Result.Fail("Unsupported or invalid URL. (No matching download type found.)")
         };
     }

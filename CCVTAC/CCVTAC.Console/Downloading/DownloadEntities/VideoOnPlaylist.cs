@@ -9,7 +9,8 @@ public class VideoOnPlaylist : IDownloadEntity
         new("""(?<=v=|v\=)([\w-]{11})(?:&list=([\w_-]+))""")
     };
 
-    public DownloadType Type => DownloadType.VideoOnPlaylist;
+    public DownloadType DownloadType => DownloadType.Media;
+    public MediaDownloadType VideoDownloadType => MediaDownloadType.VideoOnPlaylist;
 
     public static string UrlBase => "https://www.youtube.com/watch?v=";
 

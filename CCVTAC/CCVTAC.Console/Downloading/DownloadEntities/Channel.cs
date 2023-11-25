@@ -9,7 +9,8 @@ public sealed class Channel : IDownloadEntity
         new(@"(?:www\.)?youtube\.com/(?:c/|channel/|@|user/)([\w\-]+)")
     };
 
-    public DownloadType Type => DownloadType.Channel;
+    public DownloadType DownloadType => DownloadType.Media;
+    public MediaDownloadType VideoDownloadType => MediaDownloadType.Channel;
 
     // This URL base differs because the channel regex matches entire URLs.
     public static string UrlBase => "https://";

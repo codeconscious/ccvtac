@@ -3,27 +3,12 @@ namespace CCVTAC.Console.Downloading.DownloadEntities;
 public enum DownloadType
 {
     /// <summary>
-    /// A single video.
+    /// Downloadable media (e.g., video, playlists, and channels).
     /// </summary>
-    Video,
+    Media,
 
     /// <summary>
-    /// A video whose ID is also provided with a playlist on which it resides.
+    /// Metadata relating to a media download.
     /// </summary>
-    VideoOnPlaylist,
-
-    /// <summary>
-    /// A playlist containing 1 or more videos.
-    /// </summary>
-    Playlist,
-
-    /// <summary>
-    /// The metadata for a playlist. No videos are downloaded.
-    /// </summary>
-    PlaylistMetadata,
-
-    /// <summary>
-    /// A user's channel, which contains videos and maybe playlists.
-    /// </summary>
-    Channel
+    Metadata
 }

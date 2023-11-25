@@ -10,7 +10,7 @@ internal static class Downloader
     internal static ExternalProgram ExternalProgram = new(
         "yt-dlp",
         "https://github.com/yt-dlp/yt-dlp/",
-        "YouTube video, playlist, and/or channel download and audio extraction and/or metadata download"
+        "YouTube video, playlist, and channel media downloads, metadata downloads, and audio extraction"
     );
 
     internal static Result<string> Run(string url,
@@ -27,11 +27,12 @@ internal static class Downloader
                                ?? "An unknown error occurred parsing the resource type.");
         }
         IDownloadEntity downloadEntity = downloadEntityResult.Value;
-        printer.Print($"{downloadEntity.Type} URL '{url}' detected.");
+        printer.Print($"{downloadEntity.VideoDownloadType} URL '{url}' detected.");
 
         string args = GenerateDownloadArgs(
             userSettings,
-            downloadEntity.Type,
+            downloadEntity.DownloadType,
+            downloadEntity.VideoDownloadType,
             downloadEntity.PrimaryResource.FullResourceUrl);
 
         UtilitySettings downloadToolSettings = new(
@@ -40,7 +41,7 @@ internal static class Downloader
             userSettings.WorkingDirectory!
         );
 
-        var downloadResult = Runner.Run(downloadToolSettings, printer);
+        Result<int> downloadResult = Runner.Run(downloadToolSettings, printer);
 
         if (downloadResult.IsFailed)
         {
@@ -54,20 +55,19 @@ internal static class Downloader
             // TODO: Extract this content and the near-duplicate one above into a new method.
             string supplementaryArgs = GenerateDownloadArgs(
                 userSettings,
-                DownloadType.PlaylistMetadata,
+                DownloadType.Metadata,
+                null,
                 supplementary.FullResourceUrl
-                // Download the list of video IDs in the associated playlist:
-                // "--skip-download --no-write-info-json --write-playlist-metafiles"
             );
 
-            UtilitySettings supplementaryDownloadToolSettings = new(
+            UtilitySettings supplementaryDownloadSettings = new(
                 ExternalProgram,
                 supplementaryArgs,
                 userSettings.WorkingDirectory!,
-                false //true
+                false
             );
 
-            var supplementaryDownloadResult = Runner.Run(supplementaryDownloadToolSettings, printer);
+            Result<int> supplementaryDownloadResult = Runner.Run(supplementaryDownloadSettings, printer);
 
             if (supplementaryDownloadResult.IsSuccess)
             {
@@ -89,27 +89,27 @@ internal static class Downloader
     /// <returns>A string of arguments that can be passed directly to the download tool.</returns>
     private static string GenerateDownloadArgs(UserSettings settings,
                                                DownloadType downloadType,
+                                               MediaDownloadType? videoDownloadType,
                                                params string[]? additionalArgs)
     {
-        // TODO: This is only appropriate for initial downloads!
-        HashSet<string> args = downloadType == DownloadType.PlaylistMetadata
-        ? [
-            "--flat-playlist --write-info-json"
-        ]
-        : [
-            $"--extract-audio -f {settings.AudioFormat}",
-            "--write-thumbnail --convert-thumbnails jpg", // For album art
-            "--write-info-json", // For parsing metadata
-        ];
+        HashSet<string> args = downloadType switch
+        {
+            DownloadType.Metadata => [ "--flat-playlist --write-info-json" ],
+            _ => [
+                     $"--extract-audio -f {settings.AudioFormat}",
+                     "--write-thumbnail --convert-thumbnails jpg", // For album art
+                     "--write-info-json", // For parsing metadata
+                 ]
+        };
 
-        if (settings.SplitChapters && downloadType != DownloadType.PlaylistMetadata)
+        if (settings.SplitChapters && downloadType == DownloadType.Media)
         {
             args.Add("--split-chapters");
         }
 
-        // TODO: Move this logic to the individual types, via the interface.
-        if (downloadType is not DownloadType.Video &&
-            downloadType is not DownloadType.PlaylistMetadata)
+        // TODO: Consider moving this logic to the individual types, via the interface.
+        if (downloadType is DownloadType.Media &&
+            videoDownloadType is not MediaDownloadType.Video)
         {
             args.Add($"--sleep-interval {settings.SleepSecondsBetweenDownloads}");
         }
