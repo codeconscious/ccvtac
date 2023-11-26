@@ -2,6 +2,9 @@ using System.Text.RegularExpressions;
 
 namespace CCVTAC.Console.Downloading.DownloadEntities;
 
+/// <summary>
+/// A user's channel, which contains at least one video.
+/// </summary>
 public sealed class Channel : IDownloadEntity
 {
     public static IEnumerable<Regex> Regexes => new List<Regex>
@@ -14,10 +17,6 @@ public sealed class Channel : IDownloadEntity
 
     // This URL base differs because the channel regex matches entire URLs.
     public static string UrlBase => "https://";
-
-    // public string ResourceId { get; init; }
-    // public string? SecondaryResourceId { get; }
-    // public string FullResourceUrl => UrlBase + ResourceId;
 
     public ResourceUrlSet PrimaryResource { get; init; }
     public ResourceUrlSet? SupplementaryResource { get; init; }
