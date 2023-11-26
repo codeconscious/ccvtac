@@ -1,4 +1,4 @@
-namespace CCVTAC.Console.Downloading.DownloadEntities;
+namespace CCVTAC.Console.Downloading.Entities;
 
 /// <summary>
 /// Types of media that can be downloaded.

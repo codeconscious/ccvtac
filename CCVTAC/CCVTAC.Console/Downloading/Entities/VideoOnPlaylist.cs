@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace CCVTAC.Console.Downloading.DownloadEntities;
+namespace CCVTAC.Console.Downloading.Entities;
 
 /// <summary>
 /// A single video that is associated to a supplementary playlist.

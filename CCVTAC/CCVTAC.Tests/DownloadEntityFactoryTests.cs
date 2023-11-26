@@ -1,4 +1,4 @@
-﻿using CCVTAC.Console.Downloading.DownloadEntities;
+﻿using CCVTAC.Console.Downloading.Entities;
 
 namespace CCVTAC.Tests;
 

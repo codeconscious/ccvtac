@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace CCVTAC.Console.Downloading.DownloadEntities;
+namespace CCVTAC.Console.Downloading.Entities;
 
 /// <summary>
 /// A user's channel, which contains at least one video.

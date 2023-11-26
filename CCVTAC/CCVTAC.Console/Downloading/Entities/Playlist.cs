@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace CCVTAC.Console.Downloading.DownloadEntities;
+namespace CCVTAC.Console.Downloading.Entities;
 
 /// <summary>
 /// A single playlist which contains at least one video.

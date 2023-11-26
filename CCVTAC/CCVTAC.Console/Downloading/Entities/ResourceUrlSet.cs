@@ -1,4 +1,4 @@
-namespace CCVTAC.Console.Downloading.DownloadEntities;
+namespace CCVTAC.Console.Downloading.Entities;
 
 /// <summary>
 /// The set of data necessary to create URLs for resources.

@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace CCVTAC.Console.Downloading.DownloadEntities;
+namespace CCVTAC.Console.Downloading.Entities;
 
 /// <summary>
 /// Determines and creates the appropriate download type for a given URl.

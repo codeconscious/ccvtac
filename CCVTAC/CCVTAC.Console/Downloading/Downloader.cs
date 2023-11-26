@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using CCVTAC.Console.Downloading.DownloadEntities;
+using CCVTAC.Console.Downloading.Entities;
 using CCVTAC.Console.ExternalUtilities;
 using CCVTAC.Console.Settings;
 

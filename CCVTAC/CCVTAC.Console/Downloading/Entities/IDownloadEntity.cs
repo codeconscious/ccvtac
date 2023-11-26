@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace CCVTAC.Console.Downloading.DownloadEntities;
+namespace CCVTAC.Console.Downloading.Entities;
 
 /// <summary>
 /// An interface representing a media resource that can be downloaded.
