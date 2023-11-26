@@ -35,13 +35,24 @@ internal static class Downloader
             downloadEntity.VideoDownloadType,
             downloadEntity.PrimaryResource.FullResourceUrl);
 
+        // Source of error codes: https://github.com/yt-dlp/yt-dlp/issues/4262#issuecomment-1173133105
+        Dictionary<int, string> downloaderExitCodes = new()
+        {
+            { 0, "Success" },
+            { 1, "Unspecific error" },
+            { 2, "Error in provided options" },
+            { 100, "yt-dlp must restart for update to complete" },
+            { 101, "Download cancelled by --max-downloads, etc." },
+        };
+
         UtilitySettings downloadToolSettings = new(
             ExternalProgram,
             args,
-            userSettings.WorkingDirectory!
+            userSettings.WorkingDirectory!,
+            downloaderExitCodes
         );
 
-        Result<int> downloadResult = Runner.Run(downloadToolSettings, printer);
+        Result downloadResult = Runner.Run(downloadToolSettings, printer);
 
         if (downloadResult.IsFailed)
         {
@@ -64,8 +75,8 @@ internal static class Downloader
             UtilitySettings supplementaryDownloadSettings = new(
                 ExternalProgram,
                 supplementaryArgs,
-                userSettings.WorkingDirectory!
-            );
+                userSettings.WorkingDirectory!,
+                downloaderExitCodes            );
 
             Result<int> supplementaryDownloadResult = Runner.Run(supplementaryDownloadSettings, printer);
 
@@ -105,6 +116,11 @@ internal static class Downloader
         if (settings.SplitChapters && downloadType == DownloadType.Media)
         {
             args.Add("--split-chapters");
+        }
+
+        if (settings.VerboseDownloaderOutput)
+        {
+            args.Add("--verbose");
         }
 
         if (downloadType is DownloadType.Media &&

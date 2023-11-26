@@ -9,4 +9,5 @@ namespace CCVTAC.Console.ExternalUtilities;
 internal sealed record UtilitySettings(
     ExternalProgram Program,
     string Args,
-    string WorkingDirectory);
+    string WorkingDirectory,
+    Dictionary<int, string>? ExitCodes = null);

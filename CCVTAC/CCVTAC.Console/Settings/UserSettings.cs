@@ -64,6 +64,12 @@ public sealed class UserSettings
     public string[]? IgnoreUploadYearUploaders { get; init; }
 
     /// <summary>
+    /// Shows verbose output from the external downloader tool if true; otherwise, shows normal output.
+    /// </summary>
+    [JsonPropertyName("verboseDownloaderOutput")]
+    public bool VerboseDownloaderOutput { get; init; } = false;
+
+    /// <summary>
     /// If the supplied video uploader is specified in the settings, returns the video's upload year.
     /// Otherwise, returns null.
     /// </summary>
