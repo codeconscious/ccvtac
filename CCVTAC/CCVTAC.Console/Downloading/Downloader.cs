@@ -41,7 +41,17 @@ internal static class Downloader
             userSettings.WorkingDirectory!
         );
 
-        Result<int> downloadResult = Runner.Run(downloadToolSettings, printer);
+        // Source of error codes: https://github.com/yt-dlp/yt-dlp/issues/4262#issuecomment-1173133105
+        Dictionary<int, string> ytdlpExitCodes = new()
+        {
+            { 0, "Success" },
+            { 1, "Unspecific error" },
+            { 2, "Error in provided options" },
+            { 100, "yt-dlp must restart for update to complete" },
+            { 101, "Download cancelled by --max-downloads, etc." },
+        };
+
+        Result downloadResult = Runner.Run(downloadToolSettings, printer, ytdlpExitCodes);
 
         if (downloadResult.IsFailed)
         {
@@ -105,6 +115,11 @@ internal static class Downloader
         if (settings.SplitChapters && downloadType == DownloadType.Media)
         {
             args.Add("--split-chapters");
+        }
+
+        if (settings.VerboseDownloaderOutput)
+        {
+            args.Add("--verbose");
         }
 
         // TODO: Consider moving this logic to the individual types, via the interface.
