@@ -62,9 +62,9 @@ internal static class Runner
         if (knownExitCodes is not null &&
             knownExitCodes.ContainsKey(exitCode))
         {
-            return Result.Fail($"External program \"{settings.Program.Name}\" reported error #{exitCode}: {knownExitCodes[exitCode]}.");
+            return Result.Fail($"External program \"{settings.Program.Name}\" reported error {exitCode}: {knownExitCodes[exitCode]}.");
         }
 
-        return Result.Fail($"External program \"{settings.Program.Name}\" reported an error (#{exitCode}).");
+        return Result.Fail($"External program \"{settings.Program.Name}\" reported an error ({exitCode}).");
     }
 }
