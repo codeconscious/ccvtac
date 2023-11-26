@@ -18,7 +18,7 @@ internal static class Runner
             FileName = settings.Program.Name,
             Arguments = settings.Args,
             UseShellExecute = false,
-            RedirectStandardOutput = settings.RedirectStandardOutput,
+            RedirectStandardOutput = false,
             RedirectStandardError = false,
             CreateNoWindow = true,
             WorkingDirectory = settings.WorkingDirectory
@@ -30,21 +30,6 @@ internal static class Runner
         {
             return Result.Fail($"Could not start {settings.Program.Name}. " +
                                $"Please install it from {settings.Program.Url}.");
-        }
-
-        if (settings.RedirectStandardOutput)
-        {
-            try
-            {
-                string path = Path.Combine( settings.WorkingDirectory, "supplementaryOutput.txt");
-                string output = process.StandardOutput.ReadToEnd();
-                File.WriteAllText(path, output);
-            }
-            catch (Exception ex)
-            {
-                printer.Error("Error saving the supplementary output: " + ex.Message);
-                throw;
-            }
         }
 
         process.WaitForExit();

@@ -64,8 +64,7 @@ internal static class Downloader
             UtilitySettings supplementaryDownloadSettings = new(
                 ExternalProgram,
                 supplementaryArgs,
-                userSettings.WorkingDirectory!,
-                false
+                userSettings.WorkingDirectory!
             );
 
             Result<int> supplementaryDownloadResult = Runner.Run(supplementaryDownloadSettings, printer);
