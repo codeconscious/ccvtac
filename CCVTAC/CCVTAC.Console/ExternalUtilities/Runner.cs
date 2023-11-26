@@ -5,9 +5,7 @@ namespace CCVTAC.Console.ExternalUtilities;
 
 internal static class Runner
 {
-    internal static Result Run(UtilitySettings settings,
-                               Printer printer,
-                               IDictionary<int, string>? knownExitCodes = null)
+    internal static Result Run(UtilitySettings settings, Printer printer)
     {
         Stopwatch stopwatch = new();
         stopwatch.Start();
@@ -59,10 +57,10 @@ internal static class Runner
             return Result.Ok();
         }
 
-        if (knownExitCodes is not null &&
-            knownExitCodes.ContainsKey(exitCode))
+        if (settings.ExitCodes is not null &&
+            settings.ExitCodes.ContainsKey(exitCode))
         {
-            return Result.Fail($"External program \"{settings.Program.Name}\" reported error {exitCode}: {knownExitCodes[exitCode]}.");
+            return Result.Fail($"External program \"{settings.Program.Name}\" reported error {exitCode}: {settings.ExitCodes[exitCode]}.");
         }
 
         return Result.Fail($"External program \"{settings.Program.Name}\" reported an error ({exitCode}).");

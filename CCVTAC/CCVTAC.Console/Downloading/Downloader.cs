@@ -35,14 +35,8 @@ internal static class Downloader
             downloadEntity.VideoDownloadType,
             downloadEntity.PrimaryResource.FullResourceUrl);
 
-        UtilitySettings downloadToolSettings = new(
-            ExternalProgram,
-            args,
-            userSettings.WorkingDirectory!
-        );
-
         // Source of error codes: https://github.com/yt-dlp/yt-dlp/issues/4262#issuecomment-1173133105
-        Dictionary<int, string> ytdlpExitCodes = new()
+        Dictionary<int, string> downloaderExitCodes = new()
         {
             { 0, "Success" },
             { 1, "Unspecific error" },
@@ -51,7 +45,14 @@ internal static class Downloader
             { 101, "Download cancelled by --max-downloads, etc." },
         };
 
-        Result downloadResult = Runner.Run(downloadToolSettings, printer, ytdlpExitCodes);
+        UtilitySettings downloadToolSettings = new(
+            ExternalProgram,
+            args,
+            userSettings.WorkingDirectory!,
+            downloaderExitCodes
+        );
+
+        Result downloadResult = Runner.Run(downloadToolSettings, printer);
 
         if (downloadResult.IsFailed)
         {
@@ -74,6 +75,7 @@ internal static class Downloader
                 ExternalProgram,
                 supplementaryArgs,
                 userSettings.WorkingDirectory!,
+                downloaderExitCodes,
                 false
             );
 

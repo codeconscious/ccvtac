@@ -10,5 +10,6 @@ internal sealed record UtilitySettings(
     ExternalProgram Program,
     string Args,
     string WorkingDirectory,
+    Dictionary<int, string>? ExitCodes = null,
     bool RedirectStandardOutput = false
 );
