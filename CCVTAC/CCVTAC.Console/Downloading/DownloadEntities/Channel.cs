@@ -9,7 +9,8 @@ public sealed class Channel : IDownloadEntity
 {
     public static IEnumerable<Regex> Regexes => new List<Regex>
     {
-        new(@"(?:www\.)?youtube\.com/(?:c/|channel/|@|user/)([\w\-]+)")
+        // URL reference: https://help.unmetric.com/en/articles/1330396-getting-a-youtube-channel-url#h_19f80839bc
+        new("""((?:www\.)?youtube\.com\/(?:channel\/|c\/|user\/|@)(?:[\w\-]+))""")
     };
 
     public DownloadType DownloadType => DownloadType.Media;
