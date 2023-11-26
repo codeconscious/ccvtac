@@ -7,14 +7,19 @@ namespace CCVTAC.Console.Downloading.DownloadEntities;
 /// </summary>
 public interface IDownloadEntity
 {
-    public DownloadType DownloadType { get; }
-    public MediaDownloadType VideoDownloadType { get; }
     public static IEnumerable<Regex> Regexes { get; } = Enumerable.Empty<Regex>();
 
-    public ResourceUrlSet PrimaryResource { get; init; }
-    public ResourceUrlSet? SupplementaryResource { get; init; }
+    public DownloadType DownloadType { get; }
+    public MediaDownloadType VideoDownloadType { get; }
 
-    public static bool IsMatch(string input) =>
-        input is not null &&
-        Regexes.Any(r => r.IsMatch(input));
+    /// <summary>
+    /// The ID of the primary resource to be downloaded.
+    /// </summary>
+    public ResourceUrlSet PrimaryResource { get; init; }
+
+    /// <summary>
+    /// Optional ID of a supplementary resource to be downloaded.
+    /// (This will generally be the playlist to which a single video is attached.)
+    /// </summary>
+    public ResourceUrlSet? SupplementaryResource { get; init; }
 }

@@ -10,7 +10,7 @@ internal static class Downloader
     internal static ExternalProgram ExternalProgram = new(
         "yt-dlp",
         "https://github.com/yt-dlp/yt-dlp/",
-        "YouTube video, playlist, and channel media downloads, metadata downloads, and audio extraction"
+        "YouTube media and metadata downloads, plus audio extraction"
     );
 
     internal static Result<string> Run(string url,
@@ -60,6 +60,7 @@ internal static class Downloader
             printer.Warning("However, post-processing will still be attempted."); // TODO: これで良い？
         }
 
+        // Do the supplementary download, if any such data was passed in.
         if (downloadResult.IsSuccess &&
             downloadEntity.SupplementaryResource is ResourceUrlSet supplementary)
         {
@@ -75,9 +76,7 @@ internal static class Downloader
                 ExternalProgram,
                 supplementaryArgs,
                 userSettings.WorkingDirectory!,
-                downloaderExitCodes,
-                false
-            );
+                downloaderExitCodes            );
 
             Result<int> supplementaryDownloadResult = Runner.Run(supplementaryDownloadSettings, printer);
 
@@ -124,9 +123,9 @@ internal static class Downloader
             args.Add("--verbose");
         }
 
-        // TODO: Consider moving this logic to the individual types, via the interface.
         if (downloadType is DownloadType.Media &&
-            videoDownloadType is not MediaDownloadType.Video)
+            videoDownloadType is not MediaDownloadType.Video &&
+            videoDownloadType is not MediaDownloadType.VideoOnPlaylist)
         {
             args.Add($"--sleep-interval {settings.SleepSecondsBetweenDownloads}");
         }

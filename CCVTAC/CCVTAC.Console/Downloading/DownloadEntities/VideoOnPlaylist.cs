@@ -2,7 +2,10 @@ using System.Text.RegularExpressions;
 
 namespace CCVTAC.Console.Downloading.DownloadEntities;
 
-public class VideoOnPlaylist : IDownloadEntity
+/// <summary>
+/// A single video that is associated to a supplementary playlist.
+/// </summary>
+public sealed class VideoOnPlaylist : IDownloadEntity
 {
     public static IEnumerable<Regex> Regexes => new List<Regex>
     {

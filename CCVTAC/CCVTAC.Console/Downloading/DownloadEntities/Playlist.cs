@@ -2,6 +2,9 @@ using System.Text.RegularExpressions;
 
 namespace CCVTAC.Console.Downloading.DownloadEntities;
 
+/// <summary>
+/// A single playlist which contains at least one video.
+/// </summary>
 public sealed class Playlist : IDownloadEntity
 {
     public static IEnumerable<Regex> Regexes => new List<Regex>
@@ -13,9 +16,6 @@ public sealed class Playlist : IDownloadEntity
     public MediaDownloadType VideoDownloadType => MediaDownloadType.Playlist;
 
     public static string UrlBase => "https://www.youtube.com/playlist?list=";
-    // public string ResourceId { get; init; }
-    // public string? SecondaryResourceId { get; }
-    // public string FullResourceUrl => UrlBase + ResourceId;
 
     public ResourceUrlSet PrimaryResource { get; init; }
     public ResourceUrlSet? SupplementaryResource { get; init; }
