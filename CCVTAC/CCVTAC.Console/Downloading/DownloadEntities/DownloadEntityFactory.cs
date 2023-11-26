@@ -35,12 +35,7 @@ public static class DownloadEntityFactory
             return Result.Fail("Unsupported or invalid URL. (No matching URL found.)");
         }
 
-        if (typesWithResourceIds.Count > 1)
-        {
-            return Result.Fail("More than one matching regex pattern was unexpectedly found.");
-        }
-
-        (MediaDownloadType type, string resourceId, string? supplementaryResourceId) = typesWithResourceIds.Single();
+        (MediaDownloadType type, string resourceId, string? supplementaryResourceId) = typesWithResourceIds.First();
 
         return type switch
         {
@@ -48,7 +43,7 @@ public static class DownloadEntityFactory
             MediaDownloadType.Video =>           Result.Ok((IDownloadEntity) new Video(resourceId)),
             MediaDownloadType.Playlist =>        Result.Ok((IDownloadEntity) new Playlist(resourceId)),
             MediaDownloadType.Channel=>          Result.Ok((IDownloadEntity) new Channel(resourceId)),
-            _ =>                            Result.Fail("Unsupported or invalid URL. (No matching download type found.)")
+            _ =>                                 Result.Fail("Unsupported or invalid URL. (No matching download type found.)")
         };
     }
 }
