@@ -31,6 +31,10 @@ internal static class Renamer
             string.Empty,
             "Remove unneeded labels"),
         new(
+            new Regex("""\s?[\(（]歌詞入り[\)）]"""),
+            string.Empty,
+            "Remove \" (歌詞入り)\""),
+        new(
             new Regex("""【(.+)】(.+)"""), // 【person】title
             "%<1>s - %<2>s",
             "PERSON - TRACK"),
