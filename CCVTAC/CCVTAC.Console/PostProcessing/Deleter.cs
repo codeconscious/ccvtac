@@ -7,7 +7,7 @@ internal static class Deleter
     public static void Run(string workingDirectory, Printer printer)
     {
         DirectoryInfo dir = new(workingDirectory);
-        List<string> deletableExtensions = new() { ".json", ".jpg" };
+        List<string> deletableExtensions = [".json", ".jpg"];
 
         printer.Print($"Deleting now-unnecessary {string.Join(" and ", deletableExtensions)} files...");
 

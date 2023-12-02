@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.IO;
 using System.Threading;
 using CCVTAC.Console.Settings;
 using Spectre.Console;

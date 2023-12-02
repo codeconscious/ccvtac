@@ -2,7 +2,6 @@
 
 Features that I might consider as features or improvements in the future. Not all ideas might be viable, or even _good_, but this helps me avoid forgetting them until I decide what to do.
 
-- Make upload-year-to-year-tag the default instead of opt-in as it is now
 - Add a post-processing–only option for already-downloaded temporary files (via aborted downloads, etc.)
 - Stop downloading if there are repeated errors from yt-dlp
 - Logging levels (current/full vs. light)
@@ -11,10 +10,9 @@ Features that I might consider as features or improvements in the future. Not al
 - yt-dlp can handle tabs on YouTube channels too, so look into supporting those
 - Changing, saving, and reloading of settings while running the program
 - Save errors to a file with details
-- Possible to include yt-dlp as a binary? (Even if so, does it make sense to?)
+- Possible to include yt-dlp itself as a binary? (Even if so, does it make sense to?)
 - Count generated files for final output
 - Set up actual releases (likely once .NET 8 is released)
-- When a video URL also contains a playlist ID, download the playlist JSON and add it to the tags
 - Add audio normalization, maybe (I need to find a command line tool or NuGet package that works with M4A files)
 
 ## Rejected

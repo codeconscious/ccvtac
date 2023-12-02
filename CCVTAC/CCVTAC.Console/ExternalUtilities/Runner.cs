@@ -1,10 +1,11 @@
 using System.Diagnostics;
+using System.IO;
 
 namespace CCVTAC.Console.ExternalUtilities;
 
 internal static class Runner
 {
-    internal static Result<int> Run(UtilitySettings settings, Printer printer)
+    internal static Result Run(UtilitySettings settings, Printer printer)
     {
         Stopwatch stopwatch = new();
         stopwatch.Start();
@@ -34,8 +35,19 @@ internal static class Runner
         process.WaitForExit();
 
         printer.Print($"Done with {settings.Program.Purpose} in {stopwatch.ElapsedMilliseconds:#,##0}ms");
-        return process.ExitCode == 0
-            ? Result.Ok(process.ExitCode)
-            : Result.Fail($"Full or partial download error ({settings.Program.Name} error {process.ExitCode}).");
+
+        int exitCode = process.ExitCode;
+        if (exitCode == 0)
+        {
+            return Result.Ok();
+        }
+
+        if (settings.ExitCodes is not null &&
+            settings.ExitCodes.ContainsKey(exitCode))
+        {
+            return Result.Fail($"External program \"{settings.Program.Name}\" reported error {exitCode}: {settings.ExitCodes[exitCode]}.");
+        }
+
+        return Result.Fail($"External program \"{settings.Program.Name}\" reported an error ({exitCode}).");
     }
 }

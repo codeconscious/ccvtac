@@ -61,7 +61,7 @@ public sealed class Setup(UserSettings userSettings, Printer printer)
 
     internal Result<CollectionMetadata> GetCollectionJson(string workingDirectory)
     {
-        Regex regex = new("""(?<=\[)[\w\-]{20,}(?=\]\.info.json)"""); // Assumes ID length is >= 20 chars.
+        Regex regex = new("""(?<=\[)[\w\-]{17,}(?=\]\.info.json)"""); // Assumes a minimum ID length.
 
         try
         {

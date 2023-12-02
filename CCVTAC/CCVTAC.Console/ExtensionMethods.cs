@@ -38,10 +38,24 @@ public static class ExtensionMethods
         );
     }
 
+    /// <summary>
+    /// Determines whether a string is populated, containing any text.
+    /// </summary>
+    /// <param name="maybeText"></param>
+    /// <param name="allowWhiteSpace">Specifies whether whitespace can be counted as characters.</param>
+    /// <returns>true if the string contains text; otherwise, false.</returns>
     public static bool HasText(this string? maybeText, bool allowWhiteSpace = false)
     {
         return allowWhiteSpace
             ? !string.IsNullOrEmpty(maybeText)
             : !string.IsNullOrWhiteSpace(maybeText);
     }
+
+    /// <summary>
+    /// Determines whether a sequence contains no elements and, thus, is empty.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="collection"></param>
+    /// <returns>true if the source sequence contains no elements; otherwise, false.</returns>
+    public static bool IsEmpty<T>(this IEnumerable<T> collection) => !collection.Any();
 }

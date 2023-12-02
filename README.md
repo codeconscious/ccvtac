@@ -34,4 +34,4 @@ If your `settings.json` file does not exist, it will created in the application 
 
 Once the program is running, simply enter at least one YouTube video, playlist, or channel URL at the prompt and press Enter.
 
-Recommended: Periodically ensure you're running the latest version of yt-dlp using `sudo yt-dlp -U` (or whatever command is appropriate for your system), especially if you start experiencing download errors.
+Recommended: Periodically ensure you're running the latest version of yt-dlp using `sudo yt-dlp -U` (or whatever command is appropriate for your system—see the [yt-dlp GitHub page](https://github.com/yt-dlp/yt-dlp#update) for more), especially if you start experiencing download errors.

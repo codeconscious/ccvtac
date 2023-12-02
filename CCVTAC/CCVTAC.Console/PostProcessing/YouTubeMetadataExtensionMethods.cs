@@ -66,7 +66,10 @@ public static class YouTubeMetadataExtensionMethods
             sb.AppendLine();
             sb.AppendLine($"■ Playlist name: {collectionData.Title}");
             sb.AppendLine($"■ Playlist URL: {collectionData.WebpageUrl}");
-            sb.AppendLine($"■ Playlist index: {videoData.PlaylistIndex}");
+            if (videoData.PlaylistIndex is uint index)
+            {
+                sb.AppendLine($"■ Playlist index: {index}");
+            }
             if (collectionData.Description.HasText())
             {
                 sb.AppendLine($"■ Playlist description: {collectionData.Description}");
