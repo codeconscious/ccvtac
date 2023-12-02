@@ -13,6 +13,19 @@ internal static class Downloader
         "YouTube media and metadata downloads, plus audio extraction"
     );
 
+    /// <summary>
+    /// All known error codes returned by yt-dlp with their meanings.
+    /// </summary>
+    /// <remarks>Source of error codes: https://github.com/yt-dlp/yt-dlp/issues/4262#issuecomment-1173133105</remarks>
+    internal static Dictionary<int, string> DownloaderExitCodes = new()
+    {
+        { 0, "Success" },
+        { 1, "Unspecific error" },
+        { 2, "Error in provided options" },
+        { 100, "yt-dlp must restart for update to complete" },
+        { 101, "Download cancelled by --max-downloads, etc." },
+    };
+
     internal static Result<string> Run(string url,
                                        UserSettings userSettings,
                                        Printer printer)
@@ -35,21 +48,11 @@ internal static class Downloader
             downloadEntity.VideoDownloadType,
             downloadEntity.PrimaryResource.FullResourceUrl);
 
-        // Source of error codes: https://github.com/yt-dlp/yt-dlp/issues/4262#issuecomment-1173133105
-        Dictionary<int, string> downloaderExitCodes = new()
-        {
-            { 0, "Success" },
-            { 1, "Unspecific error" },
-            { 2, "Error in provided options" },
-            { 100, "yt-dlp must restart for update to complete" },
-            { 101, "Download cancelled by --max-downloads, etc." },
-        };
-
         UtilitySettings downloadToolSettings = new(
             ExternalProgram,
             args,
             userSettings.WorkingDirectory!,
-            downloaderExitCodes
+            DownloaderExitCodes
         );
 
         Result downloadResult = Runner.Run(downloadToolSettings, printer);
@@ -76,7 +79,7 @@ internal static class Downloader
                 ExternalProgram,
                 supplementaryArgs,
                 userSettings.WorkingDirectory!,
-                downloaderExitCodes            );
+                DownloaderExitCodes            );
 
             Result<int> supplementaryDownloadResult = Runner.Run(supplementaryDownloadSettings, printer);
 
