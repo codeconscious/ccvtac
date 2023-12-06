@@ -113,6 +113,8 @@ internal static class Program
             printer.PrintEmptyLines(1);
         }
 
+        History.Append(batchUrls, DateTime.Now, printer);
+
         nuint currentBatch = 0;
         bool haveProcessedAny = false;
 
@@ -167,8 +169,6 @@ internal static class Program
             {
                 return NextAction.Continue;
             }
-
-            History.Append(url, printer);
 
             var postProcessor = new PostProcessing.Setup(userSettings, printer);
             postProcessor.Run(); // TODO: Think about if/how to handle leftover temp files due to errors.
