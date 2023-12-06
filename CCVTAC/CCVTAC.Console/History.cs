@@ -7,21 +7,26 @@ namespace CCVTAC.Console;
 /// Handles storing, retrieving, and (eventually) analyzing data relating
 /// to URLs that the user has entered.
 /// </summary>
-public static class History
+public class History
 {
-    private static readonly string FileName = "history.log";
     private static readonly char Separator = ';';
+    private string FilePath { get; init; }
+
+    public History(string filePath)
+    {
+        FilePath = filePath;
+    }
 
     /// <summary>
     /// Add a URL and related data to the history file.
     /// </summary>
-    public static void Append(IList<string> urls, DateTime entryTime, Printer printer)
+    public void Append(IList<string> urls, DateTime entryTime, Printer printer)
     {
         try
         {
             string serializedEntryTime = JsonSerializer.Serialize(entryTime);
             IEnumerable<string> lines = urls.Select(url => serializedEntryTime + Separator + url);
-            File.AppendAllLines(FileName, lines);
+            File.AppendAllLines(FilePath, lines);
             printer.Print($"Added {urls.Count} URL{(urls.Count == 1 ? "" : "s")} to the history log.");
         }
         catch (Exception ex)

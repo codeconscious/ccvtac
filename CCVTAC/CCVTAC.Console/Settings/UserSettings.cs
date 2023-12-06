@@ -27,6 +27,13 @@ public sealed class UserSettings
     public string MoveToDirectory { get; init; } = string.Empty;
 
     /// <summary>
+    /// The file to which history should be logged.
+    /// </summary>
+    [JsonPropertyName("historyLog")]
+    [JsonRequired]
+    public string HistoryLogFilePath { get; init; } = string.Empty;
+
+    /// <summary>
     /// Specifies whether video chapters should be split into a separate
     /// audio files (true) or instead be ignored such that there is one combined
     /// audio file for the entire video (false). Defaults to true.

@@ -74,10 +74,11 @@ internal static class Program
         }
 
         ResultTracker resultTracker = new(printer);
+        History historyLogger = new(userSettings.HistoryLogFilePath);
 
         while (true)
         {
-            NextAction nextAction = ProcessBatch(userSettings, resultTracker, printer);
+            NextAction nextAction = ProcessBatch(userSettings, resultTracker, historyLogger, printer);
             if (nextAction != NextAction.Continue)
             {
                 break;
@@ -94,7 +95,11 @@ internal static class Program
     /// <param name="resultHandler"></param>
     /// <param name="printer"></param>
     /// <returns>A bool indicating whether to quit the program (true) or continue (false).</returns>
-    private static NextAction ProcessBatch(UserSettings userSettings, ResultTracker resultHandler, Printer printer)
+    private static NextAction ProcessBatch(
+        UserSettings userSettings,
+        ResultTracker resultHandler,
+        History historyLogger,
+        Printer printer)
     {
         string userInput = printer.GetInput(_inputPrompt);
 
@@ -113,7 +118,7 @@ internal static class Program
             printer.PrintEmptyLines(1);
         }
 
-        History.Append(batchUrls, DateTime.Now, printer);
+        historyLogger.Append(batchUrls, DateTime.Now, printer);
 
         nuint currentBatch = 0;
         bool haveProcessedAny = false;

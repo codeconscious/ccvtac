@@ -37,6 +37,7 @@ public static class SettingsService
             },
             { "Working directory", settings.WorkingDirectory },
             { "Move-to directory", settings.MoveToDirectory },
+            { "History log file", settings.HistoryLogFilePath },
         }.ToImmutableList();
 
         var table = new Table();
