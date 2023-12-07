@@ -9,7 +9,7 @@ internal static class Program
 {
     private static readonly string[] _helpCommands = ["-h", "--help"];
     private static readonly string[] _quitCommands = ["q", "quit", "exit", "bye"];
-    private const string _inputPrompt = "Enter one or more YouTube resource URLs (or 'q' to quit):";
+    private const string _inputPrompt = "Enter one or more YouTube media URLs (or 'q' to quit):";
 
     static void Main(string[] args)
     {
@@ -102,12 +102,13 @@ internal static class Program
         Printer printer)
     {
         string userInput = printer.GetInput(_inputPrompt);
+        DateTime inputTime = DateTime.Now;
 
         Stopwatch topStopwatch = new();
         topStopwatch.Start();
 
         var batchUrls = userInput.Split(" ")
-                                 .Where(i => i.HasText()) // Remove multiple spaces.
+                                 .Where(i => i.HasText())
                                  .Distinct()
                                  .ToImmutableList();
 
@@ -118,8 +119,6 @@ internal static class Program
             printer.PrintEmptyLines(1);
         }
 
-        historyLogger.Append(batchUrls, DateTime.Now, printer);
-
         nuint currentBatch = 0;
         bool haveProcessedAny = false;
 
@@ -129,6 +128,8 @@ internal static class Program
             {
                 return NextAction.QuitAtUserRequest;
             }
+
+            historyLogger.Append(url, inputTime, printer);
 
             var tempFiles = IoUtilties.Directories.GetDirectoryFiles(userSettings.WorkingDirectory);
             if (tempFiles.Any())

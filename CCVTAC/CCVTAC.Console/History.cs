@@ -20,14 +20,13 @@ public class History
     /// <summary>
     /// Add a URL and related data to the history file.
     /// </summary>
-    public void Append(IList<string> urls, DateTime entryTime, Printer printer)
+    public void Append(string url, DateTime entryTime, Printer printer)
     {
         try
         {
             string serializedEntryTime = JsonSerializer.Serialize(entryTime);
-            IEnumerable<string> lines = urls.Select(url => serializedEntryTime + Separator + url);
-            File.AppendAllLines(FilePath, lines);
-            printer.Print($"Added {urls.Count} URL{(urls.Count == 1 ? "" : "s")} to the history log.");
+            File.AppendAllText(FilePath, serializedEntryTime + Separator + url + Environment.NewLine);
+            printer.Print($"Added \"{url}\" to the history log.");
         }
         catch (Exception ex)
         {
