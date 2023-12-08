@@ -1,19 +1,36 @@
 using System.IO;
+using System.Text.Json;
 
 namespace CCVTAC.Console;
 
-public static class History
+/// <summary>
+/// Handles storing, retrieving, and (eventually) analyzing data relating
+/// to URLs that the user has entered.
+/// </summary>
+public class History
 {
-    public static void Append(string url, Printer printer)
+    private static readonly char Separator = ';';
+    private string FilePath { get; init; }
+
+    public History(string filePath)
+    {
+        FilePath = filePath;
+    }
+
+    /// <summary>
+    /// Add a URL and related data to the history file.
+    /// </summary>
+    public void Append(string url, DateTime entryTime, Printer printer)
     {
         try
         {
-            File.AppendAllText("history.log", url + Environment.NewLine);
-            printer.Print("Added URL to the history log.");
+            string serializedEntryTime = JsonSerializer.Serialize(entryTime);
+            File.AppendAllText(FilePath, serializedEntryTime + Separator + url + Environment.NewLine);
+            printer.Print($"Added \"{url}\" to the history log.");
         }
         catch (Exception ex)
         {
-            printer.Error($"Could not append URL {url} to history log: " + ex.Message);
+            printer.Error($"Could not append URL(s) to history log: " + ex.Message);
         }
     }
 }
