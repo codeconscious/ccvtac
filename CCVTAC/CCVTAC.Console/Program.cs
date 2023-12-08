@@ -30,7 +30,7 @@ internal static class Program
         }
         UserSettings userSettings = settingsResult.Value;
 
-        History history = new(userSettings.HistoryLogFilePath);
+        History history = new(userSettings.HistoryFilePath, userSettings.HistoryDisplayCount);
 
         if (args.Length > 0 && _historyCommands.Contains(args[0].ToLowerInvariant()))
         {
@@ -62,7 +62,7 @@ internal static class Program
     /// <summary>
      /// Performs initial setup, initiates each download request, and prints the final summary when the user requests to end the program.
     /// </summary>
-    private static void Start(UserSettings userSettings, History historyLogger, Printer printer)
+    private static void Start(UserSettings userSettings, History history, Printer printer)
     {
         // Verify the external program for downloading is installed on the system.
         if (Downloading.Downloader.ExternalProgram.ProgramExists() is { IsFailed: true })
@@ -84,11 +84,10 @@ internal static class Program
         }
 
         ResultTracker resultTracker = new(printer);
-        History historyLogger = new(userSettings.HistoryLogFilePath);
 
         while (true)
         {
-            NextAction nextAction = ProcessBatch(userSettings, resultTracker, historyLogger, printer);
+            NextAction nextAction = ProcessBatch(userSettings, resultTracker, history, printer);
             if (nextAction != NextAction.Continue)
             {
                 break;

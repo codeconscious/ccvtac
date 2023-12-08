@@ -1,5 +1,6 @@
 using System.IO;
 using System.Text.Json;
+using System.Threading;
 using Spectre.Console;
 
 namespace CCVTAC.Console;
@@ -12,10 +13,12 @@ public class History
 {
     private static readonly char Separator = ';';
     private string FilePath { get; init; }
+    private byte DisplayCount { get; init; }
 
-    public History(string filePath)
+    public History(string filePath, byte displayCount)
     {
         FilePath = filePath;
+        DisplayCount = displayCount;
     }
 
     /// <summary>
@@ -41,13 +44,15 @@ public class History
         {
             IEnumerable<IGrouping<DateTime, string>> historyData =
                 File.ReadAllLines(FilePath)
-                    .TakeLast(25)
+                    .TakeLast(DisplayCount)
                     .Select(line => line.Split(Separator))
                     .Where(lineItems => lineItems.Length == 2)
                     .GroupBy(line => DateTime.Parse(line[0]), line => line[1]);
 
             Table table = new();
+            table.Border(TableBorder.None);
             table.AddColumns("Time", "URL");
+            table.Columns[0].PadRight(3);
 
             string formattedTime, urls;
             foreach (var thisDate in historyData)

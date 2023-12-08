@@ -19,7 +19,7 @@ public static class SettingsService
         if (header.HasText())
             printer.Print(header!);
 
-        string historyFileNote = File.Exists(settings.HistoryLogFilePath)
+        string historyFileNote = File.Exists(settings.HistoryFilePath)
             ? "exists"
             : "will be created";
 
@@ -41,7 +41,7 @@ public static class SettingsService
             },
             { "Working directory", settings.WorkingDirectory },
             { "Move-to directory", settings.MoveToDirectory },
-            { "History log file", $"{settings.HistoryLogFilePath} ({historyFileNote})" },
+            { "History log file", $"{settings.HistoryFilePath} ({historyFileNote})" },
         }.ToImmutableList();
 
         var table = new Table();
