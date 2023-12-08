@@ -8,8 +8,9 @@ namespace CCVTAC.Console;
 internal static class Program
 {
     private static readonly string[] _helpCommands = ["-h", "--help"];
+    private static readonly string[] _historyCommands = ["--history"];
     private static readonly string[] _quitCommands = ["q", "quit", "exit", "bye"];
-    private const string _inputPrompt = "Enter one or more YouTube resource URLs (or 'q' to quit):";
+    private const string _inputPrompt = "Enter one or more YouTube media URLs (or 'q' to quit):";
 
     static void Main(string[] args)
     {
@@ -21,6 +22,24 @@ internal static class Program
             return;
         }
 
+        var settingsResult = SettingsService.GetUserSettings();
+        if (settingsResult.IsFailed)
+        {
+            printer.Errors("Settings file errors:", settingsResult);
+            return;
+        }
+        UserSettings userSettings = settingsResult.Value;
+
+        History history = new(userSettings.HistoryLogFilePath);
+
+        if (args.Length > 0 && _historyCommands.Contains(args[0].ToLowerInvariant()))
+        {
+            history.PrintRecent(printer);
+            return;
+        }
+
+        SettingsService.PrintSummary(userSettings, printer, "Settings loaded OK.");
+
         // Catch the user's pressing Ctrl-C (SIGINT).
         System.Console.CancelKeyPress += delegate
         {
@@ -30,7 +49,7 @@ internal static class Program
         // Top-level `try` block to catch and pretty-print unexpected exceptions.
         try
         {
-            Start(printer);
+            Start(userSettings, history, printer);
         }
         catch (Exception topException)
         {
@@ -43,7 +62,7 @@ internal static class Program
     /// <summary>
      /// Performs initial setup, initiates each download request, and prints the final summary when the user requests to end the program.
     /// </summary>
-    private static void Start(Printer printer)
+    private static void Start(UserSettings userSettings, History historyLogger, Printer printer)
     {
         // Verify the external program for downloading is installed on the system.
         if (Downloading.Downloader.ExternalProgram.ProgramExists() is { IsFailed: true })
@@ -54,15 +73,6 @@ internal static class Program
             printer.Print("Pass '--help' to this program for more information.");
             return;
         }
-
-        var settingsResult = SettingsService.GetUserSettings();
-        if (settingsResult.IsFailed)
-        {
-            printer.Errors("Settings file errors:", settingsResult);
-            return;
-        }
-        UserSettings userSettings = settingsResult.Value;
-        SettingsService.PrintSummary(userSettings, printer, "Settings loaded OK.");
 
         // The working directory should be empty.
         var tempFiles = IoUtilties.Directories.GetDirectoryFiles(userSettings.WorkingDirectory);
@@ -77,7 +87,7 @@ internal static class Program
 
         while (true)
         {
-            NextAction nextAction = ProcessBatch(userSettings, resultTracker, printer);
+            NextAction nextAction = ProcessBatch(userSettings, resultTracker, historyLogger, printer);
             if (nextAction != NextAction.Continue)
             {
                 break;
@@ -94,15 +104,20 @@ internal static class Program
     /// <param name="resultHandler"></param>
     /// <param name="printer"></param>
     /// <returns>A bool indicating whether to quit the program (true) or continue (false).</returns>
-    private static NextAction ProcessBatch(UserSettings userSettings, ResultTracker resultHandler, Printer printer)
+    private static NextAction ProcessBatch(
+        UserSettings userSettings,
+        ResultTracker resultHandler,
+        History historyLogger,
+        Printer printer)
     {
         string userInput = printer.GetInput(_inputPrompt);
+        DateTime inputTime = DateTime.Now;
 
         Stopwatch topStopwatch = new();
         topStopwatch.Start();
 
         var batchUrls = userInput.Split(" ")
-                                 .Where(i => i.HasText()) // Remove multiple spaces.
+                                 .Where(i => i.HasText())
                                  .Distinct()
                                  .ToImmutableList();
 
@@ -122,6 +137,8 @@ internal static class Program
             {
                 return NextAction.QuitAtUserRequest;
             }
+
+            historyLogger.Append(url, inputTime, printer);
 
             var tempFiles = IoUtilties.Directories.GetDirectoryFiles(userSettings.WorkingDirectory);
             if (tempFiles.Any())
@@ -167,8 +184,6 @@ internal static class Program
             {
                 return NextAction.Continue;
             }
-
-            History.Append(url, printer);
 
             var postProcessor = new PostProcessing.Setup(userSettings, printer);
             postProcessor.Run(); // TODO: Think about if/how to handle leftover temp files due to errors.

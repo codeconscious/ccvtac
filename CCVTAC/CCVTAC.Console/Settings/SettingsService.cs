@@ -19,6 +19,10 @@ public static class SettingsService
         if (header.HasText())
             printer.Print(header!);
 
+        string historyFileNote = File.Exists(settings.HistoryLogFilePath)
+            ? "exists"
+            : "will be created";
+
         var settingPairs = new Dictionary<string, string>()
         {
             { $"Audio file format", settings.AudioFormat.ToUpperInvariant() },
@@ -37,6 +41,7 @@ public static class SettingsService
             },
             { "Working directory", settings.WorkingDirectory },
             { "Move-to directory", settings.MoveToDirectory },
+            { "History log file", $"{settings.HistoryLogFilePath} ({historyFileNote})" },
         }.ToImmutableList();
 
         var table = new Table();
@@ -51,15 +56,15 @@ public static class SettingsService
 
         printer.Print(table);
 
-        static string PluralizeIfNeeded(string term, int count)
+        static string PluralizeIfNeeded(string singularTerm, int count)
         {
-            return (term, count) switch
+            return (singularTerm, count) switch
             {
-                { term: "second", count: 1 } => term,
-                { term: "second", count: _ } => "seconds",
-                { term: "channel", count: 1 } => term,
-                { term: "channel", count: _ } => "channels",
-                _ => term
+                { singularTerm: "second", count: 1 } => singularTerm,
+                { singularTerm: "second", count: _ } => "seconds",
+                { singularTerm: "channel", count: 1 } => singularTerm,
+                { singularTerm: "channel", count: _ } => "channels",
+                _ => singularTerm
             };
         }
     }
