@@ -31,7 +31,7 @@ public class History
         }
         catch (Exception ex)
         {
-            printer.Error($"Could not append URL {url} to history log: " + ex.Message);
+            printer.Error($"Could not append URL(s) to history log: " + ex.Message);
         }
     }
 

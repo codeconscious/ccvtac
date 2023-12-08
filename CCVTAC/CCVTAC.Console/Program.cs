@@ -84,6 +84,7 @@ internal static class Program
         }
 
         ResultTracker resultTracker = new(printer);
+        History historyLogger = new(userSettings.HistoryLogFilePath);
 
         while (true)
         {
