@@ -1,6 +1,5 @@
 using System.IO;
 using System.Text.Json;
-using System.Threading;
 using Spectre.Console;
 
 namespace CCVTAC.Console;
@@ -38,7 +37,7 @@ public class History
         }
     }
 
-    public void PrintRecent(Printer printer)
+    public void DisplayRecent(Printer printer)
     {
         try
         {
@@ -66,7 +65,7 @@ public class History
         }
         catch (Exception ex)
         {
-            printer.Error($"Could not print recent history: {ex.Message}");
+            printer.Error($"Could not display recent history: {ex.Message}");
         }
     }
 }

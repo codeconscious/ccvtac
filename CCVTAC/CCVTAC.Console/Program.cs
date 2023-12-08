@@ -34,7 +34,7 @@ internal static class Program
 
         if (args.Length > 0 && _historyCommands.Contains(args[0].ToLowerInvariant()))
         {
-            history.PrintRecent(printer);
+            history.DisplayRecent(printer);
             return;
         }
 
