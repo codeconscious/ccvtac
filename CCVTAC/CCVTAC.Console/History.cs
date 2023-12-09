@@ -46,7 +46,8 @@ public class History
                     .TakeLast(DisplayCount)
                     .Select(line => line.Split(Separator))
                     .Where(lineItems => lineItems.Length == 2) // Only lines with date-times
-                    .GroupBy(line => DateTime.Parse(line[0]), line => line[1]);
+                    .GroupBy(line =>DateTime.Parse(line[0]),
+                             line => line[1]);
 
             Table table = new();
             table.Border(TableBorder.None);
@@ -54,7 +55,7 @@ public class History
             table.Columns[0].PadRight(3);
 
             string formattedTime, urls;
-            foreach (var thisDate in historyData)
+            foreach (IGrouping<DateTime, string> thisDate in historyData)
             {
                 formattedTime = $"{thisDate.Key:yyyy-MM-dd HH:mm:ss}";
                 urls = string.Join(Environment.NewLine, thisDate);

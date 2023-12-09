@@ -37,7 +37,7 @@ public sealed class UserSettings
     /// How many history entries to display.
     /// </summary>
     [JsonPropertyName("historyDisplayCount")]
-    public byte HistoryDisplayCount { get; init; } = 25;
+    public byte HistoryDisplayCount { get; init; } = 30;
 
     /// <summary>
     /// Specifies whether video chapters should be split into a separate
