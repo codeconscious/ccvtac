@@ -144,8 +144,6 @@ internal static class Program
                 continue;
             }
 
-            history.Append(url, inputTime, printer);
-
             var tempFiles = IoUtilties.Directories.GetDirectoryFiles(userSettings.WorkingDirectory);
             if (tempFiles.Any())
             {
@@ -183,6 +181,8 @@ internal static class Program
 
             Stopwatch jobStopwatch = new();
             jobStopwatch.Start();
+
+            history.Append(url, inputTime, printer);
 
             var downloadResult = Downloading.Downloader.Run(url, userSettings, printer);
             resultHandler.RegisterResult(downloadResult);
