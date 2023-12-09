@@ -10,7 +10,7 @@ internal static class Program
     private static readonly string[] _helpCommands = ["-h", "--help"];
     private static readonly string[] _historyCommands = ["--history"];
     private static readonly string[] _quitCommands = ["q", "quit", "exit", "bye"];
-    private const string _inputPrompt = "Enter one or more YouTube media URLs (or 'q' to quit):";
+    private const string _urlInputPrompt = "Enter one or more YouTube media URLs (or 'q' to quit):";
 
     static void Main(string[] args)
     {
@@ -22,7 +22,7 @@ internal static class Program
             return;
         }
 
-        var settingsResult = SettingsService.GetUserSettings();
+        Result<UserSettings> settingsResult = SettingsService.GetUserSettings();
         if (settingsResult.IsFailed)
         {
             printer.Errors("Settings file errors:", settingsResult);
@@ -110,7 +110,7 @@ internal static class Program
         History historyLogger,
         Printer printer)
     {
-        string userInput = printer.GetInput(_inputPrompt);
+        string userInput = printer.GetInput(_urlInputPrompt);
         DateTime inputTime = DateTime.Now;
 
         Stopwatch topStopwatch = new();
