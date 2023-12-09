@@ -7,16 +7,16 @@ namespace CCVTAC.Console;
 
 internal static class Program
 {
-    private static readonly string[] _helpCommands = ["-h", "--help"];
-    private static readonly string[] _historyCommands = ["--history"];
+    private static readonly string[] _helpFlags = ["-h", "--help"];
+    private static readonly string[] _historyCommands = ["--history", "history"];
     private static readonly string[] _quitCommands = ["q", "quit", "exit", "bye"];
-    private const string _urlInputPrompt = "Enter one or more YouTube media URLs (or 'q' to quit):";
+    private const string _urlInputPrompt = "Enter one or more YouTube media URLs, 'quit', or 'history':";
 
     static void Main(string[] args)
     {
         Printer printer = new();
 
-        if (args.Length > 0 && _helpCommands.Contains(args[0].ToLowerInvariant()))
+        if (args.Length > 0 && _helpFlags.Contains(args[0].ToLowerInvariant()))
         {
             Help.Print(printer);
             return;
@@ -107,12 +107,12 @@ internal static class Program
     private static NextAction ProcessBatch(
         UserSettings userSettings,
         ResultTracker resultHandler,
-        History historyLogger,
+        History history,
         Printer printer)
     {
         string userInput = printer.GetInput(_urlInputPrompt);
-        DateTime inputTime = DateTime.Now;
 
+        DateTime inputTime = DateTime.Now;
         Stopwatch topStopwatch = new();
         topStopwatch.Start();
 
@@ -138,7 +138,13 @@ internal static class Program
                 return NextAction.QuitAtUserRequest;
             }
 
-            historyLogger.Append(url, inputTime, printer);
+            if (_historyCommands.Contains(url.ToLowerInvariant()))
+            {
+                history.DisplayRecent(printer);
+                continue;
+            }
+
+            history.Append(url, inputTime, printer);
 
             var tempFiles = IoUtilties.Directories.GetDirectoryFiles(userSettings.WorkingDirectory);
             if (tempFiles.Any())
