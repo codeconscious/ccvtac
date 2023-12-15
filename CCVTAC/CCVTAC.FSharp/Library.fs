@@ -5,16 +5,20 @@ module Say =
         printfn "Hello %s" name
 
 module YouTube =
-    type MediaId = { Id: string }
-    type SingleId = { MediaId: MediaId }
-    type IdPair = { PrimaryId: MediaId; SupplementaryId: MediaId }
+    type ResourceId = string
+
+    type PlaylistVideo = { VideoId: ResourceId; PlaylistId: ResourceId }
+    type Video = { Id: ResourceId }
+    type StandardPlaylist = { Id: ResourceId }
+    type ReleasePlaylist = { Id: ResourceId } // Entries on "Releases" tabs on YouTube
+    type Channel = { Id: ResourceId }
 
     type MediaType =
-        | PlaylistVideo of resourcePair: IdPair
-        | Video of resourceId: SingleId
-        | StandardPlaylist of resourceId: SingleId
-        | ReleasePlaylist of resourceId: SingleId
-        | Channel of resourceId: SingleId
+        | PlaylistVideo
+        | Video
+        | StandardPlaylist
+        | ReleasePlaylist
+        | Channel
 
     type DownloadType =
         | MediaType of MediaType

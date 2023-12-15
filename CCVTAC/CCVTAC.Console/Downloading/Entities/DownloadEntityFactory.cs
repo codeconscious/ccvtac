@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using CCVTAC.FSharp;
 
 namespace CCVTAC.Console.Downloading.Entities;
 
@@ -35,6 +36,10 @@ public static class DownloadEntityFactory
         {
             return Result.Fail("Unsupported or invalid URL. (No matching URL found.)");
         }
+
+        // TODO: Remove testing code
+        var aa = new YouTube.SingleId(mediaId: "test");
+        var a = YouTube.MediaType.NewVideo(aa);
 
         (MediaDownloadType type, string resourceId, string? supplementaryResourceId) =
             typesWithResourceIds.First();
