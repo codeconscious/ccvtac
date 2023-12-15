@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CCVTAC.Console", "CCVTAC.Co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CCVTAC.Tests", "CCVTAC.Tests\CCVTAC.Tests.csproj", "{8CA8220D-5E89-4F6D-9AA3-AFA534BC258B}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CCVTAC.FSharp", "CCVTAC.FSharp\CCVTAC.FSharp.fsproj", "{44860E27-2F04-428C-8444-C774627A019F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{8CA8220D-5E89-4F6D-9AA3-AFA534BC258B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8CA8220D-5E89-4F6D-9AA3-AFA534BC258B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8CA8220D-5E89-4F6D-9AA3-AFA534BC258B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44860E27-2F04-428C-8444-C774627A019F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44860E27-2F04-428C-8444-C774627A019F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44860E27-2F04-428C-8444-C774627A019F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44860E27-2F04-428C-8444-C774627A019F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
