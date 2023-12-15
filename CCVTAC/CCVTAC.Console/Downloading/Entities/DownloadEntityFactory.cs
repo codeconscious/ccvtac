@@ -12,6 +12,7 @@ public static class DownloadEntityFactory
         { MediaDownloadType.VideoOnPlaylist, VideoOnPlaylist.Regexes },
         { MediaDownloadType.Video,           Video.Regexes },
         { MediaDownloadType.Playlist,        Playlist.Regexes },
+        { MediaDownloadType.ReleasePlaylist, ReleasePlaylist.Regexes },
         { MediaDownloadType.Channel,         Channel.Regexes }
     };
 
@@ -35,13 +36,15 @@ public static class DownloadEntityFactory
             return Result.Fail("Unsupported or invalid URL. (No matching URL found.)");
         }
 
-        (MediaDownloadType type, string resourceId, string? supplementaryResourceId) = typesWithResourceIds.First();
+        (MediaDownloadType type, string resourceId, string? supplementaryResourceId) =
+            typesWithResourceIds.First();
 
         return type switch
         {
             MediaDownloadType.VideoOnPlaylist => Result.Ok((IDownloadEntity) new VideoOnPlaylist(resourceId, supplementaryResourceId!)),
             MediaDownloadType.Video =>           Result.Ok((IDownloadEntity) new Video(resourceId)),
             MediaDownloadType.Playlist =>        Result.Ok((IDownloadEntity) new Playlist(resourceId)),
+            MediaDownloadType.ReleasePlaylist => Result.Ok((IDownloadEntity) new ReleasePlaylist(resourceId)),
             MediaDownloadType.Channel=>          Result.Ok((IDownloadEntity) new Channel(resourceId)),
             _ =>                                 Result.Fail("Unsupported or invalid URL. (No matching download type found.)")
         };
