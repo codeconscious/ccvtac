@@ -8,6 +8,7 @@ namespace CCVTAC.Console;
 internal static class Program
 {
     private static readonly string[] _helpCommands = ["-h", "--help"];
+    private static readonly string[] _settingsFileCommands = ["-s", "--settings"];
     private static readonly string[] _quitCommands = ["q", "quit", "exit", "bye"];
     private const string _inputPrompt = "Enter one or more YouTube media URLs (or 'q' to quit):";
 
@@ -21,15 +22,34 @@ internal static class Program
             return;
         }
 
-        if (!SettingsService.DoesFileExist())
+        SettingsService settingsService;
+        if (args.Length >= 2)
         {
-            SettingsService.WriteDefaultFile();
-            printer.Print("""
-                A new empty settings file was created in the directory containing this application.
-                Please review it and populate it with your desired settings.
-                In particular, "workingDirectory," "moveToDirectory," and "historyPath" must be populated.
-                """);
-            return;
+            string? settingsPath = _settingsFileCommands.Contains(args[0].ToLowerInvariant())
+                ? args[1] // Expected to be a settings file path.
+                : null;
+            settingsService = new(settingsPath);
+
+            // TODO: Might be best to encapsulate in the class.
+            if (!settingsService.DoesFileExist())
+            {
+                if (settingsService.WriteDefaultFile() is { IsFailed: true } failedResult)
+                {
+                    printer.Errors($"Could not write a settings file:", failedResult.Errors.Select(e => e.Message));
+                    return;
+                }
+
+                printer.Print($"A new empty settings file was created at \"{settingsService.FullPath}\"");
+                printer.Print("""
+                    Please review it and populate it with your desired settings.
+                    In particular, "workingDirectory," "moveToDirectory," and "historyFilePath" must be populated.
+                    """);
+                return;
+            }
+        }
+        else
+        {
+            settingsService = new();
         }
 
         // Catch the user's pressing Ctrl-C (SIGINT).
@@ -41,7 +61,7 @@ internal static class Program
         // Top-level `try` block to catch and pretty-print unexpected exceptions.
         try
         {
-            Start(printer);
+            Start(settingsService, printer);
         }
         catch (Exception topException)
         {
@@ -54,7 +74,7 @@ internal static class Program
     /// <summary>
      /// Performs initial setup, initiates each download request, and prints the final summary when the user requests to end the program.
     /// </summary>
-    private static void Start(Printer printer)
+    private static void Start(SettingsService settingsService, Printer printer)
     {
         // Verify the external program for downloading is installed on the system.
         if (Downloading.Downloader.ExternalProgram.ProgramExists() is { IsFailed: true })
@@ -66,7 +86,7 @@ internal static class Program
             return;
         }
 
-        var settingsResult = SettingsService.GetUserSettings();
+        var settingsResult = settingsService.GetUserSettings();
         if (settingsResult.IsFailed)
         {
             printer.Errors("Settings file errors:", settingsResult);
@@ -85,7 +105,7 @@ internal static class Program
         }
 
         ResultTracker resultTracker = new(printer);
-        History historyLogger = new(userSettings.HistoryLogFilePath);
+        History historyLogger = new(userSettings.HistoryFilePath);
 
         while (true)
         {

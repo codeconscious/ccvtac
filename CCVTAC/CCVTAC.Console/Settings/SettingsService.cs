@@ -4,10 +4,13 @@ using Spectre.Console;
 
 namespace CCVTAC.Console.Settings;
 
-public static class SettingsService
+public class SettingsService(string? customFilePath = null)
 {
-    private const string _settingsFileName = "settings.json";
-    private static string FullPath => Path.Combine(AppContext.BaseDirectory, _settingsFileName);
+    private const string _defaultSettingsFileName = "settings.json";
+    internal string FullPath { get; init; } = customFilePath
+                                              ?? Path.Combine(
+                                                    AppContext.BaseDirectory,
+                                                    _defaultSettingsFileName);
 
     /// <summary>
     /// Prints a summary of the given settings.
@@ -20,7 +23,7 @@ public static class SettingsService
         if (header.HasText())
             printer.Print(header!);
 
-        string historyFileNote = File.Exists(settings.HistoryLogFilePath)
+        string historyFileNote = File.Exists(settings.HistoryFilePath)
             ? "exists"
             : "will be created";
 
@@ -42,7 +45,7 @@ public static class SettingsService
             },
             { "Working directory", settings.WorkingDirectory },
             { "Move-to directory", settings.MoveToDirectory },
-            { "History log file", $"{settings.HistoryLogFilePath} ({historyFileNote})" },
+            { "History log file", $"{settings.HistoryFilePath} ({historyFileNote})" },
         }.ToImmutableList();
 
         var table = new Table();
@@ -70,7 +73,7 @@ public static class SettingsService
         }
     }
 
-    public static Result<UserSettings> GetUserSettings()
+    public Result<UserSettings> GetUserSettings()
     {
         UserSettings settings;
         try
@@ -99,7 +102,7 @@ public static class SettingsService
         return Result.Ok(settings);
     }
 
-    public static bool DoesFileExist()
+    public bool DoesFileExist()
     {
         return File.Exists(FullPath);
     }
@@ -108,7 +111,7 @@ public static class SettingsService
     /// Creates the specified settings file if it is missing. Otherwise, does nothing.
     /// </summary>
     /// <returns>A Result indicating success or no action (Ok) or else failure (Fail).</returns>
-    public static Result WriteDefaultFile()
+    public Result WriteDefaultFile()
     {
         try
         {
@@ -126,7 +129,7 @@ public static class SettingsService
     /// <param name="settings"></param>
     /// <param name="printer"></param>
     /// <returns>A Result indicating success or failure.</returns>
-    private static Result Write(UserSettings settings)
+    private Result Write(UserSettings settings)
     {
         try
         {
@@ -157,14 +160,14 @@ public static class SettingsService
     /// <returns>A Result indicating success or failure.</returns>
     private static Result EnsureValidSettings(UserSettings settings)
     {
-        List<string> errors = new();
+        List<string> errors = [];
 
-        if (settings.MoveToDirectory is null)
+        if (string.IsNullOrWhiteSpace(settings.MoveToDirectory))
             errors.Add($"No move-to directory was specified in the settings.");
         else if (!Directory.Exists(settings.MoveToDirectory))
             errors.Add($"Move-to directory \"{settings.MoveToDirectory}\" does not exist.");
 
-        if (settings.WorkingDirectory is null)
+        if (string.IsNullOrWhiteSpace(settings.WorkingDirectory))
             errors.Add($"No working directory was specified in the settings.");
         else if (!Directory.Exists(settings.WorkingDirectory))
             errors.Add($"Working directory \"{settings.WorkingDirectory}\" does not exist.");
