@@ -21,6 +21,17 @@ internal static class Program
             return;
         }
 
+        if (!SettingsService.DoesFileExist())
+        {
+            SettingsService.WriteDefaultFile();
+            printer.Print("""
+                A new empty settings file was created in the directory containing this application.
+                Please review it and populate it with your desired settings.
+                In particular, "workingDirectory," "moveToDirectory," and "historyPath" must be populated.
+                """);
+            return;
+        }
+
         // Catch the user's pressing Ctrl-C (SIGINT).
         System.Console.CancelKeyPress += delegate
         {

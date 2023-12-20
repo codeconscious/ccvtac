@@ -7,6 +7,7 @@ namespace CCVTAC.Console.Settings;
 public static class SettingsService
 {
     private const string _settingsFileName = "settings.json";
+    private static string FullPath => Path.Combine(AppContext.BaseDirectory, _settingsFileName);
 
     /// <summary>
     /// Prints a summary of the given settings.
@@ -71,64 +72,51 @@ public static class SettingsService
 
     public static Result<UserSettings> GetUserSettings()
     {
-        var readSettingsResult = Read(createFileIfMissing: true);
-        if (readSettingsResult.IsFailed)
-            return Result.Fail(readSettingsResult.Errors.Select(e => e.Message));
+        UserSettings settings;
+        try
+        {
+            string json = File.ReadAllText(FullPath);
+            settings = JsonSerializer.Deserialize<UserSettings>(json)
+                       ?? throw new JsonException();
+        }
+        catch (FileNotFoundException)
+        {
+            return Result.Fail($"Settings file \"{FullPath}\" not found.");
+        }
+        catch (JsonException ex)
+        {
+            return Result.Fail($"Settings file JSON is invalid: {ex.Message}");
+        }
 
-        UserSettings settings = readSettingsResult.Value;
+        if (EnsureValidSettings(settings) is { IsFailed: true} failedResult)
+            return Result.Fail(failedResult.Errors.Select(e => e.Message));
 
-        var ensureValidSettingsResult = EnsureValidSettings(settings);
-        if (ensureValidSettingsResult.IsFailed)
-            return Result.Fail(ensureValidSettingsResult.Errors.Select(e => e.Message));
-
+        // Ensure ID3 version 2.3, which seems more widely supported than version 2.4.
         TagFormat.SetId3v2Version(
             version: TagFormat.Id3v2Version.TwoPoint3,
             forceAsDefault: true);
 
-        return readSettingsResult.Value;
+        return Result.Ok(settings);
+    }
+
+    public static bool DoesFileExist()
+    {
+        return File.Exists(FullPath);
     }
 
     /// <summary>
     /// Creates the specified settings file if it is missing. Otherwise, does nothing.
     /// </summary>
     /// <returns>A Result indicating success or no action (Ok) or else failure (Fail).</returns>
-    private static Result CreateIfMissing()
+    public static Result WriteDefaultFile()
     {
-        if (File.Exists(_settingsFileName))
-            return Result.Ok();
-
         try
         {
             return Write(new UserSettings());
         }
         catch (Exception ex)
         {
-            return Result.Fail($"Error creating \"{_settingsFileName}\": {ex.Message}");
-        }
-    }
-
-    /// <summary>
-    /// Reads the settings file and parses the JSON to a Settings object.
-    /// </summary>
-    private static Result<UserSettings> Read(bool createFileIfMissing = false)
-    {
-        try
-        {
-            if (createFileIfMissing && CreateIfMissing().IsFailed)
-                return Result.Fail($"Settings file \"{_settingsFileName}\" missing.");
-
-            string text = File.ReadAllText(_settingsFileName);
-            UserSettings settings = JsonSerializer.Deserialize<UserSettings>(text)
-                                    ?? throw new JsonException();
-            return Result.Ok(settings);
-        }
-        catch (FileNotFoundException)
-        {
-            return Result.Fail($"Settings file \"{_settingsFileName}\" not found.");
-        }
-        catch (JsonException ex)
-        {
-            return Result.Fail($"Settings file JSON is invalid: {ex.Message}");
+            return Result.Fail($"Error creating \"{FullPath}\": {ex.Message}");
         }
     }
 
@@ -150,12 +138,12 @@ public static class SettingsService
                     Encoder = System.Text.Encodings.Web.JavaScriptEncoder.Create(
                                  System.Text.Unicode.UnicodeRanges.All)
                 });
-            File.WriteAllText(_settingsFileName, json);
+            File.WriteAllText(FullPath, json);
             return Result.Ok();
         }
         catch (FileNotFoundException)
         {
-            return Result.Fail($"Settings file \"{_settingsFileName}\" is missing.");
+            return Result.Fail($"Settings file \"{FullPath}\" is missing.");
         }
         catch (JsonException ex)
         {
