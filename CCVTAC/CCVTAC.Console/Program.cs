@@ -21,9 +21,11 @@ internal static class Program
             return;
         }
 
-        if (!SettingsService.DoesFileExist())
+        // TODO: Handle `-s` flag with custom file path?
+        SettingsService settingsService = new();
+        if (!settingsService.DoesFileExist())
         {
-            SettingsService.WriteDefaultFile();
+            settingsService.WriteDefaultFile();
             printer.Print("""
                 A new empty settings file was created in the directory containing this application.
                 Please review it and populate it with your desired settings.
@@ -41,7 +43,7 @@ internal static class Program
         // Top-level `try` block to catch and pretty-print unexpected exceptions.
         try
         {
-            Start(printer);
+            Start(settingsService, printer);
         }
         catch (Exception topException)
         {
@@ -54,7 +56,7 @@ internal static class Program
     /// <summary>
      /// Performs initial setup, initiates each download request, and prints the final summary when the user requests to end the program.
     /// </summary>
-    private static void Start(Printer printer)
+    private static void Start(SettingsService settingsService, Printer printer)
     {
         // Verify the external program for downloading is installed on the system.
         if (Downloading.Downloader.ExternalProgram.ProgramExists() is { IsFailed: true })
@@ -66,7 +68,7 @@ internal static class Program
             return;
         }
 
-        var settingsResult = SettingsService.GetUserSettings();
+        var settingsResult = settingsService.GetUserSettings();
         if (settingsResult.IsFailed)
         {
             printer.Errors("Settings file errors:", settingsResult);

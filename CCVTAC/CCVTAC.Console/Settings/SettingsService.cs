@@ -4,10 +4,13 @@ using Spectre.Console;
 
 namespace CCVTAC.Console.Settings;
 
-public static class SettingsService
+public class SettingsService(string? customFilePath = null)
 {
-    private const string _settingsFileName = "settings.json";
-    private static string FullPath => Path.Combine(AppContext.BaseDirectory, _settingsFileName);
+    private const string _defaultSettingsFileName = "settings.json";
+    private string FullPath { get; init; } = customFilePath
+                                             ?? Path.Combine(
+                                                    AppContext.BaseDirectory,
+                                                    _defaultSettingsFileName);
 
     /// <summary>
     /// Prints a summary of the given settings.
@@ -70,7 +73,7 @@ public static class SettingsService
         }
     }
 
-    public static Result<UserSettings> GetUserSettings()
+    public Result<UserSettings> GetUserSettings()
     {
         UserSettings settings;
         try
@@ -99,7 +102,7 @@ public static class SettingsService
         return Result.Ok(settings);
     }
 
-    public static bool DoesFileExist()
+    public bool DoesFileExist()
     {
         return File.Exists(FullPath);
     }
@@ -108,7 +111,7 @@ public static class SettingsService
     /// Creates the specified settings file if it is missing. Otherwise, does nothing.
     /// </summary>
     /// <returns>A Result indicating success or no action (Ok) or else failure (Fail).</returns>
-    public static Result WriteDefaultFile()
+    public Result WriteDefaultFile()
     {
         try
         {
@@ -126,7 +129,7 @@ public static class SettingsService
     /// <param name="settings"></param>
     /// <param name="printer"></param>
     /// <returns>A Result indicating success or failure.</returns>
-    private static Result Write(UserSettings settings)
+    private Result Write(UserSettings settings)
     {
         try
         {
