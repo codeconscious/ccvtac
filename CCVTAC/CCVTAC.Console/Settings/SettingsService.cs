@@ -30,27 +30,6 @@ public class SettingsService(string? customFilePath = null)
             ? "exists"
             : "will be created";
 
-        var settingPairs = new Dictionary<string, string>()
-        {
-            { $"Audio file format", settings.AudioFormat.ToUpperInvariant() },
-            { $"Split video chapters", settings.SplitChapters ? "ON" : "OFF" },
-            {
-                $"Sleep between batches",
-                $"{settings.SleepSecondsBetweenBatches} {PluralizeIfNeeded("second", settings.SleepSecondsBetweenBatches)}"
-            },
-            {
-                $"Sleep between downloads",
-                $"{settings.SleepSecondsBetweenDownloads} {PluralizeIfNeeded("second", settings.SleepSecondsBetweenDownloads)}"
-            },
-            {
-                $"Ignore-upload-year channels",
-                $"{settings.IgnoreUploadYearUploaders?.Length.ToString() ?? "No"} {PluralizeIfNeeded("channel", settings.IgnoreUploadYearUploaders?.Length ?? 0)}"
-            },
-            { "Working directory", settings.WorkingDirectory },
-            { "Move-to directory", settings.MoveToDirectory },
-            { "History log file", $"{settings.HistoryFilePath} ({historyFileNote})" },
-        }.ToImmutableList();
-
         var table = new Table();
         table.Expand();
         table.Border(TableBorder.HeavyEdge);
@@ -58,6 +37,29 @@ public class SettingsService(string? customFilePath = null)
         table.AddColumns("Name", "Value");
         table.HideHeaders();
         table.Columns[1].Width = 100; // Ensure its at maximum width.
+
+        ImmutableList<KeyValuePair<string, string>> settingPairs =
+            new Dictionary<string, string>()
+                {
+                    { $"Audio file format", settings.AudioFormat.ToUpperInvariant() },
+                    { $"Split video chapters", settings.SplitChapters ? "ON" : "OFF" },
+                    {
+                        $"Sleep between batches",
+                        $"{settings.SleepSecondsBetweenBatches} {PluralizeIfNeeded("second", settings.SleepSecondsBetweenBatches)}"
+                    },
+                    {
+                        $"Sleep between downloads",
+                        $"{settings.SleepSecondsBetweenDownloads} {PluralizeIfNeeded("second", settings.SleepSecondsBetweenDownloads)}"
+                    },
+                    {
+                        $"Ignore-upload-year channels",
+                        $"{settings.IgnoreUploadYearUploaders?.Length.ToString() ?? "No"} {PluralizeIfNeeded("channel", settings.IgnoreUploadYearUploaders?.Length ?? 0)}"
+                    },
+                    { "Working directory", settings.WorkingDirectory },
+                    { "Move-to directory", settings.MoveToDirectory },
+                    { "History log file", $"{settings.HistoryFilePath} ({historyFileNote})" },
+                }
+            .ToImmutableList();
 
         settingPairs.ForEach(pair => table.AddRow(pair.Key, pair.Value));
 
