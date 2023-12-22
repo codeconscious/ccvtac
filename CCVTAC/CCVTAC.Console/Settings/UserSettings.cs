@@ -29,9 +29,15 @@ public sealed class UserSettings
     /// <summary>
     /// The file to which history should be logged.
     /// </summary>
-    [JsonPropertyName("historyLog")]
+    [JsonPropertyName("historyPath")]
     [JsonRequired]
-    public string HistoryLogFilePath { get; init; } = string.Empty;
+    public string HistoryFilePath { get; init; } = string.Empty;
+
+    /// <summary>
+    /// How many history entries to display.
+    /// </summary>
+    [JsonPropertyName("historyDisplayCount")]
+    public byte HistoryDisplayCount { get; init; } = 30;
 
     /// <summary>
     /// Specifies whether video chapters should be split into a separate
