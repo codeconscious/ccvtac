@@ -133,6 +133,15 @@ internal static class Downloader
             args.Add($"--sleep-interval {settings.SleepSecondsBetweenDownloads}");
         }
 
+        // The numbering of regular playlists should be reversed because the newest items are
+        // always placed at the top of the list at position #1. Instead, the oldest items
+        // (at the end of the list) should begin at #1.
+        if (downloadType is DownloadType.Media &&
+            videoDownloadType is MediaDownloadType.Playlist)
+        {
+            args.Add("""-o "%(playlist)s = %(playlist_autonumber)s - %(title)s [%(id)s].%(ext)s" --playlist-reverse""");
+        }
+
         return string.Join(" ", args.Concat(additionalArgs ?? Enumerable.Empty<string>()));
     }
 }

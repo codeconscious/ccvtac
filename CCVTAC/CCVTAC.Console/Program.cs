@@ -7,16 +7,17 @@ namespace CCVTAC.Console;
 
 internal static class Program
 {
-    private static readonly string[] _helpCommands = ["-h", "--help"];
+    private static readonly string[] _helpFlags = ["-h", "--help"];
+    private static readonly string[] _historyCommands = ["--history", "history"];
     private static readonly string[] _settingsFileCommands = ["-s", "--settings"];
     private static readonly string[] _quitCommands = ["q", "quit", "exit", "bye"];
-    private const string _inputPrompt = "Enter one or more YouTube media URLs (or 'q' to quit):";
+    private const string _urlInputPrompt = "Enter one or more YouTube media URLs, 'quit', or 'history':";
 
     static void Main(string[] args)
     {
         Printer printer = new();
 
-        if (args.Length > 0 && _helpCommands.Contains(args[0].ToLowerInvariant()))
+        if (args.Length > 0 && _helpFlags.Contains(args[0].ToLowerInvariant()))
         {
             Help.Print(printer);
             return;
@@ -52,6 +53,24 @@ internal static class Program
             settingsService = new();
         }
 
+        // TODO: Better to do within the settings class?
+        Result<UserSettings> settingsResult = settingsService.GetUserSettings();
+        if (settingsResult.IsFailed)
+        {
+            printer.Errors("Settings file errors:", settingsResult);
+            return;
+        }
+        UserSettings userSettings = settingsResult.Value;
+
+        History history = new(userSettings.HistoryFilePath, userSettings.HistoryDisplayCount);
+
+        if (args.Length > 0 && _historyCommands.Contains(args[0].ToLowerInvariant()))
+        {
+            history.DisplayRecent(printer);
+            return;
+        }
+
+
         // Catch the user's pressing Ctrl-C (SIGINT).
         System.Console.CancelKeyPress += delegate
         {
@@ -61,7 +80,7 @@ internal static class Program
         // Top-level `try` block to catch and pretty-print unexpected exceptions.
         try
         {
-            Start(settingsService, printer);
+            Start(userSettings, settingsService, history, printer);
         }
         catch (Exception topException)
         {
@@ -74,7 +93,7 @@ internal static class Program
     /// <summary>
      /// Performs initial setup, initiates each download request, and prints the final summary when the user requests to end the program.
     /// </summary>
-    private static void Start(SettingsService settingsService, Printer printer)
+    private static void Start(UserSettings userSettings, SettingsService settingsService, History history, Printer printer)
     {
         // Verify the external program for downloading is installed on the system.
         if (Downloading.Downloader.ExternalProgram.ProgramExists() is { IsFailed: true })
@@ -92,7 +111,6 @@ internal static class Program
             printer.Errors("Settings file errors:", settingsResult);
             return;
         }
-        UserSettings userSettings = settingsResult.Value;
         SettingsService.PrintSummary(userSettings, printer, "Settings loaded OK.");
 
         // The working directory should be empty.
@@ -105,11 +123,10 @@ internal static class Program
         }
 
         ResultTracker resultTracker = new(printer);
-        History historyLogger = new(userSettings.HistoryFilePath);
 
         while (true)
         {
-            NextAction nextAction = ProcessBatch(userSettings, resultTracker, historyLogger, printer);
+            NextAction nextAction = ProcessBatch(userSettings, resultTracker, history, printer);
             if (nextAction != NextAction.Continue)
             {
                 break;
@@ -129,12 +146,12 @@ internal static class Program
     private static NextAction ProcessBatch(
         UserSettings userSettings,
         ResultTracker resultHandler,
-        History historyLogger,
+        History history,
         Printer printer)
     {
-        string userInput = printer.GetInput(_inputPrompt);
-        DateTime inputTime = DateTime.Now;
+        string userInput = printer.GetInput(_urlInputPrompt);
 
+        DateTime inputTime = DateTime.Now;
         Stopwatch topStopwatch = new();
         topStopwatch.Start();
 
@@ -160,7 +177,11 @@ internal static class Program
                 return NextAction.QuitAtUserRequest;
             }
 
-            historyLogger.Append(url, inputTime, printer);
+            if (_historyCommands.Contains(url.ToLowerInvariant()))
+            {
+                history.DisplayRecent(printer);
+                continue;
+            }
 
             var tempFiles = IoUtilties.Directories.GetDirectoryFiles(userSettings.WorkingDirectory);
             if (tempFiles.Any())
@@ -199,6 +220,8 @@ internal static class Program
 
             Stopwatch jobStopwatch = new();
             jobStopwatch.Start();
+
+            history.Append(url, inputTime, printer);
 
             var downloadResult = Downloading.Downloader.Run(url, userSettings, printer);
             resultHandler.RegisterResult(downloadResult);

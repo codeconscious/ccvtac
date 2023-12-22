@@ -34,6 +34,12 @@ public sealed class UserSettings
     public string HistoryFilePath { get; init; } = string.Empty;
 
     /// <summary>
+    /// How many history entries to display.
+    /// </summary>
+    [JsonPropertyName("historyDisplayCount")]
+    public byte HistoryDisplayCount { get; init; } = 30;
+
+    /// <summary>
     /// Specifies whether video chapters should be split into a separate
     /// audio files (true) or instead be ignored such that there is one combined
     /// audio file for the entire video (false). Defaults to true.

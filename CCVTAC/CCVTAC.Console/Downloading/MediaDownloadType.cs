@@ -16,9 +16,16 @@ public enum MediaDownloadType
     VideoOnPlaylist,
 
     /// <summary>
-    /// A playlist containing 1 or more videos.
+    /// A playlist containing 1 or more videos. They are considered mutable, as new items
+    /// might be added gradually at later dates.
     /// </summary>
     Playlist,
+
+    /// <summary>
+    /// A release playlist (as seen on the Releases tab on YouTube) containing 1 or more videos.
+    /// They are considered to be immutable and of the correct order.
+    /// </summary>
+    ReleasePlaylist,
 
     /// <summary>
     /// A user's channel, containing 1 or more videos.
