@@ -18,7 +18,7 @@ public class SettingsService(string? customFilePath = null)
     /// <param name="settings"></param>
     /// <param name="printer"></param>
     /// <param name="header">An optional line of text to appear above the settings.</param>
-    public static void PrintSummary(
+    public void PrintSummary(
         UserSettings settings,
         Printer printer,
         string? header = null)

@@ -61,15 +61,15 @@ internal static class Program
             return;
         }
         UserSettings userSettings = settingsResult.Value;
+        settingsService.PrintSummary(userSettings, printer, header: "Settings loaded OK.");
 
         History history = new(userSettings.HistoryFilePath, userSettings.HistoryDisplayCount);
 
         if (args.Length > 0 && _historyCommands.Contains(args[0].ToLowerInvariant()))
         {
-            history.DisplayRecent(printer);
+            history.ShowRecent(printer);
             return;
         }
-
 
         // Catch the user's pressing Ctrl-C (SIGINT).
         System.Console.CancelKeyPress += delegate
@@ -80,7 +80,7 @@ internal static class Program
         // Top-level `try` block to catch and pretty-print unexpected exceptions.
         try
         {
-            Start(userSettings, settingsService, history, printer);
+            Start(userSettings, history, printer);
         }
         catch (Exception topException)
         {
@@ -93,7 +93,7 @@ internal static class Program
     /// <summary>
      /// Performs initial setup, initiates each download request, and prints the final summary when the user requests to end the program.
     /// </summary>
-    private static void Start(UserSettings userSettings, SettingsService settingsService, History history, Printer printer)
+    private static void Start(UserSettings userSettings, History history, Printer printer)
     {
         // Verify the external program for downloading is installed on the system.
         if (Downloading.Downloader.ExternalProgram.ProgramExists() is { IsFailed: true })
@@ -104,14 +104,6 @@ internal static class Program
             printer.Print("Pass '--help' to this program for more information.");
             return;
         }
-
-        var settingsResult = settingsService.GetUserSettings();
-        if (settingsResult.IsFailed)
-        {
-            printer.Errors("Settings file errors:", settingsResult);
-            return;
-        }
-        SettingsService.PrintSummary(userSettings, printer, "Settings loaded OK.");
 
         // The working directory should be empty.
         var tempFiles = IoUtilties.Directories.GetDirectoryFiles(userSettings.WorkingDirectory);
@@ -179,7 +171,7 @@ internal static class Program
 
             if (_historyCommands.Contains(url.ToLowerInvariant()))
             {
-                history.DisplayRecent(printer);
+                history.ShowRecent(printer);
                 continue;
             }
 
