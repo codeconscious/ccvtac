@@ -26,9 +26,9 @@ internal static class Program
         string? maybeSettingsPath = args.Length >= 2 && _settingsFileCommands.Contains(args[0].ToLowerInvariant())
                 ? args[1] // Expected to be a settings file path.
                 : null;
-        var settingsService = new SettingsService(maybeSettingsPath);
+        SettingsService settingsService = new(maybeSettingsPath);
 
-        Result<UserSettings> settingsResult = settingsService.PrepareUserSettings();
+        var settingsResult = settingsService.PrepareUserSettings();
         if (settingsResult.IsFailed)
         {
             printer.Errors("Settings error(s):", settingsResult);
