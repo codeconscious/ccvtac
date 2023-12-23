@@ -23,41 +23,15 @@ internal static class Program
             return;
         }
 
-        SettingsService settingsService;
-        if (args.Length >= 2)
-        {
-            string? settingsPath = _settingsFileCommands.Contains(args[0].ToLowerInvariant())
+        string? maybeSettingsPath = args.Length >= 2 && _settingsFileCommands.Contains(args[0].ToLowerInvariant())
                 ? args[1] // Expected to be a settings file path.
                 : null;
-            settingsService = new(settingsPath);
+        var settingsService = new SettingsService(maybeSettingsPath);
 
-            // TODO: Might be best to encapsulate in the class.
-            if (!settingsService.DoesFileExist())
-            {
-                if (settingsService.WriteDefaultFile() is { IsFailed: true } failedResult)
-                {
-                    printer.Errors($"Could not write a settings file:", failedResult.Errors.Select(e => e.Message));
-                    return;
-                }
-
-                printer.Print($"A new empty settings file was created at \"{settingsService.FullPath}\"");
-                printer.Print("""
-                    Please review it and populate it with your desired settings.
-                    In particular, "workingDirectory," "moveToDirectory," and "historyFilePath" must be populated.
-                    """);
-                return;
-            }
-        }
-        else
-        {
-            settingsService = new();
-        }
-
-        // TODO: Better to do within the settings class?
-        Result<UserSettings> settingsResult = settingsService.GetUserSettings();
+        Result<UserSettings> settingsResult = settingsService.PrepareUserSettings();
         if (settingsResult.IsFailed)
         {
-            printer.Errors("Settings file errors:", settingsResult);
+            printer.Errors("Settings error(s):", settingsResult);
             return;
         }
         UserSettings userSettings = settingsResult.Value;
@@ -65,6 +39,7 @@ internal static class Program
 
         History history = new(userSettings.HistoryFilePath, userSettings.HistoryDisplayCount);
 
+        // Show the history if requested.
         if (args.Length > 0 && _historyCommands.Contains(args[0].ToLowerInvariant()))
         {
             history.ShowRecent(printer);
@@ -169,6 +144,7 @@ internal static class Program
                 return NextAction.QuitAtUserRequest;
             }
 
+            // Show the history if requested.
             if (_historyCommands.Contains(url.ToLowerInvariant()))
             {
                 history.ShowRecent(printer);
