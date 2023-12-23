@@ -9,6 +9,7 @@ internal static class Program
 {
     private static readonly string[] _helpFlags = ["-h", "--help"];
     private static readonly string[] _historyCommands = ["--history", "history"];
+    private static readonly string[] _settingsFileCommands = ["-s", "--settings"];
     private static readonly string[] _quitCommands = ["q", "quit", "exit", "bye"];
     private const string _urlInputPrompt = "Enter one or more YouTube media URLs, 'quit', or 'history':";
 
@@ -22,23 +23,28 @@ internal static class Program
             return;
         }
 
-        Result<UserSettings> settingsResult = SettingsService.GetUserSettings();
+        string? maybeSettingsPath = args.Length >= 2 && _settingsFileCommands.Contains(args[0].ToLowerInvariant())
+                ? args[1] // Expected to be a settings file path.
+                : null;
+        SettingsService settingsService = new(maybeSettingsPath);
+
+        var settingsResult = settingsService.PrepareUserSettings();
         if (settingsResult.IsFailed)
         {
-            printer.Errors("Settings file errors:", settingsResult);
+            printer.Errors("Settings error(s):", settingsResult);
             return;
         }
         UserSettings userSettings = settingsResult.Value;
+        settingsService.PrintSummary(userSettings, printer, header: "Settings loaded OK.");
 
         History history = new(userSettings.HistoryFilePath, userSettings.HistoryDisplayCount);
 
+        // Show the history if requested.
         if (args.Length > 0 && _historyCommands.Contains(args[0].ToLowerInvariant()))
         {
-            history.DisplayRecent(printer);
+            history.ShowRecent(printer);
             return;
         }
-
-        SettingsService.PrintSummary(userSettings, printer, "Settings loaded OK.");
 
         // Catch the user's pressing Ctrl-C (SIGINT).
         System.Console.CancelKeyPress += delegate
@@ -138,9 +144,10 @@ internal static class Program
                 return NextAction.QuitAtUserRequest;
             }
 
+            // Show the history if requested.
             if (_historyCommands.Contains(url.ToLowerInvariant()))
             {
-                history.DisplayRecent(printer);
+                history.ShowRecent(printer);
                 continue;
             }
 

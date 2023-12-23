@@ -4,6 +4,7 @@
 .DS_Store
 history.log
 settings.json
+*.bak
 local_testing
 
 ## Ignore Visual Studio temporary files, build results, and
