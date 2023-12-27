@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.IO;
+﻿using System.IO;
 using System.Text.Json;
 using CCVTAC.Console.PostProcessing.Tagging;
 
@@ -14,8 +13,7 @@ internal static class Mover
                              bool shouldOverwrite,
                              Printer printer)
     {
-        Stopwatch stopwatch = new();
-        stopwatch.Start();
+        Timer timer = new();
 
         uint successCount = 0;
         uint failureCount = 0;
@@ -59,7 +57,7 @@ internal static class Mover
             }
         }
 
-        printer.Print($"{successCount} file(s) moved in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
+        printer.Print($"{successCount} file(s) moved in {timer.ElapsedFriendly}.");
         if (failureCount > 0)
         {
             printer.Warning($"However, {failureCount} file(s) could not be moved.");

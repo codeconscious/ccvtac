@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -87,8 +86,7 @@ internal static class Renamer
 
     public static void Run(string workingDirectory, Printer printer)
     {
-        Stopwatch stopwatch = new();
-        stopwatch.Start();
+        Timer timer = new();
 
         DirectoryInfo dir = new(workingDirectory);
 
@@ -153,6 +151,6 @@ internal static class Renamer
             }
         }
 
-        printer.Print($"Renaming done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
+        printer.Print($"Renaming done in {timer.ElapsedFriendly}.");
     }
 }
