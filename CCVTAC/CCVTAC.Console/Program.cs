@@ -189,14 +189,14 @@ internal static class Program
             Stopwatch jobStopwatch = new();
             jobStopwatch.Start();
 
-            history.Append(url, inputTime, printer);
-
             var downloadResult = Downloading.Downloader.Run(url, userSettings, printer);
             resultHandler.RegisterResult(downloadResult);
             if (downloadResult.IsFailed)
             {
                 return NextAction.Continue;
             }
+
+            history.Append(url, inputTime, printer);
 
             var postProcessor = new PostProcessing.Setup(userSettings, printer);
             postProcessor.Run(); // TODO: Think about if/how to handle leftover temp files due to errors.
