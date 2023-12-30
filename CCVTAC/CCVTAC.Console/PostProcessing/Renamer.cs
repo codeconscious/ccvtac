@@ -86,7 +86,7 @@ internal static class Renamer
 
     public static void Run(string workingDirectory, Printer printer)
     {
-        Timer timer = new();
+        Watch watch = new();
 
         DirectoryInfo dir = new(workingDirectory);
 
@@ -151,6 +151,6 @@ internal static class Renamer
             }
         }
 
-        printer.Print($"Renaming done in {timer.ElapsedFriendly}.");
+        printer.Print($"Renaming done in {watch.ElapsedFriendly}.");
     }
 }

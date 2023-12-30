@@ -13,7 +13,7 @@ internal static class Mover
                              bool shouldOverwrite,
                              Printer printer)
     {
-        Timer timer = new();
+        Watch watch = new();
 
         uint successCount = 0;
         uint failureCount = 0;
@@ -57,7 +57,7 @@ internal static class Mover
             }
         }
 
-        printer.Print($"{successCount} file(s) moved in {timer.ElapsedFriendly}.");
+        printer.Print($"{successCount} file(s) moved in {watch.ElapsedFriendly}.");
         if (failureCount > 0)
         {
             printer.Warning($"However, {failureCount} file(s) could not be moved.");

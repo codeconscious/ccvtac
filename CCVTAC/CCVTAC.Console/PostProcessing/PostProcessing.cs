@@ -13,7 +13,7 @@ public sealed class Setup(UserSettings userSettings, Printer printer)
 
     internal void Run()
     {
-        Timer timer = new();
+        Watch watch = new();
 
         Printer.Print("Starting post-processing...");
 
@@ -54,7 +54,7 @@ public sealed class Setup(UserSettings userSettings, Printer printer)
             Printer.Errors("Tagging error(s) preventing further post-processing: ", tagResult);
         }
 
-        Printer.Print($"Post-processing done in {timer.ElapsedFriendly}.");
+        Printer.Print($"Post-processing done in {watch.ElapsedFriendly}.");
     }
 
     internal Result<CollectionMetadata> GetCollectionJson(string workingDirectory)

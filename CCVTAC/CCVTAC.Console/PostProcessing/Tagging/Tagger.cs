@@ -14,14 +14,14 @@ internal static class Tagger
     {
         printer.Print("Adding file tags...");
 
-        Timer timer = new();
+        Watch watch = new();
 
         foreach (TaggingSet taggingSet in taggingSets)
         {
             ProcessSingleTaggingSet(userSettings, taggingSet, collectionJson, printer);
         }
 
-        return Result.Ok($"Tagging done in {timer.ElapsedFriendly}.");
+        return Result.Ok($"Tagging done in {watch.ElapsedFriendly}.");
     }
 
     private static void ProcessSingleTaggingSet(

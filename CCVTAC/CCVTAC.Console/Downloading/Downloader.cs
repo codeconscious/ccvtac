@@ -29,7 +29,7 @@ internal static class Downloader
                                        UserSettings userSettings,
                                        Printer printer)
     {
-        Timer timer = new();
+        Watch watch = new();
 
         var downloadEntityResult = DownloadEntityFactory.Create(url);
         if (downloadEntityResult.IsFailed)
@@ -92,7 +92,7 @@ internal static class Downloader
             }
         }
 
-        return Result.Ok($"Downloading done in {timer.ElapsedFriendly}.");
+        return Result.Ok($"Downloading done in {watch.ElapsedFriendly}.");
     }
 
     /// <summary>

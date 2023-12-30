@@ -118,7 +118,7 @@ internal static class Program
         string userInput = printer.GetInput(_urlInputPrompt);
         DateTime inputTime = DateTime.Now;
 
-        Timer timer = new();
+        Watch watch = new();
 
         var batchUrls = userInput.Split(" ")
                                  .Where(i => i.HasText())
@@ -184,7 +184,7 @@ internal static class Program
             if (batchUrls.Count > 1)
                 printer.Print($"Processing batch {++currentBatch} of {batchUrls.Count}...");
 
-            Timer jobTimer = new();
+            Watch jobWatch = new();
 
             var downloadResult = Downloading.Downloader.Run(url, userSettings, printer);
             resultHandler.RegisterResult(downloadResult);
@@ -201,12 +201,12 @@ internal static class Program
             string batchClause = batchUrls.Count > 1
                 ? $" (batch {currentBatch} of {batchUrls.Count})"
                 : string.Empty;
-            printer.Print($"Done processing '{url}'{batchClause} in {jobTimer.ElapsedFriendly}.");
+            printer.Print($"Done processing '{url}'{batchClause} in {jobWatch.ElapsedFriendly}.");
         }
 
         if (batchUrls.Count > 1)
         {
-            printer.Print($"All done with {batchUrls.Count} batches in {timer.ElapsedFriendly}.");
+            printer.Print($"All done with {batchUrls.Count} batches in {watch.ElapsedFriendly}.");
         }
 
         return NextAction.Continue;
