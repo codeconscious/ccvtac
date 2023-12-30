@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.IO;
 
 namespace CCVTAC.Console.ExternalUtilities;
 
@@ -7,8 +6,7 @@ internal static class Runner
 {
     internal static Result Run(UtilitySettings settings, Printer printer)
     {
-        Stopwatch stopwatch = new();
-        stopwatch.Start();
+        Watch watch = new();
 
         printer.Print($"Starting {settings.Program.Name} for {settings.Program.Purpose}...");
         printer.Print($"Running command: {settings.Program.Name} {settings.Args}");
@@ -34,7 +32,7 @@ internal static class Runner
 
         process.WaitForExit();
 
-        printer.Print($"Done with {settings.Program.Purpose} in {stopwatch.ElapsedMilliseconds:#,##0}ms");
+        printer.Print($"Done with {settings.Program.Purpose} in {watch.ElapsedFriendly}.");
 
         int exitCode = process.ExitCode;
         if (exitCode == 0)

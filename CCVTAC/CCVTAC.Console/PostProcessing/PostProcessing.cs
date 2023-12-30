@@ -3,7 +3,6 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using CCVTAC.Console.Settings;
 using CCVTAC.Console.PostProcessing.Tagging;
-using System.Diagnostics;
 
 namespace CCVTAC.Console.PostProcessing;
 
@@ -14,8 +13,7 @@ public sealed class Setup(UserSettings userSettings, Printer printer)
 
     internal void Run()
     {
-        Stopwatch stopwatch = new();
-        stopwatch.Start();
+        Watch watch = new();
 
         Printer.Print("Starting post-processing...");
 
@@ -56,7 +54,7 @@ public sealed class Setup(UserSettings userSettings, Printer printer)
             Printer.Errors("Tagging error(s) preventing further post-processing: ", tagResult);
         }
 
-        Printer.Print($"Post-processing done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
+        Printer.Print($"Post-processing done in {watch.ElapsedFriendly}.");
     }
 
     internal Result<CollectionMetadata> GetCollectionJson(string workingDirectory)

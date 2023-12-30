@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.IO;
+﻿using System.IO;
 using System.Text.Json;
 using CCVTAC.Console.Settings;
 using TaggedFile = TagLib.File;
@@ -15,15 +14,14 @@ internal static class Tagger
     {
         printer.Print("Adding file tags...");
 
-        Stopwatch stopwatch = new();
-        stopwatch.Start();
+        Watch watch = new();
 
         foreach (TaggingSet taggingSet in taggingSets)
         {
             ProcessSingleTaggingSet(userSettings, taggingSet, collectionJson, printer);
         }
 
-        return Result.Ok($"Tagging done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
+        return Result.Ok($"Tagging done in {watch.ElapsedFriendly}.");
     }
 
     private static void ProcessSingleTaggingSet(

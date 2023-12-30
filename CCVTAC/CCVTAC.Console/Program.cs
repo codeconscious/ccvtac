@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Threading;
+﻿using System.Threading;
 using CCVTAC.Console.Settings;
 using Spectre.Console;
 
@@ -117,10 +116,9 @@ internal static class Program
         Printer printer)
     {
         string userInput = printer.GetInput(_urlInputPrompt);
-
         DateTime inputTime = DateTime.Now;
-        Stopwatch topStopwatch = new();
-        topStopwatch.Start();
+
+        Watch watch = new();
 
         var batchUrls = userInput.Split(" ")
                                  .Where(i => i.HasText())
@@ -186,8 +184,7 @@ internal static class Program
             if (batchUrls.Count > 1)
                 printer.Print($"Processing batch {++currentBatch} of {batchUrls.Count}...");
 
-            Stopwatch jobStopwatch = new();
-            jobStopwatch.Start();
+            Watch jobWatch = new();
 
             var downloadResult = Downloading.Downloader.Run(url, userSettings, printer);
             resultHandler.RegisterResult(downloadResult);
@@ -204,14 +201,12 @@ internal static class Program
             string batchClause = batchUrls.Count > 1
                 ? $" (batch {currentBatch} of {batchUrls.Count})"
                 : string.Empty;
-            // TODO: Use minutes or hours for longer times.
-            printer.Print($"Done processing '{url}'{batchClause} in {jobStopwatch.ElapsedMilliseconds:#,##0}ms.");
+            printer.Print($"Done processing '{url}'{batchClause} in {jobWatch.ElapsedFriendly}.");
         }
 
         if (batchUrls.Count > 1)
         {
-            // TODO: Use minutes or hours for longer times.
-            printer.Print($"All done with {batchUrls.Count} batches in {topStopwatch.ElapsedMilliseconds:#,##0}ms.");
+            printer.Print($"All done with {batchUrls.Count} batches in {watch.ElapsedFriendly}.");
         }
 
         return NextAction.Continue;
