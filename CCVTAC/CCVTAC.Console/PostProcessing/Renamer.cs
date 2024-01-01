@@ -6,7 +6,7 @@ namespace CCVTAC.Console.PostProcessing;
 
 internal static class Renamer
 {
-    private record struct RenamePattern(Regex Regex, string ReplaceWithPattern, string? Description = null);
+    private readonly record struct RenamePattern(Regex Regex, string ReplaceWithPattern, string? Description = null);
 
     // TODO: Convert this into a setting.
     private static readonly IReadOnlyList<RenamePattern> RenamePatterns = new List<RenamePattern>()

@@ -7,7 +7,7 @@ namespace CCVTAC.Console.PostProcessing;
 /// the fields that I use, so this is a combined object for now. This might
 /// be changed in the future, though.)
 /// </summary>
-public record struct CollectionMetadata(
+public readonly record struct CollectionMetadata(
     [property: JsonPropertyName("id")] string Id,
     [property: JsonPropertyName("title")] string Title,
     [property: JsonPropertyName("availability")] string Availability,
