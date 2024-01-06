@@ -111,6 +111,7 @@ internal static class Downloader
                      $"--extract-audio -f {settings.AudioFormat}",
                      "--write-thumbnail --convert-thumbnails jpg", // For album art
                      "--write-info-json", // For parsing metadata
+                     "--retries 3" // Default is 10, more than necessary
                  ]
         };
 
@@ -119,10 +120,7 @@ internal static class Downloader
             args.Add("--split-chapters");
         }
 
-        if (settings.VerboseDownloaderOutput)
-        {
-            args.Add("--verbose");
-        }
+        args.Add(settings.VerboseDownloaderOutput ? "--verbose" : "--quiet");
 
         if (downloadType is DownloadType.Media &&
             videoDownloadType is not MediaDownloadType.Video &&
