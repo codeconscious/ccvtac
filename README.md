@@ -24,7 +24,7 @@ Feel free to use it yourself, but please do so responsibly. No warranties or gua
 
 Prerequisites:
 
-- .NET 8 (at least until I prepare actual releases...)
+- [.NET 8 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) (at least until I prepare actual releases...)
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp)
 - Optional: [mogrify](https://imagemagick.org/script/mogrify.php) (for auto-trimming album art)
 
