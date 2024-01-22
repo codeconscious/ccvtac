@@ -4,7 +4,7 @@ namespace CCVTAC.Console.PostProcessing;
 
 internal static class Deleter
 {
-    public static void Run(string workingDirectory, Printer printer)
+    public static void Run(string workingDirectory, bool verbose, Printer printer)
     {
         DirectoryInfo dir = new(workingDirectory);
         List<string> deletableExtensions = [".json", ".jpg"];
@@ -17,7 +17,9 @@ internal static class Deleter
             try
             {
                 file.Delete();
-                printer.Print($"• Deleted \"{file.Name}\"");
+
+                if (verbose)
+                    printer.Print($"• Deleted \"{file.Name}\"");
             }
             catch (Exception ex)
             {

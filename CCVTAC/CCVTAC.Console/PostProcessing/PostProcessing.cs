@@ -45,9 +45,9 @@ public sealed class Setup(UserSettings userSettings, Printer printer)
             Printer.Print(tagResult.Value);
 
             // AudioNormalizer.Run(UserSettings.WorkingDirectory, Printer); // TODO: `mp3gain`は無理なので、別のnormalize方法を要検討。
-            Renamer.Run(UserSettings.WorkingDirectory, Printer);
-            Mover.Run(UserSettings.WorkingDirectory, UserSettings.MoveToDirectory, taggingSets, collectionJson, true, Printer);
-            Deleter.Run(UserSettings.WorkingDirectory, Printer);
+            Renamer.Run(UserSettings.WorkingDirectory, UserSettings.VerboseOutput, Printer);
+            Mover.Run(taggingSets, collectionJson, UserSettings, true, Printer);
+            Deleter.Run(UserSettings.WorkingDirectory, UserSettings.VerboseOutput, Printer);
         }
         else
         {

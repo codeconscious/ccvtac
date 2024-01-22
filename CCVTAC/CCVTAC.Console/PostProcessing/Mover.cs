@@ -1,15 +1,15 @@
 ﻿using System.IO;
 using System.Text.Json;
 using CCVTAC.Console.PostProcessing.Tagging;
+using CCVTAC.Console.Settings;
 
 namespace CCVTAC.Console.PostProcessing;
 
 internal static class Mover
 {
-    internal static void Run(string workingDirectory,
-                             string moveToDirectory,
-                             IEnumerable<TaggingSet> taggingSets,
+    internal static void Run(IEnumerable<TaggingSet> taggingSets,
                              CollectionMetadata? maybeCollectionData,
+                             UserSettings userSettings,
                              bool shouldOverwrite,
                              Printer printer)
     {
@@ -17,10 +17,11 @@ internal static class Mover
 
         uint successCount = 0;
         uint failureCount = 0;
-        DirectoryInfo workingDirInfo = new(workingDirectory);
+        bool isVerbose = userSettings.VerboseOutput;
+        DirectoryInfo workingDirInfo = new(userSettings.WorkingDirectory);
 
         string subFolderName = GetDefaultFolderName(maybeCollectionData, taggingSets.First(), workingDirInfo);
-        string moveToDir = Path.Combine(moveToDirectory, subFolderName);
+        string moveToDir = Path.Combine(userSettings.MoveToDirectory, subFolderName);
 
         try
         {
@@ -48,7 +49,9 @@ internal static class Mover
                     $"{Path.Combine(moveToDir, file.Name)}",
                     shouldOverwrite);
                 successCount++;
-                printer.Print($"• Moved \"{file.Name}\"");
+
+                if (isVerbose)
+                    printer.Print($"• Moved \"{file.Name}\"");
             }
             catch (Exception ex)
             {
