@@ -5,21 +5,33 @@ module Say =
         printfn "Hello %s" name
 
 module YouTube =
-    type ResourceId = string
+    type MediaId = { VideoId: string }
+    type MediaIdPair = { VideoId: string; ParentId: string }
 
-    type PlaylistVideo = { VideoId: ResourceId; PlaylistId: ResourceId }
-    type Video = { Id: ResourceId }
-    type StandardPlaylist = { Id: ResourceId }
-    type ReleasePlaylist = { Id: ResourceId } // Entries on "Releases" tabs on YouTube
-    type Channel = { Id: ResourceId }
-
-    type MediaType =
-        | PlaylistVideo
-        | Video
-        | StandardPlaylist
-        | ReleasePlaylist
-        | Channel
+    type Media =
+        | Video of MediaId
+        | PlaylistVideo of MediaIdPair
+        | StandardPlaylist of MediaIdPair
+        | ReleasePlaylist of MediaIdPair
+        | Channel of MediaIdPair
 
     type DownloadType =
-        | MediaType of MediaType
+        | MediaType of Media
         | Metadata
+
+    let urlBase (media:Media) =
+        match media with
+        | Video _ -> "https://www.youtube.com/watch?v="
+        | PlaylistVideo _ -> "https://www.youtube.com/watch?v="
+        | StandardPlaylist _ -> "https://www.youtube.com/playlist?list="
+        | ReleasePlaylist _ -> "https://www.youtube.com/playlist?list="
+        | Channel _ -> "https://"
+
+    let fullUrl (media:Media) =
+        urlBase media +
+        match media with
+        | Video data -> data.VideoId
+        | PlaylistVideo data -> data.VideoId
+        | StandardPlaylist data -> data.VideoId
+        | ReleasePlaylist data -> data.VideoId
+        | Channel data -> data.VideoId
