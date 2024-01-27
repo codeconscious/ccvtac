@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -7,7 +6,7 @@ namespace CCVTAC.Console.PostProcessing;
 
 internal static class Renamer
 {
-    private record struct RenamePattern(Regex Regex, string ReplaceWithPattern, string? Description = null);
+    private readonly record struct RenamePattern(Regex Regex, string ReplaceWithPattern, string? Description = null);
 
     // TODO: Convert this into a setting.
     private static readonly IReadOnlyList<RenamePattern> RenamePatterns = new List<RenamePattern>()
@@ -87,8 +86,7 @@ internal static class Renamer
 
     public static void Run(string workingDirectory, Printer printer)
     {
-        Stopwatch stopwatch = new();
-        stopwatch.Start();
+        Watch watch = new();
 
         DirectoryInfo dir = new(workingDirectory);
 
@@ -153,6 +151,6 @@ internal static class Renamer
             }
         }
 
-        printer.Print($"Renaming done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
+        printer.Print($"Renaming done in {watch.ElapsedFriendly}.");
     }
 }

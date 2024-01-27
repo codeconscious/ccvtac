@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Threading;
+﻿using System.Threading;
 using CCVTAC.Console.Settings;
 using Spectre.Console;
 
@@ -9,6 +8,7 @@ internal static class Program
 {
     private static readonly string[] _helpFlags = ["-h", "--help"];
     private static readonly string[] _historyCommands = ["--history", "history"];
+    private static readonly string[] _settingsFileCommands = ["-s", "--settings"];
     private static readonly string[] _quitCommands = ["q", "quit", "exit", "bye"];
     private const string _urlInputPrompt = "Enter one or more YouTube media URLs, 'quit', or 'history':";
 
@@ -22,23 +22,28 @@ internal static class Program
             return;
         }
 
-        Result<UserSettings> settingsResult = SettingsService.GetUserSettings();
+        string? maybeSettingsPath = args.Length >= 2 && _settingsFileCommands.Contains(args[0].ToLowerInvariant())
+                ? args[1] // Expected to be a settings file path.
+                : null;
+        SettingsService settingsService = new(maybeSettingsPath);
+
+        var settingsResult = settingsService.PrepareUserSettings();
         if (settingsResult.IsFailed)
         {
-            printer.Errors("Settings file errors:", settingsResult);
+            printer.Errors("Settings error(s):", settingsResult);
             return;
         }
         UserSettings userSettings = settingsResult.Value;
+        settingsService.PrintSummary(userSettings, printer, header: "Settings loaded OK.");
 
         History history = new(userSettings.HistoryFilePath, userSettings.HistoryDisplayCount);
 
+        // Show the history if requested.
         if (args.Length > 0 && _historyCommands.Contains(args[0].ToLowerInvariant()))
         {
-            history.DisplayRecent(printer);
+            history.ShowRecent(printer);
             return;
         }
-
-        SettingsService.PrintSummary(userSettings, printer, "Settings loaded OK.");
 
         // Catch the user's pressing Ctrl-C (SIGINT).
         System.Console.CancelKeyPress += delegate
@@ -111,10 +116,9 @@ internal static class Program
         Printer printer)
     {
         string userInput = printer.GetInput(_urlInputPrompt);
-
         DateTime inputTime = DateTime.Now;
-        Stopwatch topStopwatch = new();
-        topStopwatch.Start();
+
+        Watch watch = new();
 
         var batchUrls = userInput.Split(" ")
                                  .Where(i => i.HasText())
@@ -138,9 +142,10 @@ internal static class Program
                 return NextAction.QuitAtUserRequest;
             }
 
+            // Show the history if requested.
             if (_historyCommands.Contains(url.ToLowerInvariant()))
             {
-                history.DisplayRecent(printer);
+                history.ShowRecent(printer);
                 continue;
             }
 
@@ -179,8 +184,7 @@ internal static class Program
             if (batchUrls.Count > 1)
                 printer.Print($"Processing batch {++currentBatch} of {batchUrls.Count}...");
 
-            Stopwatch jobStopwatch = new();
-            jobStopwatch.Start();
+            Watch jobWatch = new();
 
             history.Append(url, inputTime, printer);
 
@@ -191,20 +195,20 @@ internal static class Program
                 return NextAction.Continue;
             }
 
+            history.Append(url, inputTime, printer);
+
             var postProcessor = new PostProcessing.Setup(userSettings, printer);
             postProcessor.Run(); // TODO: Think about if/how to handle leftover temp files due to errors.
 
             string batchClause = batchUrls.Count > 1
                 ? $" (batch {currentBatch} of {batchUrls.Count})"
                 : string.Empty;
-            // TODO: Use minutes or hours for longer times.
-            printer.Print($"Done processing '{url}'{batchClause} in {jobStopwatch.ElapsedMilliseconds:#,##0}ms.");
+            printer.Print($"Done processing '{url}'{batchClause} in {jobWatch.ElapsedFriendly}.");
         }
 
         if (batchUrls.Count > 1)
         {
-            // TODO: Use minutes or hours for longer times.
-            printer.Print($"All done with {batchUrls.Count} batches in {topStopwatch.ElapsedMilliseconds:#,##0}ms.");
+            printer.Print($"All done with {batchUrls.Count} batches in {watch.ElapsedFriendly}.");
         }
 
         return NextAction.Continue;

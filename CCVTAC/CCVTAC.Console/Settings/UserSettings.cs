@@ -29,7 +29,7 @@ public sealed class UserSettings
     /// <summary>
     /// The file to which history should be logged.
     /// </summary>
-    [JsonPropertyName("historyPath")]
+    [JsonPropertyName("historyFilePath")]
     [JsonRequired]
     public string HistoryFilePath { get; init; } = string.Empty;
 
@@ -48,8 +48,8 @@ public sealed class UserSettings
     public bool SplitChapters { get; init; } = true;
 
     /// <summary>
-    /// The audio file format that should be downloaded. It must be
-    /// a format supported by both yt-dlp and TagLib#.
+    /// The audio file format that should be downloaded. It must be a format supported
+    /// by both yt-dlp and TagLib# (the tag-editing library used by this program).
     /// </summary>
     /// <remarks>I'm only supporting M4A, which requires no conversion, for now. (See PR #21.)</remarks>
     [JsonPropertyName("audioFormat")]

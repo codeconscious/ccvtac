@@ -37,7 +37,7 @@ public class History
         }
     }
 
-    public void DisplayRecent(Printer printer)
+    public void ShowRecent(Printer printer)
     {
         try
         {

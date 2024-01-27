@@ -5,7 +5,7 @@ namespace CCVTAC.Console.PostProcessing;
 /// <summary>
 /// Represents the data containing the JSON file downloaded alongside the video.
 /// </summary>
-public record struct VideoMetadata(
+public readonly record struct VideoMetadata(
     [property: JsonPropertyName("id")] string Id,
     [property: JsonPropertyName("title")] string Title,
     [property: JsonPropertyName("formats")] IReadOnlyList<FormatInfo> Formats,
@@ -83,27 +83,27 @@ public record struct VideoMetadata(
     [property: JsonPropertyName("_version")] VersionInfo Version
 );
 
-public record struct AutomaticCaptions(
+public readonly record struct AutomaticCaptions(
     [property: JsonPropertyName("en")] IReadOnlyList<En> En
 );
 
-public record struct DownloaderOptions(
+public readonly record struct DownloaderOptions(
     [property: JsonPropertyName("http_chunk_size")] int? HttpChunkSize
 );
 
-public record struct En(
+public readonly record struct En(
     [property: JsonPropertyName("url")] string Url,
     [property: JsonPropertyName("ext")] string Ext,
     [property: JsonPropertyName("protocol")] string Protocol
 );
 
-public record struct EnNP72PuUl7o(
+public readonly record struct EnNP72PuUl7o(
     [property: JsonPropertyName("ext")] string Ext,
     [property: JsonPropertyName("url")] string Url,
     [property: JsonPropertyName("name")] string Name
 );
 
-public record struct FormatInfo(
+public readonly record struct FormatInfo(
     [property: JsonPropertyName("format_id")] string FormatId,
     [property: JsonPropertyName("format_note")] string FormatNote,
     [property: JsonPropertyName("ext")] string Ext,
@@ -141,29 +141,29 @@ public record struct FormatInfo(
     [property: JsonPropertyName("filesize_approx")] int? FilesizeApprox
 );
 
-public record struct Fragment(
+public readonly record struct Fragment(
     [property: JsonPropertyName("url")] string Url,
     [property: JsonPropertyName("duration")] double? Duration
 );
 
-public record struct Heatmap(
+public readonly record struct Heatmap(
     [property: JsonPropertyName("start_time")] double? Start_time,
     [property: JsonPropertyName("end_time")] double? End_time,
     [property: JsonPropertyName("value")] double? value
 );
 
-public record struct HttpHeaders(
+public readonly record struct HttpHeaders(
     [property: JsonPropertyName("User-Agent")] string UserAgent,
     [property: JsonPropertyName("Accept")] string Accept,
     [property: JsonPropertyName("Accept-Language")] string AcceptLanguage,
     [property: JsonPropertyName("Sec-Fetch-Mode")] string SecFetchMode
 );
 
-public record struct Subtitles(
+public readonly record struct Subtitles(
     [property: JsonPropertyName("en-nP7-2PuUl7o")] IReadOnlyList<EnNP72PuUl7o> EnNP72PuUl7o
 );
 
-public record struct Thumbnail(
+public readonly record struct Thumbnail(
     [property: JsonPropertyName("url")] string Url,
     [property: JsonPropertyName("preference")] int? Preference,
     [property: JsonPropertyName("id")] string Id,
@@ -172,7 +172,7 @@ public record struct Thumbnail(
     [property: JsonPropertyName("resolution")] string Resolution
 );
 
-public record struct VersionInfo(
+public readonly record struct VersionInfo(
     [property: JsonPropertyName("version")] string Version,
     [property: JsonPropertyName("release_git_head")] string ReleaseGitHead,
     [property: JsonPropertyName("repository")] string Repository

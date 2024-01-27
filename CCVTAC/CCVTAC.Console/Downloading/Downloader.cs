@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using CCVTAC.Console.Downloading.Entities;
 using CCVTAC.Console.ExternalUtilities;
 using CCVTAC.Console.Settings;
@@ -30,8 +29,7 @@ internal static class Downloader
                                        UserSettings userSettings,
                                        Printer printer)
     {
-        Stopwatch stopwatch = new();
-        stopwatch.Start();
+        Watch watch = new();
 
         var downloadEntityResult = DownloadEntityFactory.Create(url);
         if (downloadEntityResult.IsFailed)
@@ -94,7 +92,7 @@ internal static class Downloader
             }
         }
 
-        return Result.Ok($"Downloading done in {stopwatch.ElapsedMilliseconds:#,##0}ms.");
+        return Result.Ok($"Downloading done in {watch.ElapsedFriendly}.");
     }
 
     /// <summary>
@@ -113,6 +111,7 @@ internal static class Downloader
                      $"--extract-audio -f {settings.AudioFormat}",
                      "--write-thumbnail --convert-thumbnails jpg", // For album art
                      "--write-info-json", // For parsing metadata
+                     "--retries 3" // Default is 10, more than necessary
                  ]
         };
 
@@ -121,10 +120,7 @@ internal static class Downloader
             args.Add("--split-chapters");
         }
 
-        if (settings.VerboseDownloaderOutput)
-        {
-            args.Add("--verbose");
-        }
+        args.Add(settings.VerboseDownloaderOutput ? "--verbose" : "--quiet --progress");
 
         if (downloadType is DownloadType.Media &&
             videoDownloadType is not MediaDownloadType.Video &&

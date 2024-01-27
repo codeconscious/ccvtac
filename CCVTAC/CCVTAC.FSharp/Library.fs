@@ -28,10 +28,9 @@ module YouTube =
         | Channel _ -> "https://"
 
     let fullUrl (media:Media) =
-        urlBase media +
-        match media with
-        | Video data -> data.VideoId
-        | PlaylistVideo data -> data.VideoId
-        | StandardPlaylist data -> data.VideoId
-        | ReleasePlaylist data -> data.VideoId
-        | Channel data -> data.VideoId
+        urlBase media + match media with
+                        | Video data -> data.VideoId
+                        | PlaylistVideo data -> data.VideoId
+                        | StandardPlaylist data -> data.VideoId
+                        | ReleasePlaylist data -> data.VideoId
+                        | Channel data -> data.VideoId

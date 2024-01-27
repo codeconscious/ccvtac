@@ -97,6 +97,11 @@ internal static class DetectionSchemeBank
             MatchGroupId.First,
             SourceMetadataField.Title
         ),
+        new(
+            """(?<=歌[:：]).+""", // 歌：○○○○ (Doesn't work with `$` appended.)
+            MatchGroupId.Zero,
+            SourceMetadataField.Description
+        ),
     };
 
     internal static IReadOnlyList<DetectionScheme> Album = new List<DetectionScheme>()
@@ -119,9 +124,14 @@ internal static class DetectionSchemeBank
             "pseudo-Topic style"
         ),
         new (
-            """(?<=アルバム|シングル[『「]).+(?=[」』])""", // アルバム「NAME」
+            """(?<=(アルバム|シングル)[『「]).+(?=[」』])""", // アルバム「NAME」
             MatchGroupId.Zero,
             SourceMetadataField.Title
+        ),
+        new (
+            """(?<=(アルバム|シングル)[『「]).+(?=[」』])""", // アルバム「NAME」
+            MatchGroupId.Zero,
+            SourceMetadataField.Description
         ),
         new (
             """(?<=EP[『「]).+(?=[」』]収録)""", // EP「NAME」収録
@@ -148,12 +158,12 @@ internal static class DetectionSchemeBank
     internal static IReadOnlyList<DetectionScheme> Composers = new List<DetectionScheme>()
     {
         new (
-            """(?<=[Cc]omposed by |[Cc]omposed by: |[Cc]omposer: |作曲[:：]).+""",
+            """(?<=[Cc]omposed by |[Cc]omposed by: |[Cc]omposer: |作曲[:：・]).+""",
             MatchGroupId.Zero,
             SourceMetadataField.Description
         ),
         new (
-            """(?<=[Cc]omposed by |[Cc]omposed by: |[Cc]omposer: |作曲[:：]).+""",
+            """(?<=[Cc]omposed by |[Cc]omposed by: |[Cc]omposer: |作曲[:：・]).+""",
             MatchGroupId.Zero,
             SourceMetadataField.Title
         )
