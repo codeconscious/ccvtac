@@ -120,7 +120,7 @@ internal static class Downloader
             args.Add("--split-chapters");
         }
 
-        args.Add(settings.VerboseOutput ? "--verbose" : "--quiet --progress");
+        args.Add(settings.VerboseOutput ? "--verbose" : "--progress"); // Deciding about `--quiet`.
 
         if (downloadType is DownloadType.Media &&
             videoDownloadType is not MediaDownloadType.Video &&
