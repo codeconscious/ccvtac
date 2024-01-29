@@ -178,6 +178,7 @@ public class SettingsService(string? customFilePath = null)
                         $"Ignore-upload-year channels",
                         $"{settings.IgnoreUploadYearUploaders?.Length.ToString() ?? "No"} {PluralizeIfNeeded("channel", settings.IgnoreUploadYearUploaders?.Length ?? 0)}"
                     },
+                    { "Verbose mode", settings.VerboseOutput ? "ON" : "OFF" },
                     { "Working directory", settings.WorkingDirectory },
                     { "Move-to directory", settings.MoveToDirectory },
                     { "History log file", $"{settings.HistoryFilePath} ({historyFileNote})" },
