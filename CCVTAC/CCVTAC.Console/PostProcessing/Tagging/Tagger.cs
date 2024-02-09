@@ -163,6 +163,7 @@ internal static class Tagger
         }
         catch (JsonException ex)
         {
+            // TODO: Probably should return the exception.
             return Result.Fail($"Error deserializing JSON from file \"{taggingSet.JsonFilePath}\": {ex.Message}");
         }
     }

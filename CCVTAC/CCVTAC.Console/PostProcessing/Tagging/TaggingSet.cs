@@ -39,10 +39,11 @@ internal readonly record struct TaggingSet
     /// </summary>
     internal static Regex FileNamesWithVideoIdsRegex = new(@".+\[([\w_\-]{11})\](?:.*)?\.(\w+)");
 
-    internal TaggingSet(string              resourceId,
-                        IEnumerable<string> audioFilePaths,
-                        string              jsonFilePath,
-                        string              imageFilePath)
+    internal TaggingSet(
+        string resourceId,
+        IEnumerable<string> audioFilePaths,
+        string jsonFilePath,
+        string imageFilePath)
     {
         if (string.IsNullOrWhiteSpace(resourceId))
             throw new ArgumentException("The resource ID must be provided.");

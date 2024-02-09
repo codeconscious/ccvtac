@@ -184,8 +184,10 @@ public class SettingsService(string? customFilePath = null)
                     { "History log file", $"{settings.HistoryFilePath} ({historyFileNote})" },
                 }
             .ToImmutableList();
-
         settingPairs.ForEach(pair => table.AddRow(pair.Key, pair.Value));
+
+        if (settings.PauseBeforePostProcessing)
+            table.AddRow("Pause before post-processing", "ON");
 
         printer.Print(table);
 

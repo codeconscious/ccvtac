@@ -83,6 +83,13 @@ public sealed class UserSettings
     public bool VerboseOutput { get; init; } = false;
 
     /// <summary>
+    /// Pause before post-processing to allow examining the downloaded files first.
+    /// For debugging purposes. Press the Enter key to continue with post-processing.
+    /// </summary>
+    [JsonPropertyName("pauseBeforePostProcessing")]
+    public bool PauseBeforePostProcessing { get; init; } = false;
+
+    /// <summary>
     /// If the supplied video uploader is specified in the settings, returns the video's upload year.
     /// Otherwise, returns null.
     /// </summary>
