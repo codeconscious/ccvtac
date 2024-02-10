@@ -35,7 +35,9 @@ internal static class Tagger
         var parsedJsonResult = GetParsedVideoJson(taggingSet);
         if (parsedJsonResult.IsFailed)
         {
-            printer.Errors(parsedJsonResult);
+            printer.Errors(
+                $"Error deserializing video metadata from \"{taggingSet.JsonFilePath}\":",
+                parsedJsonResult);
             return;
         }
 
@@ -163,7 +165,7 @@ internal static class Tagger
         }
         catch (JsonException ex)
         {
-            return Result.Fail($"Error deserializing JSON from file \"{taggingSet.JsonFilePath}\": {ex.Message}");
+            return Result.Fail($"{ex.Message}{Environment.NewLine}{ex.StackTrace}");
         }
     }
 

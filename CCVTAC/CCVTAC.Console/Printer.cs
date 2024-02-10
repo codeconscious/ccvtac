@@ -51,7 +51,7 @@ public sealed class Printer
     {
         if (headerMessage is not null)
         {
-            Print("[red]" + headerMessage + "[/]",
+            Print("[red]" + headerMessage.EscapeMarkup() + "[/]",
                   appendLines: appendLines,
                   processMarkup: true);
         }
