@@ -33,6 +33,7 @@ public class SettingsService
         }
 
         // Using `Fail` to indicate that the program cannot continue as is, though the write operation was successful.
+        // I'd like to fix this. (It's probably a good use case for a discrimated union (after C# gets them).
         return Result.Fail(
             $"A new empty settings file was created at \"{FullPath}\"." + Environment.NewLine +
             """
