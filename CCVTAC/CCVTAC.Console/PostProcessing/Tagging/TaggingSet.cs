@@ -13,12 +13,13 @@ namespace CCVTAC.Console.PostProcessing.Tagging;
 internal readonly record struct TaggingSet
 {
     /// <summary>
-    /// The ID of a single video and perhaps its child video (if "split chapters" was used).
+    /// The ID of a single video and perhaps its child videos (if "split chapters" was used).
+    /// Used to locate all of the related files (whose filenames will contain the same ID).
     /// </summary>
     internal string ResourceId { get; init; }
 
     /// <summary>
-    /// All audio files for the associated resource ID. Several indicate
+    /// All audio files for the associated resource ID. Several files with identical IDs indicates
     /// that the original video was split into several audio files.
     /// </summary>
     internal ImmutableHashSet<string> AudioFilePaths { get; init; }
@@ -61,12 +62,12 @@ internal readonly record struct TaggingSet
     }
 
     /// <summary>
-    /// Create a collection of TaggingSets from a collection of filePaths
-    /// related to several video IDs.
+    ///     Create a collection of TaggingSets from a collection of filePaths
+    ///     related to several video IDs.
     /// </summary>
     /// <param name="filePaths">
-    /// A collection of file paths. Expected to contain 1 JSON file and
-    /// 1 image file for each unique video ID.
+    ///     A collection of file paths. Expected to contain all related audio files (>=1),
+    ///     1 JSON file, and 1 image file for each distinct video ID.
     /// </param>
     internal static ImmutableList<TaggingSet> CreateSets(IEnumerable<string> filePaths)
     {
