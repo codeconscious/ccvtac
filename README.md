@@ -9,7 +9,12 @@ Feel free to use it yourself, but please do so responsibly. No warranties or gua
 ## Features
 
 - Converts YouTube videos to local M4A audio files (via [yt-dlp](https://github.com/yt-dlp/yt-dlp))
-- Supports video, playlist, and channel URLs
+- Supports 5 kinds of downloads
+  - Video
+  - Video on a playlist (Playlist metadata will be written to the comments)
+  - Standard playlist (with the newest video at index 1)
+  - Release playlist (in which the playlist index represents the album number)
+  - Channel
 - Adds video metadata (channel name, channel URL, video URL, etc.) summary to Comment tags
 - Writes ID3 tags (artists, title, etc.) to files where possible (via metadata or regex-based detection)
 - Renames files via specified regex patterns (to remove resource IDs, etc.)
@@ -26,14 +31,14 @@ Feel free to use it yourself, but please do so responsibly. No warranties or gua
 
 Prerequisites:
 
-- [.NET 8 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) (at least until I prepare actual releases...)
+- [.NET 8 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp)
 - Optional: [mogrify](https://imagemagick.org/script/mogrify.php) (for auto-trimming album art)
 
-Run the program with `dotnet run`. Pass `-h` or `--help` for the instructions.
+Run the program with `dotnet run`. Optionally, pass `-h` or `--help` for the instructions.
 
 If your `settings.json` file does not exist, it will created in the application directory with default settings. At minimum, you will need to enter paths to two existing directories: (1) a working directory for temporary files, (2) the directory to which the final audio files should be moved, and (3) a path to a history file. The other settings are optional.
 
-Once the program is running, simply enter at least one YouTube video, playlist, or channel URL at the prompt and press Enter.
+Once the program is running, simply enter at least one YouTube media URL at the prompt and press Enter.
 
 Recommended: Periodically ensure you're running the latest version of yt-dlp using `sudo yt-dlp -U` (or whatever command is appropriate for your system—see the [yt-dlp GitHub page](https://github.com/yt-dlp/yt-dlp#update) for more), especially if you start experiencing download errors.
