@@ -32,15 +32,55 @@ Feel free to use it yourself, but please do so responsibly. No warranties or gua
 Prerequisites:
 
 - [.NET 8 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+- A valid settings file (see below)
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp)
 - Optional: [mogrify](https://imagemagick.org/script/mogrify.php) (for auto-trimming album art)
 
-Run the program with `dotnet run`. Optionally, pass `-h` or `--help` for the instructions.
+### Settings
 
-If your `settings.json` file does not exist, it will created in the application directory with default settings. At minimum, you will need to enter (1) a directory for temporary working files, (2) a directory to which the final audio files should be moved, and (3) a path to your history file. The other settings are optional.
+A valid settings file is mandatory to use this application.
 
-Once the program is running, simply enter at least one YouTube media URL at the prompt and press the Enter key. Enter `quit` or `q` to quit. Entering `history` will show your recent URL history.
+The application will look for a file named `settings.json` in its directory. However, you can manually specify an existing file path using the `-s` option, such as `dotnet run -- -s <PATH_TO_YOUR_FILE>`.
 
-*Recommended:* Periodically ensure you're running the latest version of yt-dlp, especially if you start experiencing download errors. See the [yt-dlp GitHub page](https://github.com/yt-dlp/yt-dlp#update) for more. (Likely commands are `sudo yt-dlp -U` or `pip install --upgrade yt-dlp`.)
+If your `settings.json` file does not exist, it will created in the application directory with default settings. At minimum, you will need to enter (1) a directory for temporary working files, (2) a directory to which the final audio files should be moved, and (3) a path to your history file. The other settings have sensible defaults.
 
-If you run into any issues, please create an issue on GitHub with as much information as possible.
+Sample settings file:
+
+```json
+{
+  "workingDirectory": "/Users/me/temp", // An existing directory for working files
+  "moveToDirectory": "/Users/me/Downloads", // An existing directory to which audio files will be saved
+  "historyFilePath": "/Users/me/Downloads/history.log", // An file to which your entered URLs are saved
+  "sleepBetweenDownloadsSeconds": 10, // The number of seconds between individual video downloads on playlists and channels
+  "sleepBetweenBatchesSeconds": 20, // The number of seconds between batches (i.e., URLs you enter)
+  "splitChapters": true, // Should videos with chapters be split into separate files?
+  "historyDisplayCount": 20, // The number of history entries to show when `history` is entered
+  "verboseOutput": true,
+  "pauseBeforePostProcessing": false,
+  "ignoreUploadYearUploaders": [
+    "Channel Name",
+    "Another channel name"
+  ]
+}
+
+```
+
+I added the `sleepBetweenDownloadsSeconds` and `sleepBetweenBatchesSeconds` settings to help reduce concentrated loads on YouTube servers. Please avoid lowering these values too much and slamming their servers with enormous, long-running downloads (even if their servers can take it).
+
+### Running the application
+
+Once your settings are ready, run the application with `dotnet run`. Optionally, pass `-h` or `--help` for instructions (e.g., `dotnet run -- --help`).
+
+When the application is running, simply enter at least one YouTube media URL (video, playlist, or channel) at the prompt and press the Enter key. Separate multiple URLs by spaces.
+
+Enter `quit` or `q` to quit.
+
+Entering `history` will display your recent URL history.
+
+## yt-dlp upgrades
+
+Periodically ensure you are running the latest version of yt-dlp, especially if you start experiencing download errors. See the [yt-dlp GitHub page](https://github.com/yt-dlp/yt-dlp#update) for more. (Likely commands are `sudo yt-dlp -U` or `pip install --upgrade yt-dlp`.)
+
+### Getting help
+
+If you run into any issues, please create an issue on GitHub with as much information as possible. Thank you!
