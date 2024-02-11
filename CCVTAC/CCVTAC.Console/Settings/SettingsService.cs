@@ -4,13 +4,17 @@ using Spectre.Console;
 
 namespace CCVTAC.Console.Settings;
 
-public class SettingsService(string? customFilePath = null)
+public class SettingsService
 {
     private const string _defaultSettingsFileName = "settings.json";
-    internal string FullPath { get; init; } = customFilePath
-                                              ?? Path.Combine(
-                                                    AppContext.BaseDirectory,
-                                                    _defaultSettingsFileName);
+
+    private string FullPath { get; init; }
+
+    public SettingsService(string? customFilePath = null)
+    {
+        FullPath = customFilePath
+                   ?? Path.Combine(AppContext.BaseDirectory, _defaultSettingsFileName);
+    }
 
     public Result<UserSettings> PrepareUserSettings()
     {
