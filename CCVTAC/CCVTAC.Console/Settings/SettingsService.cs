@@ -30,10 +30,10 @@ public class SettingsService(string? customFilePath = null)
 
         // Using `Fail` to indicate that the program cannot continue as is, though the write operation was successful.
         return Result.Fail(
-            $"A new empty settings file was created at \"{FullPath}\"." +
+            $"A new empty settings file was created at \"{FullPath}\"." + Environment.NewLine +
             """
             Please review it and populate it with your desired settings.
-            In particular, "workingDirectory," "moveToDirectory," and "historyFilePath" must be populated.
+            In particular, "workingDirectory," "moveToDirectory," and "historyFilePath" must be populated with valid paths.
             """);
     }
 
