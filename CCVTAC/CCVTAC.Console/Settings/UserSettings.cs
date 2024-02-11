@@ -60,7 +60,7 @@ public sealed class UserSettings
     /// passed to the download tool.
     /// </summary>
     [JsonPropertyName("sleepBetweenDownloadsSeconds")]
-    public ushort SleepSecondsBetweenDownloads { get; init; } = 3;
+    public ushort SleepSecondsBetweenDownloads { get; init; } = 5;
 
     /// <summary>
     /// How many seconds the program should sleep between multiple batches.
