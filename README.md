@@ -65,7 +65,7 @@ Sample settings file:
 
 I added the `sleepBetweenDownloadsSeconds` and `sleepBetweenBatchesSeconds` settings to help reduce concentrated loads on YouTube servers. Please avoid lowering these values too much and slamming their servers with enormous, long-running downloads (even if their servers can take it).
 
-### Running the application
+### Using the application
 
 Once your settings are ready, run the application with `dotnet run`. Optionally, pass `-h` or `--help` for instructions (e.g., `dotnet run -- --help`).
 
@@ -75,7 +75,7 @@ Enter `quit` or `q` to quit.
 
 Entering `history` will display your recent URL history.
 
-## yt-dlp upgrades
+## Upgrading yt-dlp
 
 Periodically ensure you are running the latest version of yt-dlp, especially if you start experiencing download errors. See the [yt-dlp GitHub page](https://github.com/yt-dlp/yt-dlp#update) for more. (Likely commands are `sudo yt-dlp -U` or `pip install --upgrade yt-dlp`.)
 
