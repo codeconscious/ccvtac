@@ -32,7 +32,7 @@ internal static class Tagger
     {
         printer.Print($"{taggingSet.AudioFilePaths.Count} audio file(s) with resource ID \"{taggingSet.ResourceId}\"");
 
-        var parsedJsonResult = GetParsedVideoJson(taggingSet);
+        var parsedJsonResult = ParseVideoJson(taggingSet);
         if (parsedJsonResult.IsFailed)
         {
             printer.Errors(
@@ -145,7 +145,7 @@ internal static class Tagger
         }
     }
 
-    static Result<VideoMetadata> GetParsedVideoJson(TaggingSet taggingSet)
+    static Result<VideoMetadata> ParseVideoJson(TaggingSet taggingSet)
     {
         string json;
         try
@@ -178,12 +178,20 @@ internal static class Tagger
     private static TaggingSet DeleteSourceFile(TaggingSet taggingSet, Printer printer)
     {
         // If there is only one file, then there are no child files, so no action is necessary.
-        // (Two files should never happen, but might be worth thinking about how to handle that.)
         if (taggingSet.AudioFilePaths.Count <= 1)
         {
             return taggingSet;
         }
 
+        // If a video is split, it must have at least 2 chapters, so the minimum possible
+        // audio file count is 3. (Returning the taggingSet as-is might be viable, though.)
+        if (taggingSet.AudioFilePaths.Count == 2)
+        {
+            throw new InvalidOperationException(
+                $"Two audio files were found for media ID \"{taggingSet.ResourceId}\", but this should be impossible, so cannot continue.");
+        }
+
+        // The largest audio file must be the source file.
         FileInfo largestFileInfo =
             taggingSet.AudioFilePaths
                 .Select(fileName => new FileInfo(fileName))
