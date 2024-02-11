@@ -4,7 +4,6 @@ Features that I might consider as features or improvements in the future. Not al
 
 - Add a post-processing–only option for already-downloaded temporary files (via aborted downloads, etc.)
 - Stop downloading if there are repeated errors from yt-dlp
-- Logging levels (current/full vs. light)
 - Logging to a file
 - Clean up errors (e.g., add a summary header at the caller and remove from the `return`)
 - JSON history that stores more data than just URLs (Or maybe the log file would be sufficient? If so, is the history file even needed? Maybe allow up-and-down scrolling through history?)
