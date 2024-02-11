@@ -11,12 +11,12 @@ Feel free to use it yourself, but please do so responsibly. No warranties or gua
 - Converts YouTube videos to local M4A audio files (via [yt-dlp](https://github.com/yt-dlp/yt-dlp))
 - Supports 5 kinds of downloads
   - Video
-  - Video on a playlist (Playlist metadata will be written to the comments)
+  - Video on a playlist
   - Standard playlist (with the newest video at index 1)
-  - Release playlist (in which the playlist index represents the album number)
+  - Release playlist (in which the playlist index represents the album track number)
   - Channel
 - Writes ID3 tags (artists, title, etc.) to files where possible (via metadata or regex-based detection)
-- Adds limited video metadata (channel name, channel URL, video URL, etc.) summary to files' Comment tags
+- Adds limited video metadata (channel name and URL, video URL, etc.) summary to files' Comment tags
 - Auto-renames files via specified regex patterns (to remove resource IDs, etc.)
 - Optionally auto-trims and writes video thumbnails to files as album art (if [mogrify](https://imagemagick.org/script/mogrify.php) is installed)
 - Customized behavior via a user settings file
@@ -29,7 +29,7 @@ Feel free to use it yourself, but please do so responsibly. No warranties or gua
 
 ## Running It
 
-Prerequisites:
+### Prerequisites
 
 - [.NET 8 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
 - A valid settings file (see below)
@@ -42,27 +42,25 @@ A valid settings file is mandatory to use this application.
 
 The application will look for a file named `settings.json` in its directory. However, you can manually specify an existing file path using the `-s` option, such as `dotnet run -- -s <PATH_TO_YOUR_FILE>`.
 
-If your `settings.json` file does not exist, it will created in the application directory with default settings. At minimum, you will need to enter (1) a directory for temporary working files, (2) a directory to which the final audio files should be moved, and (3) a path to your history file. The other settings have sensible defaults.
+If your `settings.json` file does not exist, one will be created in the application directory with default settings. At minimum, you will need to enter (1) an existing directory for temporary working files, (2) an existing directory to which the final audio files should be moved, and (3) a path to your history file. The other settings have sensible defaults.
 
 Sample settings file:
 
 ```json
 {
-  "workingDirectory": "/Users/me/temp", // An existing directory for working files
-  "moveToDirectory": "/Users/me/Downloads", // An existing directory to which audio files will be saved
-  "historyFilePath": "/Users/me/Downloads/history.log", // An file to which your entered URLs are saved
-  "sleepBetweenDownloadsSeconds": 10, // The number of seconds between individual video downloads on playlists and channels
-  "sleepBetweenBatchesSeconds": 20, // The number of seconds between batches (i.e., URLs you enter)
+  "workingDirectory": "/Users/me/temp", // A temporary home for working files
+  "moveToDirectory": "/Users/me/Downloads", // Which audio files should be saved
+  "historyFilePath": "/Users/me/Downloads/history.log", // Logs your entered URLs
+  "sleepBetweenDownloadsSeconds": 10, // Delay between video downloads for playlists and channels
+  "sleepBetweenBatchesSeconds": 20, // Delay between batches (i.e., each URL entered)
   "splitChapters": true, // Should videos with chapters be split into separate files?
-  "historyDisplayCount": 20, // The number of history entries to show when `history` is entered
-  "verboseOutput": true,
-  "pauseBeforePostProcessing": false,
-  "ignoreUploadYearUploaders": [
-    "Channel Name",
-    "Another channel name"
+  "historyDisplayCount": 20, // Count of entries to show for `history`
+  "verboseOutput": true, // Use `false` for quiet mode
+  "ignoreUploadYearUploaders": [ // By default, the upload year of the video is
+    "Channel Name",              // saved to files' Year tag. However, this will
+    "Another channel name"       // not occur for videos on channels listed here.
   ]
 }
-
 ```
 
 I added the `sleepBetweenDownloadsSeconds` and `sleepBetweenBatchesSeconds` settings to help reduce concentrated loads on YouTube servers. Please avoid lowering these values too much and slamming their servers with enormous, long-running downloads (even if their servers can take it).
@@ -81,6 +79,6 @@ Entering `history` will display your recent URL history.
 
 Periodically ensure you are running the latest version of yt-dlp, especially if you start experiencing download errors. See the [yt-dlp GitHub page](https://github.com/yt-dlp/yt-dlp#update) for more. (Likely commands are `sudo yt-dlp -U` or `pip install --upgrade yt-dlp`.)
 
-### Getting help
+## Reporting issues
 
 If you run into any issues, please create an issue on GitHub with as much information as possible. Thank you!
