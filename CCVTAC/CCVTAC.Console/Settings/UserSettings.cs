@@ -60,7 +60,7 @@ public sealed class UserSettings
     /// passed to the download tool.
     /// </summary>
     [JsonPropertyName("sleepBetweenDownloadsSeconds")]
-    public ushort SleepSecondsBetweenDownloads { get; init; } = 3;
+    public ushort SleepSecondsBetweenDownloads { get; init; } = 5;
 
     /// <summary>
     /// How many seconds the program should sleep between multiple batches.
@@ -77,10 +77,17 @@ public sealed class UserSettings
     public string[]? IgnoreUploadYearUploaders { get; init; }
 
     /// <summary>
-    /// Shows verbose output from the external downloader tool if true; otherwise, shows normal output.
+    /// Shows verbose output if true; otherwise, shows normal output.
     /// </summary>
-    [JsonPropertyName("verboseDownloaderOutput")]
-    public bool VerboseDownloaderOutput { get; init; } = false;
+    [JsonPropertyName("verboseOutput")]
+    public bool VerboseOutput { get; init; } = false;
+
+    /// <summary>
+    /// Pause before post-processing to allow examining the downloaded files first.
+    /// For debugging purposes. Press the Enter key to continue with post-processing.
+    /// </summary>
+    [JsonPropertyName("pauseBeforePostProcessing")]
+    public bool PauseBeforePostProcessing { get; init; } = false;
 
     /// <summary>
     /// If the supplied video uploader is specified in the settings, returns the video's upload year.

@@ -15,7 +15,7 @@ internal static class Downloader
     /// <summary>
     /// All known error codes returned by yt-dlp with their meanings.
     /// </summary>
-    /// <remarks>Source of error codes: https://github.com/yt-dlp/yt-dlp/issues/4262#issuecomment-1173133105</remarks>
+    /// <remarks>Source: https://github.com/yt-dlp/yt-dlp/issues/4262#issuecomment-1173133105</remarks>
     internal static Dictionary<int, string> DownloaderExitCodes = new()
     {
         { 0, "Success" },
@@ -25,9 +25,7 @@ internal static class Downloader
         { 101, "Download cancelled by --max-downloads, etc." },
     };
 
-    internal static Result<string> Run(string url,
-                                       UserSettings userSettings,
-                                       Printer printer)
+    internal static Result<string> Run(string url, UserSettings userSettings, Printer printer)
     {
         Watch watch = new();
 
@@ -120,7 +118,9 @@ internal static class Downloader
             args.Add("--split-chapters");
         }
 
-        args.Add(settings.VerboseDownloaderOutput ? "--verbose" : "--quiet --progress");
+        // `--verbose` is a yt-dlp option too, but maybe that's too much data.
+        // It might be worth incorporating it in the future as a third option.
+        args.Add(settings.VerboseOutput ? string.Empty : "--quiet --progress");
 
         if (downloadType is DownloadType.Media &&
             videoDownloadType is not MediaDownloadType.Video &&
@@ -138,6 +138,6 @@ internal static class Downloader
             args.Add("""-o "%(playlist)s = %(playlist_autonumber)s - %(title)s [%(id)s].%(ext)s" --playlist-reverse""");
         }
 
-        return string.Join(" ", args.Concat(additionalArgs ?? Enumerable.Empty<string>()));
+        return string.Join(" ", args.Concat(additionalArgs ?? []));
     }
 }

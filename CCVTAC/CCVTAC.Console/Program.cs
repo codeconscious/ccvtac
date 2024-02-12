@@ -83,7 +83,7 @@ internal static class Program
         var tempFiles = IoUtilties.Directories.GetDirectoryFiles(userSettings.WorkingDirectory);
         if (tempFiles.Any())
         {
-            printer.Error($"{tempFiles.Count} file(s) unexpectedly found in the working directory, so will abort:");
+            printer.Error($"{tempFiles.Count} file(s) unexpectedly found in the working directory ({userSettings.WorkingDirectory}), so will abort:");
             tempFiles.ForEach(file => printer.Warning($"• {file}"));
             return;
         }
@@ -152,7 +152,7 @@ internal static class Program
             var tempFiles = IoUtilties.Directories.GetDirectoryFiles(userSettings.WorkingDirectory);
             if (tempFiles.Any())
             {
-                printer.Error($"{tempFiles.Count} file(s) unexpectedly found in the working directory, so will abort:");
+                printer.Error($"{tempFiles.Count} file(s) unexpectedly found in the working directory ({userSettings.WorkingDirectory}), so will abort:");
                 tempFiles.ForEach(file => printer.Warning($"• {file}"));
                 return NextAction.QuitDueToErrors;
             }

@@ -4,13 +4,17 @@ using Spectre.Console;
 
 namespace CCVTAC.Console.Settings;
 
-public class SettingsService(string? customFilePath = null)
+public class SettingsService
 {
     private const string _defaultSettingsFileName = "settings.json";
-    internal string FullPath { get; init; } = customFilePath
-                                              ?? Path.Combine(
-                                                    AppContext.BaseDirectory,
-                                                    _defaultSettingsFileName);
+
+    private string FullPath { get; init; }
+
+    public SettingsService(string? customFilePath = null)
+    {
+        FullPath = customFilePath
+                   ?? Path.Combine(AppContext.BaseDirectory, _defaultSettingsFileName);
+    }
 
     public Result<UserSettings> PrepareUserSettings()
     {
@@ -29,11 +33,12 @@ public class SettingsService(string? customFilePath = null)
         }
 
         // Using `Fail` to indicate that the program cannot continue as is, though the write operation was successful.
+        // I'd like to fix this. (It's probably a good use case for a discrimated union (after C# gets them).
         return Result.Fail(
-            $"A new empty settings file was created at \"{FullPath}\"." +
+            $"A new empty settings file was created at \"{FullPath}\"." + Environment.NewLine +
             """
             Please review it and populate it with your desired settings.
-            In particular, "workingDirectory," "moveToDirectory," and "historyFilePath" must be populated.
+            In particular, "workingDirectory," "moveToDirectory," and "historyFilePath" must be populated with valid paths.
             """);
     }
 
@@ -178,13 +183,16 @@ public class SettingsService(string? customFilePath = null)
                         $"Ignore-upload-year channels",
                         $"{settings.IgnoreUploadYearUploaders?.Length.ToString() ?? "No"} {PluralizeIfNeeded("channel", settings.IgnoreUploadYearUploaders?.Length ?? 0)}"
                     },
+                    { "Verbose mode", settings.VerboseOutput ? "ON" : "OFF" },
                     { "Working directory", settings.WorkingDirectory },
                     { "Move-to directory", settings.MoveToDirectory },
                     { "History log file", $"{settings.HistoryFilePath} ({historyFileNote})" },
                 }
             .ToImmutableList();
-
         settingPairs.ForEach(pair => table.AddRow(pair.Key, pair.Value));
+
+        if (settings.PauseBeforePostProcessing)
+            table.AddRow("Pause before post-processing", "ON");
 
         printer.Print(table);
 
