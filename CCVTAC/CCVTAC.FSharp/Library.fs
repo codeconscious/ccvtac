@@ -7,43 +7,42 @@ module Say =
 module YouTube =
     open System.Text.RegularExpressions
 
-    // type Id = { VideoId: string }
-    type Id = Id of string
-    let CreateId (s:string) =
-        if System.Text.RegularExpressions.Regex.IsMatch(s,@".{11}")
-            then Some (Id s)
-            else None
+    // type VideoId = VideoId of string
+    // type PlaylistId = PlaylistId of string
+    // type ChannelId = ChannelId of string
+    type Url = Url of string
+    // type Id = Id of string
+    type MediaType = | Video | PlaylistVideo | StandardPlaylist | ReleasePlaylist | Channel | Unknown
+    type IdPair = { VideoId: string; PlaylistId: string }
 
-    type IdPair = { VideoId: string; ParentId: string }
+    let parseUrl (s:string) (rgx, mediaType) =
+        let matches = System.Text.RegularExpressions.Regex.Matches(s, rgx)
+        if matches.Count > 1
+        then Some (matches |> Seq.cast |> Seq.filter (fun (regMatch:Match) -> regMatch.Success) |> Seq.map (fun (regMatch:Match) -> regMatch.Value))
+        else None
 
-    type Media =
-        | Video of Id
-        | PlaylistVideo of IdPair
-        | StandardPlaylist of Id
-        | ReleasePlaylist of Id
-        | Channel of Id
-        | Unknown
+    //  let unwrap (Media media) = media
 
     type DownloadType =
-        | MediaType of Media
+        | MediaType of MediaType
         | Metadata
 
-    let urlBase (media:Media) =
+    let urlPattern (media:MediaType) (url:string) =
         match media with
-        | Video _ -> "https://www.youtube.com/watch?v="
-        | PlaylistVideo _ -> "https://www.youtube.com/watch?v="
-        | StandardPlaylist _ -> "https://www.youtube.com/playlist?list="
-        | ReleasePlaylist _ -> "https://www.youtube.com/playlist?list="
-        | Channel _ -> "https://"
+        | Video str -> sprintf "https://www.youtube.com/watch?v=%s" str
+        | PlaylistVideo -> "https://www.youtube.com/watch?v=%s"
+        | StandardPlaylist -> "https://www.youtube.com/playlist?list=%s"
+        | ReleasePlaylist -> "https://www.youtube.com/playlist?list=%s"
+        | Channel -> "https://"
         | _ -> ""
 
-    let fullUrl (media:Media) =
+    let fullUrl (media: Media) =
         urlBase media + match media with
-                        | Video data -> data.VideoId
-                        | PlaylistVideo data -> data.VideoId
-                        | StandardPlaylist data -> data.VideoId
-                        | ReleasePlaylist data -> data.VideoId
-                        | Channel data -> data.VideoId
+                        | Video id -> id
+                        | PlaylistVideo (videoId, playlistId) -> videoId + playlistId // TODO: Fix
+                        | StandardPlaylist id -> id
+                        | ReleasePlaylist id -> id
+                        | Channel id -> id
                         | Unknown -> failwith "Not Implemented"
 
     // Source: https://stackoverflow.com/questions/53818476/f-match-many-regex
@@ -54,13 +53,13 @@ module YouTube =
         if m.Success then Some(List.tail [ for g in m.Groups -> g.Value ])
         else None
 
-    let getMedia (url:string) =
-        match url with
-        | Regex "^([\w-]{11})$" [ id ] -> Video({VideoId = id})
-        | Regex "(?<=v=|v\\=)([\w-]{11})" [ id ] -> Video({VideoId = id})
-        | Regex "(?<=youtu\.be/)(.{11})" [ id ] -> Video({VideoId = id})
-        | Regex "(?<=v=|v\=)([\w-]{11})(?:&list=([\w_-]+))" [ id ; parentId] -> PlaylistVideo({VideoId = id; ParentId = parentId})
-        | Regex "(?<=list=)(P[\w\-]+)" [ id ] -> StandardPlaylist({VideoId = id})
-        | Regex "(?<=list=)(O[\w\-]+)" [ id ] -> ReleasePlaylist({VideoId = id})
-        | Regex "((?:www\.)?youtube\.com\/(?:channel\/|c\/|user\/|@)(?:[\w\-]+))" [ id ] -> Channel({VideoId = id})
-        | _ -> Unknown
+    // let getMedia (url:string) =
+    //     match url with
+    //     | Regex "^([\w-]{11})$" [ id ] -> Video({VideoId = id})
+    //     | Regex "(?<=v=|v\\=)([\w-]{11})" [ id ] -> Video({VideoId = id})
+    //     | Regex "(?<=youtu\.be/)(.{11})" [ id ] -> Video({VideoId = id})
+    //     | Regex "(?<=v=|v\=)([\w-]{11})(?:&list=([\w_-]+))" [ id ; parentId] -> PlaylistVideo({VideoId = id; ParentId = parentId})
+    //     | Regex "(?<=list=)(P[\w\-]+)" [ id ] -> StandardPlaylist({VideoId = id})
+    //     | Regex "(?<=list=)(O[\w\-]+)" [ id ] -> ReleasePlaylist({VideoId = id})
+    //     | Regex "((?:www\.)?youtube\.com\/(?:channel\/|c\/|user\/|@)(?:[\w\-]+))" [ id ] -> Channel({VideoId = id})
+    //     | _ -> Unknown
