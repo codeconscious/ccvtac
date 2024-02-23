@@ -38,6 +38,10 @@ internal static class Renamer
             "%<1>s - %<2>s",
             "PERSON - TRACK"),
         new(
+            new Regex("""(.+?) - (.+?) ℗ ([\d\?？]{4})"""),
+            "%<1>s - %<2>s [%<3>s]",
+            "PERSON - TRACK ℗ YEAR"),
+        new(
             new Regex(@"(.+?)(?: - )(.+?) \[[\w⧸]+\] .+ \(([\d\?？]{4})\)"),
             "%<1>s - %<2>s [%<3>s]",
             "PERSON - TRACK [YEAR]"),
@@ -84,7 +88,7 @@ internal static class Renamer
             "Replace en dashes with hyphens")
     };
 
-    public static void Run(string workingDirectory, Printer printer)
+    public static void Run(string workingDirectory, bool isVerbose, Printer printer)
     {
         Watch watch = new();
 
@@ -142,8 +146,12 @@ internal static class Renamer
                 File.Move(
                     filePath.FullName,
                     Path.Combine(workingDirectory, newFileName));
-                printer.Print($"• From: \"{filePath.Name}\"");
-                printer.Print($"    To: \"{newFileName}\"");
+
+                if (isVerbose)
+                {
+                    printer.Print($"• From: \"{filePath.Name}\"");
+                    printer.Print($"    To: \"{newFileName}\"");
+                }
             }
             catch (Exception ex)
             {

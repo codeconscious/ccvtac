@@ -22,12 +22,15 @@ public readonly record struct VideoMetadata(
     [property: JsonPropertyName("tags")] IReadOnlyList<string> Tags,
     [property: JsonPropertyName("playable_in_embed")] bool? PlayableInEmbed,
     [property: JsonPropertyName("live_status")] string LiveStatus,
+    [property: JsonPropertyName("release_timestamp")] int? ReleaseTimestamp,
+    [property: JsonPropertyName("_format_sort_fields")] IReadOnlyList<string> FormatSortFields,
     [property: JsonPropertyName("automatic_captions")] AutomaticCaptions AutomaticCaptions,
     [property: JsonPropertyName("subtitles")] Subtitles Subtitles,
     [property: JsonPropertyName("album")] string Album,
     [property: JsonPropertyName("artist")] string Artist,
     [property: JsonPropertyName("track")] string Track,
-    [property: JsonPropertyName("release_year")] uint? ReleaseYear,
+    [property: JsonPropertyName("comment_count")] int? CommentCount,
+    [property: JsonPropertyName("chapters")] IReadOnlyList<Chapter> Chapters,
     [property: JsonPropertyName("like_count")] int? LikeCount,
     [property: JsonPropertyName("channel")] string Channel,
     [property: JsonPropertyName("channel_follower_count")] int? ChannelFollowerCount,
@@ -52,6 +55,8 @@ public readonly record struct VideoMetadata(
     [property: JsonPropertyName("display_id")] string DisplayId,
     [property: JsonPropertyName("fulltitle")] string Fulltitle,
     [property: JsonPropertyName("duration_string")] string DurationString,
+    [property: JsonPropertyName("release_date")] string ReleaseDate,
+    [property: JsonPropertyName("release_year")] uint? ReleaseYear,
     [property: JsonPropertyName("is_live")] bool? IsLive,
     [property: JsonPropertyName("was_live")] bool? WasLive,
     [property: JsonPropertyName("epoch")] int? Epoch,
@@ -127,10 +132,10 @@ public readonly record struct FormatInfo(
     [property: JsonPropertyName("format")] string Format,
     [property: JsonPropertyName("manifest_url")] string ManifestUrl,
     [property: JsonPropertyName("quality")] double? Quality,
-    [property: JsonPropertyName("has_drm")] object HasDrm,
+    [property: JsonPropertyName("has_drm")] bool? HasDrm,
     [property: JsonPropertyName("source_preference")] int? SourcePreference,
     [property: JsonPropertyName("asr")] int? Asr,
-    [property: JsonPropertyName("filesize")] int? Filesize,
+    [property: JsonPropertyName("filesize")] long? Filesize,
     [property: JsonPropertyName("audio_channels")] int? AudioChannels,
     [property: JsonPropertyName("tbr")] double? Tbr,
     [property: JsonPropertyName("language_preference")] int? LanguagePreference,
@@ -138,7 +143,7 @@ public readonly record struct FormatInfo(
     [property: JsonPropertyName("downloader_options")] DownloaderOptions DownloaderOptions,
     [property: JsonPropertyName("preference")] int? Preference,
     [property: JsonPropertyName("dynamic_range")] string DynamicRange,
-    [property: JsonPropertyName("filesize_approx")] int? FilesizeApprox
+    [property: JsonPropertyName("filesize_approx")] long? FilesizeApprox
 );
 
 public readonly record struct Fragment(
@@ -160,7 +165,15 @@ public readonly record struct HttpHeaders(
 );
 
 public readonly record struct Subtitles(
-    [property: JsonPropertyName("en-nP7-2PuUl7o")] IReadOnlyList<EnNP72PuUl7o> EnNP72PuUl7o
+    [property: JsonPropertyName("en-nP7-2PuUl7o")] IReadOnlyList<EnNP72PuUl7o> EnNP72PuUl7o,
+    [property: JsonPropertyName("live_chat")] IReadOnlyList<LiveChat> LiveChat
+);
+
+public record LiveChat(
+    [property: JsonPropertyName("url")] string Url,
+    [property: JsonPropertyName("video_id")] string VideoId,
+    [property: JsonPropertyName("ext")] string Ext,
+    [property: JsonPropertyName("protocol")] string Protocol
 );
 
 public readonly record struct Thumbnail(
@@ -176,4 +189,10 @@ public readonly record struct VersionInfo(
     [property: JsonPropertyName("version")] string Version,
     [property: JsonPropertyName("release_git_head")] string ReleaseGitHead,
     [property: JsonPropertyName("repository")] string Repository
+);
+
+public record Chapter(
+    [property: JsonPropertyName("start_time")] double? StartTime,
+    [property: JsonPropertyName("title")] string Title,
+    [property: JsonPropertyName("end_time")] double? EndTime
 );

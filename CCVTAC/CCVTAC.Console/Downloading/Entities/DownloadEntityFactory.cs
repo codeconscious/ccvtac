@@ -33,7 +33,7 @@ public static class DownloadEntityFactory
 
         if (typesWithResourceIds.IsEmpty())
         {
-            return Result.Fail("Unsupported or invalid URL. (No matching URL found.)");
+            return Result.Fail("Unsupported or invalid URL.");
         }
 
         (MediaDownloadType type, string resourceId, string? supplementaryResourceId) =

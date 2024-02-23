@@ -15,19 +15,17 @@ internal static class Downloader
     /// <summary>
     /// All known error codes returned by yt-dlp with their meanings.
     /// </summary>
-    /// <remarks>Source of error codes: https://github.com/yt-dlp/yt-dlp/issues/4262#issuecomment-1173133105</remarks>
+    /// <remarks>Source: https://github.com/yt-dlp/yt-dlp/issues/4262#issuecomment-1173133105</remarks>
     internal static Dictionary<int, string> DownloaderExitCodes = new()
     {
         { 0, "Success" },
-        { 1, "Unspecific error" },
+        { 1, "Unspecified error" },
         { 2, "Error in provided options" },
         { 100, "yt-dlp must restart for update to complete" },
         { 101, "Download cancelled by --max-downloads, etc." },
     };
 
-    internal static Result<string> Run(string url,
-                                       UserSettings userSettings,
-                                       Printer printer)
+    internal static Result<string> Run(string url, UserSettings userSettings, Printer printer)
     {
         Watch watch = new();
 
@@ -104,14 +102,18 @@ internal static class Downloader
                                                MediaDownloadType? videoDownloadType,
                                                params string[]? additionalArgs)
     {
+        const string writeJson = "--write-info-json";
+        const string trim = "--trim-filenames 250";
+
         HashSet<string> args = downloadType switch
         {
-            DownloadType.Metadata => [ "--flat-playlist --write-info-json" ],
+            DownloadType.Metadata => [ $"--flat-playlist {writeJson} {trim}" ],
             _ => [
                      $"--extract-audio -f {settings.AudioFormat}",
                      "--write-thumbnail --convert-thumbnails jpg", // For album art
-                     "--write-info-json", // For parsing metadata
-                     "--retries 3" // Default is 10, more than necessary
+                     writeJson, // For parsing metadata
+                     trim,
+                     "--retries 3", // Default is 10, more than necessary
                  ]
         };
 
@@ -120,7 +122,9 @@ internal static class Downloader
             args.Add("--split-chapters");
         }
 
-        args.Add(settings.VerboseDownloaderOutput ? "--verbose" : "--quiet --progress");
+        // `--verbose` is a yt-dlp option too, but maybe that's too much data.
+        // It might be worth incorporating it in the future as a third option.
+        args.Add(settings.VerboseOutput ? string.Empty : "--quiet --progress");
 
         if (downloadType is DownloadType.Media &&
             videoDownloadType is not MediaDownloadType.Video &&
@@ -132,12 +136,16 @@ internal static class Downloader
         // The numbering of regular playlists should be reversed because the newest items are
         // always placed at the top of the list at position #1. Instead, the oldest items
         // (at the end of the list) should begin at #1.
-        if (downloadType is DownloadType.Media &&
+        if (downloadType is DownloadType.Media && // This seems superfluous given the next line.
             videoDownloadType is MediaDownloadType.Playlist)
         {
-            args.Add("""-o "%(playlist)s = %(playlist_autonumber)s - %(title)s [%(id)s].%(ext)s" --playlist-reverse""");
+            // The digits followed by `B` induce trimming to the specified number of bytes.
+            // Use `s` instead of `B` to trim to a specified number of characters.
+            // Reference: https://github.com/yt-dlp/yt-dlp/issues/1136#issuecomment-1114252397
+            // Also, it's possible this trimming should be applied to `ReleasePlaylist`s too.
+            args.Add("""-o "%(playlist).80B = %(playlist_autonumber)s - %(title).150B [%(id)s].%(ext)s" --playlist-reverse""");
         }
 
-        return string.Join(" ", args.Concat(additionalArgs ?? Enumerable.Empty<string>()));
+        return string.Join(" ", args.Concat(additionalArgs ?? []));
     }
 }

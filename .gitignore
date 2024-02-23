@@ -3,7 +3,7 @@
 *.profraw
 .DS_Store
 history.log
-settings.json
+*.json
 *.bak
 local_testing
 

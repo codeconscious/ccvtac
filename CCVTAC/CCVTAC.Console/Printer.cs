@@ -19,7 +19,7 @@ public sealed class Printer
         if (processMarkup)
             AnsiConsole.Markup(message);
         else
-            AnsiConsole.Write(message);
+            AnsiConsole.Write(message.EscapeMarkup());
 
         if (appendLineBreak)
             AnsiConsole.WriteLine();
@@ -51,7 +51,7 @@ public sealed class Printer
     {
         if (headerMessage is not null)
         {
-            Print("[red]" + headerMessage + "[/]",
+            Print("[red]" + headerMessage.EscapeMarkup() + "[/]",
                   appendLines: appendLines,
                   processMarkup: true);
         }

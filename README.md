@@ -1,6 +1,6 @@
 # CCVTAC
 
-CCVTAC (CodeConscious Video-to-Audio Converter) is a small .NET-powered CLI tool that acts as a wrapper around [yt-dlp](https://github.com/yt-dlp/yt-dlp) to enable even easier downloads of M4A audio from specific YouTube videos, playlist, and channels, plus do some automatic post-processing (tagging and moving) as well.
+CCVTAC (CodeConscious Video-to-Audio Converter) is a small .NET-powered CLI tool that acts as a wrapper around [yt-dlp](https://github.com/yt-dlp/yt-dlp) to enable easier downloads of M4A audio from YouTube videos, playlist, and channels, plus do some automatic post-processing (tagging, renaming, and moving) as well.
 
 <img width="1451" alt="Sample download" src="https://github.com/codeconscious/ccvtac/assets/50596087/40fd5c56-0c39-44c4-9f5e-bc6398337820">
 
@@ -11,34 +11,74 @@ Feel free to use it yourself, but please do so responsibly. No warranties or gua
 - Converts YouTube videos to local M4A audio files (via [yt-dlp](https://github.com/yt-dlp/yt-dlp))
 - Supports 5 kinds of downloads
   - Video
-  - Video on a playlist (Playlist metadata will be written to the comments)
+  - Video on a playlist
   - Standard playlist (with the newest video at index 1)
-  - Release playlist (in which the playlist index represents the album number)
+  - Release playlist (in which the playlist index represents the album track number)
   - Channel
-- Adds video metadata (channel name, channel URL, video URL, etc.) summary to Comment tags
 - Writes ID3 tags (artists, title, etc.) to files where possible (via metadata or regex-based detection)
-- Renames files via specified regex patterns (to remove resource IDs, etc.)
+- Adds limited video metadata (channel name and URL, video URL, etc.) summary to files' Comment tags
+- Auto-renames files via specified regex patterns (to remove resource IDs, etc.)
 - Optionally auto-trims and writes video thumbnails to files as album art (if [mogrify](https://imagemagick.org/script/mogrify.php) is installed)
-- Customize behavior via a user settings file
+- Customized behavior via a user settings file
   - Optionally split video chapters into separate files
   - Specify the working directory for temporary files
   - Specify an output directory for audio files
-  - List channels for whom video upload years should _not_ be added to the tags' Year field (Adding years is the default behavior)
+  - Specify channels for whom video upload years should _not_ be added to the tags' Year field (Adding the years is the default behavior)
   - Set sleep times between batches (multiple URLs entered at once) and individual video downloads
 - Saves entered URLs to a local history file
 
 ## Running It
 
-Prerequisites:
+### Prerequisites
 
 - [.NET 8 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+- A valid settings file (see below)
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp)
 - Optional: [mogrify](https://imagemagick.org/script/mogrify.php) (for auto-trimming album art)
 
-Run the program with `dotnet run`. Optionally, pass `-h` or `--help` for the instructions.
+### Settings
 
-If your `settings.json` file does not exist, it will created in the application directory with default settings. At minimum, you will need to enter paths to two existing directories: (1) a working directory for temporary files, (2) the directory to which the final audio files should be moved, and (3) a path to a history file. The other settings are optional.
+A valid settings file is mandatory to use this application.
 
-Once the program is running, simply enter at least one YouTube media URL at the prompt and press Enter.
+The application will look for a file named `settings.json` in its directory. However, you can manually specify an existing file path using the `-s` option, such as `dotnet run -- -s <PATH_TO_YOUR_FILE>`.
 
-Recommended: Periodically ensure you're running the latest version of yt-dlp using `sudo yt-dlp -U` (or whatever command is appropriate for your system—see the [yt-dlp GitHub page](https://github.com/yt-dlp/yt-dlp#update) for more), especially if you start experiencing download errors.
+If your `settings.json` file does not exist, one will be created in the application directory with default settings. At minimum, you will need to enter (1) an existing directory for temporary working files, (2) an existing directory to which the final audio files should be moved, and (3) a path to your history file. The other settings have sensible defaults.
+
+Sample settings file:
+
+```json
+{
+  "workingDirectory": "/Users/me/temp", // A temporary home for working files
+  "moveToDirectory": "/Users/me/Downloads", // Which audio files should be saved
+  "historyFilePath": "/Users/me/Downloads/history.log", // Logs your entered URLs
+  "sleepBetweenDownloadsSeconds": 10, // Delay between video downloads for playlists and channels
+  "sleepBetweenBatchesSeconds": 20, // Delay between batches (i.e., each URL entered)
+  "splitChapters": true, // Should videos with chapters be split into separate files?
+  "historyDisplayCount": 20, // Count of entries to show for `history`
+  "verboseOutput": true, // Use `false` for quiet mode
+  "ignoreUploadYearUploaders": [ // By default, the upload year of the video is
+    "Channel Name",              // saved to files' Year tag. However, this will
+    "Another channel name"       // not occur for videos on channels listed here.
+  ]
+}
+```
+
+I added the `sleepBetweenDownloadsSeconds` and `sleepBetweenBatchesSeconds` settings to help reduce concentrated loads on YouTube servers. Please avoid lowering these values too much and slamming their servers with enormous, long-running downloads (even if their servers can take it).
+
+### Using the application
+
+Once your settings are ready, run the application with `dotnet run`. Optionally, pass `-h` or `--help` for instructions (e.g., `dotnet run -- --help`).
+
+When the application is running, simply enter at least one YouTube media URL (video, playlist, or channel) at the prompt and press the Enter key. Separate multiple URLs by spaces.
+
+Enter `quit` or `q` to quit.
+
+Entering `history` will display your recent URL history.
+
+## Upgrading yt-dlp
+
+Periodically ensure you are running the latest version of yt-dlp, especially if you start experiencing download errors. See the [yt-dlp GitHub page](https://github.com/yt-dlp/yt-dlp#update) for more. (Likely commands are `sudo yt-dlp -U` or `pip install --upgrade yt-dlp`.)
+
+## Reporting issues
+
+If you run into any issues, please create an issue on GitHub with as much information as possible. Thank you!
