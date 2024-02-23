@@ -48,7 +48,8 @@ internal static class Program
         // Catch the user's pressing Ctrl-C (SIGINT).
         System.Console.CancelKeyPress += delegate
         {
-            printer.Warning("\nQuitting at user's request.");
+            printer.Warning("\nQuitting at user's request. You might want to verify and delete the files in the working directory.");
+            printer.Warning($"Working directory: {userSettings.WorkingDirectory}");
         };
 
         // Top-level `try` block to catch and pretty-print unexpected exceptions.
