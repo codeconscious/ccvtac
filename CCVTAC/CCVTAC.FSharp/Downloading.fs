@@ -27,7 +27,7 @@ module public Downloading =
             | m when m.Success -> Some(List.tail [ for g in m.Groups -> g.Value ])
             | _ -> None
 
-    let private mediaTypeWithUrls (url:Url) = // TODO: `private`にしたい。
+    let private mediaTypeWithIds (url:Url) = // TODO: `private`にしたい。
         let (Url textUrl) = url
         match textUrl with
             | Regex @"(?<=v=|v\=)([\w-]{11})(?:&list=([\w_-]+))" [ id ; playlistId ]
@@ -40,7 +40,7 @@ module public Downloading =
             | Regex @"((?:www\.)?youtube\.com\/(?:channel\/|c\/|user\/|@)(?:[\w\-]+))" [ id ] -> (Channel, [id])
             | _ -> (Unknown, [])
 
-    let private createCleanUrls (mediaType, ids:string list) =
+    let private mediaTypeWithDownloadUrls (mediaType, ids:string list) =
         match mediaType with
         | Video when ids.Length = 1
             -> Some (mediaType, [sprintf "https://www.youtube.com/watch?v=%s" ids.[0]])
@@ -54,4 +54,5 @@ module public Downloading =
         | _ -> None
 
     let generateDownloadUrls rawUrl =
-        mediaTypeWithUrls (Url rawUrl) |> createCleanUrls
+        mediaTypeWithIds (Url rawUrl)
+        |> mediaTypeWithDownloadUrls
