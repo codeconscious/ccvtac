@@ -1,6 +1,6 @@
 ﻿namespace CCVTAC.FSharp
 
-module public YouTube =
+module public Downloading =
     open System.Text.RegularExpressions
 
     type private Url = Url of string // 本当に要るかどうか、決まっていない。

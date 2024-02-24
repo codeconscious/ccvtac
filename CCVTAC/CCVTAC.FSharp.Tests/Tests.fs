@@ -1,7 +1,7 @@
 module Tests
 
 open Xunit
-open CCVTAC.FSharp.YouTube
+open CCVTAC.FSharp.Downloading
 
 [<Fact>]
 let ``Correctly detects video URL and its ID`` () =
