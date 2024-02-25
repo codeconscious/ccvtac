@@ -30,14 +30,16 @@ internal static class Downloader
     {
         Watch watch = new();
 
-        var result = FSharp.Downloading.generateDownloadUrls(url);
-        if (result is null)
+        var maybeMediaType = FSharp.Downloading.mediaTypeWithIds(url);
+        if (maybeMediaType.IsError)
         {
             return Result.Fail("Unable to determine the type of URL.");
         }
 
-        var (mediaType, urls) = result.Value;
-        printer.Print($"{mediaType} URL '{url}' detected.");
+        var mediaType = maybeMediaType.ResultValue;
+        printer.Print($"{maybeMediaType} URL '{url}' detected.");
+
+        var urls = FSharp.Downloading.downloadUrls(maybeMediaType.ResultValue);
 
         string args = GenerateDownloadArgs(userSettings, mediaType, urls[0]);
         var downloadToolSettings = new UtilitySettings(ExternalTool, args, userSettings.WorkingDirectory!, ExitCodes);
@@ -112,8 +114,8 @@ internal static class Downloader
         // It might be worth incorporating it in the future as a third option.
         args.Add(settings.VerboseOutput ? string.Empty : "--quiet --progress");
 
-        FMediaType[] singleDownloadTypes = [FMediaType.Video, FMediaType.PlaylistVideo];
-        if (!singleDownloadTypes.Contains(mediaType))
+        List<Type> singleDownloadTypes = [typeof(FMediaType.Video), typeof(FMediaType.PlaylistVideo)];
+        if (mediaType is not null && !singleDownloadTypes.Contains(mediaType.GetType()))
         {
             args.Add($"--sleep-interval {settings.SleepSecondsBetweenDownloads}");
         }
@@ -121,7 +123,7 @@ internal static class Downloader
         // The numbering of regular playlists should be reversed because the newest items are
         // always placed at the top of the list at position #1. Instead, the oldest items
         // (at the end of the list) should begin at #1.
-        if (mediaType is not null && mediaType == FMediaType.StandardPlaylist)
+        if (mediaType is not null && mediaType.GetType() == typeof(FMediaType.StandardPlaylist))
         {
             // The digits followed by `B` induce trimming to the specified number of bytes.
             // Use `s` instead of `B` to trim to a specified number of characters.

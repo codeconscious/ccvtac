@@ -4,15 +4,12 @@ module public Downloading =
     open System.Text.RegularExpressions
 
     type MediaType =
-        | Video
-        | PlaylistVideo
-        | StandardPlaylist
-        | ReleasePlaylist
-        | Channel
+        | Video of string
+        | PlaylistVideo of string * string
+        | StandardPlaylist of string
+        | ReleasePlaylist of string
+        | Channel of string
 
-    // type DownloadType =
-    //     | MediaType of MediaType
-    //     | Metadata
 
     // This active recognizer will not work with the parameter order is switched.
     let private (|Regex|_|) pattern input =
@@ -21,38 +18,26 @@ module public Downloading =
             | m when m.Success -> Some(List.tail [ for g in m.Groups -> g.Value ])
             | _ -> None
 
-    let private mediaTypeWithIds (textUrl:string) =
-        match textUrl with
-        | Regex @"(?<=v=|v\=)([\w-]{11})(?:&list=([\w_-]+))" [ id ; playlistId ]
-            -> Some (PlaylistVideo, [id; playlistId])
-        | Regex @"^([\w-]{11})$" [ id ] -> Some (Video, [id])
-        | Regex @"(?<=v=|v\\=)([\w-]{11})" [ id ] -> Some (Video, [id])
-        | Regex @"(?<=youtu\.be/)(.{11})" [ id ] -> Some (Video, [id])
-        | Regex @"(?<=list=)(P[\w\-]+)" [ id ] -> Some (StandardPlaylist, [id])
-        | Regex @"(?<=list=)(O[\w\-]+)" [ id ] -> Some (ReleasePlaylist, [id])
-        | Regex @"((?:www\.)?youtube\.com\/(?:channel\/|c\/|user\/|@)(?:[\w\-]+))" [ id ] -> Some (Channel, [id])
-        | _ -> None
+    let mediaTypeWithIds (url:string) =
+        match url with
+        | Regex @"(?<=v=|v\=)([\w-]{11})(?:&list=([\w_-]+))" [ videoId ; playlistId ]
+            -> Ok (PlaylistVideo (videoId, playlistId))
+        | Regex @"^([\w-]{11})$" [ id ] -> Ok (Video id)
+        | Regex @"(?<=v=|v\\=)([\w-]{11})" [ id ] -> Ok (Video id)
+        | Regex @"(?<=youtu\.be/)(.{11})" [ id ] -> Ok (Video id)
+        | Regex @"(?<=list=)(P[\w\-]+)" [ id ] -> Ok (StandardPlaylist id)
+        | Regex @"(?<=list=)(O[\w\-]+)" [ id ] -> Ok (ReleasePlaylist id)
+        | Regex @"((?:www\.)?youtube\.com\/(?:channel\/|c\/|user\/|@)(?:[\w\-]+))" [ id ] -> Ok (Channel id)
+        | _ -> Error("Unsupported URL")
 
-    let private mediaTypeWithDownloadUrls (typeWithIds : (MediaType * string list) option) =
-        let videoUrlBase = "https://www.youtube.com/watch?v="
-        let playlistUrlBase = "https://www.youtube.com/playlist?list="
-        let channelUrlBase = "https://"
-
+    let downloadUrls mediaType =
         let fullUrl urlBase id = urlBase + id
-        let videoUrl = fullUrl videoUrlBase
-        let playlistUrl = fullUrl playlistUrlBase
-        let channelUrl = fullUrl channelUrlBase
+        let videoUrl = fullUrl "https://www.youtube.com/watch?v="
+        let playlistUrl = fullUrl "https://www.youtube.com/playlist?list="
+        let channelUrl = fullUrl "https://"
 
-        match typeWithIds with
-        | Some (_, ids) when ids.Length = 0 -> None // TODO: Error
-        | Some (Video, ids) -> Some (Video, [videoUrl ids.Head])
-        | Some (PlaylistVideo, ids) when ids.Length = 2
-            -> Some (PlaylistVideo, [videoUrl ids.Head; playlistUrl ids.[1]])
-        | Some (StandardPlaylist, ids) -> Some (StandardPlaylist , [playlistUrl ids.Head])
-        | Some (ReleasePlaylist, ids) -> Some (ReleasePlaylist, [playlistUrl ids.Head])
-        | Some (Channel, ids) -> Some (Channel, [channelUrl ids.Head])
-        | _ -> None // TODO: Or, `Error`?
-
-    let generateDownloadUrls rawUrl =
-        mediaTypeWithIds rawUrl
-        |> mediaTypeWithDownloadUrls
+        match mediaType with
+        | Video v -> [videoUrl v]
+        | PlaylistVideo (v, p) -> [videoUrl v; playlistUrl p]
+        | StandardPlaylist p | ReleasePlaylist p -> [playlistUrl p]
+        | Channel c -> [channelUrl c]
