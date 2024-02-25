@@ -1,12 +1,13 @@
 using CCVTAC.Console.Downloading.Entities;
 using CCVTAC.Console.ExternalUtilities;
 using CCVTAC.Console.Settings;
+using FMediaType = CCVTAC.FSharp.Downloading.MediaType;
 
 namespace CCVTAC.Console.Downloading;
 
 internal static class Downloader
 {
-    internal static ExternalProgram ExternalProgram = new(
+    internal static ExternalProgram ExternalTool = new(
         "yt-dlp",
         "https://github.com/yt-dlp/yt-dlp/",
         "YouTube media and metadata downloads, plus audio extraction"
@@ -16,7 +17,7 @@ internal static class Downloader
     /// All known error codes returned by yt-dlp with their meanings.
     /// </summary>
     /// <remarks>Source: https://github.com/yt-dlp/yt-dlp/issues/4262#issuecomment-1173133105</remarks>
-    internal static Dictionary<int, string> DownloaderExitCodes = new()
+    internal static Dictionary<int, string> ExitCodes = new()
     {
         { 0, "Success" },
         { 1, "Unspecified error" },
@@ -29,53 +30,39 @@ internal static class Downloader
     {
         Watch watch = new();
 
-        var downloadEntityResult = DownloadEntityFactory.Create(url);
-        if (downloadEntityResult.IsFailed)
+        var result = FSharp.Downloading.generateDownloadUrls(url);
+        if (result is null)
         {
-            return Result.Fail(downloadEntityResult.Errors?.First().Message
-                               ?? "An unknown error occurred parsing the resource type.");
+            return Result.Fail("Unable to determine the type of URL.");
         }
-        IDownloadEntity downloadEntity = downloadEntityResult.Value;
-        printer.Print($"{downloadEntity.VideoDownloadType} URL '{url}' detected.");
 
-        string args = GenerateDownloadArgs(
-            userSettings,
-            downloadEntity.DownloadType,
-            downloadEntity.VideoDownloadType,
-            downloadEntity.PrimaryResource.FullResourceUrl);
+        var (mediaType, urls) = result.Value;
+        printer.Print($"{mediaType} URL '{url}' detected.");
 
-        UtilitySettings downloadToolSettings = new(
-            ExternalProgram,
-            args,
-            userSettings.WorkingDirectory!,
-            DownloaderExitCodes
-        );
-
-        Result downloadResult = Runner.Run(downloadToolSettings, printer);
+        string args = GenerateDownloadArgs(userSettings, mediaType, urls[0]);
+        var downloadToolSettings = new UtilitySettings(ExternalTool, args, userSettings.WorkingDirectory!, ExitCodes);
+        var downloadResult = Runner.Run(downloadToolSettings, printer);
 
         if (downloadResult.IsFailed)
         {
             downloadResult.Errors.ForEach(e => printer.Error(e.Message));
             printer.Warning("However, post-processing will still be attempted."); // TODO: これで良い？
+            // TODO: Seems we can return here.
         }
-
         // Do the supplementary download, if any such data was passed in.
-        if (downloadResult.IsSuccess &&
-            downloadEntity.SupplementaryResource is ResourceUrlSet supplementary)
+        else if (urls.Length > 1) // Meaning there's a supplementary URL for downloading playlist metadata.
         {
-            // TODO: Extract this content and the near-duplicate one above into a new method.
             string supplementaryArgs = GenerateDownloadArgs(
                 userSettings,
-                DownloadType.Metadata,
-                null,
-                supplementary.FullResourceUrl
+                null, // Indicates a metadata-only supplementary download. Will improve later.
+                urls[1]
             );
 
             UtilitySettings supplementaryDownloadSettings = new(
-                ExternalProgram,
+                ExternalTool,
                 supplementaryArgs,
                 userSettings.WorkingDirectory!,
-                DownloaderExitCodes            );
+                ExitCodes);
 
             Result<int> supplementaryDownloadResult = Runner.Run(supplementaryDownloadSettings, printer);
 
@@ -98,26 +85,25 @@ internal static class Downloader
     /// </summary>
     /// <returns>A string of arguments that can be passed directly to the download tool.</returns>
     private static string GenerateDownloadArgs(UserSettings settings,
-                                               DownloadType downloadType,
-                                               MediaDownloadType? videoDownloadType,
+                                               FMediaType? mediaType,
                                                params string[]? additionalArgs)
     {
         const string writeJson = "--write-info-json";
         const string trim = "--trim-filenames 250";
 
-        HashSet<string> args = downloadType switch
+        HashSet<string> args = mediaType switch
         {
-            DownloadType.Metadata => [ $"--flat-playlist {writeJson} {trim}" ],
+            null => [ $"--flat-playlist {writeJson} {trim}" ], // Metadata only
             _ => [
                      $"--extract-audio -f {settings.AudioFormat}",
                      "--write-thumbnail --convert-thumbnails jpg", // For album art
                      writeJson, // For parsing metadata
                      trim,
-                     "--retries 3", // Default is 10, more than necessary
+                     "--retries 3", // Default is 10, which seems more than necessary
                  ]
         };
 
-        if (settings.SplitChapters && downloadType == DownloadType.Media)
+        if (settings.SplitChapters && mediaType is not null)
         {
             args.Add("--split-chapters");
         }
@@ -126,9 +112,8 @@ internal static class Downloader
         // It might be worth incorporating it in the future as a third option.
         args.Add(settings.VerboseOutput ? string.Empty : "--quiet --progress");
 
-        if (downloadType is DownloadType.Media &&
-            videoDownloadType is not MediaDownloadType.Video &&
-            videoDownloadType is not MediaDownloadType.VideoOnPlaylist)
+        FMediaType[] singleDownloadTypes = [FMediaType.Video, FMediaType.PlaylistVideo];
+        if (!singleDownloadTypes.Contains(mediaType))
         {
             args.Add($"--sleep-interval {settings.SleepSecondsBetweenDownloads}");
         }
@@ -136,8 +121,7 @@ internal static class Downloader
         // The numbering of regular playlists should be reversed because the newest items are
         // always placed at the top of the list at position #1. Instead, the oldest items
         // (at the end of the list) should begin at #1.
-        if (downloadType is DownloadType.Media && // This seems superfluous given the next line.
-            videoDownloadType is MediaDownloadType.Playlist)
+        if (mediaType is not null && mediaType == FMediaType.StandardPlaylist)
         {
             // The digits followed by `B` induce trimming to the specified number of bytes.
             // Use `s` instead of `B` to trim to a specified number of characters.

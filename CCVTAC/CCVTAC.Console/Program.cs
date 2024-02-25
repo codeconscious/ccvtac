@@ -72,11 +72,11 @@ internal static class Program
     private static void Start(UserSettings userSettings, History history, Printer printer)
     {
         // Verify the external program for downloading is installed on the system.
-        if (Downloading.Downloader.ExternalProgram.ProgramExists() is { IsFailed: true })
+        if (Downloading.Downloader.ExternalTool.ProgramExists() is { IsFailed: true })
         {
             printer.Error(
-                $"To use this program, please first install {Downloading.Downloader.ExternalProgram.Name} " +
-                $"({Downloading.Downloader.ExternalProgram.Url}) on this system.");
+                $"To use this program, please first install {Downloading.Downloader.ExternalTool.Name} " +
+                $"({Downloading.Downloader.ExternalTool.Url}) on this system.");
             printer.Print("Pass '--help' to this program for more information.");
             return;
         }
