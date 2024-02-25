@@ -46,6 +46,7 @@ internal static class Program
         }
 
         // Catch the user's pressing Ctrl-C (SIGINT).
+        // TODO: Add another within the main loop to enable cancelling of just single downloads?
         System.Console.CancelKeyPress += delegate
         {
             printer.Warning("\nQuitting at user's request. You might want to verify and delete the files in the working directory.");
