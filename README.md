@@ -1,6 +1,6 @@
 # CCVTAC
 
-CCVTAC (CodeConscious Video-to-Audio Converter) is a small .NET-powered CLI tool that acts as a wrapper around [yt-dlp](https://github.com/yt-dlp/yt-dlp) to enable easier downloads of M4A audio from YouTube videos, playlist, and channels, plus do some automatic post-processing (tagging, renaming, and moving) as well.
+CCVTAC (CodeConscious Video-to-Audio Converter) is a small .NET-powered (mainly C#, but I've started introducing F# as well) CLI tool that acts as a wrapper around [yt-dlp](https://github.com/yt-dlp/yt-dlp) to enable easier downloads of M4A audio from YouTube videos, playlist, and channels, plus do some automatic post-processing (tagging, renaming, and moving) as well.
 
 <img width="1451" alt="Sample download" src="https://github.com/codeconscious/ccvtac/assets/50596087/40fd5c56-0c39-44c4-9f5e-bc6398337820">
 
