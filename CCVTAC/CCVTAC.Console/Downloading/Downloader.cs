@@ -30,16 +30,16 @@ internal static class Downloader
     {
         Watch watch = new();
 
-        var maybeMediaType = FSharp.Downloading.mediaTypeWithIds(url);
-        if (maybeMediaType.IsError)
+        var mediaTypeOrError = FSharp.Downloading.mediaTypeWithIds(url);
+        if (mediaTypeOrError.IsError)
         {
             return Result.Fail("Unable to determine the type of URL.");
         }
 
-        var mediaType = maybeMediaType.ResultValue;
-        printer.Print($"{maybeMediaType} URL '{url}' detected.");
+        var mediaType = mediaTypeOrError.ResultValue;
+        printer.Print($"{mediaType.GetType().Name} URL '{url}' detected.");
 
-        var urls = FSharp.Downloading.downloadUrls(maybeMediaType.ResultValue);
+        var urls = FSharp.Downloading.downloadUrls(mediaType);
 
         string args = GenerateDownloadArgs(userSettings, mediaType, urls[0]);
         var downloadToolSettings = new UtilitySettings(ExternalTool, args, userSettings.WorkingDirectory!, ExitCodes);
@@ -105,31 +105,36 @@ internal static class Downloader
                  ]
         };
 
-        if (settings.SplitChapters && mediaType is not null)
-        {
-            args.Add("--split-chapters");
-        }
-
         // `--verbose` is a yt-dlp option too, but maybe that's too much data.
         // It might be worth incorporating it in the future as a third option.
         args.Add(settings.VerboseOutput ? string.Empty : "--quiet --progress");
 
-        List<Type> singleDownloadTypes = [typeof(FMediaType.Video), typeof(FMediaType.PlaylistVideo)];
-        if (mediaType is not null && !singleDownloadTypes.Contains(mediaType.GetType()))
+        if (mediaType is not null)
         {
-            args.Add($"--sleep-interval {settings.SleepSecondsBetweenDownloads}");
-        }
+            if (settings.SplitChapters)
+            {
+                args.Add("--split-chapters");
+            }
 
-        // The numbering of regular playlists should be reversed because the newest items are
-        // always placed at the top of the list at position #1. Instead, the oldest items
-        // (at the end of the list) should begin at #1.
-        if (mediaType is not null && mediaType.GetType() == typeof(FMediaType.StandardPlaylist))
-        {
-            // The digits followed by `B` induce trimming to the specified number of bytes.
-            // Use `s` instead of `B` to trim to a specified number of characters.
-            // Reference: https://github.com/yt-dlp/yt-dlp/issues/1136#issuecomment-1114252397
-            // Also, it's possible this trimming should be applied to `ReleasePlaylist`s too.
-            args.Add("""-o "%(playlist).80B = %(playlist_autonumber)s - %(title).150B [%(id)s].%(ext)s" --playlist-reverse""");
+            // List<Type> singleDownloadTypes = [typeof(FMediaType.Video), typeof(FMediaType.PlaylistVideo)];
+            // if (!singleDownloadTypes.Contains(mediaType.GetType()))
+            if (!mediaType.IsVideo && !mediaType.IsPlaylistVideo)
+            {
+                args.Add($"--sleep-interval {settings.SleepSecondsBetweenDownloads}");
+            }
+
+            // The numbering of regular playlists should be reversed because the newest items are
+            // always placed at the top of the list at position #1. Instead, the oldest items
+            // (at the end of the list) should begin at #1.
+            // if (mediaType.GetType() == typeof(FMediaType.StandardPlaylist))
+            if (mediaType.IsStandardPlaylist)
+            {
+                // The digits followed by `B` induce trimming to the specified number of bytes.
+                // Use `s` instead of `B` to trim to a specified number of characters.
+                // Reference: https://github.com/yt-dlp/yt-dlp/issues/1136#issuecomment-1114252397
+                // Also, it's possible this trimming should be applied to `ReleasePlaylist`s too.
+                args.Add("""-o "%(playlist).80B = %(playlist_autonumber)s - %(title).150B [%(id)s].%(ext)s" --playlist-reverse""");
+            }
         }
 
         return string.Join(" ", args.Concat(additionalArgs ?? []));
