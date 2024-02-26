@@ -28,7 +28,7 @@ module public Downloading =
         | Regex @"(?<=list=)(P[\w\-]+)" [ id ] -> Ok (StandardPlaylist id)
         | Regex @"(?<=list=)(O[\w\-]+)" [ id ] -> Ok (ReleasePlaylist id)
         | Regex @"((?:www\.)?youtube\.com\/(?:channel\/|c\/|user\/|@)(?:[\w\-]+))" [ id ] -> Ok (Channel id)
-        | _ -> Error("Unsupported URL")
+        | _ -> Error("Unable to determine the type of URL.")
 
     let downloadUrls mediaType =
         let fullUrl urlBase id = urlBase + id

@@ -1,6 +1,6 @@
 using CCVTAC.Console.ExternalUtilities;
 using CCVTAC.Console.Settings;
-using MediaType = CCVTAC.FSharp.Downloading.MediaType; // Types from the F# library
+using MediaType = CCVTAC.FSharp.Downloading.MediaType;
 
 namespace CCVTAC.Console.Downloading;
 
@@ -25,14 +25,14 @@ internal static class Downloader
         { 101, "Download cancelled by --max-downloads, etc." },
     };
 
-    internal static Result<string> Run(string url, UserSettings userSettings, Printer printer)
+    internal static Result<string> Run(string url, UserSettings settings, Printer printer)
     {
         Watch watch = new();
 
         var mediaTypeOrError = FSharp.Downloading.mediaTypeWithIds(url);
         if (mediaTypeOrError.IsError)
         {
-            return Result.Fail("Unable to determine the type of URL.");
+            return Result.Fail(mediaTypeOrError.ErrorValue);
         }
 
         var mediaType = mediaTypeOrError.ResultValue;
@@ -40,8 +40,8 @@ internal static class Downloader
 
         var urls = FSharp.Downloading.downloadUrls(mediaType);
 
-        string args = GenerateDownloadArgs(userSettings, mediaType, urls[0]);
-        var downloadToolSettings = new UtilitySettings(ExternalTool, args, userSettings.WorkingDirectory!, ExitCodes);
+        string args = GenerateDownloadArgs(settings, mediaType, urls[0]);
+        var downloadToolSettings = new UtilitySettings(ExternalTool, args, settings.WorkingDirectory!, ExitCodes);
         var downloadResult = Runner.Run(downloadToolSettings, printer);
 
         if (downloadResult.IsFailed)
@@ -53,16 +53,12 @@ internal static class Downloader
         // Do the supplementary download, if any such data was passed in.
         else if (urls.Length > 1) // Meaning there's a supplementary URL for downloading playlist metadata.
         {
-            string supplementaryArgs = GenerateDownloadArgs(
-                userSettings,
-                null, // Indicates a metadata-only supplementary download. Will improve later.
-                urls[1]
-            );
+            string supplementaryArgs = GenerateDownloadArgs(settings, null, urls[1]);
 
             UtilitySettings supplementaryDownloadSettings = new(
                 ExternalTool,
                 supplementaryArgs,
-                userSettings.WorkingDirectory!,
+                settings.WorkingDirectory!,
                 ExitCodes);
 
             Result<int> supplementaryDownloadResult = Runner.Run(supplementaryDownloadSettings, printer);
@@ -82,8 +78,11 @@ internal static class Downloader
     }
 
     /// <summary>
-    /// Generate the argument string from the download tool.
+    /// Generate the entire argument string from the download tool.
     /// </summary>
+    /// <param name="settings"></param>
+    /// <param name="mediaType">A MediaType or else null, which indicates a metadata-only supplementary download.</param>
+    /// <param name="additionalArgs"></param>
     /// <returns>A string of arguments that can be passed directly to the download tool.</returns>
     private static string GenerateDownloadArgs(UserSettings settings,
                                                MediaType? mediaType,
