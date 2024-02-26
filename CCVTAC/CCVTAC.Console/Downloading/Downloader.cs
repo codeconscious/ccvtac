@@ -1,7 +1,6 @@
-using CCVTAC.Console.Downloading.Entities;
 using CCVTAC.Console.ExternalUtilities;
 using CCVTAC.Console.Settings;
-using FMediaType = CCVTAC.FSharp.Downloading.MediaType;
+using MediaType = CCVTAC.FSharp.Downloading.MediaType; // Types from the F# library
 
 namespace CCVTAC.Console.Downloading;
 
@@ -87,7 +86,7 @@ internal static class Downloader
     /// </summary>
     /// <returns>A string of arguments that can be passed directly to the download tool.</returns>
     private static string GenerateDownloadArgs(UserSettings settings,
-                                               FMediaType? mediaType,
+                                               MediaType? mediaType,
                                                params string[]? additionalArgs)
     {
         const string writeJson = "--write-info-json";
