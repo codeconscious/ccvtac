@@ -197,8 +197,6 @@ internal static class Program
                 return NextAction.Continue;
             }
 
-            history.Append(url, inputTime, printer);
-
             var postProcessor = new PostProcessing.Setup(userSettings, printer);
             postProcessor.Run(); // TODO: Think about if/how to handle leftover temp files due to errors.
 
