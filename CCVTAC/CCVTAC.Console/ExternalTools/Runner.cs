@@ -1,10 +1,10 @@
 using System.Diagnostics;
 
-namespace CCVTAC.Console.ExternalUtilities;
+namespace CCVTAC.Console.ExternalTools;
 
 internal static class Runner
 {
-    internal static Result Run(UtilitySettings settings, Printer printer)
+    internal static Result Run(ToolSettings settings, Printer printer)
     {
         Watch watch = new();
 

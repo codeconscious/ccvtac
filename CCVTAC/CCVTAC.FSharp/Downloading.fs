@@ -11,7 +11,7 @@ module public Downloading =
         | Channel of string
 
 
-    // This active recognizer will not work with the parameter order is switched.
+    // This active recognizer will not work if the parameter order is switched.
     let private (|Regex|_|) pattern input =
         let m = Regex.Match(input, pattern)
         match m with
@@ -28,16 +28,16 @@ module public Downloading =
         | Regex @"(?<=list=)(P[\w\-]+)" [ id ] -> Ok (StandardPlaylist id)
         | Regex @"(?<=list=)(O[\w\-]+)" [ id ] -> Ok (ReleasePlaylist id)
         | Regex @"((?:www\.)?youtube\.com\/(?:channel\/|c\/|user\/|@)(?:[\w\-]+))" [ id ] -> Ok (Channel id)
-        | _ -> Error("Unable to determine the type of URL.")
+        | _ -> Error("Unable to determine the media type of the URL.")
 
     let downloadUrls mediaType =
         let fullUrl urlBase id = urlBase + id
         let videoUrl = fullUrl "https://www.youtube.com/watch?v="
         let playlistUrl = fullUrl "https://www.youtube.com/playlist?list="
-        let channelUrl = fullUrl "https://"
+        let channelUrl = fullUrl "https://" // For channels, the entire domain is also matched.
 
         match mediaType with
-        | Video v -> [videoUrl v]
-        | PlaylistVideo (v, p) -> [videoUrl v; playlistUrl p]
-        | StandardPlaylist p | ReleasePlaylist p -> [playlistUrl p]
-        | Channel c -> [channelUrl c]
+        | Video id -> [videoUrl id]
+        | PlaylistVideo (vId, pId) -> [videoUrl vId; playlistUrl pId]
+        | StandardPlaylist id | ReleasePlaylist id -> [playlistUrl id]
+        | Channel id -> [channelUrl id]

@@ -1,8 +1,8 @@
 using System.Diagnostics;
 
-namespace CCVTAC.Console.ExternalUtilities;
+namespace CCVTAC.Console.ExternalTools;
 
-internal record ExternalProgram
+internal record ExternalTool
 {
     /// <summary>
     /// The name of the program. This should be the exact text used to call it
@@ -29,7 +29,7 @@ internal record ExternalProgram
     /// <param name="url">The URL of the program, from which users should install it if needed.</param>
     /// <param name="purpose">A brief summary of the purpose of the program within the context of this program.
     /// Should be phrased as a noun (e.g., "image processing" or "audio normalization").</param>
-    internal ExternalProgram(string name, string url, string purpose)
+    internal ExternalTool(string name, string url, string purpose)
     {
         Name = name.Trim();
         Url = url.Trim();

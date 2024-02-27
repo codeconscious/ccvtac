@@ -1,4 +1,4 @@
-using CCVTAC.Console.ExternalUtilities;
+using CCVTAC.Console.ExternalTools;
 using CCVTAC.Console.Settings;
 using MediaType = CCVTAC.FSharp.Downloading.MediaType;
 
@@ -6,7 +6,7 @@ namespace CCVTAC.Console.Downloading;
 
 internal static class Downloader
 {
-    internal static ExternalProgram ExternalTool = new(
+    internal static ExternalTool ExternalTool = new(
         "yt-dlp",
         "https://github.com/yt-dlp/yt-dlp/",
         "YouTube media and metadata downloads, plus audio extraction"
@@ -41,21 +41,19 @@ internal static class Downloader
         var urls = FSharp.Downloading.downloadUrls(mediaType);
 
         string args = GenerateDownloadArgs(settings, mediaType, urls[0]);
-        var downloadToolSettings = new UtilitySettings(ExternalTool, args, settings.WorkingDirectory!, ExitCodes);
-        var downloadResult = Runner.Run(downloadToolSettings, printer);
+        var downloadSettings = new ToolSettings(ExternalTool, args, settings.WorkingDirectory!, ExitCodes);
+        var downloadResult = Runner.Run(downloadSettings, printer);
 
         if (downloadResult.IsFailed)
         {
             downloadResult.Errors.ForEach(e => printer.Error(e.Message));
-            printer.Warning("However, post-processing will still be attempted."); // TODO: これで良い？
-            // TODO: Seems we can return here.
+            printer.Warning("However, post-processing will still be attempted."); // For any partial downloads
         }
-        // Do the supplementary download, if any such data was passed in.
         else if (urls.Length > 1) // Meaning there's a supplementary URL for downloading playlist metadata.
         {
             string supplementaryArgs = GenerateDownloadArgs(settings, null, urls[1]);
 
-            UtilitySettings supplementaryDownloadSettings = new(
+            var supplementaryDownloadSettings = new ToolSettings(
                 ExternalTool,
                 supplementaryArgs,
                 settings.WorkingDirectory!,
@@ -78,27 +76,28 @@ internal static class Downloader
     }
 
     /// <summary>
-    /// Generate the entire argument string from the download tool.
+    /// Generate the entire argument string for the download tool.
     /// </summary>
     /// <param name="settings"></param>
-    /// <param name="mediaType">A MediaType or else null, which indicates a metadata-only supplementary download.</param>
+    /// <param name="mediaType">A `MediaType` or null (which indicates a metadata-only supplementary download).</param>
     /// <param name="additionalArgs"></param>
     /// <returns>A string of arguments that can be passed directly to the download tool.</returns>
-    private static string GenerateDownloadArgs(UserSettings settings,
-                                               MediaType? mediaType,
-                                               params string[]? additionalArgs)
+    private static string GenerateDownloadArgs(
+        UserSettings settings,
+        MediaType? mediaType,
+        params string[]? additionalArgs)
     {
         const string writeJson = "--write-info-json";
-        const string trim = "--trim-filenames 250";
+        const string trimFileNames = "--trim-filenames 250";
 
         HashSet<string> args = mediaType switch
         {
-            null => [ $"--flat-playlist {writeJson} {trim}" ], // Metadata only
+            null => [ $"--flat-playlist {writeJson} {trimFileNames}" ], // Metadata-only download
             _ => [
                      $"--extract-audio -f {settings.AudioFormat}",
                      "--write-thumbnail --convert-thumbnails jpg", // For album art
-                     writeJson, // For parsing metadata
-                     trim,
+                     writeJson, // Contains metadata
+                     trimFileNames,
                      "--retries 3", // Default is 10, which seems more than necessary
                  ]
         };
@@ -114,8 +113,6 @@ internal static class Downloader
                 args.Add("--split-chapters");
             }
 
-            // List<Type> singleDownloadTypes = [typeof(FMediaType.Video), typeof(FMediaType.PlaylistVideo)];
-            // if (!singleDownloadTypes.Contains(mediaType.GetType()))
             if (!mediaType.IsVideo && !mediaType.IsPlaylistVideo)
             {
                 args.Add($"--sleep-interval {settings.SleepSecondsBetweenDownloads}");
@@ -124,7 +121,6 @@ internal static class Downloader
             // The numbering of regular playlists should be reversed because the newest items are
             // always placed at the top of the list at position #1. Instead, the oldest items
             // (at the end of the list) should begin at #1.
-            // if (mediaType.GetType() == typeof(FMediaType.StandardPlaylist))
             if (mediaType.IsStandardPlaylist)
             {
                 // The digits followed by `B` induce trimming to the specified number of bytes.
