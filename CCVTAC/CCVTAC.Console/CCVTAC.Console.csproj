@@ -11,4 +11,7 @@
     <PackageReference Include="TagLibSharp" Version="2.3.0"/>
     <PackageReference Include="CodeConscious.Startwatch" Version="0.0.2"/>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CCVTAC.FSharp\CCVTAC.FSharp.fsproj" />
+  </ItemGroup>
 </Project>

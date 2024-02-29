@@ -46,6 +46,7 @@ internal static class Program
         }
 
         // Catch the user's pressing Ctrl-C (SIGINT).
+        // TODO: Add another within the main loop to enable cancelling of just single downloads?
         System.Console.CancelKeyPress += delegate
         {
             printer.Warning("\nQuitting at user's request. You might want to verify and delete the files in the working directory.");
@@ -71,11 +72,11 @@ internal static class Program
     private static void Start(UserSettings userSettings, History history, Printer printer)
     {
         // Verify the external program for downloading is installed on the system.
-        if (Downloading.Downloader.ExternalProgram.ProgramExists() is { IsFailed: true })
+        if (Downloading.Downloader.ExternalTool.ProgramExists() is { IsFailed: true })
         {
             printer.Error(
-                $"To use this program, please first install {Downloading.Downloader.ExternalProgram.Name} " +
-                $"({Downloading.Downloader.ExternalProgram.Url}) on this system.");
+                $"To use this program, please first install {Downloading.Downloader.ExternalTool.Name} " +
+                $"({Downloading.Downloader.ExternalTool.Url}) on this system.");
             printer.Print("Pass '--help' to this program for more information.");
             return;
         }
@@ -187,14 +188,14 @@ internal static class Program
 
             Watch jobWatch = new();
 
+            history.Append(url, inputTime, printer);
+
             var downloadResult = Downloading.Downloader.Run(url, userSettings, printer);
             resultHandler.RegisterResult(downloadResult);
             if (downloadResult.IsFailed)
             {
                 return NextAction.Continue;
             }
-
-            history.Append(url, inputTime, printer);
 
             var postProcessor = new PostProcessing.Setup(userSettings, printer);
             postProcessor.Run(); // TODO: Think about if/how to handle leftover temp files due to errors.
