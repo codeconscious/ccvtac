@@ -10,7 +10,8 @@ internal static class Program
     private static readonly string[] _historyCommands = ["--history", "history"];
     private static readonly string[] _settingsFileCommands = ["-s", "--settings"];
     private static readonly string[] _quitCommands = ["q", "quit", "exit", "bye"];
-    private const string _urlInputPrompt = "Enter one or more YouTube media URLs, 'quit', or 'history':";
+    private const string _urlPrompt =
+        "Enter one or more YouTube media URLs (separated by spaces), 'history', or 'quit':\n▶︎";
 
     static void Main(string[] args)
     {
@@ -22,7 +23,8 @@ internal static class Program
             return;
         }
 
-        string? maybeSettingsPath = args.Length >= 2 && _settingsFileCommands.Contains(args[0].ToLowerInvariant())
+        string? maybeSettingsPath = args.Length >= 2 &&
+                                    _settingsFileCommands.Contains(args[0].ToLowerInvariant())
                 ? args[1] // Expected to be a settings file path.
                 : null;
         SettingsService settingsService = new(maybeSettingsPath);
@@ -46,7 +48,6 @@ internal static class Program
         }
 
         // Catch the user's pressing Ctrl-C (SIGINT).
-        // TODO: Add another within the main loop to enable cancelling of just single downloads?
         System.Console.CancelKeyPress += delegate
         {
             printer.Warning("\nQuitting at user's request. You might want to verify and delete the files in the working directory.");
@@ -81,11 +82,11 @@ internal static class Program
             return;
         }
 
-        // The working directory should be empty.
+        // The working directory should start empty.
         var tempFiles = IoUtilties.Directories.GetDirectoryFiles(userSettings.WorkingDirectory);
         if (tempFiles.Any())
         {
-            printer.Error($"{tempFiles.Count} file(s) unexpectedly found in the working directory ({userSettings.WorkingDirectory}), so will abort:");
+            printer.Error($"Aborting due to {tempFiles.Count} file(s) unexpectedly found in the working directory ({userSettings.WorkingDirectory}):");
             tempFiles.ForEach(file => printer.Warning($"• {file}"));
             return;
         }
@@ -94,7 +95,7 @@ internal static class Program
 
         while (true)
         {
-            NextAction nextAction = ProcessBatch(userSettings, resultTracker, history, printer);
+            var nextAction = ProcessBatch(userSettings, resultTracker, history, printer);
             if (nextAction != NextAction.Continue)
             {
                 break;
@@ -117,7 +118,7 @@ internal static class Program
         History history,
         Printer printer)
     {
-        string userInput = printer.GetInput(_urlInputPrompt);
+        string userInput = printer.GetInput(_urlPrompt);
         DateTime inputTime = DateTime.Now;
 
         Watch watch = new();
