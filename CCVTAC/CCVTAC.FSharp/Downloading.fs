@@ -10,7 +10,6 @@ module public Downloading =
         | ReleasePlaylist of string
         | Channel of string
 
-
     // This active recognizer will not work if the parameter order is switched.
     let private (|Regex|_|) pattern input =
         let m = Regex.Match(input, pattern)
