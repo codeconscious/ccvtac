@@ -127,7 +127,7 @@ internal static class Downloader
                 // Use `s` instead of `B` to trim to a specified number of characters.
                 // Reference: https://github.com/yt-dlp/yt-dlp/issues/1136#issuecomment-1114252397
                 // Also, it's possible this trimming should be applied to `ReleasePlaylist`s too.
-                args.Add("""-o "%(playlist).80B = %(playlist_autonumber)s - %(title).150B [%(id)s].%(ext)s" --playlist-reverse""");
+                args.Add("""-o "%(uploader).80B - %(playlist).80B - %(playlist_autonumber)s - %(title).150B [%(id)s].%(ext)s" --playlist-reverse""");
             }
         }
 
