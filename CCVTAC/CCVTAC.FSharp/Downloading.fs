@@ -4,11 +4,15 @@ module public Downloading =
     open System.Text.RegularExpressions
 
     type MediaType =
-        | Video of string
-        | PlaylistVideo of string * string
-        | StandardPlaylist of string
-        | ReleasePlaylist of string
-        | Channel of string
+        | Video of id : string
+        | PlaylistVideo of videoId : string * playlistId : string
+        | StandardPlaylist of id : string
+        | ReleasePlaylist of id : string
+        | Channel of id : string
+
+    // type Download =
+    //     | Media of MediaType
+    //     | Metadata
 
     // This active recognizer will not work if the parameter order is switched.
     let private (|Regex|_|) pattern input =
@@ -27,7 +31,7 @@ module public Downloading =
         | Regex @"(?<=list=)(P[\w\-]+)" [ id ] -> Ok (StandardPlaylist id)
         | Regex @"(?<=list=)(O[\w\-]+)" [ id ] -> Ok (ReleasePlaylist id)
         | Regex @"((?:www\.)?youtube\.com\/(?:channel\/|c\/|user\/|@)(?:[\w\-]+))" [ id ] -> Ok (Channel id)
-        | _ -> Error("Unable to determine the media type of the URL.")
+        | _ -> Error "Unable to determine the media type of the URL."
 
     let downloadUrls mediaType =
         let fullUrl urlBase id = urlBase + id
@@ -40,3 +44,20 @@ module public Downloading =
         | PlaylistVideo (vId, pId) -> [videoUrl vId; playlistUrl pId]
         | StandardPlaylist id | ReleasePlaylist id -> [playlistUrl id]
         | Channel id -> [channelUrl id]
+
+    // module public Args =
+    //     let generateArgs settings download customArgs =
+    //         let baseArgs download =
+    //             let writeJson = "--write-info-json"
+    //             let trimFileNames = "--trim-filenames 250"
+
+    //             match download with
+    //             | Media -> String.concat " " ($"--extract-audio -f {settings.AudioFormat}" +
+    //                                           "--write-thumbnail --convert-thumbnails jpg" + // For album art
+    //                                           writeJson + // Contains metadata
+    //                                           trimFileNames +
+    //                                           "--retries 3")
+    //             | Metadata -> $"--flat-playlist {writeJson} {trimFileNames}"
+
+    //         let verbosityArgs args =
+    //             settings.
