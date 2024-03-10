@@ -4,6 +4,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Settings.fs" />
     <Compile Include="Downloading.fs" />
   </ItemGroup>
 </Project>
