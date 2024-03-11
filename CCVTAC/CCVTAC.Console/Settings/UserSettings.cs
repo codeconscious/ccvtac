@@ -88,21 +88,4 @@ public sealed class UserSettings
     /// </summary>
     [JsonPropertyName("pauseBeforePostProcessing")]
     public bool PauseBeforePostProcessing { get; init; } = false;
-
-    /// <summary>
-    /// If the supplied video uploader is specified in the settings, returns the video's upload year.
-    /// Otherwise, returns null.
-    /// </summary>
-    public ushort? GetAppropriateReleaseDateIfAny(VideoMetadata videoData)
-    {
-        if (this.IgnoreUploadYearUploaders?.Contains(videoData.Uploader,
-                                                     StringComparer.OrdinalIgnoreCase) == true)
-        {
-            return null;
-        }
-
-        return ushort.TryParse(videoData.UploadDate[0..4], out ushort parsedYear)
-            ? parsedYear
-            : null;
-    }
 }

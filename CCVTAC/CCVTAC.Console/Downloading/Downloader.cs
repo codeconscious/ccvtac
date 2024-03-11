@@ -1,6 +1,7 @@
 using CCVTAC.Console.ExternalTools;
 using CCVTAC.Console.Settings;
 using MediaType = CCVTAC.FSharp.Downloading.MediaType;
+using FSettings = CCVTAC.FSharp.Settings.UserSettings;
 
 namespace CCVTAC.Console.Downloading;
 
@@ -25,7 +26,7 @@ internal static class Downloader
         { 101, "Download cancelled by --max-downloads, etc." },
     };
 
-    internal static Result<string> Run(string url, UserSettings settings, Printer printer)
+    internal static Result<string> Run(string url, FSettings settings, Printer printer)
     {
         Watch watch = new();
 
@@ -83,7 +84,7 @@ internal static class Downloader
     /// <param name="additionalArgs"></param>
     /// <returns>A string of arguments that can be passed directly to the download tool.</returns>
     private static string GenerateDownloadArgs(
-        UserSettings settings,
+        FSettings settings,
         MediaType? mediaType,
         params string[]? additionalArgs)
     {
@@ -94,7 +95,7 @@ internal static class Downloader
         {
             null => [ $"--flat-playlist {writeJson} {trimFileNames}" ], // Metadata-only download
             _ => [
-                     $"--extract-audio -f {settings.AudioFormat}",
+                     $"--extract-audio -f m4a",
                      "--write-thumbnail --convert-thumbnails jpg", // For album art
                      writeJson, // Contains metadata
                      trimFileNames,

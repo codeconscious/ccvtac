@@ -1,4 +1,4 @@
-module Settings
+namespace CCVTAC.FSharp.Settings
 
 // TODO: Make proper modules and ctors?
 // TODO: Verify existance and validity?
@@ -19,16 +19,16 @@ type FilePath = FilePath of string
 // TODO: Add validation and create `ValidatedUserSettings`?
 // TODO: Add attributes for custom names (e.g., `[<field: DataMember(Name="workingDirectory")>]`)
 type UserSettings = {
-    workingDirectory : string
-    moveToDirectory : string
-    historyFile : string
-    historyDisplayCount : byte
-    splitChapters : bool
-    sleepBetweenDownloadsSeconds : uint16
-    sleepBetweenBatchesSeconds : uint16
-    verboseOutput: bool
-    pauseBeforePostProcessing : bool // Debugging use
-    ignoreUploadYearUploaders : string array
+    WorkingDirectory : string
+    MoveToDirectory : string
+    HistoryFilePath : string // Needs to be HistoryFile
+    HistoryDisplayCount : byte
+    SplitChapters : bool
+    SleepSecondsBetweenDownloads : uint16
+    SleepSecondsBetweenBatches : uint16
+    VerboseOutput: bool
+    PauseBeforePostProcessing : bool // Debugging use
+    IgnoreUploadYearUploaders : string array
 }
 
 module IO =

@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Text.Json;
 using CCVTAC.Console.PostProcessing.Tagging;
-using CCVTAC.Console.Settings;
+using FSettings = CCVTAC.FSharp.Settings.UserSettings;
 
 namespace CCVTAC.Console.PostProcessing;
 
@@ -9,7 +9,7 @@ internal static class Mover
 {
     internal static void Run(IEnumerable<TaggingSet> taggingSets,
                              CollectionMetadata? maybeCollectionData,
-                             UserSettings userSettings,
+                             FSettings userSettings,
                              bool shouldOverwrite,
                              Printer printer)
     {

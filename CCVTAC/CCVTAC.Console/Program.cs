@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using CCVTAC.Console.Settings;
 using Spectre.Console;
+using FSettings = CCVTAC.FSharp.Settings.UserSettings;
 
 namespace CCVTAC.Console;
 
@@ -29,13 +30,23 @@ internal static class Program
                 : null;
         SettingsService settingsService = new(maybeSettingsPath);
 
-        var settingsResult = settingsService.PrepareUserSettings();
-        if (settingsResult.IsFailed)
+        // var settingsResult = settingsService.PrepareUserSettings();
+        // if (settingsResult.IsFailed)
+        // {
+        //     printer.Errors("Settings error(s):", settingsResult);
+        //     return;
+        // }
+        FSettings userSettings;
+        try
         {
-            printer.Errors("Settings error(s):", settingsResult);
+            var settingsResult = settingsService.ReadFSettings();
+            userSettings = settingsResult;
+        }
+        catch (Exception ex)
+        {
+            printer.Error($"Could not load settings: {ex.Message}");
             return;
         }
-        UserSettings userSettings = settingsResult.Value;
         settingsService.PrintSummary(userSettings, printer, header: "Settings loaded OK.");
 
         History history = new(userSettings.HistoryFilePath, userSettings.HistoryDisplayCount);
@@ -70,7 +81,7 @@ internal static class Program
     /// <summary>
      /// Performs initial setup, initiates each download request, and prints the final summary when the user requests to end the program.
     /// </summary>
-    private static void Start(UserSettings userSettings, History history, Printer printer)
+    private static void Start(FSettings userSettings, History history, Printer printer)
     {
         // Verify the external program for downloading is installed on the system.
         if (Downloading.Downloader.ExternalTool.ProgramExists() is { IsFailed: true })
@@ -113,7 +124,7 @@ internal static class Program
     /// <param name="printer"></param>
     /// <returns>A bool indicating whether to quit the program (true) or continue (false).</returns>
     private static NextAction ProcessBatch(
-        UserSettings userSettings,
+        FSettings userSettings,
         ResultTracker resultHandler,
         History history,
         Printer printer)

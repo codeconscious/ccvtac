@@ -1,6 +1,7 @@
 using System.IO;
 using System.Text.Json;
 using Spectre.Console;
+using FSettings = CCVTAC.FSharp.Settings.UserSettings;
 
 namespace CCVTAC.Console.Settings;
 
@@ -10,13 +11,22 @@ public class SettingsService
 
     private string FullPath { get; init; }
 
-    public SettingsService(string? customFilePath = null)
+    internal SettingsService(string? customFilePath = null)
     {
         FullPath = customFilePath
                    ?? Path.Combine(AppContext.BaseDirectory, _defaultSettingsFileName);
     }
 
-    public Result<UserSettings> PrepareUserSettings()
+    internal FSettings ReadFSettings(string fileName = _defaultSettingsFileName)
+    {
+        var filePath = FSharp.Settings.FilePath.NewFilePath(fileName);
+        var result = FSharp.Settings.IO.readSettings(filePath);
+        return result.IsOk
+            ? result.ResultValue
+            : throw new Exception(result.ErrorValue);
+    }
+
+    internal Result<UserSettings> PrepareUserSettings()
     {
         if (File.Exists(FullPath))
         {
@@ -146,8 +156,8 @@ public class SettingsService
     /// <param name="settings"></param>
     /// <param name="printer"></param>
     /// <param name="header">An optional line of text to appear above the settings.</param>
-    public void PrintSummary(
-        UserSettings settings,
+    internal void PrintSummary(
+        FSettings settings,
         Printer printer,
         string? header = null)
     {
@@ -169,7 +179,6 @@ public class SettingsService
         ImmutableList<KeyValuePair<string, string>> settingPairs =
             new Dictionary<string, string>()
                 {
-                    { $"Audio file format", settings.AudioFormat.ToUpperInvariant() },
                     { $"Split video chapters", settings.SplitChapters ? "ON" : "OFF" },
                     {
                         $"Sleep between batches",
@@ -184,9 +193,9 @@ public class SettingsService
                         $"{settings.IgnoreUploadYearUploaders?.Length.ToString() ?? "No"} {PluralizeIfNeeded("channel", settings.IgnoreUploadYearUploaders?.Length ?? 0)}"
                     },
                     { "Verbose mode", settings.VerboseOutput ? "ON" : "OFF" },
-                    { "Working directory", settings.WorkingDirectory },
-                    { "Move-to directory", settings.MoveToDirectory },
-                    { "History log file", $"{settings.HistoryFilePath} ({historyFileNote})" },
+                    { "Working directory", settings.WorkingDirectory ?? "None found" }, // TODO: Add validation, then remove the null case.
+                    { "Move-to directory", settings.MoveToDirectory ?? "None found" },
+                    { "History log file", $"{settings.HistoryFilePath?? "None found" } ({historyFileNote})" },
                 }
             .ToImmutableList();
         settingPairs.ForEach(pair => table.AddRow(pair.Key, pair.Value));

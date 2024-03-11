@@ -1,13 +1,13 @@
 ﻿using System.IO;
 using System.Text.Json;
-using CCVTAC.Console.Settings;
 using TaggedFile = TagLib.File;
+using FSettings = CCVTAC.FSharp.Settings.UserSettings;
 
 namespace CCVTAC.Console.PostProcessing.Tagging;
 
 internal static class Tagger
 {
-    internal static Result<string> Run(UserSettings userSettings,
+    internal static Result<string> Run(FSettings userSettings,
                                        IEnumerable<TaggingSet> taggingSets,
                                        CollectionMetadata? collectionJson,
                                        Printer printer)
@@ -25,7 +25,7 @@ internal static class Tagger
     }
 
     private static void ProcessSingleTaggingSet(
-        UserSettings userSettings,
+        FSettings userSettings,
         TaggingSet taggingSet,
         CollectionMetadata? collectionJson,
         Printer printer)
@@ -56,7 +56,7 @@ internal static class Tagger
         }
     }
 
-    static void TagSingleFile(UserSettings userSettings,
+    static void TagSingleFile(FSettings userSettings,
                               VideoMetadata videoData,
                               string audioFilePath,
                               string imageFilePath,
@@ -123,7 +123,7 @@ internal static class Tagger
             }
             else
             {
-                ushort? maybeDefaultYear = userSettings.GetAppropriateReleaseDateIfAny(videoData);
+                ushort? maybeDefaultYear = GetAppropriateReleaseDateIfAny(userSettings, videoData);
 
                 if (tagDetector.DetectReleaseYear(videoData, maybeDefaultYear) is ushort year)
                 {
@@ -142,6 +142,23 @@ internal static class Tagger
         catch (Exception ex)
         {
             printer.Error($"Error tagging file: {ex.Message}");
+        }
+
+        /// <summary>
+        /// If the supplied video uploader is specified in the settings, returns the video's upload year.
+        /// Otherwise, returns null.
+        /// </summary>
+        static ushort? GetAppropriateReleaseDateIfAny(FSettings settings, VideoMetadata videoData)
+        {
+            if (settings.IgnoreUploadYearUploaders?.Contains(videoData.Uploader,
+                                                             StringComparer.OrdinalIgnoreCase) == true)
+            {
+                return null;
+            }
+
+            return ushort.TryParse(videoData.UploadDate[0..4], out ushort parsedYear)
+                ? parsedYear
+                : null;
         }
     }
 

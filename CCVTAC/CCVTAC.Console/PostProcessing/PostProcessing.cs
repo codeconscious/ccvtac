@@ -3,12 +3,13 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using CCVTAC.Console.Settings;
 using CCVTAC.Console.PostProcessing.Tagging;
+using FSettings = CCVTAC.FSharp.Settings.UserSettings;
 
 namespace CCVTAC.Console.PostProcessing;
 
-public sealed class Setup(UserSettings userSettings, Printer printer)
+public sealed class Setup(FSettings userSettings, Printer printer)
 {
-    public UserSettings UserSettings { get; } = userSettings;
+    public FSettings UserSettings { get; } = userSettings;
     public Printer Printer { get; } = printer;
 
     internal void Run()
