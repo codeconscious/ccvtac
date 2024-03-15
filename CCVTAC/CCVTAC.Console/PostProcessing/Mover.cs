@@ -21,7 +21,8 @@ internal static class Mover
         DirectoryInfo workingDirInfo = new(userSettings.WorkingDirectory);
 
         string subFolderName = GetDefaultFolderName(maybeCollectionData, taggingSets.First(), workingDirInfo);
-        string moveToDir = Path.Combine(userSettings.MoveToDirectory, subFolderName);
+        string collectionFolder = maybeCollectionData?.Title ?? string.Empty;
+        string moveToDir = Path.Combine(userSettings.MoveToDirectory, subFolderName, collectionFolder);
 
         try
         {
@@ -75,7 +76,7 @@ internal static class Mover
             collectionData.Uploader.HasText() &&
             collectionData.Title.HasText())
         {
-            workingName = $"{collectionData.Uploader} - {collectionData.Title}";
+            workingName = $"{collectionData.Uploader}";
         }
         else
         {
