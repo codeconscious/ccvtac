@@ -30,26 +30,33 @@ internal static class Program
                 : null;
         SettingsService settingsService = new(maybeSettingsPath);
 
-        // var settingsResult = settingsService.PrepareUserSettings();
-        // if (settingsResult.IsFailed)
-        // {
-        //     printer.Errors("Settings error(s):", settingsResult);
-        //     return;
-        // }
         FSettings userSettings;
         try
         {
-            var settingsResult = settingsService.ReadFSettings();
-            userSettings = settingsResult;
+            if (settingsService.FileExists())
+            {
+                userSettings = settingsService.Read();
+            }
+            else
+            {
+                settingsService.WriteDefaultFile();
+
+                var message = """
+                    A new empty settings file was created. Please review it and populate it with your desired settings.
+                    In particular, "workingDirectory," "moveToDirectory," and "historyFilePath" must be populated with valid paths.
+                    """;
+                printer.Print(message);
+                return;
+            }
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
-            printer.Error($"Could not load settings: {ex.Message}");
+            printer.Error($"Settings error: {ex.Message}");
             return;
         }
         settingsService.PrintSummary(userSettings, printer, header: "Settings loaded OK.");
 
-        History history = new(userSettings.HistoryFilePath, userSettings.HistoryDisplayCount);
+        History history = new(userSettings.HistoryFile, userSettings.HistoryDisplayCount);
 
         // Show the history if requested.
         if (args.Length > 0 && _historyCommands.Contains(args[0].ToLowerInvariant()))
@@ -74,7 +81,7 @@ internal static class Program
         {
             printer.Error($"Fatal error: {topException.Message}");
             AnsiConsole.WriteException(topException);
-            printer.Print("Please help improve this tool by reporting this error and the URL you entered at https://github.com/codeconscious/ccvtac/issues.");
+            printer.Print("Please help improve this tool by reporting this error and any URLs you entered at https://github.com/codeconscious/ccvtac/issues.");
         }
     }
 

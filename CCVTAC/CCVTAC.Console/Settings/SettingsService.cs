@@ -1,137 +1,41 @@
 using System.IO;
-using System.Text.Json;
 using Spectre.Console;
-using FSettings = CCVTAC.FSharp.Settings.UserSettings;
+using CCVTAC.FSharp.Settings;
+using FSettings = CCVTAC.FSharp.Settings.UserSettings; // "F" for F# -- a temporary contrivance for clarity
 
 namespace CCVTAC.Console.Settings;
 
 public class SettingsService
 {
-    private const string _defaultSettingsFileName = "settings.json";
+    private const string _defaultFileName = "settings.json";
 
     private string FullPath { get; init; }
 
     internal SettingsService(string? customFilePath = null)
     {
         FullPath = customFilePath
-                   ?? Path.Combine(AppContext.BaseDirectory, _defaultSettingsFileName);
+                   ?? Path.Combine(AppContext.BaseDirectory, _defaultFileName);
     }
 
-    internal FSettings ReadFSettings(string fileName = _defaultSettingsFileName)
+    internal bool FileExists() => File.Exists(FullPath);
+
+    internal FSettings Read()
     {
-        var filePath = FSharp.Settings.FilePath.NewFilePath(fileName);
-        var result = FSharp.Settings.IO.readSettings(filePath);
-        return result.IsOk
-            ? result.ResultValue
-            : throw new Exception(result.ErrorValue);
-    }
+        var path = FilePath.NewFilePath(FullPath);
+        var result = IO.Read(path);
+        if (result.IsError)
+            throw new InvalidOperationException(result.ErrorValue);
 
-    internal Result<UserSettings> PrepareUserSettings()
-    {
-        if (File.Exists(FullPath))
-        {
-            var getSettingsResult = GetExistingSettings();
-            if (getSettingsResult.IsFailed)
-                return getSettingsResult;
-
-            return Result.Ok(getSettingsResult.Value);
-        }
-
-        if (WriteDefaultFile() is { IsFailed: true } failedResult)
-        {
-            return Result.Fail($"Could not write a new settings file: {failedResult.Errors.Select(e => e.Message).First()}");
-        }
-
-        // Using `Fail` to indicate that the program cannot continue as is, though the write operation was successful.
-        // I'd like to fix this. (It's probably a good use case for a discrimated union (after C# gets them).
-        return Result.Fail(
-            $"A new empty settings file was created at \"{FullPath}\"." + Environment.NewLine +
-            """
-            Please review it and populate it with your desired settings.
-            In particular, "workingDirectory," "moveToDirectory," and "historyFilePath" must be populated with valid paths.
-            """);
-    }
-
-    private Result<UserSettings> GetExistingSettings()
-    {
-        UserSettings settings;
-        try
-        {
-            string json = File.ReadAllText(FullPath);
-            settings = JsonSerializer.Deserialize<UserSettings>(json)
-                       ?? throw new JsonException();
-        }
-        catch (FileNotFoundException)
-        {
-            return Result.Fail($"Settings file \"{FullPath}\" not found.");
-        }
-        catch (JsonException ex)
-        {
-            return Result.Fail($"Settings file JSON at \"{FullPath}\" is invalid: {ex.Message}");
-        }
-
-        if (EnsureValidSettings(settings) is { IsFailed: true} failedResult)
-            return Result.Fail(failedResult.Errors.Select(e => e.Message));
-
-        // Ensure ID3 version 2.3, which seems more widely supported than version 2.4.
-        TagFormat.SetId3v2Version(
-            version: TagFormat.Id3v2Version.TwoPoint3,
-            forceAsDefault: true);
-
-        return Result.Ok(settings);
-    }
-
-    /// <summary>
-    /// Creates the specified settings file if it is missing. Otherwise, does nothing.
-    /// </summary>
-    /// <returns>A Result indicating success or no action (Ok) or else failure (Fail).</returns>
-    private Result WriteDefaultFile()
-    {
-        try
-        {
-            return WriteFile(new UserSettings());
-        }
-        catch (Exception ex)
-        {
-            return Result.Fail($"Error creating \"{FullPath}\": {ex.Message}");
-        }
-    }
-
-    /// <summary>
-    /// Write settings to the specified file.
-    /// </summary>
-    /// <param name="settings"></param>
-    /// <param name="printer"></param>
-    private Result WriteFile(UserSettings settings)
-    {
-        try
-        {
-            string json = JsonSerializer.Serialize(
-                settings,
-                new JsonSerializerOptions
-                {
-                    WriteIndented = true,
-                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.Create(
-                                 System.Text.Unicode.UnicodeRanges.All)
-                });
-            File.WriteAllText(FullPath, json);
-            return Result.Ok();
-        }
-        catch (FileNotFoundException)
-        {
-            return Result.Fail($"Settings file \"{FullPath}\" is missing.");
-        }
-        catch (JsonException ex)
-        {
-            return Result.Fail($"Invalid JSON in settings file: {ex.Message}.");
-        }
+        var settings = result.ResultValue;
+        EnsureValidSettings(settings);
+        return settings;
     }
 
     /// <summary>
     /// Ensure the mandatory settings are present and valid.
     /// </summary>
     /// <returns>A Result indicating success or failure.</returns>
-    private static Result EnsureValidSettings(UserSettings settings)
+    private static void EnsureValidSettings(FSettings settings)
     {
         List<string> errors = [];
 
@@ -145,9 +49,21 @@ public class SettingsService
         else if (!Directory.Exists(settings.WorkingDirectory))
             errors.Add($"Working directory \"{settings.WorkingDirectory}\" does not exist.");
 
-        return errors.Any()
-            ? Result.Fail(errors)
-            : Result.Ok();
+        if (errors.Any())
+            throw new InvalidOperationException($"Errors:{Environment.NewLine}{string.Join(Environment.NewLine, errors)}");
+    }
+
+    /// <summary>
+    /// Creates the specified settings file if it is missing. Otherwise, does nothing.
+    /// </summary>
+    /// <returns>A Result indicating success or no action (Ok) or else failure (Fail).</returns>
+    internal Result WriteDefaultFile()
+    {
+        var path = FilePath.NewFilePath(FullPath);
+        var result = IO.WriteDefaultFile(path);
+        return result.IsOk
+            ? Result.Ok()
+            : throw new InvalidOperationException(result.ErrorValue);
     }
 
     /// <summary>
@@ -164,7 +80,7 @@ public class SettingsService
         if (header.HasText())
             printer.Print(header!);
 
-        string historyFileNote = File.Exists(settings.HistoryFilePath)
+        string historyFileNote = File.Exists(settings.HistoryFile)
             ? "exists"
             : "will be created";
 
@@ -176,7 +92,7 @@ public class SettingsService
         table.HideHeaders();
         table.Columns[1].Width = 100; // Ensure its at maximum width.
 
-        ImmutableList<KeyValuePair<string, string>> settingPairs =
+        var settingPairs =
             new Dictionary<string, string>()
                 {
                     { $"Split video chapters", settings.SplitChapters ? "ON" : "OFF" },
@@ -195,13 +111,13 @@ public class SettingsService
                     { "Verbose mode", settings.VerboseOutput ? "ON" : "OFF" },
                     { "Working directory", settings.WorkingDirectory ?? "None found" }, // TODO: Add validation, then remove the null case.
                     { "Move-to directory", settings.MoveToDirectory ?? "None found" },
-                    { "History log file", $"{settings.HistoryFilePath?? "None found" } ({historyFileNote})" },
+                    { "History log file", $"{settings.HistoryFile?? "None found" } ({historyFileNote})" },
                 }
             .ToImmutableList();
         settingPairs.ForEach(pair => table.AddRow(pair.Key, pair.Value));
 
         if (settings.PauseBeforePostProcessing)
-            table.AddRow("Pause before post-processing", "ON");
+            table.AddRow("Pause before post-processing", "ON (for debugging use)");
 
         printer.Print(table);
 

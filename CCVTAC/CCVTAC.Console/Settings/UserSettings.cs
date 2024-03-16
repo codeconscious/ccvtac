@@ -29,9 +29,9 @@ public sealed class UserSettings
     /// <summary>
     /// The file to which history should be logged.
     /// </summary>
-    [JsonPropertyName("historyFilePath")]
+    [JsonPropertyName("historyFile")]
     [JsonRequired]
-    public string HistoryFilePath { get; init; } = string.Empty;
+    public string HistoryFile { get; init; } = string.Empty;
 
     /// <summary>
     /// How many history entries to display.

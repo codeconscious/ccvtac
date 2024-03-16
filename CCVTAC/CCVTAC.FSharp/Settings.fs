@@ -5,23 +5,12 @@ namespace CCVTAC.FSharp.Settings
 type DirectoryName = DirectoryName of string
 type FilePath = FilePath of string
 
-// type UserSettings = {
-//     WorkingDirectory : DirectoryName
-//     MoveToDirectory : DirectoryName
-//     HistoryFile : FilePath
-//     HistoryDisplayCount : byte
-//     SplitChapters : bool
-//     SleepSecondsBetweenDownloads : uint16
-//     SleepSecondsBetweenBatches : uint16
-//     VerboseOutput: bool
-//     PauseBeforePostProcessing : bool // Debugging use
-// }
 // TODO: Add validation and create `ValidatedUserSettings`?
 // TODO: Add attributes for custom names (e.g., `[<field: DataMember(Name="workingDirectory")>]`)
 type UserSettings = {
     WorkingDirectory : string
     MoveToDirectory : string
-    HistoryFilePath : string // Needs to be HistoryFile
+    HistoryFile : string // Needs to be HistoryFile
     HistoryDisplayCount : byte
     SplitChapters : bool
     SleepSecondsBetweenDownloads : uint16
@@ -48,17 +37,19 @@ module IO =
     //         | :? JsonException -> Error($"Could not parse JSON in \"{file}\" to settings.")
     //         | e -> Error $"Settings unexpectedly could not be read from \"{file}\": {e.Message}"
 
-    let readSettings filePath =
+    [<CompiledName("Read")>]
+    let read filePath =
         let (FilePath file) = filePath
 
         try
             Ok (file |> File.ReadAllText |> JsonSerializer.Deserialize<UserSettings>)
         with
-            | :? FileNotFoundException -> Error($"\"{file}\" was not found.")
-            | :? JsonException -> Error($"Could not parse JSON in \"{file}\" to settings.")
+            | :? FileNotFoundException -> Error $"\"{file}\" was not found."
+            | :? JsonException -> Error $"Could not parse JSON in \"{file}\" to settings."
             | e -> Error $"Settings unexpectedly could not be read from \"{file}\": {e.Message}"
 
-    let writeSettings settings filePath =
+    [<CompiledName("WriteFile")>]
+    let private writeFile settings filePath =
         let unicodeEncoder = JavaScriptEncoder.Create(UnicodeRanges.All)
         let writeIndented = true
         let options = JsonSerializerOptions(WriteIndented = writeIndented, Encoder = unicodeEncoder)
@@ -71,6 +62,22 @@ module IO =
             | :? FileNotFoundException -> Error $"\"{file}\" was not found and did not create it."
             | :? JsonException -> Error $"Could not parse user settings to JSON."
             | e -> Error $"Unexpectedly could not write settings to \"{file}\": {e.Message}"
+
+    [<CompiledName("WriteDefaultFile")>]
+    let writeDefaultFile filePath =
+        let defaultSettings = {
+            WorkingDirectory = String.Empty
+            MoveToDirectory = String.Empty
+            HistoryFile = String.Empty
+            HistoryDisplayCount = 25uy // byte
+            SplitChapters = true
+            SleepSecondsBetweenDownloads = 10us // uint16
+            SleepSecondsBetweenBatches = 20us // uint16
+            VerboseOutput = true
+            PauseBeforePostProcessing = false // Debugging only; can it be ignored? Maybe best to just remove at this point...
+            IgnoreUploadYearUploaders = [||]
+        }
+        writeFile defaultSettings filePath
 
     let checkValidity settings =
         raise <| NotImplementedException()
