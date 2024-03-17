@@ -25,16 +25,6 @@ module IO =
     open System.Text.Unicode
     open System.Text.Encodings.Web
 
-    // let tryIo f param =
-    //     try Ok(f param)
-    //     with ex -> Error(ex.Message)
-    // let tryIo2 f param =
-    //     try Ok(f param)
-    //     with //ex -> Error(ex.Message)
-    //         | :? FileNotFoundException -> Error($"\"{file}\" was not found.")
-    //         | :? JsonException -> Error($"Could not parse JSON in \"{file}\" to settings.")
-    //         | e -> Error $"Settings unexpectedly could not be read from \"{file}\": {e.Message}"
-
     [<CompiledName("Read")>]
     let read filePath =
         let (FilePath file) = filePath
