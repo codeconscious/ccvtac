@@ -39,7 +39,7 @@ internal static class Program
             }
             else
             {
-                settingsService.WriteDefaultFile();
+                settingsService.WriteDefault();
 
                 var message = """
                     A new empty settings file was created. Please review it and populate it with your desired settings.

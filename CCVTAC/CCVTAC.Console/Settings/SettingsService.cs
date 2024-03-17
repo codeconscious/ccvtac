@@ -19,6 +19,10 @@ public class SettingsService
 
     internal bool FileExists() => File.Exists(FullPath);
 
+    /// <summary>
+    /// Read the settings from the specified JSON file.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Indicates IO or validation errors.</exception>
     internal FSettings Read()
     {
         var path = FilePath.NewFilePath(FullPath);
@@ -27,14 +31,15 @@ public class SettingsService
             throw new InvalidOperationException(result.ErrorValue);
 
         var settings = result.ResultValue;
-        EnsureValidSettings(settings);
+        EnsureValid(settings);
         return settings;
     }
 
     /// <summary>
-    /// Ensure the mandatory settings are present and valid.
+    /// Ensures the mandatory settings are present and valid. Otherwise, throws.
     /// </summary>
-    private static void EnsureValidSettings(FSettings settings)
+    /// <exception cref="InvalidOperationException">Indicates validation errors.</exception>
+    private static void EnsureValid(FSettings settings)
     {
         List<string> errors = [];
 
@@ -55,8 +60,8 @@ public class SettingsService
     /// <summary>
     /// Creates the specified settings file if it is missing. Otherwise, does nothing.
     /// </summary>
-    /// <returns>A Result indicating success or no action (Ok) or else failure (Fail).</returns>
-    internal Result WriteDefaultFile()
+    /// <exception cref="InvalidOperationException">Indicates an IO error.</exception>
+    internal Result WriteDefault()
     {
         var path = FilePath.NewFilePath(FullPath);
         var result = IO.WriteDefaultFile(path);
