@@ -17,11 +17,12 @@ internal static class Mover
 
         uint successCount = 0;
         uint failureCount = 0;
-        bool isVerbose = userSettings.VerboseOutput;
+        bool verbose = userSettings.VerboseOutput;
         DirectoryInfo workingDirInfo = new(userSettings.WorkingDirectory);
 
-        string subFolderName = GetDefaultFolderName(maybeCollectionData, taggingSets.First(), workingDirInfo);
-        string moveToDir = Path.Combine(userSettings.MoveToDirectory, subFolderName);
+        string subFolderName = GetDefaultFolderName(maybeCollectionData, taggingSets.First());
+        string collectionFolder = maybeCollectionData?.Title ?? string.Empty;
+        string moveToDir = Path.Combine(userSettings.MoveToDirectory, subFolderName, collectionFolder);
 
         try
         {
@@ -50,7 +51,7 @@ internal static class Mover
                     shouldOverwrite);
                 successCount++;
 
-                if (isVerbose)
+                if (verbose)
                     printer.Print($"• Moved \"{file.Name}\"");
             }
             catch (Exception ex)
@@ -67,7 +68,7 @@ internal static class Mover
         }
     }
 
-    private static string GetDefaultFolderName(CollectionMetadata? maybeCollectionData, TaggingSet taggingSet, DirectoryInfo workingDirInfo)
+    private static string GetDefaultFolderName(CollectionMetadata? maybeCollectionData, TaggingSet taggingSet)
     {
         string workingName;
 
@@ -75,7 +76,7 @@ internal static class Mover
             collectionData.Uploader.HasText() &&
             collectionData.Title.HasText())
         {
-            workingName = $"{collectionData.Uploader} - {collectionData.Title}";
+            workingName = $"{collectionData.Uploader}";
         }
         else
         {
