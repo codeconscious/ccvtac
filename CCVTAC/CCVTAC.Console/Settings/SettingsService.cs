@@ -27,10 +27,9 @@ public class SettingsService
     {
         var path = FilePath.NewFilePath(FullPath);
         var result = IO.Read(path);
-        if (result.IsError)
-            throw new InvalidOperationException(result.ErrorValue);
-
-        return result.ResultValue;
+        return result.IsOk
+            ? result.ResultValue
+            : throw new InvalidOperationException(result.ErrorValue);
     }
 
     /// <summary>
