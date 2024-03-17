@@ -5,7 +5,6 @@ namespace CCVTAC.FSharp.Settings
 type DirectoryName = DirectoryName of string
 type FilePath = FilePath of string
 
-// TODO: Add validation and create `ValidatedUserSettings`?
 // TODO: Add attributes for custom names (e.g., `[<field: DataMember(Name="workingDirectory")>]`)
 type UserSettings = {
     WorkingDirectory : string
@@ -40,8 +39,26 @@ module IO =
     let read filePath =
         let (FilePath file) = filePath
 
+        let verify (settings:UserSettings) =
+            let isBlank str = String.IsNullOrWhiteSpace str
+            let dirMissing str = not <| (Directory.Exists str)
+
+            match settings with
+            | { WorkingDirectory = w } when isBlank w
+                -> Error $"No working directory was specified."
+            | { MoveToDirectory = m } when isBlank m
+                -> Error $"No move-to directory was specified."
+            | { WorkingDirectory = w } when dirMissing w
+                -> Error $"Working directory \"{w}\" does not exist."
+            | { MoveToDirectory = m } when dirMissing m
+                -> Error $"Move-to directory \"{m}\" does not exist."
+            | _ -> Ok settings
+
         try
-            Ok (file |> File.ReadAllText |> JsonSerializer.Deserialize<UserSettings>)
+            file
+            |> File.ReadAllText
+            |> JsonSerializer.Deserialize<UserSettings>
+            |> verify
         with
             | :? FileNotFoundException -> Error $"\"{file}\" was not found."
             | :? JsonException -> Error $"Could not parse JSON in \"{file}\" to settings."
@@ -76,6 +93,3 @@ module IO =
             IgnoreUploadYearUploaders = [||]
         }
         writeFile defaultSettings filePath
-
-    let checkValidity settings =
-        raise <| NotImplementedException()

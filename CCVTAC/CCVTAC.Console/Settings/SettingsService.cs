@@ -30,31 +30,7 @@ public class SettingsService
         if (result.IsError)
             throw new InvalidOperationException(result.ErrorValue);
 
-        var settings = result.ResultValue;
-        EnsureValid(settings);
-        return settings;
-    }
-
-    /// <summary>
-    /// Ensures the mandatory settings are present and valid. Otherwise, throws.
-    /// </summary>
-    /// <exception cref="InvalidOperationException">Indicates validation errors.</exception>
-    private static void EnsureValid(FSettings settings)
-    {
-        List<string> errors = [];
-
-        if (string.IsNullOrWhiteSpace(settings.MoveToDirectory))
-            errors.Add($"No move-to directory was specified in the settings.");
-        else if (!Directory.Exists(settings.MoveToDirectory))
-            errors.Add($"Move-to directory \"{settings.MoveToDirectory}\" does not exist.");
-
-        if (string.IsNullOrWhiteSpace(settings.WorkingDirectory))
-            errors.Add($"No working directory was specified in the settings.");
-        else if (!Directory.Exists(settings.WorkingDirectory))
-            errors.Add($"Working directory \"{settings.WorkingDirectory}\" does not exist.");
-
-        if (errors.Any())
-            throw new InvalidOperationException($"Errors:{Environment.NewLine}{string.Join(Environment.NewLine, errors)}");
+        return result.ResultValue;
     }
 
     /// <summary>
