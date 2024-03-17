@@ -16,7 +16,6 @@ type UserSettings = {
     SleepSecondsBetweenDownloads : uint16
     SleepSecondsBetweenBatches : uint16
     VerboseOutput: bool
-    PauseBeforePostProcessing : bool // Debugging use
     IgnoreUploadYearUploaders : string array
 }
 
@@ -74,7 +73,6 @@ module IO =
             SleepSecondsBetweenDownloads = 10us // uint16
             SleepSecondsBetweenBatches = 20us // uint16
             VerboseOutput = true
-            PauseBeforePostProcessing = false // Debugging only; can it be ignored? Maybe best to just remove at this point...
             IgnoreUploadYearUploaders = [||]
         }
         writeFile defaultSettings filePath

@@ -34,7 +34,6 @@ public class SettingsService
     /// <summary>
     /// Ensure the mandatory settings are present and valid.
     /// </summary>
-    /// <returns>A Result indicating success or failure.</returns>
     private static void EnsureValidSettings(FSettings settings)
     {
         List<string> errors = [];
@@ -90,7 +89,7 @@ public class SettingsService
         table.BorderColor(Color.Grey27);
         table.AddColumns("Name", "Value");
         table.HideHeaders();
-        table.Columns[1].Width = 100; // Ensure its at maximum width.
+        table.Columns[1].Width = 100; // Ensure maximum width.
 
         var settingPairs =
             new Dictionary<string, string>()
@@ -115,9 +114,6 @@ public class SettingsService
                 }
             .ToImmutableList();
         settingPairs.ForEach(pair => table.AddRow(pair.Key, pair.Value));
-
-        if (settings.PauseBeforePostProcessing)
-            table.AddRow("Pause before post-processing", "ON (for debugging use)");
 
         printer.Print(table);
 

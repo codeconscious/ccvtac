@@ -14,12 +14,6 @@ public sealed class Setup(FSettings userSettings, Printer printer)
 
     internal void Run()
     {
-        if (UserSettings.PauseBeforePostProcessing)
-        {
-            Printer.Warning("Paused before post processing. Press the Enter key to continue.");
-            System.Console.ReadLine();
-        }
-
         Watch watch = new();
 
         Printer.Print("Starting post-processing...");
