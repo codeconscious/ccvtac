@@ -3,20 +3,19 @@ namespace CCVTAC.FSharp.Settings
 open System.Text.Json.Serialization
 
 // TODO: Make proper modules and ctors?
-// TODO: Verify existance and validity?
 type DirectoryName = DirectoryName of string
 type FilePath = FilePath of string
 
 type UserSettings = {
-    [<JsonPropertyName("workingDirectory")>] WorkingDirectory : string
-    [<JsonPropertyName("moveToDirectory")>] MoveToDirectory : string
-    [<JsonPropertyName("historyFile")>] HistoryFile : string // Needs to be HistoryFile
-    [<JsonPropertyName("historyDisplayCount")>] HistoryDisplayCount : byte
-    [<JsonPropertyName("splitChapters")>] SplitChapters : bool
-    [<JsonPropertyName("sleepSecondsBetweenDownloads")>] SleepSecondsBetweenDownloads : uint16
-    [<JsonPropertyName("sleepSecondsBetweenBatches")>] SleepSecondsBetweenBatches : uint16
-    [<JsonPropertyName("verboseOutput")>] VerboseOutput: bool
-    [<JsonPropertyName("ignoreUploadYearUploaders")>] IgnoreUploadYearUploaders : string array
+    [<JsonPropertyName("workingDirectory")>]             WorkingDirectory: string
+    [<JsonPropertyName("moveToDirectory")>]              MoveToDirectory: string
+    [<JsonPropertyName("historyFile")>]                  HistoryFile: string
+    [<JsonPropertyName("historyDisplayCount")>]          HistoryDisplayCount: byte
+    [<JsonPropertyName("splitChapters")>]                SplitChapters: bool
+    [<JsonPropertyName("sleepSecondsBetweenDownloads")>] SleepSecondsBetweenDownloads: uint16
+    [<JsonPropertyName("sleepSecondsBetweenBatches")>]   SleepSecondsBetweenBatches: uint16
+    [<JsonPropertyName("verboseOutput")>]                VerboseOutput: bool
+    [<JsonPropertyName("ignoreUploadYearUploaders")>]    IgnoreUploadYearUploaders: string array
 }
 
 module IO =
@@ -28,32 +27,28 @@ module IO =
 
     [<CompiledName("Read")>]
     let read filePath =
-        let (FilePath file) = filePath
+        let (FilePath path) = filePath
 
         let verify (settings:UserSettings) =
-            let isBlank str = String.IsNullOrWhiteSpace str
+            let isEmpty str = String.IsNullOrWhiteSpace str
             let dirMissing str = not <| (Directory.Exists str)
 
             match settings with
-            | { WorkingDirectory = w } when isBlank w
-                -> Error $"No working directory was specified."
-            | { MoveToDirectory = m } when isBlank m
-                -> Error $"No move-to directory was specified."
-            | { WorkingDirectory = w } when dirMissing w
-                -> Error $"Working directory \"{w}\" does not exist."
-            | { MoveToDirectory = m } when dirMissing m
-                -> Error $"Move-to directory \"{m}\" does not exist."
+            | { WorkingDirectory = w } when isEmpty w -> Error $"No working directory was specified."
+            | { WorkingDirectory = w } when dirMissing w -> Error $"Working directory \"{w}\" is missing."
+            | { MoveToDirectory = m } when isEmpty m -> Error $"No move-to directory was specified."
+            | { MoveToDirectory = m } when dirMissing m -> Error $"Move-to directory \"{m}\" is missing."
             | _ -> Ok settings
 
         try
-            file
+            path
             |> File.ReadAllText
             |> JsonSerializer.Deserialize<UserSettings>
             |> verify
         with
-            | :? FileNotFoundException -> Error $"\"{file}\" was not found."
-            | :? JsonException -> Error $"Could not parse JSON in \"{file}\" to settings."
-            | e -> Error $"Settings unexpectedly could not be read from \"{file}\": {e.Message}"
+            | :? FileNotFoundException -> Error $"\"{path}\" was not found."
+            | :? JsonException -> Error $"Could not parse JSON in \"{path}\" to settings."
+            | e -> Error $"Settings unexpectedly could not be read from \"{path}\": {e.Message}"
 
     [<CompiledName("WriteFile")>]
     let private writeFile settings filePath =
@@ -66,21 +61,20 @@ module IO =
             let json = JsonSerializer.Serialize(settings, options)
             Ok (File.WriteAllText(file, json))
         with
-            | :? FileNotFoundException -> Error $"\"{file}\" was not found and did not create it."
-            | :? JsonException -> Error $"Could not parse user settings to JSON."
-            | e -> Error $"Unexpectedly could not write settings to \"{file}\": {e.Message}"
+            | :? FileNotFoundException -> Error $"\"{file}\" was not found."
+            | :? JsonException -> Error $"Failure parsing user settings to JSON."
+            | e -> Error $"Failure writing settings to \"{file}\": {e.Message}"
 
     [<CompiledName("WriteDefaultFile")>]
     let writeDefaultFile filePath =
-        let defaultSettings = {
-            WorkingDirectory = String.Empty
-            MoveToDirectory = String.Empty
-            HistoryFile = String.Empty
-            HistoryDisplayCount = 25uy // byte
-            SplitChapters = true
-            SleepSecondsBetweenDownloads = 10us // uint16
-            SleepSecondsBetweenBatches = 20us // uint16
-            VerboseOutput = true
-            IgnoreUploadYearUploaders = [||]
-        }
+        let defaultSettings =
+            { WorkingDirectory = String.Empty
+              MoveToDirectory = String.Empty
+              HistoryFile = String.Empty
+              HistoryDisplayCount = 25uy // byte
+              SplitChapters = true
+              SleepSecondsBetweenDownloads = 10us // uint16
+              SleepSecondsBetweenBatches = 20us // uint16
+              VerboseOutput = true
+              IgnoreUploadYearUploaders = [||] }
         writeFile defaultSettings filePath
