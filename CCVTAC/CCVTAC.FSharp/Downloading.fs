@@ -45,19 +45,27 @@ module public Downloading =
         | StandardPlaylist id | ReleasePlaylist id -> [playlistUrl id]
         | Channel id -> [channelUrl id]
 
+    // open CCVTAC.FSharp.Settings
+
     // module public Args =
-    //     let generateArgs settings download customArgs =
+    //     let generateArgs (settings:UserSettings option) download customArgs =
     //         let baseArgs download =
-    //             let writeJson = "--write-info-json"
-    //             let trimFileNames = "--trim-filenames 250"
+    //             let jsonArg settings =
+    //                 match settings with
+    //                 | None -> String.empty
+    //                 | Some -> "--write-info-json"
+    //             let trimArg settings =
+    //                 match settings with
+    //                 | None -> String.empty
+    //                 | Some -> "--trim-filenames 250"
 
     //             match download with
     //             | Media -> String.concat " " ($"--extract-audio -f {settings.AudioFormat}" +
     //                                           "--write-thumbnail --convert-thumbnails jpg" + // For album art
-    //                                           writeJson + // Contains metadata
-    //                                           trimFileNames +
+    //                                           jsonArg + // Contains metadata
+    //                                           trimArg +
     //                                           "--retries 3")
-    //             | Metadata -> $"--flat-playlist {writeJson} {trimFileNames}"
+    //             | Metadata -> $"--flat-playlist {jsonArg} {trimArg}"
 
     //         let verbosityArgs args =
     //             settings.
