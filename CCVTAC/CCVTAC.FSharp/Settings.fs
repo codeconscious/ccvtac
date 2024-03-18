@@ -1,21 +1,22 @@
 namespace CCVTAC.FSharp.Settings
 
+open System.Text.Json.Serialization
+
 // TODO: Make proper modules and ctors?
 // TODO: Verify existance and validity?
 type DirectoryName = DirectoryName of string
 type FilePath = FilePath of string
 
-// TODO: Add attributes for custom names (e.g., `[<field: DataMember(Name="workingDirectory")>]`)
 type UserSettings = {
-    WorkingDirectory : string
-    MoveToDirectory : string
-    HistoryFile : string // Needs to be HistoryFile
-    HistoryDisplayCount : byte
-    SplitChapters : bool
-    SleepSecondsBetweenDownloads : uint16
-    SleepSecondsBetweenBatches : uint16
-    VerboseOutput: bool
-    IgnoreUploadYearUploaders : string array
+    [<JsonPropertyName("workingDirectory")>] WorkingDirectory : string
+    [<JsonPropertyName("moveToDirectory")>] MoveToDirectory : string
+    [<JsonPropertyName("historyFile")>] HistoryFile : string // Needs to be HistoryFile
+    [<JsonPropertyName("historyDisplayCount")>] HistoryDisplayCount : byte
+    [<JsonPropertyName("splitChapters")>] SplitChapters : bool
+    [<JsonPropertyName("sleepSecondsBetweenDownloads")>] SleepSecondsBetweenDownloads : uint16
+    [<JsonPropertyName("sleepSecondsBetweenBatches")>] SleepSecondsBetweenBatches : uint16
+    [<JsonPropertyName("verboseOutput")>] VerboseOutput: bool
+    [<JsonPropertyName("ignoreUploadYearUploaders")>] IgnoreUploadYearUploaders : string array
 }
 
 module IO =
