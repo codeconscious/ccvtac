@@ -25,6 +25,13 @@ module IO =
     open System.Text.Unicode
     open System.Text.Encodings.Web
 
+    [<CompiledName("FileExists")>]
+    let fileExists filePath =
+        let (FilePath file) = filePath
+        match file |> File.Exists with
+        | true -> Ok()
+        | false -> Error($"The file \"path\" does not exist.")
+
     [<CompiledName("Read")>]
     let read filePath =
         let (FilePath path) = filePath
@@ -66,7 +73,12 @@ module IO =
             | e -> Error $"Failure writing settings to \"{file}\": {e.Message}"
 
     [<CompiledName("WriteDefaultFile")>]
-    let writeDefaultFile filePath =
+    let writeDefaultFile (filePath: FilePath option) =
+        let safePath =
+            let defaultFileName = "settings.json"
+            match filePath with
+            | Some p -> p
+            | None -> FilePath <| Path.Combine(AppContext.BaseDirectory, defaultFileName);
         let defaultSettings =
             { WorkingDirectory = String.Empty
               MoveToDirectory = String.Empty
@@ -77,4 +89,4 @@ module IO =
               SleepSecondsBetweenBatches = 20us // uint16
               VerboseOutput = true
               IgnoreUploadYearUploaders = [||] }
-        writeFile defaultSettings filePath
+        writeFile defaultSettings safePath

@@ -28,33 +28,23 @@ internal static class Program
                                     _settingsFileCommands.Contains(args[0].ToLowerInvariant())
                 ? args[1] // Expected to be a settings file path.
                 : null;
-        SettingsService settingsService = new(maybeSettingsPath);
 
         UserSettings settings;
-        try
+        var result = SettingsAdapter.ProcessSettings(maybeSettingsPath, printer);
+        if (result.IsFailed)
         {
-            if (settingsService.FileExists())
-            {
-                settings = settingsService.Read();
-            }
-            else
-            {
-                settingsService.WriteDefault();
-
-                var message = """
-                    A new empty settings file was created. Please review it and populate it with your desired settings.
-                    In particular, "workingDirectory," "moveToDirectory," and "historyFilePath" must be populated with valid paths.
-                    """;
-                printer.Print(message);
-                return;
-            }
-        }
-        catch (InvalidOperationException ex)
-        {
-            printer.Error($"Settings error: {ex.Message}");
+            printer.Errors(result.Errors.Select(e => e.Message));
             return;
         }
-        settingsService.PrintSummary(settings, printer, header: "Settings loaded OK.");
+        else if (result.Value is null)
+        {
+            return;
+        }
+        else
+        {
+            settings = result.Value;
+        }
+        SettingsAdapter.PrintSummary(settings, printer, header: "Settings loaded OK.");
 
         History history = new(settings.HistoryFile, settings.HistoryDisplayCount);
 
@@ -235,19 +225,8 @@ internal static class Program
     /// </summary>
     private enum NextAction : byte
     {
-        /// <summary>
-        /// Program execution should continue and not end.
-        /// </summary>
         Continue,
-
-        /// <summary>
-        /// Program execution should end at the user's request.
-        /// </summary>
         QuitAtUserRequest,
-
-        /// <summary>
-        /// Program execution should end due to an inability to continue.
-        /// </summary>
         QuitDueToErrors,
     }
 }

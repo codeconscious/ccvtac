@@ -5,44 +5,56 @@ using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 
 namespace CCVTAC.Console.Settings;
 
-public class SettingsService
+public class SettingsAdapter
 {
-    private const string _defaultFileName = "settings.json";
-
-    private string FullPath { get; init; }
-
-    internal SettingsService(string? customFilePath = null)
-    {
-        FullPath = customFilePath
-                   ?? Path.Combine(AppContext.BaseDirectory, _defaultFileName);
-    }
-
-    internal bool FileExists() => File.Exists(FullPath);
-
     /// <summary>
-    /// Read the settings from the specified JSON file.
+    /// Reads settings or creates a new default settings file.
     /// </summary>
-    /// <exception cref="InvalidOperationException">Indicates IO or validation errors.</exception>
-    internal UserSettings Read()
+    /// <param name="maybeSettingsPath"></param>
+    /// <param name="printer"></param>
+    /// <returns>
+    ///     A Result indicating three possible conditions:
+    ///     1. `Ok` with successfully parsed user settings from the disk.
+    ///     2. `OK` with no value, indicating that a new default file was created.
+    ///     3. `Fail`, indicating a failure in the read or write process or in settings validation.
+    /// </returns>
+    /// <remarks>This is intended to be a temporary solution until more code is moved to F#.</remarks>
+    internal static Result<UserSettings> ProcessSettings(string? maybeSettingsPath, Printer printer)
     {
-        var path = FilePath.NewFilePath(FullPath);
-        var result = IO.Read(path);
-        return result.IsOk
-            ? result.ResultValue
-            : throw new InvalidOperationException(result.ErrorValue);
-    }
+        var path = FilePath.NewFilePath(maybeSettingsPath);
 
-    /// <summary>
-    /// Creates the specified settings file if it is missing. Otherwise, does nothing.
-    /// </summary>
-    /// <exception cref="InvalidOperationException">Indicates an IO error.</exception>
-    internal Result WriteDefault()
-    {
-        var path = FilePath.NewFilePath(FullPath);
-        var result = IO.WriteDefaultFile(path);
-        return result.IsOk
-            ? Result.Ok()
-            : throw new InvalidOperationException(result.ErrorValue);
+        if (FSharp.Settings.IO.FileExists(path) is { IsOk: true })
+        {
+            try
+            {
+                var result = FSharp.Settings.IO.Read(path);
+                if (result is { IsError: true })
+                    return Result.Fail($"Settings validation error: {result.ErrorValue}");
+
+                return Result.Ok(result.ResultValue);
+            }
+            catch (Exception ex)
+            {
+                return Result.Fail($"Error reading settings: {ex.Message}");
+            }
+        }
+
+        try
+        {
+            var result = FSharp.Settings.IO.WriteDefaultFile(path);
+            if (result is { IsError: true })
+                return Result.Fail($"Unexpected error writing the default settings: {result.ErrorValue}");
+
+            printer.Print("""
+                A new empty settings file was created. Please review it and populate it with your desired settings.
+                In particular, "workingDirectory," "moveToDirectory," and "historyFile" must be populated.
+                """);
+            return Result.Ok();
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail($"Error writing default settings: {ex.Message}");
+        }
     }
 
     /// <summary>
@@ -51,7 +63,7 @@ public class SettingsService
     /// <param name="settings"></param>
     /// <param name="printer"></param>
     /// <param name="header">An optional line of text to appear above the settings.</param>
-    internal void PrintSummary(
+    internal static void PrintSummary(
         UserSettings settings,
         Printer printer,
         string? header = null)
