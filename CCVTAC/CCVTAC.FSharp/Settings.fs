@@ -3,7 +3,7 @@ namespace CCVTAC.FSharp.Settings
 open System.Text.Json.Serialization
 
 // TODO: Make proper modules and ctors?
-type DirectoryName = DirectoryName of string
+// type DirectoryName = DirectoryName of string
 type FilePath = FilePath of string
 
 type UserSettings = {
@@ -66,7 +66,8 @@ module IO =
 
         try
             let json = JsonSerializer.Serialize(settings, options)
-            Ok (File.WriteAllText(file, json))
+            File.WriteAllText(file, json)
+            Ok $"A new default settings file was created at \"{file}\".\nPlease populate it with your desired settings."
         with
             | :? FileNotFoundException -> Error $"\"{file}\" was not found."
             | :? JsonException -> Error $"Failure parsing user settings to JSON."

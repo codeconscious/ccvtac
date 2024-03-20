@@ -45,10 +45,7 @@ public class SettingsAdapter
             if (result is { IsError: true })
                 return Result.Fail($"Unexpected error writing the default settings: {result.ErrorValue}");
 
-            printer.Print("""
-                A new empty settings file was created. Please review it and populate it with your desired settings.
-                In particular, "workingDirectory," "moveToDirectory," and "historyFile" must be populated.
-                """);
+            printer.Print(result.ResultValue); // The new-file message.
             return Result.Ok();
         }
         catch (Exception ex)
