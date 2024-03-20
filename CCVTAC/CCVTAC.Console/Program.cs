@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using CCVTAC.Console.Settings;
 using Spectre.Console;
-using FSettings = CCVTAC.FSharp.Settings.UserSettings;
+using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 
 namespace CCVTAC.Console;
 
@@ -30,12 +30,12 @@ internal static class Program
                 : null;
         SettingsService settingsService = new(maybeSettingsPath);
 
-        FSettings userSettings;
+        UserSettings settings;
         try
         {
             if (settingsService.FileExists())
             {
-                userSettings = settingsService.Read();
+                settings = settingsService.Read();
             }
             else
             {
@@ -54,9 +54,9 @@ internal static class Program
             printer.Error($"Settings error: {ex.Message}");
             return;
         }
-        settingsService.PrintSummary(userSettings, printer, header: "Settings loaded OK.");
+        settingsService.PrintSummary(settings, printer, header: "Settings loaded OK.");
 
-        History history = new(userSettings.HistoryFile, userSettings.HistoryDisplayCount);
+        History history = new(settings.HistoryFile, settings.HistoryDisplayCount);
 
         // Show the history if requested.
         if (args.Length > 0 && _historyCommands.Contains(args[0].ToLowerInvariant()))
@@ -69,13 +69,13 @@ internal static class Program
         System.Console.CancelKeyPress += delegate
         {
             printer.Warning("\nQuitting at user's request. You might want to verify and delete the files in the working directory.");
-            printer.Warning($"Working directory: {userSettings.WorkingDirectory}");
+            printer.Warning($"Working directory: {settings.WorkingDirectory}");
         };
 
         // Top-level `try` block to catch and pretty-print unexpected exceptions.
         try
         {
-            Start(userSettings, history, printer);
+            Start(settings, history, printer);
         }
         catch (Exception topException)
         {
@@ -88,7 +88,7 @@ internal static class Program
     /// <summary>
      /// Performs initial setup, initiates each download request, and prints the final summary when the user requests to end the program.
     /// </summary>
-    private static void Start(FSettings userSettings, History history, Printer printer)
+    private static void Start(UserSettings settings, History history, Printer printer)
     {
         // Verify the external program for downloading is installed on the system.
         if (Downloading.Downloader.ExternalTool.ProgramExists() is { IsFailed: true })
@@ -101,10 +101,10 @@ internal static class Program
         }
 
         // The working directory should start empty.
-        var tempFiles = IoUtilties.Directories.GetDirectoryFiles(userSettings.WorkingDirectory);
+        var tempFiles = IoUtilties.Directories.GetDirectoryFiles(settings.WorkingDirectory);
         if (tempFiles.Any())
         {
-            printer.Error($"Aborting due to {tempFiles.Count} file(s) unexpectedly found in the working directory ({userSettings.WorkingDirectory}):");
+            printer.Error($"Aborting due to {tempFiles.Count} file(s) unexpectedly found in the working directory ({settings.WorkingDirectory}):");
             tempFiles.ForEach(file => printer.Warning($"• {file}"));
             return;
         }
@@ -113,7 +113,7 @@ internal static class Program
 
         while (true)
         {
-            var nextAction = ProcessBatch(userSettings, resultTracker, history, printer);
+            var nextAction = ProcessBatch(settings, resultTracker, history, printer);
             if (nextAction != NextAction.Continue)
             {
                 break;
@@ -126,12 +126,9 @@ internal static class Program
     /// <summary>
     /// Processes a single user request, from input to downloading and file post-processing.
     /// </summary>
-    /// <param name="userSettings"></param>
-    /// <param name="resultHandler"></param>
-    /// <param name="printer"></param>
-    /// <returns>A bool indicating whether to quit the program (true) or continue (false).</returns>
+    /// <returns>The appropriate next action to take.</returns>
     private static NextAction ProcessBatch(
-        FSettings userSettings,
+        UserSettings settings,
         ResultTracker resultHandler,
         History history,
         Printer printer)
@@ -170,10 +167,10 @@ internal static class Program
                 continue;
             }
 
-            var tempFiles = IoUtilties.Directories.GetDirectoryFiles(userSettings.WorkingDirectory);
+            var tempFiles = IoUtilties.Directories.GetDirectoryFiles(settings.WorkingDirectory);
             if (tempFiles.Any())
             {
-                printer.Error($"{tempFiles.Count} file(s) unexpectedly found in the working directory ({userSettings.WorkingDirectory}), so will abort:");
+                printer.Error($"{tempFiles.Count} file(s) unexpectedly found in the working directory ({settings.WorkingDirectory}), so will abort:");
                 tempFiles.ForEach(file => printer.Warning($"• {file}"));
                 return NextAction.QuitDueToErrors;
             }
@@ -181,19 +178,19 @@ internal static class Program
             if (haveProcessedAny) // No need to sleep for the very first URL.
             {
                 AnsiConsole.Status()
-                    .Start($"Sleeping for {userSettings.SleepSecondsBetweenBatches} seconds...", ctx =>
+                    .Start($"Sleeping for {settings.SleepSecondsBetweenBatches} seconds...", ctx =>
                     {
                         ctx.Spinner(Spinner.Known.Star);
                         ctx.SpinnerStyle(Style.Parse("blue"));
 
-                        ushort remainingSeconds = userSettings.SleepSecondsBetweenBatches;
+                        ushort remainingSeconds = settings.SleepSecondsBetweenBatches;
                         while (remainingSeconds > 0)
                         {
                             ctx.Status($"Sleeping for {remainingSeconds} seconds...");
                             remainingSeconds--;
                             Thread.Sleep(1000);
                         }
-                        printer.Print($"Slept for {userSettings.SleepSecondsBetweenBatches} second(s).",
+                        printer.Print($"Slept for {settings.SleepSecondsBetweenBatches} second(s).",
                                       appendLines: 1);
                     });
             }
@@ -209,14 +206,14 @@ internal static class Program
 
             history.Append(url, inputTime, printer);
 
-            var downloadResult = Downloading.Downloader.Run(url, userSettings, printer);
+            var downloadResult = Downloading.Downloader.Run(url, settings, printer);
             resultHandler.RegisterResult(downloadResult);
             if (downloadResult.IsFailed)
             {
                 return NextAction.Continue;
             }
 
-            var postProcessor = new PostProcessing.Setup(userSettings, printer);
+            var postProcessor = new PostProcessing.Setup(settings, printer);
             postProcessor.Run(); // TODO: Think about if/how to handle leftover temp files due to errors.
 
             string batchClause = batchUrls.Count > 1

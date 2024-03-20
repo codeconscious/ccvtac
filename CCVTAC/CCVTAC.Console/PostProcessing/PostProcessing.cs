@@ -1,15 +1,14 @@
 using System.IO;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using CCVTAC.Console.Settings;
 using CCVTAC.Console.PostProcessing.Tagging;
-using FSettings = CCVTAC.FSharp.Settings.UserSettings;
+using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 
 namespace CCVTAC.Console.PostProcessing;
 
-public sealed class Setup(FSettings userSettings, Printer printer)
+public sealed class Setup(UserSettings settings, Printer printer)
 {
-    public FSettings UserSettings { get; } = userSettings;
+    public UserSettings Settings { get; } = settings;
     public Printer Printer { get; } = printer;
 
     internal void Run()
@@ -18,7 +17,7 @@ public sealed class Setup(FSettings userSettings, Printer printer)
 
         Printer.Print("Starting post-processing...");
 
-        var taggingSetsResult = GenerateTaggingSets(UserSettings.WorkingDirectory);
+        var taggingSetsResult = GenerateTaggingSets(Settings.WorkingDirectory);
         if (taggingSetsResult.IsFailed)
         {
             Printer.Error("No tagging sets were generated, so tagging cannot be done.");
@@ -26,7 +25,7 @@ public sealed class Setup(FSettings userSettings, Printer printer)
         }
         var taggingSets = taggingSetsResult.Value;
 
-        var collectionJsonResult = GetCollectionJson(UserSettings.WorkingDirectory);
+        var collectionJsonResult = GetCollectionJson(Settings.WorkingDirectory);
         CollectionMetadata? collectionJson;
         if (collectionJsonResult.IsFailed)
         {
@@ -38,17 +37,17 @@ public sealed class Setup(FSettings userSettings, Printer printer)
             collectionJson = collectionJsonResult.Value;
         }
 
-        ImageProcessor.Run(UserSettings.WorkingDirectory, Printer);
+        ImageProcessor.Run(Settings.WorkingDirectory, Printer);
 
-        var tagResult = Tagger.Run(UserSettings, taggingSets, collectionJson, Printer);
+        var tagResult = Tagger.Run(Settings, taggingSets, collectionJson, Printer);
         if (tagResult.IsSuccess)
         {
             Printer.Print(tagResult.Value);
 
-            // AudioNormalizer.Run(UserSettings.WorkingDirectory, Printer); // TODO: `mp3gain`は無理なので、別のnormalize方法を要検討。
-            Renamer.Run(UserSettings.WorkingDirectory, UserSettings.VerboseOutput, Printer);
-            Mover.Run(taggingSets, collectionJson, UserSettings, true, Printer);
-            Deleter.Run(UserSettings.WorkingDirectory, UserSettings.VerboseOutput, Printer);
+            // AudioNormalizer.Run(UserSettings.WorkingDirectory, Printer); // TODO: normalize方法を要検討。
+            Renamer.Run(Settings.WorkingDirectory, Settings.VerboseOutput, Printer);
+            Mover.Run(taggingSets, collectionJson, Settings, true, Printer);
+            Deleter.Run(Settings.WorkingDirectory, Settings.VerboseOutput, Printer);
         }
         else
         {

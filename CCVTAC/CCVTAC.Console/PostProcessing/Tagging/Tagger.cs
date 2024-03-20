@@ -1,13 +1,13 @@
 ﻿using System.IO;
 using System.Text.Json;
 using TaggedFile = TagLib.File;
-using FSettings = CCVTAC.FSharp.Settings.UserSettings;
+using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 
 namespace CCVTAC.Console.PostProcessing.Tagging;
 
 internal static class Tagger
 {
-    internal static Result<string> Run(FSettings userSettings,
+    internal static Result<string> Run(UserSettings settings,
                                        IEnumerable<TaggingSet> taggingSets,
                                        CollectionMetadata? collectionJson,
                                        Printer printer)
@@ -18,14 +18,14 @@ internal static class Tagger
 
         foreach (TaggingSet taggingSet in taggingSets)
         {
-            ProcessSingleTaggingSet(userSettings, taggingSet, collectionJson, printer);
+            ProcessSingleTaggingSet(settings, taggingSet, collectionJson, printer);
         }
 
         return Result.Ok($"Tagging done in {watch.ElapsedFriendly}.");
     }
 
     private static void ProcessSingleTaggingSet(
-        FSettings userSettings,
+        UserSettings settings,
         TaggingSet taggingSet,
         CollectionMetadata? collectionJson,
         Printer printer)
@@ -46,7 +46,7 @@ internal static class Tagger
         foreach (string audioFilePath in finalTaggingSet.AudioFilePaths)
         {
             TagSingleFile(
-                userSettings,
+                settings,
                 parsedJsonResult.Value,
                 audioFilePath,
                 taggingSet.ImageFilePath,
@@ -56,7 +56,7 @@ internal static class Tagger
         }
     }
 
-    static void TagSingleFile(FSettings userSettings,
+    static void TagSingleFile(UserSettings settings,
                               VideoMetadata videoData,
                               string audioFilePath,
                               string imageFilePath,
@@ -123,7 +123,7 @@ internal static class Tagger
             }
             else
             {
-                ushort? maybeDefaultYear = GetAppropriateReleaseDateIfAny(userSettings, videoData);
+                ushort? maybeDefaultYear = GetAppropriateReleaseDateIfAny(settings, videoData);
 
                 if (tagDetector.DetectReleaseYear(videoData, maybeDefaultYear) is ushort year)
                 {
@@ -148,7 +148,7 @@ internal static class Tagger
         /// If the supplied video uploader is specified in the settings, returns the video's upload year.
         /// Otherwise, returns null.
         /// </summary>
-        static ushort? GetAppropriateReleaseDateIfAny(FSettings settings, VideoMetadata videoData)
+        static ushort? GetAppropriateReleaseDateIfAny(UserSettings settings, VideoMetadata videoData)
         {
             if (settings.IgnoreUploadYearUploaders?.Contains(videoData.Uploader,
                                                              StringComparer.OrdinalIgnoreCase) == true)

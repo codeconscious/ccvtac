@@ -1,7 +1,7 @@
 using System.IO;
 using Spectre.Console;
 using CCVTAC.FSharp.Settings;
-using FSettings = CCVTAC.FSharp.Settings.UserSettings; // "F" for F# -- a temporary contrivance for clarity
+using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 
 namespace CCVTAC.Console.Settings;
 
@@ -23,7 +23,7 @@ public class SettingsService
     /// Read the settings from the specified JSON file.
     /// </summary>
     /// <exception cref="InvalidOperationException">Indicates IO or validation errors.</exception>
-    internal FSettings Read()
+    internal UserSettings Read()
     {
         var path = FilePath.NewFilePath(FullPath);
         var result = IO.Read(path);
@@ -52,7 +52,7 @@ public class SettingsService
     /// <param name="printer"></param>
     /// <param name="header">An optional line of text to appear above the settings.</param>
     internal void PrintSummary(
-        FSettings settings,
+        UserSettings settings,
         Printer printer,
         string? header = null)
     {

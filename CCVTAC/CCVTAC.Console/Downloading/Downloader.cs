@@ -1,7 +1,6 @@
 using CCVTAC.Console.ExternalTools;
-using CCVTAC.Console.Settings;
 using MediaType = CCVTAC.FSharp.Downloading.MediaType;
-using FSettings = CCVTAC.FSharp.Settings.UserSettings;
+using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 
 namespace CCVTAC.Console.Downloading;
 
@@ -26,7 +25,7 @@ internal static class Downloader
         { 101, "Download cancelled by --max-downloads, etc." },
     };
 
-    internal static Result<string> Run(string url, FSettings settings, Printer printer)
+    internal static Result<string> Run(string url, UserSettings settings, Printer printer)
     {
         Watch watch = new();
 
@@ -84,7 +83,7 @@ internal static class Downloader
     /// <param name="additionalArgs"></param>
     /// <returns>A string of arguments that can be passed directly to the download tool.</returns>
     private static string GenerateDownloadArgs(
-        FSettings settings,
+        UserSettings settings,
         MediaType? mediaType,
         params string[]? additionalArgs)
     {
