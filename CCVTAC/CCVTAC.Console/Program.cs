@@ -116,10 +116,7 @@ internal static class Program
     /// <summary>
     /// Processes a single user request, from input to downloading and file post-processing.
     /// </summary>
-    /// <param name="settings"></param>
-    /// <param name="resultHandler"></param>
-    /// <param name="printer"></param>
-    /// <returns>A bool indicating whether to quit the program (true) or continue (false).</returns>
+    /// <returns>The appropriate next action the application should take.</returns>
     private static NextAction ProcessBatch(
         UserSettings settings,
         ResultTracker resultHandler,
