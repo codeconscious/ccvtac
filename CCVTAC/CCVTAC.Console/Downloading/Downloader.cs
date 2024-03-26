@@ -1,6 +1,6 @@
 using CCVTAC.Console.ExternalTools;
-using CCVTAC.Console.Settings;
 using MediaType = CCVTAC.FSharp.Downloading.MediaType;
+using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 
 namespace CCVTAC.Console.Downloading;
 
@@ -94,7 +94,7 @@ internal static class Downloader
         {
             null => [ $"--flat-playlist {writeJson} {trimFileNames}" ], // Metadata-only download
             _ => [
-                     $"--extract-audio -f {settings.AudioFormat}",
+                     $"--extract-audio -f m4a",
                      "--write-thumbnail --convert-thumbnails jpg", // For album art
                      writeJson, // Contains metadata
                      trimFileNames,

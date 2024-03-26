@@ -4,13 +4,12 @@ module public Downloading =
     open System.Text.RegularExpressions
 
     type MediaType =
-        | Video of string
-        | PlaylistVideo of string * string
-        | StandardPlaylist of string
-        | ReleasePlaylist of string
-        | Channel of string
+        | Video of id : string
+        | PlaylistVideo of videoId : string * playlistId : string
+        | StandardPlaylist of id : string
+        | ReleasePlaylist of id : string
+        | Channel of id : string
 
-    // This active recognizer will not work if the parameter order is switched.
     let private (|Regex|_|) pattern input =
         let m = Regex.Match(input, pattern)
         match m with
@@ -27,7 +26,7 @@ module public Downloading =
         | Regex @"(?<=list=)(P[\w\-]+)" [ id ] -> Ok (StandardPlaylist id)
         | Regex @"(?<=list=)(O[\w\-]+)" [ id ] -> Ok (ReleasePlaylist id)
         | Regex @"((?:www\.)?youtube\.com\/(?:channel\/|c\/|user\/|@)(?:[\w\-]+))" [ id ] -> Ok (Channel id)
-        | _ -> Error("Unable to determine the media type of the URL.")
+        | _ -> Error "Unable to determine the media type of the URL."
 
     let downloadUrls mediaType =
         let fullUrl urlBase id = urlBase + id

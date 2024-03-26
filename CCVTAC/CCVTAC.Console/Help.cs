@@ -32,16 +32,16 @@ public static class Help
         However, you can manually specify an existing file path using the `-s`
         option, such as `dotnet run -- -s <PATH_TO_YOUR_FILE>`.
 
-        If your `settings.json` file does not exist, one will be created in the
+        If your `settings.json` file does not exist, a default file will be created in the
         application directory with default settings. At minimum, you will need to
         enter (1) an existing directory for temporary working files, (2) an existing
         directory to which the final audio files should be moved, and (3) a path to
         your history file. The other settings have sensible defaults.
 
-        I added the `sleepBetweenDownloadsSeconds` and `sleepBetweenBatchesSeconds`
+        I added the `sleepSecondsBetweenDownloads` and `sleepSecondsBetweenBatches`
         settings to help reduce concentrated loads on YouTube servers. Please avoid
         lowering these values too much and slamming their servers with enormous,
-        long-running downloads (even if their servers can take it).
+        long-running downloads (even if you feel their servers can take it).
 
         Using the application:
 

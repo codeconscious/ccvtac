@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Text.Json;
 using CCVTAC.Console.PostProcessing.Tagging;
-using CCVTAC.Console.Settings;
+using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 
 namespace CCVTAC.Console.PostProcessing;
 
@@ -20,7 +20,7 @@ internal static class Mover
         bool isVerbose = userSettings.VerboseOutput;
         DirectoryInfo workingDirInfo = new(userSettings.WorkingDirectory);
 
-        string subFolderName = GetDefaultFolderName(maybeCollectionData, taggingSets.First(), workingDirInfo);
+        string subFolderName = GetDefaultFolderName(maybeCollectionData, taggingSets.First());
         string collectionFolder = maybeCollectionData?.Title ?? string.Empty;
         string moveToDir = Path.Combine(userSettings.MoveToDirectory, subFolderName, collectionFolder);
 
@@ -68,7 +68,7 @@ internal static class Mover
         }
     }
 
-    private static string GetDefaultFolderName(CollectionMetadata? maybeCollectionData, TaggingSet taggingSet, DirectoryInfo workingDirInfo)
+    private static string GetDefaultFolderName(CollectionMetadata? maybeCollectionData, TaggingSet taggingSet)
     {
         string workingName;
 
