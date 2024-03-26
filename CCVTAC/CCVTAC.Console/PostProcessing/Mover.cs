@@ -9,7 +9,7 @@ internal static class Mover
 {
     internal static void Run(IEnumerable<TaggingSet> taggingSets,
                              CollectionMetadata? maybeCollectionData,
-                             UserSettings userSettings,
+                             UserSettings settings,
                              bool shouldOverwrite,
                              Printer printer)
     {
@@ -17,12 +17,12 @@ internal static class Mover
 
         uint successCount = 0;
         uint failureCount = 0;
-        bool verbose = userSettings.VerboseOutput;
-        DirectoryInfo workingDirInfo = new(userSettings.WorkingDirectory);
+        bool verbose = settings.VerboseOutput;
+        DirectoryInfo workingDirInfo = new(settings.WorkingDirectory);
 
         string subFolderName = GetDefaultFolderName(maybeCollectionData, taggingSets.First());
         string collectionFolder = maybeCollectionData?.Title ?? string.Empty;
-        string moveToDir = Path.Combine(userSettings.MoveToDirectory, subFolderName, collectionFolder);
+        string moveToDir = Path.Combine(settings.MoveToDirectory, subFolderName, collectionFolder);
 
         try
         {
