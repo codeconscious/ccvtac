@@ -7,7 +7,7 @@ namespace CCVTAC.Console.PostProcessing.Tagging;
 
 internal static class Tagger
 {
-    internal static Result<string> Run(UserSettings settings,
+    internal static Result<string> Run(UserSettings userSettings,
                                        IEnumerable<TaggingSet> taggingSets,
                                        CollectionMetadata? collectionJson,
                                        Printer printer)
@@ -18,14 +18,14 @@ internal static class Tagger
 
         foreach (TaggingSet taggingSet in taggingSets)
         {
-            ProcessSingleTaggingSet(settings, taggingSet, collectionJson, printer);
+            ProcessSingleTaggingSet(userSettings, taggingSet, collectionJson, printer);
         }
 
         return Result.Ok($"Tagging done in {watch.ElapsedFriendly}.");
     }
 
     private static void ProcessSingleTaggingSet(
-        UserSettings settings,
+        UserSettings userSettings,
         TaggingSet taggingSet,
         CollectionMetadata? collectionJson,
         Printer printer)
@@ -46,7 +46,7 @@ internal static class Tagger
         foreach (string audioFilePath in finalTaggingSet.AudioFilePaths)
         {
             TagSingleFile(
-                settings,
+                userSettings,
                 parsedJsonResult.Value,
                 audioFilePath,
                 taggingSet.ImageFilePath,
@@ -56,7 +56,7 @@ internal static class Tagger
         }
     }
 
-    static void TagSingleFile(UserSettings settings,
+    static void TagSingleFile(UserSettings userSettings,
                               VideoMetadata videoData,
                               string audioFilePath,
                               string imageFilePath,
@@ -123,7 +123,7 @@ internal static class Tagger
             }
             else
             {
-                ushort? maybeDefaultYear = GetAppropriateReleaseDateIfAny(settings, videoData);
+                ushort? maybeDefaultYear = GetAppropriateReleaseDateIfAny(userSettings, videoData);
 
                 if (tagDetector.DetectReleaseYear(videoData, maybeDefaultYear) is ushort year)
                 {

@@ -17,7 +17,7 @@ internal static class Mover
 
         uint successCount = 0;
         uint failureCount = 0;
-        bool verbose = userSettings.VerboseOutput;
+        bool isVerbose = userSettings.VerboseOutput;
         DirectoryInfo workingDirInfo = new(userSettings.WorkingDirectory);
 
         string subFolderName = GetDefaultFolderName(maybeCollectionData, taggingSets.First());
@@ -51,7 +51,7 @@ internal static class Mover
                     shouldOverwrite);
                 successCount++;
 
-                if (verbose)
+                if (isVerbose)
                     printer.Print($"• Moved \"{file.Name}\"");
             }
             catch (Exception ex)

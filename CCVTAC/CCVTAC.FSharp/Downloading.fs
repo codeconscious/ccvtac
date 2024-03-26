@@ -10,11 +10,6 @@ module public Downloading =
         | ReleasePlaylist of id : string
         | Channel of id : string
 
-    // type Download =
-    //     | Media of MediaType
-    //     | Metadata
-
-    // This active recognizer will not work if the parameter order is switched.
     let private (|Regex|_|) pattern input =
         let m = Regex.Match(input, pattern)
         match m with
@@ -44,28 +39,3 @@ module public Downloading =
         | PlaylistVideo (vId, pId) -> [videoUrl vId; playlistUrl pId]
         | StandardPlaylist id | ReleasePlaylist id -> [playlistUrl id]
         | Channel id -> [channelUrl id]
-
-    // open CCVTAC.FSharp.Settings
-
-    // module public Args =
-    //     let generateArgs (settings:UserSettings option) download customArgs =
-    //         let baseArgs download =
-    //             let jsonArg settings =
-    //                 match settings with
-    //                 | None -> String.empty
-    //                 | Some -> "--write-info-json"
-    //             let trimArg settings =
-    //                 match settings with
-    //                 | None -> String.empty
-    //                 | Some -> "--trim-filenames 250"
-
-    //             match download with
-    //             | Media -> String.concat " " ($"--extract-audio -f {settings.AudioFormat}" +
-    //                                           "--write-thumbnail --convert-thumbnails jpg" + // For album art
-    //                                           jsonArg + // Contains metadata
-    //                                           trimArg +
-    //                                           "--retries 3")
-    //             | Metadata -> $"--flat-playlist {jsonArg} {trimArg}"
-
-    //         let verbosityArgs args =
-    //             settings.

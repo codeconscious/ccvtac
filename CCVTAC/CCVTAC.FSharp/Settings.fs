@@ -3,8 +3,6 @@ namespace CCVTAC.FSharp
 module Settings =
     open System.Text.Json.Serialization
 
-    // TODO: Make proper modules and ctors?
-    // type DirectoryName = DirectoryName of string
     type FilePath = FilePath of string
 
     type UserSettings = {

@@ -6,9 +6,9 @@ using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 
 namespace CCVTAC.Console.PostProcessing;
 
-public sealed class Setup(UserSettings settings, Printer printer)
+public sealed class Setup(UserSettings userSettings, Printer printer)
 {
-    public UserSettings Settings { get; } = settings;
+    public UserSettings UserSettings { get; } = userSettings;
     public Printer Printer { get; } = printer;
 
     internal void Run()
@@ -17,7 +17,7 @@ public sealed class Setup(UserSettings settings, Printer printer)
 
         Printer.Print("Starting post-processing...");
 
-        var taggingSetsResult = GenerateTaggingSets(Settings.WorkingDirectory);
+        var taggingSetsResult = GenerateTaggingSets(UserSettings.WorkingDirectory);
         if (taggingSetsResult.IsFailed)
         {
             Printer.Error("No tagging sets were generated, so tagging cannot be done.");
@@ -25,7 +25,7 @@ public sealed class Setup(UserSettings settings, Printer printer)
         }
         var taggingSets = taggingSetsResult.Value;
 
-        var collectionJsonResult = GetCollectionJson(Settings.WorkingDirectory);
+        var collectionJsonResult = GetCollectionJson(UserSettings.WorkingDirectory);
         CollectionMetadata? collectionJson;
         if (collectionJsonResult.IsFailed)
         {
@@ -37,17 +37,17 @@ public sealed class Setup(UserSettings settings, Printer printer)
             collectionJson = collectionJsonResult.Value;
         }
 
-        ImageProcessor.Run(Settings.WorkingDirectory, Printer);
+        ImageProcessor.Run(UserSettings.WorkingDirectory, Printer);
 
-        var tagResult = Tagger.Run(Settings, taggingSets, collectionJson, Printer);
+        var tagResult = Tagger.Run(UserSettings, taggingSets, collectionJson, Printer);
         if (tagResult.IsSuccess)
         {
             Printer.Print(tagResult.Value);
 
             // AudioNormalizer.Run(UserSettings.WorkingDirectory, Printer); // TODO: normalize方法を要検討。
-            Renamer.Run(Settings.WorkingDirectory, Settings.VerboseOutput, Printer);
-            Mover.Run(taggingSets, collectionJson, Settings, true, Printer);
-            Deleter.Run(Settings.WorkingDirectory, Settings.VerboseOutput, Printer);
+            Renamer.Run(UserSettings.WorkingDirectory, UserSettings.VerboseOutput, Printer);
+            Mover.Run(taggingSets, collectionJson, UserSettings, true, Printer);
+            Deleter.Run(UserSettings.WorkingDirectory, UserSettings.VerboseOutput, Printer);
         }
         else
         {
