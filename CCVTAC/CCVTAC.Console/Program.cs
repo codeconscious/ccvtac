@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using CCVTAC.Console.Settings;
 using Spectre.Console;
+using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 
 namespace CCVTAC.Console;
 
@@ -27,18 +28,25 @@ internal static class Program
                                     _settingsFileCommands.Contains(args[0].ToLowerInvariant())
                 ? args[1] // Expected to be a settings file path.
                 : null;
-        SettingsService settingsService = new(maybeSettingsPath);
 
-        var settingsResult = settingsService.PrepareUserSettings();
-        if (settingsResult.IsFailed)
+        UserSettings userSettings;
+        var result = SettingsAdapter.ProcessSettings(maybeSettingsPath, printer);
+        if (result.IsFailed)
         {
-            printer.Errors("Settings error(s):", settingsResult);
+            printer.Errors(result.Errors.Select(e => e.Message));
             return;
         }
-        UserSettings userSettings = settingsResult.Value;
-        settingsService.PrintSummary(userSettings, printer, header: "Settings loaded OK.");
+        else if (result.Value is null)
+        {
+            return;
+        }
+        else
+        {
+            userSettings = result.Value;
+        }
+        SettingsAdapter.PrintSummary(userSettings, printer, header: "Settings loaded OK.");
 
-        History history = new(userSettings.HistoryFilePath, userSettings.HistoryDisplayCount);
+        History history = new(userSettings.HistoryFile, userSettings.HistoryDisplayCount);
 
         // Show the history if requested.
         if (args.Length > 0 && _historyCommands.Contains(args[0].ToLowerInvariant()))
@@ -63,7 +71,7 @@ internal static class Program
         {
             printer.Error($"Fatal error: {topException.Message}");
             AnsiConsole.WriteException(topException);
-            printer.Print("Please help improve this tool by reporting this error and the URL you entered at https://github.com/codeconscious/ccvtac/issues.");
+            printer.Print("Please help improve this tool by reporting this error and any URLs you entered at https://github.com/codeconscious/ccvtac/issues.");
         }
     }
 

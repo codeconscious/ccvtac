@@ -1,4 +1,4 @@
-module Tests
+module DownloadEntityTests
 
 open Xunit
 open CCVTAC.FSharp.Downloading

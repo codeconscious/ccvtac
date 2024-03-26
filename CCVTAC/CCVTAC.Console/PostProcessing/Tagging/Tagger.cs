@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Text.Json;
-using CCVTAC.Console.Settings;
 using TaggedFile = TagLib.File;
+using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 
 namespace CCVTAC.Console.PostProcessing.Tagging;
 
@@ -123,7 +123,7 @@ internal static class Tagger
             }
             else
             {
-                ushort? maybeDefaultYear = userSettings.GetAppropriateReleaseDateIfAny(videoData);
+                ushort? maybeDefaultYear = GetAppropriateReleaseDateIfAny(userSettings, videoData);
 
                 if (tagDetector.DetectReleaseYear(videoData, maybeDefaultYear) is ushort year)
                 {
@@ -142,6 +142,23 @@ internal static class Tagger
         catch (Exception ex)
         {
             printer.Error($"Error tagging file: {ex.Message}");
+        }
+
+        /// <summary>
+        /// If the supplied video uploader is specified in the settings, returns the video's upload year.
+        /// Otherwise, returns null.
+        /// </summary>
+        static ushort? GetAppropriateReleaseDateIfAny(UserSettings settings, VideoMetadata videoData)
+        {
+            if (settings.IgnoreUploadYearUploaders?.Contains(videoData.Uploader,
+                                                             StringComparer.OrdinalIgnoreCase) == true)
+            {
+                return null;
+            }
+
+            return ushort.TryParse(videoData.UploadDate[0..4], out ushort parsedYear)
+                ? parsedYear
+                : null;
         }
     }
 

@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Text.Json;
 using CCVTAC.Console.PostProcessing.Tagging;
-using CCVTAC.Console.Settings;
+using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 
 namespace CCVTAC.Console.PostProcessing;
 
