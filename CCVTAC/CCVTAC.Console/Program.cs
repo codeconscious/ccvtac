@@ -14,6 +14,8 @@ internal static class Program
     private const string _urlPrompt =
         "Enter one or more YouTube media URLs (separated by spaces), 'history', or 'quit':\n▶︎";
 
+    private const string _defaultSettingsFileName = "settings.json";
+
     static void Main(string[] args)
     {
         Printer printer = new();
@@ -27,7 +29,7 @@ internal static class Program
         string? maybeSettingsPath = args.Length >= 2 &&
                                     _settingsFileCommands.Contains(args[0].ToLowerInvariant())
                 ? args[1] // Expected to be a settings file path.
-                : null;
+                : _defaultSettingsFileName;
 
         UserSettings settings;
         var result = SettingsAdapter.ProcessSettings(maybeSettingsPath, printer);
