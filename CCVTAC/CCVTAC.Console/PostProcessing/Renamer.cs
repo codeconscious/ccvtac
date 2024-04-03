@@ -20,6 +20,10 @@ internal static class Renamer
             new Regex(@"\s{2,}"),
             " ",
             "Remove extra spaces"),
+        new(
+            new Regex(@" ⧸ "),
+            " - "),
+
         // Various patterns
         new(
             new Regex(@"(?<= - )\d{3} (\d{1,3})\.?\s?"),
@@ -77,6 +81,7 @@ internal static class Renamer
             new Regex(@"(.+) ?⧸ ?(.+)(?= ：(?: \w+)?\.\w{3,4})"),
             "%<2>s - %<1>s"
         ),
+
         // Cleanup:
         new(
             new Regex(@" - - "),
