@@ -30,7 +30,7 @@ internal static class Renamer
             "%<1>s - ",
             "Remove and reformat duplicate track numbers"),
         new(
-            new Regex(@"\s*[(（【［\[\-]?(?:[Oo]fficial +|OFFICIAL +)?(?:HD )?(?:[Mm]usic [Vv]ideo|MUSIC VIDEO|[Ll]yric [Vv]ideo|LYRIC VIDEO|[Vv]ideo|VIDEO|[Aa]udio|[Vv]isualizer|AUDIO|[Ff]ull (?:[Aa]lbum|LP|EP)|M(?:[_/])?V)[)】］）\]\-]?"),
+            new Regex(@"\s*[(（【［\[\-]?(?:[Oo]fficial +|OFFICIAL +)?(?:HD )?(?:[Mm]usic [Vv]ideo|MUSIC VIDEO|[Ll]yric [Vv]ideo|LYRIC VIDEO|[Vv]ideo|VIDEO|[Aa]udio|[Vv]isualizer|[Vv]isualiser|AUDIO|[Ff]ull (?:[Aa]lbum|LP|EP)|M(?:[_/])?V)[)】］）\]\-]?"),
             string.Empty,
             "Remove unneeded labels"),
         new(
