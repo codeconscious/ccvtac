@@ -47,14 +47,14 @@ module Settings =
             let (FilePath file) = filePath
             match file |> File.Exists with
             | true -> Ok()
-            | false -> Error($"The file \"path\" does not exist.")
+            | false -> Error $"The file \"path\" does not exist."
 
         [<CompiledName("Read")>]
         let read filePath =
             let (FilePath path) = filePath
 
-            let verify (settings:UserSettings) =
-                let isEmpty str = String.IsNullOrWhiteSpace str
+            let verify settings =
+                let isEmpty str = str |> String.IsNullOrWhiteSpace
                 let dirMissing str = not <| (Directory.Exists str)
 
                 match settings with
@@ -76,14 +76,14 @@ module Settings =
 
         [<CompiledName("WriteFile")>]
         let private writeFile settings filePath =
-            let unicodeEncoder = JavaScriptEncoder.Create(UnicodeRanges.All)
+            let unicodeEncoder = UnicodeRanges.All |> JavaScriptEncoder.Create
             let writeIndented = true
             let options = JsonSerializerOptions(WriteIndented = writeIndented, Encoder = unicodeEncoder)
             let (FilePath file) = filePath
 
             try
                 let json = JsonSerializer.Serialize(settings, options)
-                File.WriteAllText(file, json)
+                (file, json) |> File.WriteAllText
                 Ok $"A new default settings file was created at \"{file}\".\nPlease populate it with your desired settings."
             with
                 | :? FileNotFoundException -> Error $"\"{file}\" was not found."
