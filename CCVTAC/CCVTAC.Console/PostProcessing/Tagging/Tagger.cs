@@ -82,10 +82,14 @@ internal static class Tagger
                 printer.Print($"• Found title \"{taggedFile.Tag.Title}\"");
             }
 
-            if (videoData.Artist is string metadataArtist)
+            if (videoData.Artist is string metadataArtists)
             {
-                printer.Print($"• Using metadata artist \"{metadataArtist}\"");
-                taggedFile.Tag.Performers = [metadataArtist];
+                var firstArtist = metadataArtists.Split(", ").First();
+                var diffSummary = firstArtist == metadataArtists
+                    ? string.Empty
+                    : $" (extracted from \"{metadataArtists}\")";
+                printer.Print($"• Using metadata artist \"{firstArtist}\"{diffSummary}");
+                taggedFile.Tag.Performers = [firstArtist];
             }
             else if (tagDetector.DetectArtist(videoData) is string artist)
             {
