@@ -32,7 +32,6 @@ Feel free to use it yourself, but please do so responsibly. No warranties or gua
 ### Prerequisites
 
 - [.NET 8 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
-- A valid settings file (see below)
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp)
 - Optional: [mogrify](https://imagemagick.org/script/mogrify.php) (for auto-trimming album art)
 
@@ -40,7 +39,7 @@ Feel free to use it yourself, but please do so responsibly. No warranties or gua
 
 A valid settings file is mandatory to use this application.
 
-The application will look for a file named `settings.json` in its directory. However, you can manually specify an existing file path using the `-s` option, such as `dotnet run -- -s <PATH_TO_YOUR_FILE>`.
+By default, the application will look for a file named `settings.json` in its directory. However, you can manually specify an existing file path using the `-s` option, such as `dotnet run -- -s <PATH_TO_YOUR_FILE>`.
 
 If your `settings.json` file does not exist, one will be created in the application directory with default settings. At minimum, you will need to enter (1) an existing directory for temporary working files, (2) an existing directory to which the final audio files should be moved, and (3) a path to your history file. The other settings have sensible defaults.
 
