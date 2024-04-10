@@ -64,6 +64,22 @@ Sample settings file:
 
 I added the `sleepSecondsBetweenDownloads` and `sleepSecondsBetweenBatches` settings to help reduce concentrated loads on YouTube servers. Please use reasonable values to avoid slamming them with enormous, long-running downloads.
 
+Here's a mostly-empty version you can copy and paste:
+
+```
+{
+  "workingDirectory": "",
+  "moveToDirectory": ""
+  "historyFile": ""
+  "sleepSecondsBetweenDownloads": 10
+  "sleepSecondsBetweenBatches": 20
+  "splitChapters": true,
+  "historyDisplayCount": 20,
+  "verboseOutput": true,
+  "ignoreUploadYearUploaders": []
+}
+```
+
 ### Using the application
 
 Once your settings are ready, run the application with `dotnet run`. Optionally, pass `-h` or `--help` for instructions (e.g., `dotnet run -- --help`).
