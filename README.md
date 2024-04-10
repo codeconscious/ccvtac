@@ -45,24 +45,24 @@ If your `settings.json` file does not exist, one will be created in the applicat
 
 Sample settings file:
 
-```json
+```
 {
-  "workingDirectory": "/Users/me/temp", // A temporary home for working files
-  "moveToDirectory": "/Users/me/Downloads", // Where audio files should be saved
+  "workingDirectory": "/Users/me/temp",             // A temporary home for working files
+  "moveToDirectory": "/Users/me/Downloads",         // Where final audio files should be saved
   "historyFile": "/Users/me/Downloads/history.log", // Log for your entered URLs
-  "sleepSecondsBetweenDownloads": 10, // Delay between video downloads (for playlists and channels)
-  "sleepSecondsBetweenBatches": 20, // Delay between batches (i.e., each URL entered)
-  "splitChapters": true, // Split videos with chapters into separate files?
-  "historyDisplayCount": 20, // Count of entries to show for `history` command
-  "verboseOutput": true, // Use `false` for quiet mode
-  "ignoreUploadYearUploaders": [ // By default, the upload year of the video is
-    "Channel Name",              // saved to files' Year tag. However, this will
-    "Another channel name"       // not occur for videos on channels listed here.
+  "sleepSecondsBetweenDownloads": 10,               // Delay between video downloads in playlists and channels
+  "sleepSecondsBetweenBatches": 20,                 // Delay between batches (i.e., each URL entered)
+  "splitChapters": true,                            // Split videos with chapters into separate files?
+  "historyDisplayCount": 20,                        // Count of entries to show for `history` command
+  "verboseOutput": true,                            // Use `false` for quiet mode
+  "ignoreUploadYearUploaders": [                    // By default, the upload year of the video is
+    "Channel Name",                                 //   saved to files' Year tag. However, this will
+    "Another channel name"                          //   not occur for videos on channels listed here.
   ]
 }
 ```
 
-I added the `sleepSecondsBetweenDownloads` and `sleepSecondsBetweenBatches` settings to help reduce concentrated loads on YouTube servers. Please avoid lowering these values too much and slamming their servers with enormous, long-running downloads (even if their servers can take it).
+I added the `sleepSecondsBetweenDownloads` and `sleepSecondsBetweenBatches` settings to help reduce concentrated loads on YouTube servers. Please use reasonable values to avoid slamming them with enormous, long-running downloads.
 
 ### Using the application
 
