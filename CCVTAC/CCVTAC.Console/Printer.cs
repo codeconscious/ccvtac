@@ -17,9 +17,17 @@ public sealed class Printer
         PrintEmptyLines(prependLines);
 
         if (processMarkup)
+        {
             AnsiConsole.Markup(message);
+        }
         else
-            AnsiConsole.Write(message.EscapeMarkup());
+        {
+            // `AnsiConsole.Write()` calls an internal function that uses format strings,
+            // so we must duplicate any curly brackets to safely escape the message text.
+            // See https://github.com/spectreconsole/spectre.console/issues/1495.
+            var safeMessage = message.Replace("{", "{{").Replace("}", "}}");
+            AnsiConsole.Write(safeMessage.EscapeMarkup());
+        }
 
         if (appendLineBreak)
             AnsiConsole.WriteLine();
