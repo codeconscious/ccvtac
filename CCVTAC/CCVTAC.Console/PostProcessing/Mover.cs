@@ -20,7 +20,7 @@ internal static class Mover
         bool verbose = settings.VerboseOutput;
         DirectoryInfo workingDirInfo = new(settings.WorkingDirectory);
 
-        string subFolderName = GetDefaultFolderName(maybeCollectionData, taggingSets.First());
+        string subFolderName = GetDefaultDirectoryName(maybeCollectionData, taggingSets.First());
         string collectionFolder = maybeCollectionData?.Title ?? string.Empty;
         string moveToDir = Path.Combine(settings.MoveToDirectory, subFolderName, collectionFolder);
 
@@ -68,7 +68,7 @@ internal static class Mover
         }
     }
 
-    private static string GetDefaultFolderName(CollectionMetadata? maybeCollectionData, TaggingSet taggingSet)
+    private static string GetDefaultDirectoryName(CollectionMetadata? maybeCollectionData, TaggingSet taggingSet)
     {
         string workingName;
 
@@ -86,7 +86,7 @@ internal static class Mover
                 : string.Empty;
         }
 
-        return workingName.ReplaceInvalidPathChars();
+        return workingName.ReplaceInvalidPathChars().Trim();
     }
 
     private static Result<VideoMetadata> GetParsedVideoJson(TaggingSet taggingSet)
