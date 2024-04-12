@@ -124,17 +124,17 @@ internal static class DetectionSchemeBank
             "pseudo-Topic style"
         ),
         new (
-            """(?<=(アルバム|シングル)[『「]).+(?=[」』])""", // アルバム「NAME」
+            """(?<=(アルバム|シングル)[『「]).+?(?=[」』])""", // アルバム「NAME」
             MatchGroupId.Zero,
             SourceMetadataField.Title
         ),
         new (
-            """(?<=(アルバム|シングル)[『「]).+(?=[」』])""", // アルバム「NAME」
+            """(?<=(アルバム|シングル)[『「]).+?(?=[」』])""", // アルバム「NAME」
             MatchGroupId.Zero,
             SourceMetadataField.Description
         ),
         new (
-            """(?<=EP[『「]).+(?=[」』]収録)""", // EP「NAME」収録
+            """(?<=EP[『「]).+?(?=[」』]収録)""", // EP「NAME」収録
             MatchGroupId.Zero,
             SourceMetadataField.Description
         ),
