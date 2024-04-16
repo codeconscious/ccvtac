@@ -17,6 +17,7 @@ Features and improvements I'm considering in the future. Not all ideas might be 
 
 ## Maybe
 
+- Change settings file format from JSON to YAML?
 - Save errors to a file with details
 - JSON history that stores more data than just URLs (Or maybe the log file would be sufficient? If so, is the history file even needed? Maybe allow up-and-down scrolling through history?)
 - yt-dlp can handle tabs on YouTube channels too, so look into supporting those
