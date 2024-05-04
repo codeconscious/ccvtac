@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using CCVTAC.Console.PostProcessing.Tagging;
 using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 
@@ -7,6 +8,12 @@ namespace CCVTAC.Console.PostProcessing;
 
 internal static class Mover
 {
+    private static bool IsPlaylistImage(string fileName)
+    {
+        var regex = new Regex(@"\[[OP]L[\w\d_-]+\]");
+        return regex.IsMatch(fileName);
+    }
+
     internal static void Run(IEnumerable<TaggingSet> taggingSets,
                              CollectionMetadata? maybeCollectionData,
                              UserSettings settings,
@@ -40,8 +47,12 @@ internal static class Mover
             throw;
         }
 
-        printer.Print($"Moving audio file(s) to \"{moveToDir}\"...");
-        foreach (FileInfo file in workingDirInfo.EnumerateFiles("*.m4a"))
+        var eligibleAudioFiles = workingDirInfo.EnumerateFiles("*.m4a");
+        var eligibleImages = workingDirInfo.EnumerateFiles("*.jpg").Where(f => IsPlaylistImage(f.FullName));
+        var allEligibleFiles = eligibleAudioFiles.Concat(eligibleImages);
+        printer.Print($"Moving {eligibleAudioFiles.Count()} audio file(s) and {eligibleImages.Count()} images to \"{moveToDir}\"...");
+
+        foreach (FileInfo file in allEligibleFiles)
         {
             try
             {
