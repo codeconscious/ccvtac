@@ -92,7 +92,7 @@ module Settings =
 
         [<CompiledName("WriteDefaultFile")>]
         let writeDefaultFile (filePath: FilePath option) =
-            let safePath =
+            let confirmedPath =
                 let defaultFileName = "settings.json"
                 match filePath with
                 | Some p -> p
@@ -107,4 +107,4 @@ module Settings =
                   SleepSecondsBetweenBatches = 20us
                   VerboseOutput = true
                   IgnoreUploadYearUploaders = [||] }
-            writeFile defaultSettings safePath
+            writeFile defaultSettings confirmedPath
