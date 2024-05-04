@@ -74,9 +74,13 @@ internal static class Renamer
             "%<1>s - %<2>s",
             "Reformat 'ARTIST - \'TITLE\' ]'"),
         new(
-            new Regex("""(.+) \- (.+) \((\d{4}).+\) \- (\d{1,3}) (.+)"""),
+            new Regex(@"(.+) [-–] (.+) \((\d{4}).+\) [-–] (\d{1,3}) (.+)"),
             "%<1>s - %<2>s [%<3>s] - %<4>s - %<5>s",
             "ARTIST - ALBUM (YEAR ...) - TRACK TITLE"),
+        new(
+            new Regex(@"◆(.+?)(?:\d{1,2}(?:st|nd|rd|th)アルバム) [-–] 「(.+)」 .+ [-–] (\d{1,3}) [-–] (.+)"),
+            "%<1>s - %<2>s - %<3>s - %<4>s",
+            "◆ARTIST(...) - 「ALBUM」 ... - TRACK - TITLE"),
         new(
             new Regex(@"(\d+) - \[(feat.+)\] (.+) ⧸ (.+)(?=\.\w{3,4})"),
             "%<4>s - %<4>s - %<1>s - %<3>s (%<2>s)"
