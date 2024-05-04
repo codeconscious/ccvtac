@@ -9,7 +9,7 @@ internal static class Runner
         Watch watch = new();
 
         printer.Print($"Starting {settings.Program.Name} for {settings.Program.Purpose}...");
-        printer.Print($"Running command: {settings.Program.Name} {settings.Args}");
+        printer.Print($"▶️ Running command: {settings.Program.Name} {settings.Args}");
 
         ProcessStartInfo processStartInfo = new()
         {
