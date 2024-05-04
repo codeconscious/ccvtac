@@ -47,12 +47,13 @@ internal static class Mover
             throw;
         }
 
-        var eligibleAudioFiles = workingDirInfo.EnumerateFiles("*.m4a");
-        var eligibleImages = workingDirInfo.EnumerateFiles("*.jpg").Where(f => IsPlaylistImage(f.FullName));
-        var allEligibleFiles = eligibleAudioFiles.Concat(eligibleImages);
-        printer.Print($"Moving {eligibleAudioFiles.Count()} audio file(s) and {eligibleImages.Count()} images to \"{moveToDir}\"...");
+        var audioFiles = workingDirInfo.EnumerateFiles("*.m4a");
+        var playlistImage = workingDirInfo.EnumerateFiles("*.jpg")
+                                          .Where(f => IsPlaylistImage(f.FullName));
+        var allFiles = audioFiles.Concat(playlistImage);
 
-        foreach (FileInfo file in allEligibleFiles)
+        printer.Print($"Moving {audioFiles.Count()} audio file(s) to \"{moveToDir}\"...");
+        foreach (FileInfo file in allFiles)
         {
             try
             {
