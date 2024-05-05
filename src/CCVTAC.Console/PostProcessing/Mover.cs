@@ -8,6 +8,8 @@ namespace CCVTAC.Console.PostProcessing;
 
 internal static class Mover
 {
+    private static readonly string _coverImageFileName = "cover.jpg";
+
     private static bool IsPlaylistImage(string fileName)
     {
         var regex = new Regex(@"\[[OP]L[\w\d_-]+\]");
@@ -91,7 +93,9 @@ internal static class Mover
         {
             if (GetCoverImage(workingDirInfo, audioFiles.Count()) is FileInfo fileInfo)
             {
-                fileInfo.MoveTo(Path.Combine(moveToDir, "cover.jpg"), overwrite: false);
+                fileInfo.MoveTo(
+                    Path.Combine(moveToDir, _coverImageFileName),
+                    overwrite: false);
             }
 
         }
