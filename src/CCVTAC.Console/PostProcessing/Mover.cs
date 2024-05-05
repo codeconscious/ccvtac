@@ -14,11 +14,28 @@ internal static class Mover
         return regex.IsMatch(fileName);
     }
 
-    internal static void Run(IEnumerable<TaggingSet> taggingSets,
-                             CollectionMetadata? maybeCollectionData,
-                             UserSettings settings,
-                             bool shouldOverwrite,
-                             Printer printer)
+    private static FileInfo? GetCoverImage(DirectoryInfo workingDirInfo, int audioFileCount)
+    {
+        var images = workingDirInfo.EnumerateFiles("*.jpg").ToImmutableArray();
+        if (images.IsEmpty())
+            return null;
+
+        var playlistImages = images.Where(i => IsPlaylistImage(i.FullName));
+        if (playlistImages.Any())
+            return playlistImages.First();
+
+        if (audioFileCount > 1 && images.Length == 1)
+            return images.First();
+        else
+            return null;
+    }
+
+    internal static void Run(
+        IEnumerable<TaggingSet> taggingSets,
+        CollectionMetadata? maybeCollectionData,
+        UserSettings settings,
+        bool shouldOverwrite,
+        Printer printer)
     {
         Watch watch = new();
 
@@ -48,12 +65,9 @@ internal static class Mover
         }
 
         var audioFiles = workingDirInfo.EnumerateFiles("*.m4a");
-        var playlistImage = workingDirInfo.EnumerateFiles("*.jpg")
-                                          .Where(f => IsPlaylistImage(f.FullName));
-        var allFiles = audioFiles.Concat(playlistImage);
-
         printer.Print($"Moving {audioFiles.Count()} audio file(s) to \"{moveToDir}\"...");
-        foreach (FileInfo file in allFiles)
+
+        foreach (FileInfo file in audioFiles)
         {
             try
             {
@@ -73,10 +87,23 @@ internal static class Mover
             }
         }
 
-        printer.Print($"{successCount} file(s) moved in {watch.ElapsedFriendly}.");
+        try
+        {
+            if (GetCoverImage(workingDirInfo, audioFiles.Count()) is FileInfo fileInfo)
+            {
+                fileInfo.MoveTo(Path.Combine(moveToDir, "cover.jpg"), overwrite: false);
+            }
+
+        }
+        catch (Exception ex)
+        {
+            printer.Warning($"Failed to copy the image file: {ex.Message}");
+        }
+
+        printer.Print($"{successCount} audio file(s) moved in {watch.ElapsedFriendly}.");
         if (failureCount > 0)
         {
-            printer.Warning($"However, {failureCount} file(s) could not be moved.");
+            printer.Warning($"However, {failureCount} audio file(s) could not be moved.");
         }
     }
 
