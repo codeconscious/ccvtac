@@ -97,6 +97,8 @@ internal static class Mover
                 image.MoveTo(
                     Path.Combine(moveToDir, _coverImageFileName),
                     overwrite: false);
+
+                printer.Print("Moved cover image.");
             }
 
         }
