@@ -66,8 +66,8 @@ internal static class Mover
             throw;
         }
 
-        var audioFiles = workingDirInfo.EnumerateFiles("*.m4a");
-        printer.Print($"Moving {audioFiles.Count()} audio file(s) to \"{moveToDir}\"...");
+        var audioFiles = workingDirInfo.EnumerateFiles("*.m4a").ToList();
+        printer.Print($"Moving {audioFiles.Count} audio file(s) to \"{moveToDir}\"...");
 
         foreach (FileInfo file in audioFiles)
         {
@@ -77,6 +77,7 @@ internal static class Mover
                     file.FullName,
                     $"{Path.Combine(moveToDir, file.Name)}",
                     shouldOverwrite);
+
                 successCount++;
 
                 if (verbose)
@@ -91,9 +92,9 @@ internal static class Mover
 
         try
         {
-            if (GetCoverImage(workingDirInfo, audioFiles.Count()) is FileInfo fileInfo)
+            if (GetCoverImage(workingDirInfo, audioFiles.Count) is FileInfo image)
             {
-                fileInfo.MoveTo(
+                image.MoveTo(
                     Path.Combine(moveToDir, _coverImageFileName),
                     overwrite: false);
             }
