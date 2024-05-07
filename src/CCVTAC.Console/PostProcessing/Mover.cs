@@ -8,8 +8,6 @@ namespace CCVTAC.Console.PostProcessing;
 
 internal static class Mover
 {
-    private static readonly string _coverImageFileName = "cover.jpg";
-
     private static bool IsPlaylistImage(string fileName)
     {
         var regex = new Regex(@"\[[OP]L[\w\d_-]+\]");
@@ -47,8 +45,8 @@ internal static class Mover
         DirectoryInfo workingDirInfo = new(settings.WorkingDirectory);
 
         string subFolderName = GetDefaultDirectoryName(maybeCollectionData, taggingSets.First());
-        string collectionFolder = maybeCollectionData?.Title ?? string.Empty;
-        string moveToDir = Path.Combine(settings.MoveToDirectory, subFolderName, collectionFolder);
+        string maybePlaylistName = maybeCollectionData?.Title ?? string.Empty;
+        string moveToDir = Path.Combine(settings.MoveToDirectory, subFolderName, maybePlaylistName);
 
         try
         {
@@ -92,10 +90,14 @@ internal static class Mover
 
         try
         {
+            var baseFileName = string.IsNullOrWhiteSpace(maybePlaylistName)
+                ? subFolderName
+                : $"{subFolderName} - {maybePlaylistName}";
+
             if (GetCoverImage(workingDirInfo, audioFiles.Count) is FileInfo image)
             {
                 image.MoveTo(
-                    Path.Combine(moveToDir, _coverImageFileName),
+                    Path.Combine(moveToDir, $"{baseFileName.Trim()}.jpg"),
                     overwrite: false);
 
                 printer.Print("Moved cover image.");
