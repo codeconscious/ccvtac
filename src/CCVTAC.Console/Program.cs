@@ -196,7 +196,7 @@ internal static class Program
 
             Watch jobWatch = new();
 
-            history.Append(url, inputTime, printer);
+            history.Append(url, inputTime, settings.VerboseOutput, printer);
 
             var downloadResult = Downloading.Downloader.Run(url, settings, printer);
             resultHandler.RegisterResult(downloadResult);
@@ -211,7 +211,7 @@ internal static class Program
             string batchClause = batchUrls.Count > 1
                 ? $" (batch {currentBatch} of {batchUrls.Count})"
                 : string.Empty;
-            printer.Print($"Done processing '{url}'{batchClause} in {jobWatch.ElapsedFriendly}.");
+            printer.Print($"Processed '{url}'{batchClause} in {jobWatch.ElapsedFriendly}.");
         }
 
         if (batchUrls.Count > 1)

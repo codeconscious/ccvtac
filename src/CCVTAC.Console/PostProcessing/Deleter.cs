@@ -9,7 +9,8 @@ internal static class Deleter
         DirectoryInfo dir = new(workingDirectory);
         List<string> deletableExtensions = [".json", ".jpg"];
 
-        printer.Print($"Deleting now-unnecessary {string.Join(" and ", deletableExtensions)} files...");
+        if (verbose)
+            printer.Print($"Deleting temporary {string.Join(" and ", deletableExtensions)} files...");
 
         foreach (FileInfo file in dir.EnumerateFiles("*")
                                      .Where(f => deletableExtensions.Contains(f.Extension)))
@@ -27,7 +28,7 @@ internal static class Deleter
             }
         }
 
-        printer.Print("Deletion completed OK.");
+        printer.Print("Deleted temporary files.");
 
         var tempFiles = IoUtilties.Directories.GetDirectoryFiles(workingDirectory);
         if (tempFiles.Any())

@@ -29,7 +29,9 @@ public sealed class Setup(UserSettings settings, Printer printer)
         CollectionMetadata? collectionJson;
         if (collectionJsonResult.IsFailed)
         {
-            Printer.Print($"No playlist or channel metadata found: {collectionJsonResult.Errors.First().Message}");
+            if (Settings.VerboseOutput)
+                Printer.Print($"No playlist or channel metadata found: {collectionJsonResult.Errors.First().Message}");
+
             collectionJson = null;
         }
         else
@@ -37,7 +39,7 @@ public sealed class Setup(UserSettings settings, Printer printer)
             collectionJson = collectionJsonResult.Value;
         }
 
-        ImageProcessor.Run(Settings.WorkingDirectory, Printer);
+        ImageProcessor.Run(Settings.WorkingDirectory, Settings.VerboseOutput, Printer);
 
         var tagResult = Tagger.Run(Settings, taggingSets, collectionJson, Printer);
         if (tagResult.IsSuccess)

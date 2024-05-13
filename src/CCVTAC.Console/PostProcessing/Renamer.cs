@@ -114,7 +114,8 @@ internal static class Renamer
             return;
         }
 
-        printer.Print($"Renaming {audioFilePaths.Count()} audio file(s)...");
+        if (isVerbose)
+            printer.Print($"Renaming {audioFilePaths.Count()} audio file(s)...");
 
         foreach (FileInfo filePath in audioFilePaths)
         {
