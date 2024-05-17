@@ -38,6 +38,11 @@ internal static class Downloader
         var mediaType = mediaTypeOrError.ResultValue;
         printer.Print($"{mediaType.GetType().Name} URL '{url}' detected.");
 
+        if (!mediaType.IsVideo && !settings.VerboseOutput)
+        {
+            printer.Print("Please wait for the multiple videos to be downloaded...");
+        }
+
         var urls = FSharp.Downloading.downloadUrls(mediaType);
 
         string args = GenerateDownloadArgs(settings, mediaType, urls[0]);
@@ -74,7 +79,7 @@ internal static class Downloader
             }
         }
 
-        return Result.Ok($"Downloading done in {watch.ElapsedFriendly}.");
+        return Result.Ok();
     }
 
     /// <summary>
