@@ -206,7 +206,7 @@ internal static class Program
             }
 
             var postProcessor = new PostProcessing.Setup(settings, printer);
-            postProcessor.Run(); // TODO: Think about if/how to handle leftover temp files due to errors.
+            postProcessor.Run();
 
             string batchClause = batchUrls.Count > 1
                 ? $" (batch {currentBatch} of {batchUrls.Count})"
@@ -216,7 +216,7 @@ internal static class Program
 
         if (batchUrls.Count > 1)
         {
-            printer.Print($"All done with {batchUrls.Count} batches in {watch.ElapsedFriendly}.");
+            printer.Print($"\nAll done with {batchUrls.Count} batches in {watch.ElapsedFriendly}.");
         }
 
         return NextAction.Continue;
