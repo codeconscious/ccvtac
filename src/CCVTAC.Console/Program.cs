@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using CCVTAC.Console.Settings;
+using CCVTAC.Console.Downloading;
 using Spectre.Console;
 using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 
@@ -192,20 +193,31 @@ internal static class Program
             }
 
             if (batchUrls.Count > 1)
+            {
                 printer.Print($"Processing batch {++currentBatch} of {batchUrls.Count}...");
+            }
 
             Watch jobWatch = new();
 
+            var mediaTypeResult = Downloader.GetMediaType(url);
+            if (mediaTypeResult.IsFailed)
+            {
+                printer.Error($"Could not parsed URL: {mediaTypeResult.Errors.First().Message}");
+                return NextAction.Continue;
+            }
+            var mediaType = mediaTypeResult.Value;
+            printer.Print($"{mediaType.GetType().Name} URL '{url}' detected.");
+
             history.Append(url, inputTime, printer);
 
-            var downloadResult = Downloading.Downloader.Run(url, settings, printer);
+            var downloadResult = Downloader.Run(url, mediaType, settings, printer);
             resultHandler.RegisterResult(downloadResult);
             if (downloadResult.IsFailed)
             {
                 return NextAction.Continue;
             }
 
-            var postProcessor = new PostProcessing.Setup(settings, printer);
+            var postProcessor = new PostProcessing.PostProcessing(settings, mediaType, printer);
             postProcessor.Run(); // TODO: Think about if/how to handle leftover temp files due to errors.
 
             string batchClause = batchUrls.Count > 1

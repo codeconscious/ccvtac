@@ -2,6 +2,7 @@
 using System.Text.Json;
 using TaggedFile = TagLib.File;
 using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
+using static CCVTAC.FSharp.Downloading;
 
 namespace CCVTAC.Console.PostProcessing.Tagging;
 
@@ -10,15 +11,18 @@ internal static class Tagger
     internal static Result<string> Run(UserSettings settings,
                                        IEnumerable<TaggingSet> taggingSets,
                                        CollectionMetadata? collectionJson,
+                                       MediaType mediaType,
                                        Printer printer)
     {
         printer.Print("Adding file tags...");
 
         Watch watch = new();
 
+        bool embedImages = mediaType.IsVideo || mediaType.IsPlaylistVideo;
+
         foreach (TaggingSet taggingSet in taggingSets)
         {
-            ProcessSingleTaggingSet(settings, taggingSet, collectionJson, printer);
+            ProcessSingleTaggingSet(settings, taggingSet, collectionJson, embedImages, printer);
         }
 
         return Result.Ok($"Tagging done in {watch.ElapsedFriendly}.");
@@ -28,6 +32,7 @@ internal static class Tagger
         UserSettings settings,
         TaggingSet taggingSet,
         CollectionMetadata? collectionJson,
+        bool embedImages,
         Printer printer)
     {
         printer.Print($"{taggingSet.AudioFilePaths.Count} audio file(s) with resource ID \"{taggingSet.ResourceId}\"");
@@ -46,7 +51,7 @@ internal static class Tagger
         // If a single video was split, the tagging set will have multiple audio paths.
         // In this case, we will not embed the image file (with the assumption that
         // the standalone image file will be available in the move-to directory).
-        string? maybeImagePath = finalTaggingSet.AudioFilePaths.Count == 1
+        string? maybeImagePath = embedImages && finalTaggingSet.AudioFilePaths.Count == 1
             ? finalTaggingSet.ImageFilePath
             : null;
 
