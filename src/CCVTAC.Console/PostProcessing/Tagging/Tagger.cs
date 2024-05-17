@@ -18,7 +18,8 @@ internal static class Tagger
 
         Watch watch = new();
 
-        bool embedImages = mediaType.IsVideo || mediaType.IsPlaylistVideo;
+        bool embedImages = settings.EmbedImages &&
+                           mediaType.IsVideo || mediaType.IsPlaylistVideo;
 
         foreach (TaggingSet taggingSet in taggingSets)
         {
@@ -150,14 +151,14 @@ internal static class Tagger
 
             taggedFile.Tag.Comment = videoData.GenerateComment(collectionData);
 
-            if (imageFilePath is null)
-            {
-                printer.Print("Skipping image embedding.");
-            }
-            else
+            if (settings.EmbedImages && imageFilePath is not null)
             {
                 printer.Print("Will embedded the image.");
                 WriteImage(taggedFile, imageFilePath, printer);
+            }
+            else
+            {
+                printer.Print("Skipping image embedding.");
             }
 
             taggedFile.Save();
