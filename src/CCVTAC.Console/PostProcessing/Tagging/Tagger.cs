@@ -45,13 +45,20 @@ internal static class Tagger
 
         TaggingSet finalTaggingSet = DeleteSourceFile(taggingSet, printer, settings.VerboseOutput);
 
+        // If a single video was split, the tagging set will have multiple audio paths.
+        // In this case, we will not embed the image file (with the assumption that
+        // the standalone image file will be available in the move-to directory).
+        string? maybeImagePath = finalTaggingSet.AudioFilePaths.Count == 1
+            ? finalTaggingSet.ImageFilePath
+            : null;
+
         foreach (string audioFilePath in finalTaggingSet.AudioFilePaths)
         {
             TagSingleFile(
                 settings,
                 parsedJsonResult.Value,
                 audioFilePath,
-                taggingSet.ImageFilePath,
+                maybeImagePath,
                 collectionJson,
                 printer
             );
@@ -61,7 +68,7 @@ internal static class Tagger
     static void TagSingleFile(UserSettings settings,
                               VideoMetadata videoData,
                               string audioFilePath,
-                              string imageFilePath,
+                              string? imageFilePath,
                               CollectionMetadata? collectionData,
                               Printer printer)
     {
@@ -162,7 +169,16 @@ internal static class Tagger
 
             taggedFile.Tag.Comment = videoData.GenerateComment(collectionData);
 
-            WriteImage(taggedFile, imageFilePath, printer, settings.VerboseOutput);
+            if (imageFilePath is null)
+            {
+                printer.Print("Skipping image embedding.");
+            }
+            else
+            {
+                printer.Print("Will embedded the image.");
+                WriteImage(taggedFile, imageFilePath, printer, settings.VerboseOutput);
+            }
+
             taggedFile.Save();
             if (settings.VerboseOutput)
                 printer.Print($"Wrote tags to \"{audioFileName}\".");
