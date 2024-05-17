@@ -7,6 +7,7 @@ Features and improvements I'm considering in the future. Not all ideas might be 
 - Review audo-adding album art (because even if it is deleted, the padding remains and the file is not made smaller)
 - Add a post-processing–only option for already-downloaded temporary files (via aborted downloads, etc.)
 - Stop downloading if there are repeated errors from yt-dlp
+- When creating a blank settings file, include all options
 
 ## Probably
 
