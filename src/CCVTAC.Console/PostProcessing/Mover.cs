@@ -8,10 +8,11 @@ namespace CCVTAC.Console.PostProcessing;
 
 internal static class Mover
 {
+    private static readonly Regex _playlistImageRegex = new(@"\[[OP]L[\w\d_-]+\]");
+
     private static bool IsPlaylistImage(string fileName)
     {
-        var regex = new Regex(@"\[[OP]L[\w\d_-]+\]");
-        return regex.IsMatch(fileName);
+        return _playlistImageRegex.IsMatch(fileName);
     }
 
     private static FileInfo? GetCoverImage(DirectoryInfo workingDirInfo, int audioFileCount)
