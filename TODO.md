@@ -26,6 +26,7 @@ Features and improvements I'm considering in the future. Not all ideas might be 
 - Count generated files for final output
 - Set up actual releases on GitHub (using Actions?)
 - Output the counts of URL types too (e.g., "# videos, # playlists")
+- Lower-quality audio setting?
 
 ## Rejected
 
