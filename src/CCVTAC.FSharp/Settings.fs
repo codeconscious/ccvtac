@@ -14,6 +14,7 @@ module Settings =
         [<JsonPropertyName("sleepSecondsBetweenDownloads")>] SleepSecondsBetweenDownloads: uint16
         [<JsonPropertyName("sleepSecondsBetweenBatches")>]   SleepSecondsBetweenBatches: uint16
         [<JsonPropertyName("verboseOutput")>]                VerboseOutput: bool
+        [<JsonPropertyName("embedImages")>]                  EmbedImages: bool
         [<JsonPropertyName("ignoreUploadYearUploaders")>]    IgnoreUploadYearUploaders: string array
     }
 
@@ -27,6 +28,7 @@ module Settings =
         [
             ("Split video chapters", if settings.SplitChapters then "ON" else "OFF")
             ("Verbose mode", if settings.VerboseOutput then "ON" else "OFF")
+            ("Embed images", if settings.EmbedImages then "ON" else "OFF")
             ("Sleep between batches", settings.SleepSecondsBetweenBatches |> int |> pluralize  "second")
             ("Sleep between downloads", settings.SleepSecondsBetweenDownloads |> int |> pluralize "second")
             ("Ignore-upload-year channels", settings.IgnoreUploadYearUploaders.Length |> pluralize "channel")
@@ -106,5 +108,6 @@ module Settings =
                   SleepSecondsBetweenDownloads = 10us
                   SleepSecondsBetweenBatches = 20us
                   VerboseOutput = true
+                  EmbedImages = true
                   IgnoreUploadYearUploaders = [||] }
             writeFile defaultSettings confirmedPath

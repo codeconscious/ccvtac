@@ -3,13 +3,22 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using CCVTAC.Console.PostProcessing.Tagging;
 using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
+using static CCVTAC.FSharp.Downloading;
 
 namespace CCVTAC.Console.PostProcessing;
 
-public sealed class Setup(UserSettings settings, Printer printer)
+public sealed class PostProcessing
 {
-    public UserSettings Settings { get; } = settings;
-    public Printer Printer { get; } = printer;
+    public UserSettings Settings { get; }
+    public Printer Printer { get; }
+    public MediaType MediaType { get; }
+
+    public PostProcessing(UserSettings settings, MediaType mediaType, Printer printer)
+    {
+        Settings = settings;
+        Printer = printer;
+        MediaType = mediaType;
+    }
 
     internal void Run()
     {
@@ -39,7 +48,7 @@ public sealed class Setup(UserSettings settings, Printer printer)
 
         ImageProcessor.Run(Settings.WorkingDirectory, Printer);
 
-        var tagResult = Tagger.Run(Settings, taggingSets, collectionJson, Printer);
+        var tagResult = Tagger.Run(Settings, taggingSets, collectionJson, MediaType, Printer);
         if (tagResult.IsSuccess)
         {
             Printer.Print(tagResult.Value);

@@ -2,6 +2,7 @@
 using System.Text.Json;
 using TaggedFile = TagLib.File;
 using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
+using static CCVTAC.FSharp.Downloading;
 
 namespace CCVTAC.Console.PostProcessing.Tagging;
 
@@ -10,15 +11,19 @@ internal static class Tagger
     internal static Result<string> Run(UserSettings settings,
                                        IEnumerable<TaggingSet> taggingSets,
                                        CollectionMetadata? collectionJson,
+                                       MediaType mediaType,
                                        Printer printer)
     {
         printer.Print("Adding file tags...");
 
         Watch watch = new();
 
+        bool embedImages = settings.EmbedImages &&
+                           mediaType.IsVideo || mediaType.IsPlaylistVideo;
+
         foreach (TaggingSet taggingSet in taggingSets)
         {
-            ProcessSingleTaggingSet(settings, taggingSet, collectionJson, printer);
+            ProcessSingleTaggingSet(settings, taggingSet, collectionJson, embedImages, printer);
         }
 
         return Result.Ok($"Tagging done in {watch.ElapsedFriendly}.");
@@ -28,6 +33,7 @@ internal static class Tagger
         UserSettings settings,
         TaggingSet taggingSet,
         CollectionMetadata? collectionJson,
+        bool embedImages,
         Printer printer)
     {
         printer.Print($"{taggingSet.AudioFilePaths.Count} audio file(s) with resource ID \"{taggingSet.ResourceId}\"");
@@ -43,13 +49,20 @@ internal static class Tagger
 
         TaggingSet finalTaggingSet = DeleteSourceFile(taggingSet, printer);
 
+        // If a single video was split, the tagging set will have multiple audio paths.
+        // In this case, we will not embed the image file (with the assumption that
+        // the standalone image file will be available in the move-to directory).
+        string? maybeImagePath = embedImages && finalTaggingSet.AudioFilePaths.Count == 1
+            ? finalTaggingSet.ImageFilePath
+            : null;
+
         foreach (string audioFilePath in finalTaggingSet.AudioFilePaths)
         {
             TagSingleFile(
                 settings,
                 parsedJsonResult.Value,
                 audioFilePath,
-                taggingSet.ImageFilePath,
+                maybeImagePath,
                 collectionJson,
                 printer
             );
@@ -59,7 +72,7 @@ internal static class Tagger
     static void TagSingleFile(UserSettings settings,
                               VideoMetadata videoData,
                               string audioFilePath,
-                              string imageFilePath,
+                              string? imageFilePath,
                               CollectionMetadata? collectionData,
                               Printer printer)
     {
@@ -138,7 +151,15 @@ internal static class Tagger
 
             taggedFile.Tag.Comment = videoData.GenerateComment(collectionData);
 
-            WriteImage(taggedFile, imageFilePath, printer);
+            if (settings.EmbedImages && imageFilePath is not null)
+            {
+                printer.Print("Will embedded the image.");
+                WriteImage(taggedFile, imageFilePath, printer);
+            }
+            else
+            {
+                printer.Print("Skipping image embedding.");
+            }
 
             taggedFile.Save();
             printer.Print($"Wrote tags to \"{audioFileName}\".");
