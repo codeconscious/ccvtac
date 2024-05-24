@@ -2,6 +2,7 @@
 using System.Text.Json;
 using TaggedFile = TagLib.File;
 using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
+using static CCVTAC.FSharp.Downloading;
 
 namespace CCVTAC.Console.PostProcessing.Tagging;
 
@@ -10,6 +11,7 @@ internal static class Tagger
     internal static Result<string> Run(UserSettings settings,
                                        IEnumerable<TaggingSet> taggingSets,
                                        CollectionMetadata? collectionJson,
+                                       MediaType mediaType,
                                        Printer printer)
     {
         if (settings.VerboseOutput)
@@ -17,9 +19,12 @@ internal static class Tagger
 
         Watch watch = new();
 
+        bool embedImages = settings.EmbedImages &&
+                           mediaType.IsVideo || mediaType.IsPlaylistVideo;
+
         foreach (TaggingSet taggingSet in taggingSets)
         {
-            ProcessSingleTaggingSet(settings, taggingSet, collectionJson, printer);
+            ProcessSingleTaggingSet(settings, taggingSet, collectionJson, embedImages, printer);
         }
 
         return Result.Ok($"Tagging done in {watch.ElapsedFriendly}.");
@@ -29,6 +34,7 @@ internal static class Tagger
         UserSettings settings,
         TaggingSet taggingSet,
         CollectionMetadata? collectionJson,
+        bool embedImages,
         Printer printer)
     {
         if (settings.VerboseOutput)
@@ -49,6 +55,13 @@ internal static class Tagger
         // In this case, we will not embed the image file (with the assumption that
         // the standalone image file will be available in the move-to directory).
         string? maybeImagePath = finalTaggingSet.AudioFilePaths.Count == 1
+            ? finalTaggingSet.ImageFilePath
+            : null;
+
+        // If a single video was split, the tagging set will have multiple audio paths.
+        // In this case, we will not embed the image file (with the assumption that
+        // the standalone image file will be available in the move-to directory).
+        string? maybeImagePath = embedImages && finalTaggingSet.AudioFilePaths.Count == 1
             ? finalTaggingSet.ImageFilePath
             : null;
 
@@ -169,14 +182,14 @@ internal static class Tagger
 
             taggedFile.Tag.Comment = videoData.GenerateComment(collectionData);
 
-            if (imageFilePath is null)
+            if (settings.EmbedImages && imageFilePath is not null)
             {
-                printer.Print("Skipping image embedding.");
+                printer.Print("Will embedded the image.");
+                WriteImage(taggedFile, imageFilePath, printer);
             }
             else
             {
-                printer.Print("Embedding the image.");
-                WriteImage(taggedFile, imageFilePath, printer, settings.VerboseOutput);
+                printer.Print("Skipping image embedding.");
             }
 
             taggedFile.Save();

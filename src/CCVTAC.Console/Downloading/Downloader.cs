@@ -25,18 +25,20 @@ internal static class Downloader
         { 101, "Download cancelled by --max-downloads, etc." },
     };
 
-    internal static Result<string> Run(string url, UserSettings settings, Printer printer)
+    internal static Result<MediaType> GetMediaType(string url)
     {
-        Watch watch = new();
-
         var mediaTypeOrError = FSharp.Downloading.mediaTypeWithIds(url);
         if (mediaTypeOrError.IsError)
         {
             return Result.Fail(mediaTypeOrError.ErrorValue);
         }
 
-        var mediaType = mediaTypeOrError.ResultValue;
-        printer.Print($"{mediaType.GetType().Name} URL '{url}' detected.");
+        return Result.Ok(mediaTypeOrError.ResultValue);
+    }
+
+    internal static Result<string> Run(string url, MediaType mediaType, UserSettings settings, Printer printer)
+    {
+        Watch watch = new();
 
         if (!mediaType.IsVideo && !settings.VerboseOutput)
         {

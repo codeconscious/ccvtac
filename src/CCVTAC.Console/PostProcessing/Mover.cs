@@ -8,10 +8,11 @@ namespace CCVTAC.Console.PostProcessing;
 
 internal static class Mover
 {
+    private static readonly Regex _playlistImageRegex = new(@"\[[OP]L[\w\d_-]+\]"); // TODO: Add channels.
+
     private static bool IsPlaylistImage(string fileName)
     {
-        var regex = new Regex(@"\[[OP]L[\w\d_-]+\]");
-        return regex.IsMatch(fileName);
+        return _playlistImageRegex.IsMatch(fileName);
     }
 
     private static FileInfo? GetCoverImage(DirectoryInfo workingDirInfo, int audioFileCount)
@@ -45,8 +46,8 @@ internal static class Mover
         DirectoryInfo workingDirInfo = new(settings.WorkingDirectory);
 
         string subFolderName = GetDefaultDirectoryName(maybeCollectionData, taggingSets.First());
-        string maybePlaylistName = maybeCollectionData?.Title ?? string.Empty;
-        string moveToDir = Path.Combine(settings.MoveToDirectory, subFolderName, maybePlaylistName);
+        string maybeCollectionName = maybeCollectionData?.Title ?? string.Empty;
+        string moveToDir = Path.Combine(settings.MoveToDirectory, subFolderName, maybeCollectionName);
 
         try
         {
@@ -92,9 +93,9 @@ internal static class Mover
 
         try
         {
-            var baseFileName = string.IsNullOrWhiteSpace(maybePlaylistName)
+            var baseFileName = string.IsNullOrWhiteSpace(maybeCollectionName)
                 ? subFolderName
-                : $"{subFolderName} - {maybePlaylistName}";
+                : $"{subFolderName} - {maybeCollectionName}";
 
             if (GetCoverImage(workingDirInfo, audioFiles.Count) is FileInfo image)
             {
@@ -112,6 +113,7 @@ internal static class Mover
         }
 
         printer.Print($"Moved {successCount} audio file(s) in {watch.ElapsedFriendly}.");
+
         if (failureCount > 0)
         {
             printer.Warning($"However, {failureCount} audio file(s) could not be moved.");
