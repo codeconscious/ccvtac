@@ -208,7 +208,7 @@ internal static class Program
             var mediaType = mediaTypeResult.Value;
             printer.Print($"{mediaType.GetType().Name} URL '{url}' detected.");
 
-            history.Append(url, inputTime, printer);
+            history.Append(url, inputTime, settings.VerboseOutput, printer);
 
             var downloadResult = Downloader.Run(url, mediaType, settings, printer);
             resultHandler.RegisterResult(downloadResult);

@@ -54,13 +54,6 @@ internal static class Tagger
         // If a single video was split, the tagging set will have multiple audio paths.
         // In this case, we will not embed the image file (with the assumption that
         // the standalone image file will be available in the move-to directory).
-        string? maybeImagePath = finalTaggingSet.AudioFilePaths.Count == 1
-            ? finalTaggingSet.ImageFilePath
-            : null;
-
-        // If a single video was split, the tagging set will have multiple audio paths.
-        // In this case, we will not embed the image file (with the assumption that
-        // the standalone image file will be available in the move-to directory).
         string? maybeImagePath = embedImages && finalTaggingSet.AudioFilePaths.Count == 1
             ? finalTaggingSet.ImageFilePath
             : null;
@@ -185,7 +178,7 @@ internal static class Tagger
             if (settings.EmbedImages && imageFilePath is not null)
             {
                 printer.Print("Will embedded the image.");
-                WriteImage(taggedFile, imageFilePath, printer);
+                WriteImage(taggedFile, imageFilePath, settings.VerboseOutput, printer);
             }
             else
             {
@@ -292,7 +285,11 @@ internal static class Tagger
     /// Write the video thumbnail to the file tags.
     /// </summary>
     /// <remarks>Heavily inspired by https://stackoverflow.com/a/61264720/11767771.</remarks>
-    private static void WriteImage(TaggedFile taggedFile, string imageFilePath, Printer printer, bool verbose)
+    private static void WriteImage(
+        TaggedFile taggedFile,
+        string imageFilePath,
+        bool verbose,
+        Printer printer)
     {
         if (string.IsNullOrWhiteSpace(imageFilePath))
         {
