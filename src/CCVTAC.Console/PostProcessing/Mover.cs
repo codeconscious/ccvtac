@@ -8,7 +8,7 @@ namespace CCVTAC.Console.PostProcessing;
 
 internal static class Mover
 {
-    private static readonly Regex _playlistImageRegex = new(@"\[[OP]L[\w\d_-]+\]");
+    private static readonly Regex _playlistImageRegex = new(@"\[[OP]L[\w\d_-]+\]"); // TODO: Add channels.
 
     private static bool IsPlaylistImage(string fileName)
     {
@@ -46,8 +46,8 @@ internal static class Mover
         DirectoryInfo workingDirInfo = new(settings.WorkingDirectory);
 
         string subFolderName = GetDefaultDirectoryName(maybeCollectionData, taggingSets.First());
-        string maybePlaylistName = maybeCollectionData?.Title ?? string.Empty;
-        string moveToDir = Path.Combine(settings.MoveToDirectory, subFolderName, maybePlaylistName);
+        string maybeCollectionName = maybeCollectionData?.Title ?? string.Empty;
+        string moveToDir = Path.Combine(settings.MoveToDirectory, subFolderName, maybeCollectionName);
 
         try
         {
@@ -91,9 +91,9 @@ internal static class Mover
 
         try
         {
-            var baseFileName = string.IsNullOrWhiteSpace(maybePlaylistName)
+            var baseFileName = string.IsNullOrWhiteSpace(maybeCollectionName)
                 ? subFolderName
-                : $"{subFolderName} - {maybePlaylistName}";
+                : $"{subFolderName} - {maybeCollectionName}";
 
             if (GetCoverImage(workingDirInfo, audioFiles.Count) is FileInfo image)
             {
