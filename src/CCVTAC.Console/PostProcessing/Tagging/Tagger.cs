@@ -177,7 +177,7 @@ internal static class Tagger
 
             if (settings.EmbedImages && imageFilePath is not null)
             {
-                printer.Print("Will embedded the image.");
+                printer.Print("Embedding the image.");
                 WriteImage(taggedFile, imageFilePath, settings.VerboseOutput, printer);
             }
             else
