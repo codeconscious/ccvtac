@@ -33,7 +33,7 @@ internal static class Downloader
             return Result.Fail(mediaTypeOrError.ErrorValue);
         }
 
-        return mediaTypeOrError.ResultValue;
+        return Result.Ok(mediaTypeOrError.ResultValue);
     }
 
     internal static Result<string> Run(string url, MediaType mediaType, UserSettings settings, Printer printer)
