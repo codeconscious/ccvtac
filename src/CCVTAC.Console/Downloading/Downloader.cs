@@ -9,7 +9,7 @@ internal static class Downloader
     internal static ExternalTool ExternalTool = new(
         "yt-dlp",
         "https://github.com/yt-dlp/yt-dlp/",
-        "YouTube media and metadata downloads, plus audio extraction"
+        "YouTube downloads and audio extraction"
     );
 
     /// <summary>

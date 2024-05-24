@@ -8,9 +8,9 @@ internal static class Runner
     {
         Watch watch = new();
 
+        printer.Print($"Starting {settings.Program.Name} for {settings.Program.Purpose}...");
         if (verbose)
         {
-            printer.Print($"Starting {settings.Program.Name} for {settings.Program.Purpose}...");
             printer.Print($"Running command: {settings.Program.Name} {settings.Args}");
         }
 
@@ -35,7 +35,7 @@ internal static class Runner
 
         process.WaitForExit();
 
-        printer.Print($"{settings.Program.Purpose} done in {watch.ElapsedFriendly}.");
+        printer.Print($"Completed {settings.Program.Purpose} in {watch.ElapsedFriendly}.");
 
         int exitCode = process.ExitCode;
         if (exitCode == 0)

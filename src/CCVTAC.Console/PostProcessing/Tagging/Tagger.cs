@@ -175,7 +175,7 @@ internal static class Tagger
             }
             else
             {
-                printer.Print("Will embedded the image.");
+                printer.Print("Embedding the image.");
                 WriteImage(taggedFile, imageFilePath, printer, settings.VerboseOutput);
             }
 
