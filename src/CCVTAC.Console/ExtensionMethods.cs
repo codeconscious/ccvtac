@@ -13,7 +13,6 @@ public static class ExtensionMethods
     /// <param name="sourceText"></param>
     /// <param name="replaceWith"></param>
     /// <param name="customInvalidChars">Optional additional characters to consider invalid.</param>
-    /// <returns></returns>
     public static string ReplaceInvalidPathChars(this string sourceText,
                                                 char replaceWith = '_',
                                                 char[]? customInvalidChars = null)

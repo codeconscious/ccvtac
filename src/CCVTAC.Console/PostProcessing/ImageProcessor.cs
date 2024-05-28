@@ -4,7 +4,7 @@ namespace CCVTAC.Console.PostProcessing;
 
 internal static class ImageProcessor
 {
-    internal static void Run(string workingDirectory, Printer printer)
+    internal static void Run(string workingDirectory, bool verbose, Printer printer)
     {
         ExternalTool imageProgram = new(
             "mogrify",
@@ -18,6 +18,6 @@ internal static class ImageProcessor
             workingDirectory
         );
 
-        Runner.Run(imageEditToolSettings, printer);
+        Runner.Run(imageEditToolSettings, verbose, printer);
     }
 }

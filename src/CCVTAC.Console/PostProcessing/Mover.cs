@@ -66,7 +66,9 @@ internal static class Mover
         }
 
         var audioFiles = workingDirInfo.EnumerateFiles("*.m4a").ToList();
-        printer.Print($"Moving {audioFiles.Count} audio file(s) to \"{moveToDir}\"...");
+
+        if (settings.VerboseOutput)
+            printer.Print($"Moving {audioFiles.Count} audio file(s) to \"{moveToDir}\"...");
 
         foreach (FileInfo file in audioFiles)
         {
@@ -110,7 +112,8 @@ internal static class Mover
             printer.Warning($"Failed to copy the image file: {ex.Message}");
         }
 
-        printer.Print($"{successCount} audio file(s) moved in {watch.ElapsedFriendly}.");
+        printer.Print($"Moved {successCount} audio file(s) in {watch.ElapsedFriendly}.");
+
         if (failureCount > 0)
         {
             printer.Warning($"However, {failureCount} audio file(s) could not be moved.");

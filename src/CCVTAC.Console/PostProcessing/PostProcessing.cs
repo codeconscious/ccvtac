@@ -38,7 +38,9 @@ public sealed class PostProcessing
         CollectionMetadata? collectionJson;
         if (collectionJsonResult.IsFailed)
         {
-            Printer.Print($"No playlist or channel metadata found: {collectionJsonResult.Errors.First().Message}");
+            if (Settings.VerboseOutput)
+                Printer.Print($"No playlist or channel metadata found: {collectionJsonResult.Errors.First().Message}");
+
             collectionJson = null;
         }
         else
@@ -46,7 +48,7 @@ public sealed class PostProcessing
             collectionJson = collectionJsonResult.Value;
         }
 
-        ImageProcessor.Run(Settings.WorkingDirectory, Printer);
+        ImageProcessor.Run(Settings.WorkingDirectory, Settings.VerboseOutput, Printer);
 
         var tagResult = Tagger.Run(Settings, taggingSets, collectionJson, MediaType, Printer);
         if (tagResult.IsSuccess)

@@ -4,12 +4,15 @@ namespace CCVTAC.Console.ExternalTools;
 
 internal static class Runner
 {
-    internal static Result Run(ToolSettings settings, Printer printer)
+    internal static Result Run(ToolSettings settings, bool verbose, Printer printer)
     {
         Watch watch = new();
 
         printer.Print($"Starting {settings.Program.Name} for {settings.Program.Purpose}...");
-        printer.Print($"▶️ Running command: {settings.Program.Name} {settings.Args}");
+        if (verbose)
+        {
+            printer.Print($"Running command: {settings.Program.Name} {settings.Args}");
+        }
 
         ProcessStartInfo processStartInfo = new()
         {
@@ -32,7 +35,7 @@ internal static class Runner
 
         process.WaitForExit();
 
-        printer.Print($"Done with {settings.Program.Purpose} in {watch.ElapsedFriendly}.");
+        printer.Print($"Completed {settings.Program.Purpose} in {watch.ElapsedFriendly}.");
 
         int exitCode = process.ExitCode;
         if (exitCode == 0)

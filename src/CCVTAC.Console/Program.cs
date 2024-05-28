@@ -208,7 +208,7 @@ internal static class Program
             var mediaType = mediaTypeResult.Value;
             printer.Print($"{mediaType.GetType().Name} URL '{url}' detected.");
 
-            history.Append(url, inputTime, printer);
+            history.Append(url, inputTime, settings.VerboseOutput, printer);
 
             var downloadResult = Downloader.Run(url, mediaType, settings, printer);
             resultHandler.RegisterResult(downloadResult);
@@ -218,17 +218,17 @@ internal static class Program
             }
 
             var postProcessor = new PostProcessing.PostProcessing(settings, mediaType, printer);
-            postProcessor.Run(); // TODO: Think about if/how to handle leftover temp files due to errors.
+            postProcessor.Run();
 
             string batchClause = batchUrls.Count > 1
                 ? $" (batch {currentBatch} of {batchUrls.Count})"
                 : string.Empty;
-            printer.Print($"Done processing '{url}'{batchClause} in {jobWatch.ElapsedFriendly}.");
+            printer.Print($"Processed '{url}'{batchClause} in {jobWatch.ElapsedFriendly}.");
         }
 
         if (batchUrls.Count > 1)
         {
-            printer.Print($"All done with {batchUrls.Count} batches in {watch.ElapsedFriendly}.");
+            printer.Print($"\nAll done with {batchUrls.Count} batches in {watch.ElapsedFriendly}.");
         }
 
         return NextAction.Continue;
