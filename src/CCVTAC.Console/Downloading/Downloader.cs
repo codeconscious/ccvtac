@@ -9,7 +9,7 @@ internal static class Downloader
     internal static ExternalTool ExternalTool = new(
         "yt-dlp",
         "https://github.com/yt-dlp/yt-dlp/",
-        "YouTube media and metadata downloads, plus audio extraction"
+        "YouTube downloads and audio extraction"
     );
 
     /// <summary>
@@ -25,24 +25,32 @@ internal static class Downloader
         { 101, "Download cancelled by --max-downloads, etc." },
     };
 
-    internal static Result<string> Run(string url, UserSettings settings, Printer printer)
+    internal static Result<MediaType> GetMediaType(string url)
     {
-        Watch watch = new();
-
         var mediaTypeOrError = FSharp.Downloading.mediaTypeWithIds(url);
         if (mediaTypeOrError.IsError)
         {
             return Result.Fail(mediaTypeOrError.ErrorValue);
         }
 
-        var mediaType = mediaTypeOrError.ResultValue;
-        printer.Print($"{mediaType.GetType().Name} URL '{url}' detected.");
+        return Result.Ok(mediaTypeOrError.ResultValue);
+    }
+
+    internal static Result<string> Run(string url, MediaType mediaType, UserSettings settings, Printer printer)
+    {
+        Watch watch = new();
+
+        if (!mediaType.IsVideo && !settings.VerboseOutput)
+        {
+            printer.Print("Please wait for the multiple videos to be downloaded...");
+        }
 
         var urls = FSharp.Downloading.downloadUrls(mediaType);
 
         string args = GenerateDownloadArgs(settings, mediaType, urls[0]);
-        var downloadSettings = new ToolSettings(ExternalTool, args, settings.WorkingDirectory!, ExitCodes);
-        var downloadResult = Runner.Run(downloadSettings, printer);
+        var downloadSettings =
+            new ToolSettings(ExternalTool, args, settings.WorkingDirectory!, ExitCodes);
+        var downloadResult = Runner.Run(downloadSettings, settings.VerboseOutput, printer);
 
         if (downloadResult.IsFailed)
         {
@@ -59,7 +67,8 @@ internal static class Downloader
                 settings.WorkingDirectory!,
                 ExitCodes);
 
-            Result<int> supplementaryDownloadResult = Runner.Run(supplementaryDownloadSettings, printer);
+            Result<int> supplementaryDownloadResult =
+                Runner.Run(supplementaryDownloadSettings, settings.VerboseOutput, printer);
 
             if (supplementaryDownloadResult.IsSuccess)
             {
@@ -72,7 +81,7 @@ internal static class Downloader
             }
         }
 
-        return Result.Ok($"Downloading done in {watch.ElapsedFriendly}.");
+        return Result.Ok();
     }
 
     /// <summary>
@@ -102,9 +111,9 @@ internal static class Downloader
                  ]
         };
 
-        // `--verbose` is a yt-dlp option too, but maybe that's too much data.
+        // yt-dlp has its own `--verbose` option too, but that's too much data.
         // It might be worth incorporating it in the future as a third option.
-        args.Add(settings.VerboseOutput ? string.Empty : "--quiet --progress");
+        args.Add(settings.VerboseOutput ? string.Empty : "--quiet --no-warnings");
 
         if (mediaType is not null)
         {

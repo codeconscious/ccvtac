@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using CCVTAC.Console.PostProcessing.Tagging;
 using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 
@@ -7,11 +8,35 @@ namespace CCVTAC.Console.PostProcessing;
 
 internal static class Mover
 {
-    internal static void Run(IEnumerable<TaggingSet> taggingSets,
-                             CollectionMetadata? maybeCollectionData,
-                             UserSettings settings,
-                             bool shouldOverwrite,
-                             Printer printer)
+    private static readonly Regex _playlistImageRegex = new(@"\[[OP]L[\w\d_-]+\]"); // TODO: Add channels.
+
+    private static bool IsPlaylistImage(string fileName)
+    {
+        return _playlistImageRegex.IsMatch(fileName);
+    }
+
+    private static FileInfo? GetCoverImage(DirectoryInfo workingDirInfo, int audioFileCount)
+    {
+        var images = workingDirInfo.EnumerateFiles("*.jpg").ToImmutableArray();
+        if (images.IsEmpty())
+            return null;
+
+        var playlistImages = images.Where(i => IsPlaylistImage(i.FullName));
+        if (playlistImages.Any())
+            return playlistImages.First();
+
+        if (audioFileCount > 1 && images.Length == 1)
+            return images.First();
+        else
+            return null;
+    }
+
+    internal static void Run(
+        IEnumerable<TaggingSet> taggingSets,
+        CollectionMetadata? maybeCollectionData,
+        UserSettings settings,
+        bool shouldOverwrite,
+        Printer printer)
     {
         Watch watch = new();
 
@@ -20,9 +45,9 @@ internal static class Mover
         bool verbose = settings.VerboseOutput;
         DirectoryInfo workingDirInfo = new(settings.WorkingDirectory);
 
-        string subFolderName = GetDefaultFolderName(maybeCollectionData, taggingSets.First());
-        string collectionFolder = maybeCollectionData?.Title ?? string.Empty;
-        string moveToDir = Path.Combine(settings.MoveToDirectory, subFolderName, collectionFolder);
+        string subFolderName = GetDefaultDirectoryName(maybeCollectionData, taggingSets.First());
+        string maybeCollectionName = maybeCollectionData?.Title ?? string.Empty;
+        string moveToDir = Path.Combine(settings.MoveToDirectory, subFolderName, maybeCollectionName);
 
         try
         {
@@ -40,8 +65,12 @@ internal static class Mover
             throw;
         }
 
-        printer.Print($"Moving audio file(s) to \"{moveToDir}\"...");
-        foreach (FileInfo file in workingDirInfo.EnumerateFiles("*.m4a"))
+        var audioFiles = workingDirInfo.EnumerateFiles("*.m4a").ToList();
+
+        if (settings.VerboseOutput)
+            printer.Print($"Moving {audioFiles.Count} audio file(s) to \"{moveToDir}\"...");
+
+        foreach (FileInfo file in audioFiles)
         {
             try
             {
@@ -49,6 +78,7 @@ internal static class Mover
                     file.FullName,
                     $"{Path.Combine(moveToDir, file.Name)}",
                     shouldOverwrite);
+
                 successCount++;
 
                 if (verbose)
@@ -61,14 +91,36 @@ internal static class Mover
             }
         }
 
-        printer.Print($"{successCount} file(s) moved in {watch.ElapsedFriendly}.");
+        try
+        {
+            var baseFileName = string.IsNullOrWhiteSpace(maybeCollectionName)
+                ? subFolderName
+                : $"{subFolderName} - {maybeCollectionName}";
+
+            if (GetCoverImage(workingDirInfo, audioFiles.Count) is FileInfo image)
+            {
+                image.MoveTo(
+                    Path.Combine(moveToDir, $"{baseFileName.Trim()}.jpg"),
+                    overwrite: false);
+
+                printer.Print("Moved cover image.");
+            }
+
+        }
+        catch (Exception ex)
+        {
+            printer.Warning($"Failed to copy the image file: {ex.Message}");
+        }
+
+        printer.Print($"Moved {successCount} audio file(s) in {watch.ElapsedFriendly}.");
+
         if (failureCount > 0)
         {
-            printer.Warning($"However, {failureCount} file(s) could not be moved.");
+            printer.Warning($"However, {failureCount} audio file(s) could not be moved.");
         }
     }
 
-    private static string GetDefaultFolderName(CollectionMetadata? maybeCollectionData, TaggingSet taggingSet)
+    private static string GetDefaultDirectoryName(CollectionMetadata? maybeCollectionData, TaggingSet taggingSet)
     {
         string workingName;
 
@@ -86,7 +138,7 @@ internal static class Mover
                 : string.Empty;
         }
 
-        return workingName.ReplaceInvalidPathChars();
+        return workingName.ReplaceInvalidPathChars().Trim();
     }
 
     private static Result<VideoMetadata> GetParsedVideoJson(TaggingSet taggingSet)

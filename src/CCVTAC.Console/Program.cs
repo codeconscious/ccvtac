@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using CCVTAC.Console.Settings;
+using CCVTAC.Console.Downloading;
 using Spectre.Console;
 using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 
@@ -192,31 +193,42 @@ internal static class Program
             }
 
             if (batchUrls.Count > 1)
+            {
                 printer.Print($"Processing batch {++currentBatch} of {batchUrls.Count}...");
+            }
 
             Watch jobWatch = new();
 
-            history.Append(url, inputTime, printer);
+            var mediaTypeResult = Downloader.GetMediaType(url);
+            if (mediaTypeResult.IsFailed)
+            {
+                printer.Error($"Could not parsed URL: {mediaTypeResult.Errors.First().Message}");
+                return NextAction.Continue;
+            }
+            var mediaType = mediaTypeResult.Value;
+            printer.Print($"{mediaType.GetType().Name} URL '{url}' detected.");
 
-            var downloadResult = Downloading.Downloader.Run(url, settings, printer);
+            history.Append(url, inputTime, settings.VerboseOutput, printer);
+
+            var downloadResult = Downloader.Run(url, mediaType, settings, printer);
             resultHandler.RegisterResult(downloadResult);
             if (downloadResult.IsFailed)
             {
                 return NextAction.Continue;
             }
 
-            var postProcessor = new PostProcessing.Setup(settings, printer);
-            postProcessor.Run(); // TODO: Think about if/how to handle leftover temp files due to errors.
+            var postProcessor = new PostProcessing.PostProcessing(settings, mediaType, printer);
+            postProcessor.Run();
 
             string batchClause = batchUrls.Count > 1
                 ? $" (batch {currentBatch} of {batchUrls.Count})"
                 : string.Empty;
-            printer.Print($"Done processing '{url}'{batchClause} in {jobWatch.ElapsedFriendly}.");
+            printer.Print($"Processed '{url}'{batchClause} in {jobWatch.ElapsedFriendly}.");
         }
 
         if (batchUrls.Count > 1)
         {
-            printer.Print($"All done with {batchUrls.Count} batches in {watch.ElapsedFriendly}.");
+            printer.Print($"\nAll done with {batchUrls.Count} batches in {watch.ElapsedFriendly}.");
         }
 
         return NextAction.Continue;
