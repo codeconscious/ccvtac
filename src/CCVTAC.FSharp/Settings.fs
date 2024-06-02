@@ -15,6 +15,7 @@ module Settings =
         [<JsonPropertyName("sleepSecondsBetweenBatches")>]   SleepSecondsBetweenBatches: uint16
         [<JsonPropertyName("verboseOutput")>]                VerboseOutput: bool
         [<JsonPropertyName("embedImages")>]                  EmbedImages: bool
+        [<JsonPropertyName("doNotEmbedUploaders")>]          DoNotEmbedUploaders: string array
         [<JsonPropertyName("ignoreUploadYearUploaders")>]    IgnoreUploadYearUploaders: string array
     }
 
@@ -60,11 +61,16 @@ module Settings =
                 let dirMissing str = not <| (Directory.Exists str)
 
                 match settings with
-                | { WorkingDirectory = w } when isEmpty w -> Error $"No working directory was specified."
-                | { WorkingDirectory = w } when dirMissing w -> Error $"Working directory \"{w}\" is missing."
-                | { MoveToDirectory = m } when isEmpty m -> Error $"No move-to directory was specified."
-                | { MoveToDirectory = m } when dirMissing m -> Error $"Move-to directory \"{m}\" is missing."
-                | _ -> Ok settings
+                | { WorkingDirectory = w } when isEmpty w ->
+                    Error $"No working directory was specified."
+                | { WorkingDirectory = w } when dirMissing w ->
+                    Error $"Working directory \"{w}\" is missing."
+                | { MoveToDirectory = m } when isEmpty m ->
+                    Error $"No move-to directory was specified."
+                | { MoveToDirectory = m } when dirMissing m ->
+                    Error $"Move-to directory \"{m}\" is missing."
+                | _ ->
+                    Ok settings
 
             try
                 path
@@ -109,5 +115,6 @@ module Settings =
                   SleepSecondsBetweenBatches = 20us
                   VerboseOutput = true
                   EmbedImages = true
+                  DoNotEmbedUploaders = [||]
                   IgnoreUploadYearUploaders = [||] }
             writeFile defaultSettings confirmedPath

@@ -4,37 +4,38 @@ namespace CCVTAC.Console.PostProcessing;
 
 internal static class Deleter
 {
-    public static void Run(string workingDirectory, bool verbose, Printer printer)
+    public static void Run(ICollection<string> filesToDelete, bool verbose, Printer printer)
     {
-        DirectoryInfo dir = new(workingDirectory);
         List<string> deletableExtensions = [".json", ".jpg"];
 
         if (verbose)
             printer.Print($"Deleting temporary {string.Join(" and ", deletableExtensions)} files...");
 
-        foreach (FileInfo file in dir.EnumerateFiles("*")
-                                     .Where(f => deletableExtensions.Contains(f.Extension)))
+        foreach (var fileName in filesToDelete)
         {
             try
             {
-                file.Delete();
+                File.Delete(fileName);
 
                 if (verbose)
-                    printer.Print($"• Deleted \"{file.Name}\"");
+                    printer.Print($"• Deleted \"{fileName}\"");
             }
             catch (Exception ex)
             {
-                printer.Error($"• Could not delete \"{file.Name}\": {ex.Message}");
+                printer.Error($"• Deletion error: {ex.Message}");
             }
         }
 
         printer.Print("Deleted temporary files.");
+    }
 
+    public static void CheckRemaining(string workingDirectory, Printer printer)
+    {
         var tempFiles = IoUtilties.Directories.GetDirectoryFiles(workingDirectory);
         if (tempFiles.Any())
         {
             printer.Warning($"{tempFiles.Count} file(s) unexpectedly remain in the working folder:");
-            tempFiles.ForEach(file => printer.Print($"• {file}"));
+            tempFiles.ForEach(file => printer.Warning($"• {file}"));
         }
     }
 }
