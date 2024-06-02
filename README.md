@@ -50,14 +50,19 @@ Sample settings file:
   "workingDirectory": "/Users/me/temp",             // A temporary home for working files
   "moveToDirectory": "/Users/me/Downloads",         // Where final audio files should be saved
   "historyFile": "/Users/me/Downloads/history.log", // Log for your entered URLs
+  "historyDisplayCount": 20,                        // Count of entries to show for `history` command
+  "splitChapters": true,                            // Split videos with chapters into separate files?
   "sleepSecondsBetweenDownloads": 10,               // Delay between video downloads in playlists and channels
   "sleepSecondsBetweenBatches": 20,                 // Delay between batches (i.e., each URL entered)
-  "splitChapters": true,                            // Split videos with chapters into separate files?
-  "historyDisplayCount": 20,                        // Count of entries to show for `history` command
   "verboseOutput": true,                            // Use `false` for quiet mode
+  "embedImages": true,                              // Is embedding video thumbnails into audio files enabled?
+  "doNotEmbedUploaders": [                          // Channel names for which the video thumbnail should
+    "Channel Name",                                 //   never be embedded in the audio file.
+    "Another Channel Name
+  ],
   "ignoreUploadYearUploaders": [                    // By default, the upload year of the video is
     "Channel Name",                                 //   saved to files' Year tag. However, this will
-    "Another channel name"                          //   not occur for videos on channels listed here.
+    "Another Channel Name"                          //   not occur for videos on channels listed here.
   ]
 }
 ```
@@ -71,11 +76,13 @@ Here's a mostly-empty version you can copy and paste:
   "workingDirectory": "",
   "moveToDirectory": ""
   "historyFile": ""
+  "historyDisplayCount": 20,
+  "splitChapters": true,
   "sleepSecondsBetweenDownloads": 10
   "sleepSecondsBetweenBatches": 20
-  "splitChapters": true,
-  "historyDisplayCount": 20,
   "verboseOutput": true,
+  "embedImages": true,
+  "doNotEmbedUploaders": [],
   "ignoreUploadYearUploaders": []
 }
 ```
