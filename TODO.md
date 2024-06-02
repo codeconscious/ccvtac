@@ -14,6 +14,7 @@ Features and improvements I'm considering in the future. Not all ideas might be 
 - Add a post-processing–only option for already-downloaded temporary files (via aborted downloads, etc.)
 - Changing, saving, and reloading of settings while running the program
 - Add audio normalization (once I find a command line tool or NuGet package that works with M4A files)
+- Disable image cropping when adding images is disabled in the settings.
 
 ## Maybe
 
@@ -26,8 +27,8 @@ Features and improvements I'm considering in the future. Not all ideas might be 
 - Count generated files for final output
 - Set up actual releases on GitHub, ideally using GitHub Actions
 - Output the counts of URL types too (e.g., "# videos, # playlists")
+- Don't download images when adding images is disabled in the settings.
 
 ## Rejected
 
 - Save errors to a file with details
-
