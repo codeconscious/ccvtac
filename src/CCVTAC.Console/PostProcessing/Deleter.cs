@@ -4,14 +4,34 @@ namespace CCVTAC.Console.PostProcessing;
 
 internal static class Deleter
 {
-    public static void Run(ICollection<string> filesToDelete, bool verbose, Printer printer)
+    internal static void Run(
+        IReadOnlyCollection<string> taggingSetFileNames,
+        CollectionMetadata? collectionMetadata,
+        string workingDirectory,
+        bool verbose,
+        Printer printer)
     {
-        List<string> deletableExtensions = [".json", ".jpg"];
+
+        ImmutableList<string> collectionFileNames;
+        var collectionFilesResult = GetCollectionFiles(collectionMetadata, workingDirectory);
+        if (collectionFilesResult.IsSuccess)
+        {
+            var files = collectionFilesResult.Value;
+            printer.Print($"Found {files.Count} collection files.");
+            collectionFileNames = files;
+        }
+        else
+        {
+            printer.Warning($"Error gathering collection files: {collectionFilesResult.Errors.First()}");
+            collectionFileNames = [];
+        }
+
+        var allFileNames = taggingSetFileNames.Concat(collectionFileNames).ToImmutableList();
 
         if (verbose)
-            printer.Print($"Deleting temporary {string.Join(" and ", deletableExtensions)} files...");
+            printer.Print($"Deleting {allFileNames.Count} temporary files...");
 
-        foreach (var fileName in filesToDelete)
+        foreach (var fileName in allFileNames)
         {
             try
             {
@@ -29,7 +49,25 @@ internal static class Deleter
         printer.Print("Deleted temporary files.");
     }
 
-    public static void CheckRemaining(string workingDirectory, Printer printer)
+    internal static Result<ImmutableList<string>> GetCollectionFiles(
+        CollectionMetadata? collectionMetadata,
+        string workingDirectory)
+    {
+        if (collectionMetadata is null)
+            return Result.Ok(ImmutableList<string>.Empty);
+
+        try
+        {
+            var id = collectionMetadata.Value.Id;
+            return Directory.GetFiles(workingDirectory, $"*{id}*").ToImmutableList();
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail(ex.Message);
+        }
+    }
+
+    internal static void CheckRemaining(string workingDirectory, Printer printer)
     {
         var tempFiles = IoUtilties.Directories.GetDirectoryFiles(workingDirectory);
         if (tempFiles.Any())

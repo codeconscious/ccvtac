@@ -23,10 +23,12 @@ public sealed class PostProcessing
     internal void Run()
     {
         Watch watch = new();
+        bool verbose = Settings.VerboseOutput;
+        string workingDirectory = Settings.WorkingDirectory;
 
         Printer.Print("Starting post-processing...");
 
-        var taggingSetsResult = GenerateTaggingSets(Settings.WorkingDirectory);
+        var taggingSetsResult = GenerateTaggingSets(workingDirectory);
         if (taggingSetsResult.IsFailed)
         {
             Printer.Error("No tagging sets were generated, so tagging cannot be done.");
@@ -34,7 +36,7 @@ public sealed class PostProcessing
         }
         var taggingSets = taggingSetsResult.Value;
 
-        var collectionJsonResult = GetCollectionJson(Settings.WorkingDirectory);
+        var collectionJsonResult = GetCollectionJson(workingDirectory);
         CollectionMetadata? collectionJson;
         if (collectionJsonResult.IsFailed)
         {
@@ -50,7 +52,7 @@ public sealed class PostProcessing
 
         if (Settings.EmbedImages)
         {
-            ImageProcessor.Run(Settings.WorkingDirectory, Settings.VerboseOutput, Printer);
+            ImageProcessor.Run(workingDirectory, verbose, Printer);
         }
 
         var tagResult = Tagger.Run(Settings, taggingSets, collectionJson, MediaType, Printer);
@@ -58,13 +60,13 @@ public sealed class PostProcessing
         {
             Printer.Print(tagResult.Value);
 
-            // AudioNormalizer.Run(UserSettings.WorkingDirectory, Printer); // TODO: normalize方法を要検討。
-            Renamer.Run(Settings.WorkingDirectory, Settings.VerboseOutput, Printer);
+            // AudioNormalizer.Run(workingDirectory, Printer); // TODO: normalize方法を要検討。
+            Renamer.Run(workingDirectory, verbose, Printer);
             Mover.Run(taggingSets, collectionJson, Settings, true, Printer);
 
             var taggingSetFileNames = taggingSets.SelectMany(set => set.AllFiles).ToImmutableList();
-            Deleter.Run(taggingSetFileNames, Settings.VerboseOutput, Printer);
-            Deleter.CheckRemaining(Settings.WorkingDirectory, Printer);
+            Deleter.Run(taggingSetFileNames, collectionJson, workingDirectory, verbose, Printer);
+            Deleter.CheckRemaining(workingDirectory, Printer);
         }
         else
         {
