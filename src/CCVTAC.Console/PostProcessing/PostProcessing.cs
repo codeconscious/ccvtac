@@ -48,7 +48,10 @@ public sealed class PostProcessing
             collectionJson = collectionJsonResult.Value;
         }
 
-        ImageProcessor.Run(Settings.WorkingDirectory, Settings.VerboseOutput, Printer);
+        if (Settings.EmbedImages)
+        {
+            ImageProcessor.Run(Settings.WorkingDirectory, Settings.VerboseOutput, Printer);
+        }
 
         var tagResult = Tagger.Run(Settings, taggingSets, collectionJson, MediaType, Printer);
         if (tagResult.IsSuccess)
@@ -58,7 +61,10 @@ public sealed class PostProcessing
             // AudioNormalizer.Run(UserSettings.WorkingDirectory, Printer); // TODO: normalize方法を要検討。
             Renamer.Run(Settings.WorkingDirectory, Settings.VerboseOutput, Printer);
             Mover.Run(taggingSets, collectionJson, Settings, true, Printer);
-            Deleter.Run(Settings.WorkingDirectory, Settings.VerboseOutput, Printer);
+
+            var taggingSetFileNames = taggingSets.SelectMany(set => set.AllFiles).ToImmutableList();
+            Deleter.Run(taggingSetFileNames, Settings.VerboseOutput, Printer);
+            Deleter.CheckRemaining(Settings.WorkingDirectory, Printer);
         }
         else
         {
