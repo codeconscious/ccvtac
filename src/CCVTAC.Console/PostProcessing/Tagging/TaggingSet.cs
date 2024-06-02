@@ -34,6 +34,8 @@ internal readonly record struct TaggingSet
     /// </summary>
     internal string ImageFilePath { get; init; }
 
+    internal IReadOnlyList<string> AllFiles => [..AudioFilePaths, JsonFilePath, ImageFilePath];
+
     /// <summary>
     /// A regex that finds all files whose filename includes a video ID.
     /// Group 1 contains the video ID itself.
@@ -62,8 +64,9 @@ internal readonly record struct TaggingSet
     }
 
     /// <summary>
-    ///     Create a collection of TaggingSets from a collection of filePaths
-    ///     related to several video IDs.
+    ///     Create a collection of TaggingSets from a collection of file paths
+    ///     related to several video IDs. Files that don't match the requirements
+    ///     will be ignored.
     /// </summary>
     /// <param name="filePaths">
     ///     A collection of file paths. Expected to contain all related audio files (>=1),
@@ -81,7 +84,7 @@ internal readonly record struct TaggingSet
         const string imageFileExt = ".jpg";
 
         return filePaths
-                    // First, get a list of all files whose filenames contain a video ID regex.
+                    // First, get regex matches of all files whose filenames contain a video ID regex.
                     .Select(f => FileNamesWithVideoIdsRegex.Match(f))
                     .Where(m => m.Success)
                     .Select(m => m.Captures.OfType<Match>().First())
@@ -93,6 +96,7 @@ internal readonly record struct TaggingSet
                     // Next, ensure the correct count of image and JSON files, ignoring those that don't match.
                     // (For thought: It might be an option to track and report the invalid ones as well.)
                     .Where(gr =>
+                        gr.Any(f => f.EndsWith(audioFileExt, StringComparison.OrdinalIgnoreCase)) &&
                         gr.Count(f => f.EndsWith(jsonFileExt, StringComparison.OrdinalIgnoreCase)) == 1 &&
                         gr.Count(f => f.EndsWith(imageFileExt, StringComparison.OrdinalIgnoreCase)) == 1)
 
