@@ -20,13 +20,20 @@ module public Downloading =
         match url with
         | Regex @"(?<=v=|v\=)([\w-]{11})(?:&list=([\w_-]+))" [ videoId ; playlistId ]
             -> Ok (PlaylistVideo (videoId, playlistId))
-        | Regex @"^([\w-]{11})$" [ id ] -> Ok (Video id)
-        | Regex @"(?<=v=|v\\=)([\w-]{11})" [ id ] -> Ok (Video id)
-        | Regex @"(?<=youtu\.be/)(.{11})" [ id ] -> Ok (Video id)
-        | Regex @"(?<=list=)(P[\w\-]+)" [ id ] -> Ok (StandardPlaylist id)
-        | Regex @"(?<=list=)(O[\w\-]+)" [ id ] -> Ok (ReleasePlaylist id)
-        | Regex @"((?:www\.)?youtube\.com\/(?:channel\/|c\/|user\/|@)(?:[\w\-]+))" [ id ] -> Ok (Channel id)
-        | _ -> Error "Unable to determine the media type of the URL."
+        | Regex @"^([\w-]{11})$" [ id ]
+            -> Ok (Video id)
+        | Regex @"(?<=v=|v\\=)([\w-]{11})" [ id ]
+            -> Ok (Video id)
+        | Regex @"(?<=youtu\.be/)(.{11})" [ id ]
+            -> Ok (Video id)
+        | Regex @"(?<=list=)(P[\w\-]+)" [ id ]
+            -> Ok (StandardPlaylist id)
+        | Regex @"(?<=list=)(O[\w\-]+)" [ id ]
+            -> Ok (ReleasePlaylist id)
+        | Regex @"((?:www\.)?youtube\.com\/(?:channel\/|c\/|user\/|@)(?:[\w\-]+))" [ id ]
+            -> Ok (Channel id)
+        | _ ->
+            Error "Unable to determine the media type of the URL."
 
     let downloadUrls mediaType =
         let fullUrl urlBase id = urlBase + id
