@@ -22,7 +22,7 @@ internal static class Deleter
         }
         else
         {
-            printer.Warning($"Error gathering collection files: {collectionFilesResult.Errors.First()}");
+            printer.Warning(collectionFilesResult.Errors.First().Message);
             collectionFileNames = [];
         }
 
@@ -63,17 +63,19 @@ internal static class Deleter
         }
         catch (Exception ex)
         {
-            return Result.Fail(ex.Message);
+            return Result.Fail($"Error collecting filenames: {ex.Message}");
         }
     }
 
-    internal static void CheckRemaining(string workingDirectory, Printer printer)
+    internal static void VerifyEmptyDirectory(string workingDirectory, Printer printer)
     {
         var tempFiles = IoUtilties.Directories.GetDirectoryFiles(workingDirectory);
-        if (tempFiles.Any())
-        {
-            printer.Warning($"{tempFiles.Count} file(s) unexpectedly remain in the working folder:");
-            tempFiles.ForEach(file => printer.Warning($"• {file}"));
-        }
+
+        if (tempFiles.IsEmpty)
+            return;
+
+        printer.Warning($"{tempFiles.Count} file(s) unexpectedly remain in the working folder:");
+        tempFiles.ForEach(file => printer.Warning($"• {file}"));
+
     }
 }
