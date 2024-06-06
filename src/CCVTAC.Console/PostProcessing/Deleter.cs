@@ -13,16 +13,16 @@ internal static class Deleter
     {
 
         ImmutableList<string> collectionFileNames;
-        var collectionFilesResult = GetCollectionFiles(collectionMetadata, workingDirectory);
-        if (collectionFilesResult.IsSuccess)
+        var getFileResult = GetCollectionFiles(collectionMetadata, workingDirectory);
+        if (getFileResult.IsSuccess)
         {
-            var files = collectionFilesResult.Value;
+            var files = getFileResult.Value;
             printer.Print($"Found {files.Count} collection files.");
             collectionFileNames = files;
         }
         else
         {
-            printer.Warning(collectionFilesResult.Errors.First().Message);
+            printer.Warning(getFileResult.Errors.First().Message);
             collectionFileNames = [];
         }
 
