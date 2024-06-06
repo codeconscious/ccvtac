@@ -11,40 +11,32 @@ internal static class Deleter
         bool verbose,
         Printer printer)
     {
-
         ImmutableList<string> collectionFileNames;
         var getFileResult = GetCollectionFiles(collectionMetadata, workingDirectory);
         if (getFileResult.IsSuccess)
         {
             var files = getFileResult.Value;
-            printer.Print($"Found {files.Count} collection files.");
             collectionFileNames = files;
+            printer.Print($"Found {files.Count} collection files.");
         }
         else
         {
-            printer.Warning(getFileResult.Errors.First().Message);
             collectionFileNames = [];
+            printer.Warning(getFileResult.Errors.First().Message);
         }
 
         var allFileNames = taggingSetFileNames.Concat(collectionFileNames).ToImmutableList();
 
+        if (allFileNames.IsEmpty)
+        {
+            printer.Warning("No files to delete were found.");
+            return;
+        }
+
         if (verbose)
             printer.Print($"Deleting {allFileNames.Count} temporary files...");
 
-        foreach (var fileName in allFileNames)
-        {
-            try
-            {
-                File.Delete(fileName);
-
-                if (verbose)
-                    printer.Print($"• Deleted \"{fileName}\"");
-            }
-            catch (Exception ex)
-            {
-                printer.Error($"• Deletion error: {ex.Message}");
-            }
-        }
+        DeleteAll(allFileNames, verbose, printer);
 
         printer.Print("Deleted temporary files.");
     }
@@ -64,6 +56,24 @@ internal static class Deleter
         catch (Exception ex)
         {
             return Result.Fail($"Error collecting filenames: {ex.Message}");
+        }
+    }
+
+    private static void DeleteAll(IEnumerable<string> fileNames, bool verbose, Printer printer)
+    {
+        foreach (var fileName in fileNames)
+        {
+            try
+            {
+                File.Delete(fileName);
+
+                if (verbose)
+                    printer.Print($"• Deleted \"{fileName}\"");
+            }
+            catch (Exception ex)
+            {
+                printer.Error($"• Deletion error: {ex.Message}");
+            }
         }
     }
 
