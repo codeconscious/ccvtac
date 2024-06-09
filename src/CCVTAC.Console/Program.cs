@@ -137,6 +137,11 @@ internal static class Program
                                  .Distinct()
                                  .ToImmutableList();
 
+        if (_quitCommands.Contains(inputUrls[0].ToLowerInvariant()))
+        {
+            return NextAction.QuitAtUserRequest;
+        }
+
         var checkedUrls = UrlHelper.SplitCombinedUrls(inputUrls);
 
         if (checkedUrls.Count > 1)
@@ -151,11 +156,6 @@ internal static class Program
 
         foreach (string url in checkedUrls)
         {
-            if (_quitCommands.Contains(url.ToLowerInvariant()))
-            {
-                return NextAction.QuitAtUserRequest;
-            }
-
             // Show the history if requested.
             if (_historyCommands.Contains(url.ToLowerInvariant()))
             {
