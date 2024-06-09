@@ -9,6 +9,8 @@ namespace CCVTAC.Console.PostProcessing;
 internal static class Mover
 {
     private static readonly Regex _playlistImageRegex = new(@"\[[OP]L[\w\d_-]+\]"); // TODO: Add channels.
+    private const string _audioFileWildcard = "*.m4a";
+    private const string _imageFileWildcard = "*.jp*";
 
     internal static void Run(
         IEnumerable<TaggingSet> taggingSets,
@@ -20,7 +22,7 @@ internal static class Mover
         Watch watch = new();
 
         bool verbose = settings.VerboseOutput;
-        DirectoryInfo workingDirInfo = new(settings.WorkingDirectory);
+        var workingDirInfo = new DirectoryInfo(settings.WorkingDirectory);
 
         string subFolderName = GetSafeSubDirectoryName(maybeCollectionData, taggingSets.First());
         string collectionName = maybeCollectionData?.Title ?? string.Empty;
@@ -29,10 +31,10 @@ internal static class Mover
         var dirResult = EnsureDirectoryExists(fullMoveToDir, verbose, printer);
         if (dirResult.IsFailed)
         {
-            return;
+            return; // The error message is printed within the above method.
         }
 
-        var audioFileNames = workingDirInfo.EnumerateFiles("*.m4a").ToList();
+        var audioFileNames = workingDirInfo.EnumerateFiles(_audioFileWildcard).ToImmutableList();
         if (audioFileNames.IsEmpty())
         {
             printer.Error("No audio filenames were found.");
@@ -66,7 +68,7 @@ internal static class Mover
 
     private static FileInfo? GetCoverImage(DirectoryInfo workingDirInfo, int audioFileCount)
     {
-        var images = workingDirInfo.EnumerateFiles("*.jpg").ToImmutableArray();
+        var images = workingDirInfo.EnumerateFiles(_imageFileWildcard).ToImmutableArray();
         if (images.IsEmpty())
             return null;
 
@@ -169,7 +171,7 @@ internal static class Mover
         }
         catch (Exception ex)
         {
-            printer.Warning($"Failed to copy the image file: {ex.Message}");
+            printer.Warning($"Error copying the image file: {ex.Message}");
         }
     }
 
