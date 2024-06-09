@@ -10,6 +10,55 @@ internal static class Mover
 {
     private static readonly Regex _playlistImageRegex = new(@"\[[OP]L[\w\d_-]+\]"); // TODO: Add channels.
 
+    internal static void Run(
+        IEnumerable<TaggingSet> taggingSets,
+        CollectionMetadata? maybeCollectionData,
+        UserSettings settings,
+        bool overwrite,
+        Printer printer)
+    {
+        Watch watch = new();
+
+        bool verbose = settings.VerboseOutput;
+        DirectoryInfo workingDirInfo = new(settings.WorkingDirectory);
+
+        string subFolderName = GetSafeSubDirectoryName(maybeCollectionData, taggingSets.First());
+        string collectionName = maybeCollectionData?.Title ?? string.Empty;
+        string fullMoveToDir = Path.Combine(settings.MoveToDirectory, subFolderName, collectionName);
+
+        var dirResult = EnsureDirectoryExists(fullMoveToDir, verbose, printer);
+        if (dirResult.IsFailed)
+        {
+            return;
+        }
+
+        var audioFileNames = workingDirInfo.EnumerateFiles("*.m4a").ToList();
+        if (audioFileNames.IsEmpty())
+        {
+            printer.Error("No audio filenames were found.");
+            return;
+        }
+
+        if (verbose)
+        {
+            printer.Print($"Moving {audioFileNames.Count} audio file(s) to \"{fullMoveToDir}\"...");
+        }
+
+        var (successCount, failureCount) =
+            MoveAudioFiles(audioFileNames, fullMoveToDir, overwrite, verbose, printer);
+
+        MoveImageFile(collectionName, subFolderName, workingDirInfo, fullMoveToDir, audioFileNames.Count, printer);
+
+        var fileLabel = successCount == 1 ? "file" : "files";
+        printer.Print($"Moved {successCount} audio {fileLabel} in {watch.ElapsedFriendly}.");
+
+        if (failureCount > 0)
+        {
+            fileLabel = failureCount == 1 ? "file": "files";
+            printer.Warning($"However, {failureCount} audio {fileLabel} could not be moved.");
+        }
+    }
+
     private static bool IsPlaylistImage(string fileName)
     {
         return _playlistImageRegex.IsMatch(fileName);
@@ -25,50 +74,51 @@ internal static class Mover
         if (playlistImages.Any())
             return playlistImages.First();
 
-        if (audioFileCount > 1 && images.Length == 1)
-            return images.First();
-        else
-            return null;
+        return audioFileCount > 1 && images.Length == 1
+            ? images.First()
+            : null;
     }
 
-    internal static void Run(
-        IEnumerable<TaggingSet> taggingSets,
-        CollectionMetadata? maybeCollectionData,
-        UserSettings settings,
-        bool shouldOverwrite,
-        Printer printer)
+    private static Result EnsureDirectoryExists(string moveToDir, bool verbose, Printer printer)
     {
-        Watch watch = new();
-
-        uint successCount = 0;
-        uint failureCount = 0;
-        bool verbose = settings.VerboseOutput;
-        DirectoryInfo workingDirInfo = new(settings.WorkingDirectory);
-
-        string subFolderName = GetDefaultDirectoryName(maybeCollectionData, taggingSets.First());
-        string maybeCollectionName = maybeCollectionData?.Title ?? string.Empty;
-        string moveToDir = Path.Combine(settings.MoveToDirectory, subFolderName, maybeCollectionName);
-
         try
         {
-            if (!Path.Exists(moveToDir))
+            if (Path.Exists(moveToDir))
+            {
+                if (verbose)
+                    printer.Print($"Found move-to directory \"{moveToDir}\".");
+
+                return Result.Ok();
+            }
+
+            if (verbose)
             {
                 printer.Print($"Creating move-to directory \"{moveToDir}\" (based on playlist metadata)... ",
                               appendLineBreak: false);
-                Directory.CreateDirectory(moveToDir);
-                printer.Print("OK!");
             }
+
+            Directory.CreateDirectory(moveToDir);
+
+            printer.Print($"Created move-to directory \"{moveToDir}\".");
+            return Result.Ok();
+
         }
         catch (Exception ex)
         {
             printer.Error($"Error creating move-to directory \"{moveToDir}\": {ex.Message}");
-            throw;
+            return Result.Fail(string.Empty);
         }
+    }
 
-        var audioFiles = workingDirInfo.EnumerateFiles("*.m4a").ToList();
-
-        if (settings.VerboseOutput)
-            printer.Print($"Moving {audioFiles.Count} audio file(s) to \"{moveToDir}\"...");
+    private static (uint successCount, uint failureCount) MoveAudioFiles(
+        ICollection<FileInfo> audioFiles,
+        string moveToDir,
+        bool overwrite,
+        bool verbose,
+        Printer printer)
+    {
+        uint successCount = 0;
+        uint failureCount = 0;
 
         foreach (FileInfo file in audioFiles)
         {
@@ -76,8 +126,8 @@ internal static class Mover
             {
                 File.Move(
                     file.FullName,
-                    $"{Path.Combine(moveToDir, file.Name)}",
-                    shouldOverwrite);
+                    Path.Combine(moveToDir, file.Name),
+                    overwrite);
 
                 successCount++;
 
@@ -91,36 +141,39 @@ internal static class Mover
             }
         }
 
+        return (successCount, failureCount);
+    }
+
+    private static void MoveImageFile(
+        string maybeCollectionName,
+        string subFolderName,
+        DirectoryInfo workingDirInfo,
+        string moveToDir,
+        int audioFileCount,
+        Printer printer)
+    {
         try
         {
             var baseFileName = string.IsNullOrWhiteSpace(maybeCollectionName)
                 ? subFolderName
                 : $"{subFolderName} - {maybeCollectionName.ReplaceInvalidPathChars()}";
 
-            if (GetCoverImage(workingDirInfo, audioFiles.Count) is FileInfo image)
+            if (GetCoverImage(workingDirInfo, audioFileCount) is FileInfo image)
             {
                 image.MoveTo(
                     Path.Combine(moveToDir, $"{baseFileName.Trim()}.jpg"),
                     overwrite: false);
 
-                printer.Print("Moved cover image.");
+                printer.Print("Moved image file.");
             }
-
         }
         catch (Exception ex)
         {
             printer.Warning($"Failed to copy the image file: {ex.Message}");
         }
-
-        printer.Print($"Moved {successCount} audio file(s) in {watch.ElapsedFriendly}.");
-
-        if (failureCount > 0)
-        {
-            printer.Warning($"However, {failureCount} audio file(s) could not be moved.");
-        }
     }
 
-    private static string GetDefaultDirectoryName(CollectionMetadata? maybeCollectionData, TaggingSet taggingSet)
+    private static string GetSafeSubDirectoryName(CollectionMetadata? maybeCollectionData, TaggingSet taggingSet)
     {
         string workingName;
 
@@ -133,6 +186,7 @@ internal static class Mover
         else
         {
             var jsonResult = GetParsedVideoJson(taggingSet);
+
             workingName = jsonResult.IsSuccess
                 ? jsonResult.Value.Uploader
                 : string.Empty;
