@@ -16,8 +16,7 @@ internal static class Directories
         string workingDirectory,
         IEnumerable<string>? customIgnoreFiles = null)
     {
-        var ignoreFiles = customIgnoreFiles?.Distinct()
-                          ?? Enumerable.Empty<string>();
+        var ignoreFiles = customIgnoreFiles?.Distinct() ?? [];
 
         return Directory.GetFiles(workingDirectory, AllFilesSearchPattern, EnumerationOptions)
                         .Where(dirFilePath =>

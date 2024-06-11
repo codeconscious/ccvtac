@@ -72,6 +72,7 @@ internal readonly record struct TaggingSet
     ///     A collection of file paths. Expected to contain all related audio files (>=1),
     ///     1 JSON file, and 1 image file for each distinct video ID.
     /// </param>
+    /// <remarks>Does not include collection (playlist or channel) metadata files.</remarks>
     internal static ImmutableList<TaggingSet> CreateSets(IEnumerable<string> filePaths)
     {
         if (filePaths is null || !filePaths.Any())
