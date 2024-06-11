@@ -9,6 +9,64 @@ namespace CCVTAC.Console.PostProcessing;
 internal static class Mover
 {
     private static readonly Regex _playlistImageRegex = new(@"\[[OP]L[\w\d_-]+\]"); // TODO: Add channels.
+    private const string _audioFileWildcard = "*.m4a";
+    private const string _imageFileWildcard = "*.jp*";
+
+    internal static void Run(
+        IEnumerable<TaggingSet> taggingSets,
+        CollectionMetadata? maybeCollectionData,
+        UserSettings settings,
+        bool overwrite,
+        Printer printer)
+    {
+        Watch watch = new();
+
+        bool verbose = settings.VerboseOutput;
+        var workingDirInfo = new DirectoryInfo(settings.WorkingDirectory);
+
+        string subFolderName = GetSafeSubDirectoryName(maybeCollectionData, taggingSets.First());
+        string collectionName = maybeCollectionData?.Title ?? string.Empty;
+        string fullMoveToDir = Path.Combine(settings.MoveToDirectory, subFolderName, collectionName);
+
+        var dirResult = EnsureDirectoryExists(fullMoveToDir, verbose, printer);
+        if (dirResult.IsFailed)
+        {
+            return; // The error message is printed within the above method.
+        }
+
+        var audioFileNames = workingDirInfo.EnumerateFiles(_audioFileWildcard).ToImmutableList();
+        if (audioFileNames.IsEmpty())
+        {
+            printer.Error("No audio filenames were found.");
+            return;
+        }
+
+        if (verbose)
+        {
+            printer.Print($"Moving {audioFileNames.Count} audio file(s) to \"{fullMoveToDir}\"...");
+        }
+
+        var (successCount, failureCount) =
+            MoveAudioFiles(audioFileNames, fullMoveToDir, overwrite, verbose, printer);
+
+        MoveImageFile(
+            collectionName,
+            subFolderName,
+            workingDirInfo,
+            fullMoveToDir,
+            audioFileNames.Count,
+            overwrite: true,
+            printer);
+
+        var fileLabel = successCount == 1 ? "file" : "files";
+        printer.Print($"Moved {successCount} audio {fileLabel} in {watch.ElapsedFriendly}.");
+
+        if (failureCount > 0)
+        {
+            fileLabel = failureCount == 1 ? "file": "files";
+            printer.Warning($"However, {failureCount} audio {fileLabel} could not be moved.");
+        }
+    }
 
     internal static void Run(
         IEnumerable<TaggingSet> taggingSets,
@@ -66,7 +124,7 @@ internal static class Mover
 
     private static FileInfo? GetCoverImage(DirectoryInfo workingDirInfo, int audioFileCount)
     {
-        var images = workingDirInfo.EnumerateFiles("*.jpg").ToImmutableArray();
+        var images = workingDirInfo.EnumerateFiles(_imageFileWildcard).ToImmutableArray();
         if (images.IsEmpty())
             return null;
 
@@ -150,6 +208,7 @@ internal static class Mover
         DirectoryInfo workingDirInfo,
         string moveToDir,
         int audioFileCount,
+        bool overwrite,
         Printer printer)
     {
         try
@@ -162,7 +221,7 @@ internal static class Mover
             {
                 image.MoveTo(
                     Path.Combine(moveToDir, $"{baseFileName.Trim()}.jpg"),
-                    overwrite: false);
+                    overwrite: overwrite);
 
                 printer.Print("Moved image file.");
             }
