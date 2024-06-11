@@ -179,7 +179,7 @@ internal static class Mover
         }
         catch (Exception ex)
         {
-            printer.Warning($"Failed to copy the image file: {ex.Message}");
+            printer.Warning($"Error copying the image file: {ex.Message}");
         }
     }
 
