@@ -4,14 +4,64 @@ namespace CCVTAC.Console.PostProcessing;
 
 internal static class Deleter
 {
-    public static void Run(ICollection<string> filesToDelete, bool verbose, Printer printer)
+    internal static void Run(
+        IReadOnlyCollection<string> taggingSetFileNames,
+        CollectionMetadata? collectionMetadata,
+        string workingDirectory,
+        bool verbose,
+        Printer printer)
     {
-        List<string> deletableExtensions = [".json", ".jpg"];
+        ImmutableList<string> collectionFileNames;
+        var getFileResult = GetCollectionFiles(collectionMetadata, workingDirectory);
+        if (getFileResult.IsSuccess)
+        {
+            var files = getFileResult.Value;
+            collectionFileNames = files;
+            printer.Print($"Found {files.Count} collection files.");
+        }
+        else
+        {
+            collectionFileNames = [];
+            printer.Warning(getFileResult.Errors.First().Message);
+        }
+
+        var allFileNames = taggingSetFileNames.Concat(collectionFileNames).ToImmutableList();
+
+        if (allFileNames.IsEmpty)
+        {
+            printer.Warning("No files to delete were found.");
+            return;
+        }
 
         if (verbose)
-            printer.Print($"Deleting temporary {string.Join(" and ", deletableExtensions)} files...");
+            printer.Print($"Deleting {allFileNames.Count} temporary files...");
 
-        foreach (var fileName in filesToDelete)
+        DeleteAll(allFileNames, verbose, printer);
+
+        printer.Print("Deleted temporary files.");
+    }
+
+    internal static Result<ImmutableList<string>> GetCollectionFiles(
+        CollectionMetadata? collectionMetadata,
+        string workingDirectory)
+    {
+        if (collectionMetadata is null)
+            return Result.Ok(ImmutableList<string>.Empty);
+
+        try
+        {
+            var id = collectionMetadata.Value.Id;
+            return Directory.GetFiles(workingDirectory, $"*{id}*").ToImmutableList();
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail($"Error collecting filenames: {ex.Message}");
+        }
+    }
+
+    private static void DeleteAll(IEnumerable<string> fileNames, bool verbose, Printer printer)
+    {
+        foreach (var fileName in fileNames)
         {
             try
             {
@@ -25,17 +75,17 @@ internal static class Deleter
                 printer.Error($"• Deletion error: {ex.Message}");
             }
         }
-
-        printer.Print("Deleted temporary files.");
     }
 
-    public static void CheckRemaining(string workingDirectory, Printer printer)
+    internal static void VerifyEmptyDirectory(string workingDirectory, Printer printer)
     {
         var tempFiles = IoUtilties.Directories.GetDirectoryFiles(workingDirectory);
-        if (tempFiles.Any())
-        {
-            printer.Warning($"{tempFiles.Count} file(s) unexpectedly remain in the working folder:");
-            tempFiles.ForEach(file => printer.Warning($"• {file}"));
-        }
+
+        if (tempFiles.IsEmpty)
+            return;
+
+        printer.Warning($"{tempFiles.Count} file(s) unexpectedly remain in the working folder:");
+        tempFiles.ForEach(file => printer.Warning($"• {file}"));
+
     }
 }
