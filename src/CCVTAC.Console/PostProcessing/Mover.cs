@@ -49,7 +49,14 @@ internal static class Mover
         var (successCount, failureCount) =
             MoveAudioFiles(audioFileNames, fullMoveToDir, overwrite, verbose, printer);
 
-        MoveImageFile(collectionName, subFolderName, workingDirInfo, fullMoveToDir, audioFileNames.Count, printer);
+        MoveImageFile(
+            collectionName,
+            subFolderName,
+            workingDirInfo,
+            fullMoveToDir,
+            audioFileNames.Count,
+            overwrite: true,
+            printer);
 
         var fileLabel = successCount == 1 ? "file" : "files";
         printer.Print($"Moved {successCount} audio {fileLabel} in {watch.ElapsedFriendly}.");
@@ -152,6 +159,7 @@ internal static class Mover
         DirectoryInfo workingDirInfo,
         string moveToDir,
         int audioFileCount,
+        bool overwrite,
         Printer printer)
     {
         try
@@ -164,7 +172,7 @@ internal static class Mover
             {
                 image.MoveTo(
                     Path.Combine(moveToDir, $"{baseFileName.Trim()}.jpg"),
-                    overwrite: false);
+                    overwrite: overwrite);
 
                 printer.Print("Moved image file.");
             }
