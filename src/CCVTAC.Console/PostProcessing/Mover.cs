@@ -166,7 +166,7 @@ internal static class Mover
         {
             var baseFileName = string.IsNullOrWhiteSpace(maybeCollectionName)
                 ? subFolderName
-                : $"{subFolderName} - {maybeCollectionName}";
+                : $"{subFolderName} - {maybeCollectionName.ReplaceInvalidPathChars()}";
 
             if (GetCoverImage(workingDirInfo, audioFileCount) is FileInfo image)
             {
