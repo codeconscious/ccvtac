@@ -131,28 +131,30 @@ internal static class Program
 
         Watch watch = new();
 
-        var batchUrls = userInput.Split(" ")
+        var inputUrls = userInput.Split(" ")
                                  .Where(i => i.HasText())
                                  .Distinct()
                                  .ToImmutableList();
 
-        if (batchUrls.Count > 1)
+        if (_quitCommands.Contains(inputUrls[0].ToLowerInvariant()))
         {
-            printer.Print($"Batch of {batchUrls.Count} URLs entered.");
-            batchUrls.ForEach(i => printer.Print($"• {i}"));
+            return NextAction.QuitAtUserRequest;
+        }
+
+        var checkedUrls = UrlHelper.SplitCombinedUrls(inputUrls);
+
+        if (checkedUrls.Count > 1)
+        {
+            printer.Print($"Batch of {checkedUrls.Count} URLs entered.");
+            checkedUrls.ForEach(i => printer.Print($"• {i}"));
             printer.PrintEmptyLines(1);
         }
 
         nuint currentBatch = 0;
         bool haveProcessedAny = false;
 
-        foreach (string url in batchUrls)
+        foreach (string url in checkedUrls)
         {
-            if (_quitCommands.Contains(url.ToLowerInvariant()))
-            {
-                return NextAction.QuitAtUserRequest;
-            }
-
             // Show the history if requested.
             if (_historyCommands.Contains(url.ToLowerInvariant()))
             {
@@ -192,9 +194,9 @@ internal static class Program
                 haveProcessedAny = true;
             }
 
-            if (batchUrls.Count > 1)
+            if (checkedUrls.Count > 1)
             {
-                printer.Print($"Processing batch {++currentBatch} of {batchUrls.Count}...");
+                printer.Print($"Processing batch {++currentBatch} of {checkedUrls.Count}...");
             }
 
             Watch jobWatch = new();
@@ -202,7 +204,7 @@ internal static class Program
             var mediaTypeResult = Downloader.GetMediaType(url);
             if (mediaTypeResult.IsFailed)
             {
-                printer.Error($"Could not parsed URL: {mediaTypeResult.Errors.First().Message}");
+                printer.Error($"Error parsing URL {url}: {mediaTypeResult.Errors.First().Message}");
                 return NextAction.Continue;
             }
             var mediaType = mediaTypeResult.Value;
@@ -220,15 +222,15 @@ internal static class Program
             var postProcessor = new PostProcessing.PostProcessing(settings, mediaType, printer);
             postProcessor.Run();
 
-            string batchClause = batchUrls.Count > 1
-                ? $" (batch {currentBatch} of {batchUrls.Count})"
+            string batchClause = checkedUrls.Count > 1
+                ? $" (batch {currentBatch} of {checkedUrls.Count})"
                 : string.Empty;
             printer.Print($"Processed '{url}'{batchClause} in {jobWatch.ElapsedFriendly}.");
         }
 
-        if (batchUrls.Count > 1)
+        if (checkedUrls.Count > 1)
         {
-            printer.Print($"\nAll done with {batchUrls.Count} batches in {watch.ElapsedFriendly}.");
+            printer.Print($"\nAll done with {checkedUrls.Count} batches in {watch.ElapsedFriendly}.");
         }
 
         return NextAction.Continue;
