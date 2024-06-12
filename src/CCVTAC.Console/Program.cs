@@ -3,7 +3,6 @@ using CCVTAC.Console.Settings;
 using CCVTAC.Console.Downloading;
 using Spectre.Console;
 using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
-using System.Text.RegularExpressions;
 
 namespace CCVTAC.Console;
 
