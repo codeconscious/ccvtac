@@ -30,10 +30,10 @@ public static class UrlHelper
             var indexPairs =
                 startIndices
                     .Select((si, itemIndex) => {
-                            var end = itemIndex == 0 // The last URL entered by user.
+                            int endIndex = itemIndex == 0 // If the last URL entered by user.
                                 ? url.Length
                                 : startIndices[itemIndex-1];
-                            return new IndexPair(si, end);
+                            return new IndexPair(si, endIndex);
                         })
                     .ToImmutableList();
 
