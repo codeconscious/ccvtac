@@ -33,19 +33,19 @@ internal static class Program
                 : _defaultSettingsFileName;
 
         UserSettings settings;
-        var result = SettingsAdapter.ProcessSettings(maybeSettingsPath, printer);
-        if (result.IsFailed)
+        var settingsResult = SettingsAdapter.ProcessSettings(maybeSettingsPath, printer);
+        if (settingsResult.IsFailed)
         {
-            printer.Errors(result.Errors.Select(e => e.Message));
+            printer.Errors(settingsResult.Errors.Select(e => e.Message));
             return;
         }
-        else if (result.Value is null)
+        else if (settingsResult.Value is null)
         {
             return;
         }
         else
         {
-            settings = result.Value;
+            settings = settingsResult.Value;
         }
         SettingsAdapter.PrintSummary(settings, printer, header: "Settings loaded OK.");
 
