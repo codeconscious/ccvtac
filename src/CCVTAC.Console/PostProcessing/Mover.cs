@@ -108,7 +108,7 @@ internal static class Mover
 
             Directory.CreateDirectory(moveToDir);
 
-            printer.Print($"Created move-to directory \"{moveToDir}\".");
+            printer.Print("OK.");
             return Result.Ok();
 
         }
