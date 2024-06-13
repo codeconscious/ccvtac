@@ -46,7 +46,7 @@ internal static class Renamer
             "%<1>s - %<2>s [%<3>s]",
             "PERSON - TRACK ℗ YEAR"),
         new(
-            new Regex(@"(.+?)(?: - )(.+?) \[[\w⧸]+\] .+ \(([\d\?？]{4})\)"),
+            new Regex(@"(.+?)(?: - )(.+?) (?:\[[\w⧸]+\] .+ )?\(([\d\?？]{4})\)"),
             "%<1>s - %<2>s [%<3>s]",
             "PERSON - TRACK [YEAR]"),
         new(
