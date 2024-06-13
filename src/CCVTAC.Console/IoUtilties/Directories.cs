@@ -25,34 +25,19 @@ internal static class Directories
                         .ToImmutableList();
     }
 
-    internal static Result CheckIfEmpty(string directory)
+    internal static Result WarnIfAnyFiles(string directory, Printer printer)
     {
-        var files = GetDirectoryFiles(directory);
+        var fileNames = GetDirectoryFiles(directory);
 
-        if (files.IsEmpty)
+        if (fileNames.IsEmpty)
         {
             return Result.Ok();
         }
 
-        var errors = files.Select(f => new Error(f));
-        return Result.Fail(errors);
-    }
-
-    internal static Result WarnIfAnyFiles(string directory, Printer printer)
-    {
-        var result = CheckIfEmpty(directory);
-
-        if (result.IsSuccess)
-        {
-            return result;
-        }
-
-        var files = result.Errors.Select(e => e.Message).ToImmutableList();
-        var fileLabel = files.Count == 1 ? "file remains" : "files remain";
-        var summary = $"{files.Count} {fileLabel} in the working directory:";
-
+        var filesRemainLabel = fileNames.Count == 1 ? "file remains" : "files remain";
+        var summary = $"{fileNames.Count} {filesRemainLabel} in the working directory:";
         printer.Error(summary);
-        files.ForEach(file => printer.Warning($"• {file}"));
+        fileNames.ForEach(file => printer.Warning($"• {file}"));
 
         return Result.Fail(summary);
     }
