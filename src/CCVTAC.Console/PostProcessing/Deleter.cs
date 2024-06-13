@@ -76,16 +76,4 @@ internal static class Deleter
             }
         }
     }
-
-    internal static void VerifyEmptyDirectory(string workingDirectory, Printer printer)
-    {
-        var tempFiles = IoUtilties.Directories.GetDirectoryFiles(workingDirectory);
-
-        if (tempFiles.IsEmpty)
-            return;
-
-        printer.Warning($"{tempFiles.Count} file(s) unexpectedly remain in the working folder:");
-        tempFiles.ForEach(file => printer.Warning($"• {file}"));
-
-    }
 }

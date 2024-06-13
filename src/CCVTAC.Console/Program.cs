@@ -84,21 +84,20 @@ internal static class Program
     private static void Start(UserSettings settings, History history, Printer printer)
     {
         // Verify the external program for downloading is installed on the system.
-        if (Downloading.Downloader.ExternalTool.ProgramExists() is { IsFailed: true })
+        if (Downloader.ExternalTool.ProgramExists() is { IsFailed: true })
         {
             printer.Error(
-                $"To use this program, please first install {Downloading.Downloader.ExternalTool.Name} " +
-                $"({Downloading.Downloader.ExternalTool.Url}) on this system.");
+                $"To use this program, please first install {Downloader.ExternalTool.Name} " +
+                $"({Downloader.ExternalTool.Url}) on this system.");
             printer.Print("Pass '--help' to this program for more information.");
             return;
         }
 
         // The working directory should start empty.
-        var tempFiles = IoUtilties.Directories.GetDirectoryFiles(settings.WorkingDirectory);
-        if (tempFiles.Any())
+        var workingDirResult = IoUtilties.Directories.WarnIfAnyFiles(settings.WorkingDirectory, printer);
+        if (workingDirResult.IsFailed)
         {
-            printer.Error($"Aborting due to {tempFiles.Count} file(s) unexpectedly found in the working directory ({settings.WorkingDirectory}):");
-            tempFiles.ForEach(file => printer.Warning($"• {file}"));
+            printer.Print($"Aborting...");
             return;
         }
 
