@@ -19,7 +19,9 @@ internal static class Deleter
             collectionFileNames = files;
 
             if (verbose)
+            {
                 printer.Print($"Found {files.Count} collection files.");
+            }
         }
         else
         {
