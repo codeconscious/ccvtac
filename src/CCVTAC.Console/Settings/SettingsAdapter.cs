@@ -27,7 +27,9 @@ public static class SettingsAdapter
             {
                 var result = FSharp.Settings.IO.Read(path);
                 if (result is { IsError: true })
+                {
                     return Result.Fail($"Settings validation error: {result.ErrorValue}");
+                }
 
                 return Result.Ok(result.ResultValue);
             }
@@ -41,7 +43,9 @@ public static class SettingsAdapter
         {
             var result = FSharp.Settings.IO.WriteDefaultFile(path);
             if (result is { IsError: true })
+            {
                 return Result.Fail($"Unexpected error writing the default settings: {result.ErrorValue}");
+            }
 
             printer.Print(result.ResultValue); // The new-file message.
             return Result.Ok();
