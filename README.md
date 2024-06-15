@@ -91,7 +91,7 @@ Here's a mostly-empty version you can copy and paste:
 
 Once your settings are ready, run the application with `dotnet run`. Optionally, pass `-h` or `--help` for instructions (e.g., `dotnet run -- --help`).
 
-When the application is running, simply enter at least one YouTube media URL (video, playlist, or channel) at the prompt and press the Enter key. Separate multiple URLs by spaces.
+When the application is running, simply enter at least one YouTube media URL (video, playlist, or channel) at the prompt and press the Enter key. You can optionally omit spaces between the URLs.
 
 Enter `quit` or `q` to quit.
 

@@ -50,7 +50,7 @@ public static class Help
 
         When the application is running, simply enter at least one YouTube media URL
         (video, playlist, or channel) at the prompt and press the Enter key.
-        Separate multiple URLs by spaces.
+        You can optionally omit spaces between the URLs.
 
         Enter `quit` or `q` to quit.
 
