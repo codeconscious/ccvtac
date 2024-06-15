@@ -9,15 +9,13 @@ namespace CCVTAC.Console.PostProcessing;
 
 public sealed class PostProcessing
 {
-    public UserSettings Settings { get; }
-    public Printer Printer { get; }
-    public MediaType MediaType { get; }
+    private UserSettings Settings { get; }
+    private MediaType MediaType { get; }
+    private Printer Printer { get; }
 
     public PostProcessing(UserSettings settings, MediaType mediaType, Printer printer)
     {
-        Settings = settings;
-        Printer = printer;
-        MediaType = mediaType;
+        (Settings, MediaType, Printer) = (settings, mediaType, printer);
     }
 
     internal void Run()
