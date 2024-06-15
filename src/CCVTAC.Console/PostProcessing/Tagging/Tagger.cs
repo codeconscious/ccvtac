@@ -187,7 +187,7 @@ internal static class Tagger
             else
             {
                 if (verbose)
-                printer.Print("Skipping image embedding.");
+                    printer.Print("Skipping image embedding.");
             }
 
             taggedFile.Save();
