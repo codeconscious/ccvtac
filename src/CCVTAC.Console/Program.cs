@@ -13,7 +13,7 @@ internal static class Program
     private static readonly string[] _settingsFileCommands = ["-s", "--settings"];
     private static readonly string[] _quitCommands = ["q", "quit", "exit", "bye"];
     private const string _urlPrompt =
-        "Enter one or more YouTube media URLs (separated by spaces), 'history', or 'quit':\n▶︎";
+        "Enter one or more YouTube media URLs (spaces are optional), 'history', or 'quit':\n▶︎";
 
     private const string _defaultSettingsFileName = "settings.json";
 
