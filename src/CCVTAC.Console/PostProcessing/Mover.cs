@@ -8,7 +8,7 @@ namespace CCVTAC.Console.PostProcessing;
 
 internal static class Mover
 {
-    private static readonly Regex _playlistImageRegex = new(@"\[[OP]L[\w\d_-]+\]"); // TODO: Add channels.
+    private static readonly Regex _playlistImageRegex = new(@"\[[OP]L[\w\d_-]{12,}\]");
     private const string _audioFileWildcard = "*.m4a";
     private const string _imageFileWildcard = "*.jp*";
 
@@ -77,11 +77,15 @@ internal static class Mover
     {
         var images = workingDirInfo.EnumerateFiles(_imageFileWildcard).ToImmutableArray();
         if (images.IsEmpty())
+        {
             return null;
+        }
 
         var playlistImages = images.Where(i => IsPlaylistImage(i.FullName));
         if (playlistImages.Any())
+        {
             return playlistImages.First();
+        }
 
         return audioFileCount > 1 && images.Length == 1
             ? images.First()
