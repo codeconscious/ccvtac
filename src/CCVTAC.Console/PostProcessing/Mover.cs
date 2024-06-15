@@ -99,7 +99,9 @@ internal static class Mover
             if (Path.Exists(moveToDir))
             {
                 if (verbose)
+                {
                     printer.Print($"Found move-to directory \"{moveToDir}\".");
+                }
 
                 return Result.Ok();
             }
@@ -149,7 +151,9 @@ internal static class Mover
                 successCount++;
 
                 if (verbose)
+                {
                     printer.Print($"• Moved \"{file.Name}\"");
+                }
             }
             catch (Exception ex)
             {
@@ -225,10 +229,9 @@ internal static class Mover
             return Result.Fail($"Error reading JSON file \"{taggingSet.JsonFilePath}\": {ex.Message}.");
         }
 
-        VideoMetadata videoData;
         try
         {
-            videoData = JsonSerializer.Deserialize<VideoMetadata>(json);
+            var videoData = JsonSerializer.Deserialize<VideoMetadata>(json);
             return Result.Ok(videoData);
         }
         catch (JsonException ex)
