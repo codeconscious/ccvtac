@@ -75,8 +75,10 @@ public static class SettingsAdapter
         table.Columns[1].Width = 100; // Ensure maximum width.
 
         var settingPairs = FSharp.Settings.Summarize(settings);
-        settingPairs.ToList().ForEach(pair =>
-            table.AddRow(pair.Item1, pair.Item2));
+        foreach (var pair in settingPairs)
+        {
+            table.AddRow(pair.Item1, pair.Item2);
+        }
 
         printer.Print(table);
     }
