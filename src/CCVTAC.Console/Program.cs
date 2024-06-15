@@ -94,8 +94,8 @@ internal static class Program
         }
 
         // The working directory should start empty.
-        var workingDirResult = IoUtilties.Directories.WarnIfAnyFiles(settings.WorkingDirectory, printer);
-        if (workingDirResult.IsFailed)
+        var emptyDirResult = IoUtilties.Directories.WarnIfAnyFiles(settings.WorkingDirectory, printer);
+        if (emptyDirResult.IsFailed)
         {
             printer.Print($"Aborting...");
             return;
