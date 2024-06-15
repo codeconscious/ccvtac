@@ -4,7 +4,7 @@ namespace CCVTAC.Console;
 
 public static class UrlHelper
 {
-    private static readonly Regex _httpsRegex = new("https:");
+    private static readonly Regex _httpsRegex = new("(?:https:|history)");
 
     private record IndexPair(int Start, int End);
 
