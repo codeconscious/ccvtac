@@ -24,4 +24,21 @@ internal static class Directories
                                 dirFilePath.EndsWith(ignoreFile)))
                         .ToImmutableList();
     }
+
+    internal static Result WarnIfAnyFiles(string directory, Printer printer)
+    {
+        var fileNames = GetDirectoryFiles(directory);
+
+        if (fileNames.IsEmpty)
+        {
+            return Result.Ok();
+        }
+
+        var filesRemainLabel = fileNames.Count == 1 ? "file remains" : "files remain";
+        var summary = $"{fileNames.Count} {filesRemainLabel} in the working directory:";
+        printer.Error(summary);
+        fileNames.ForEach(file => printer.Warning($"• {file}"));
+
+        return Result.Fail(summary);
+    }
 }
