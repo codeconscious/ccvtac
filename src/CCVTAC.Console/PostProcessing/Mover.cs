@@ -108,7 +108,11 @@ internal static class Mover
 
             Directory.CreateDirectory(moveToDir);
 
-            printer.Print("OK.");
+            if (verbose)
+            {
+                printer.Print("OK.");
+            }
+
             return Result.Ok();
 
         }

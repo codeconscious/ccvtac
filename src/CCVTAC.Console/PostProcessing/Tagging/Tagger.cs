@@ -78,11 +78,13 @@ internal static class Tagger
                               CollectionMetadata? collectionData,
                               Printer printer)
     {
+        bool verbose = settings.VerboseOutput;
+
         try
         {
             string audioFileName = Path.GetFileName(audioFilePath);
 
-            if (settings.VerboseOutput)
+            if (verbose)
                 printer.Print($"Current audio file: \"{audioFileName}\"");
 
             using TaggedFile taggedFile = TaggedFile.Create(audioFilePath);
@@ -90,14 +92,14 @@ internal static class Tagger
 
             if (videoData.Track is string metadataTitle)
             {
-                if (settings.VerboseOutput)
+                if (verbose)
                     printer.Print($"• Using metadata title \"{metadataTitle}\"");
 
                 taggedFile.Tag.Title = metadataTitle;
             }
             else
             {
-                if (settings.VerboseOutput)
+                if (verbose)
                     printer.Print($"• Found title \"{taggedFile.Tag.Title}\"");
 
                 taggedFile.Tag.Title = tagDetector.DetectTitle(videoData, videoData.Title);
@@ -111,12 +113,12 @@ internal static class Tagger
                     : $" (extracted from \"{metadataArtists}\")";
                 taggedFile.Tag.Performers = [firstArtist];
 
-                if (settings.VerboseOutput)
+                if (verbose)
                     printer.Print($"• Using metadata artist \"{firstArtist}\"{diffSummary}");
             }
             else if (tagDetector.DetectArtist(videoData) is string artist)
             {
-                if (settings.VerboseOutput)
+                if (verbose)
                     printer.Print($"• Found artist \"{artist}\"");
 
                 taggedFile.Tag.Performers = [artist];
@@ -124,14 +126,14 @@ internal static class Tagger
 
             if (videoData.Album is string metadataAlbum)
             {
-                if (settings.VerboseOutput)
+                if (verbose)
                     printer.Print($"• Using metadata album \"{metadataAlbum}\"");
 
                 taggedFile.Tag.Album = metadataAlbum;
             }
             else if (tagDetector.DetectAlbum(videoData, collectionData?.Title) is string album)
             {
-                if (settings.VerboseOutput)
+                if (verbose)
                     printer.Print($"• Found album \"{album}\"");
 
                 taggedFile.Tag.Album = album;
@@ -139,7 +141,7 @@ internal static class Tagger
 
             if (tagDetector.DetectComposers(videoData) is string composers)
             {
-                if (settings.VerboseOutput)
+                if (verbose)
                     printer.Print($"• Found composer(s) \"{composers}\"");
 
                 taggedFile.Tag.Composers = [composers];
@@ -147,7 +149,7 @@ internal static class Tagger
 
             if (videoData.PlaylistIndex is uint trackNo)
             {
-                if (settings.VerboseOutput)
+                if (verbose)
                     printer.Print($"• Using playlist index of {trackNo} for track number");
 
                 taggedFile.Tag.Track = trackNo;
@@ -155,7 +157,7 @@ internal static class Tagger
 
             if (videoData.ReleaseYear is uint releaseYear)
             {
-                if (settings.VerboseOutput)
+                if (verbose)
                     printer.Print($"• Using metadata release year \"{releaseYear}\"");
 
                 taggedFile.Tag.Year = releaseYear;
@@ -166,7 +168,7 @@ internal static class Tagger
 
                 if (tagDetector.DetectReleaseYear(videoData, maybeDefaultYear) is ushort year)
                 {
-                    if (settings.VerboseOutput)
+                    if (verbose)
                         printer.Print($"• Found year \"{year}\"");
 
                     taggedFile.Tag.Year = year;
@@ -180,15 +182,16 @@ internal static class Tagger
                 imageFilePath is not null)
             {
                 printer.Print("Embedding the image.");
-                WriteImage(taggedFile, imageFilePath, settings.VerboseOutput, printer);
+                WriteImage(taggedFile, imageFilePath, verbose, printer);
             }
             else
             {
-                printer.Print("Skipping image embedding.");
+                if (verbose)
+                    printer.Print("Skipping image embedding.");
             }
 
             taggedFile.Save();
-            if (settings.VerboseOutput)
+            if (verbose)
                 printer.Print($"Wrote tags to \"{audioFileName}\".");
         }
         catch (Exception ex)
