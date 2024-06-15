@@ -3,7 +3,7 @@ using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 
 namespace CCVTAC.Console.Settings;
 
-public class SettingsAdapter
+public static class SettingsAdapter
 {
     /// <summary>
     /// Reads settings or creates a new default settings file.
