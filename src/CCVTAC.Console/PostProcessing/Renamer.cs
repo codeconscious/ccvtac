@@ -16,95 +16,95 @@ internal static class Renamer
         [
             // Universal, to always be run first.
             new(
-                new Regex(@"\s\[[\w_-]{11}\](?=\.\w{3,5})"),
+                new(@"\s\[[\w_-]{11}\](?=\.\w{3,5})"),
                 string.Empty,
                 "Remove trailing video IDs (recommend running this first)"),
             new(
-                new Regex(@"\s{2,}"),
+                new(@"\s{2,}"),
                 " ",
                 "Remove extra spaces"),
             new(
-                new Regex(@" ⧸ "),
+                new(@" ⧸ "),
                 " - "),
 
             // Various patterns
             new(
-                new Regex(@"(?<= - )\d{3} (\d{1,3})\.?\s?"),
+                new(@"(?<= - )\d{3} (\d{1,3})\.?\s?"),
                 "%<1>s - ",
                 "Remove and reformat duplicate track numbers"),
             new(
-                new Regex(@"\s*[(（【［\[\-]?(?:[Oo]fficial +|OFFICIAL +)?(?:HD )?(?:[Mm]usic [Vv]ideo|MUSIC VIDEO|[Ll]yric [Vv]ideo|LYRIC VIDEO|[Vv]ideo|VIDEO|[Aa]udio|[Vv]isualizer|[Vv]isualiser|AUDIO|[Ff]ull (?:[Aa]lbum|LP|EP)|M(?:[_/])?V)[)】］）\]\-]?"),
+                new(@"\s*[(（【［\[\-]?(?:[Oo]fficial +|OFFICIAL +)?(?:HD )?(?:[Mm]usic [Vv]ideo|MUSIC VIDEO|[Ll]yric [Vv]ideo|LYRIC VIDEO|[Vv]ideo|VIDEO|[Aa]udio|[Vv]isualizer|[Vv]isualiser|AUDIO|[Ff]ull (?:[Aa]lbum|LP|EP)|M(?:[_/])?V)[)】］）\]\-]?"),
                 string.Empty,
                 "Remove unneeded labels"),
             new(
-                new Regex("""\s?[\(（]歌詞入り[\)）]"""),
+                new("""\s?[\(（]歌詞入り[\)）]"""),
                 string.Empty,
                 "Remove \" (歌詞入り)\""),
             new(
-                new Regex("""【(.+)】(.+)"""), // 【person】title
+                new("""【(.+)】(.+)"""), // 【person】title
                 "%<1>s - %<2>s",
                 "PERSON - TRACK"),
             new(
-                new Regex("""(.+?) - (.+?) ℗ ([\d\?？]{4})"""),
+                new("""(.+?) - (.+?) ℗ ([\d\?？]{4})"""),
                 "%<1>s - %<2>s [%<3>s]",
                 "PERSON - TRACK ℗ YEAR"),
             new(
-                new Regex(@"(.+?)(?: - )(.+?) (?:\[[\w⧸]+\] .+ )?\(([\d\?？]{4})\)"),
+                new(@"(.+?)(?: - )(.+?) (?:\[[\w⧸]+\] .+ )?\(([\d\?？]{4})\)"),
                 "%<1>s - %<2>s [%<3>s]",
                 "PERSON - TRACK [YEAR]"),
             new(
-                new Regex(@"^(.+?)(?: - )?\s?[｢「『【](.+)[」｣』】]\s?\[?([12]\d{3})\]?(?:\s?MV)?"),
+                new(@"^(.+?)(?: - )?\s?[｢「『【](.+)[」｣』】]\s?\[?([12]\d{3})\]?(?:\s?MV)?"),
                 "%<1>s - %<2>s [%<3>s]",
                 "Reformat 'PERSON「TITLE」YEAR' and 'PERSON「TITLE」[YEAR]'"),
             new(
-                new Regex(@"^(.+?)(?: - )?\s?[｢「『【](.+?)[」｣』】](?:\s?MV)?(?=\.\w{3,4})"),
+                new(@"^(.+?)(?: - )?\s?[｢「『【](.+?)[」｣』】](?:\s?MV)?(?=\.\w{3,4})"),
                 "%<1>s - %<2>s",
                 "Reformat 'PERSON「TITLE」' (alone, not followed by anything)"),
             new(
-                new Regex(@"^(.+?)(?: - )?\s?([｢「『【].+?[」｣』】](?:\s?MV)?.*)(?=\.\w{3,4})"),
+                new(@"^(.+?)(?: - )?\s?([｢「『【].+?[」｣』】](?:\s?MV)?.*)(?=\.\w{3,4})"),
                 "%<1>s - %<2>s",
                 "Reformat 'PERSON「TITLE」' followed by other info"),
             new(
-                new Regex(@"(^.+) \[\s(.+)\s\]"),
+                new(@"(^.+) \[\s(.+)\s\]"),
                 "%<1>s - %<2>s",
                 "Reformat 'ARTIST [ TITLE ]'"),
             new(
-                new Regex(@"^(.+)\s{1,}-\s{1,}['＂](.+)['＂]"),
+                new(@"^(.+)\s{1,}-\s{1,}['＂](.+)['＂]"),
                 "%<1>s - %<2>s",
                 """Reformat 'ARTIST - 'TITLE' ]', etc."""),
             new(
-                new Regex(@"^(.+?)(?: - [｢「『【])(.+)(?:[」｣』】]).*(?=（Full Ver.）)"),
+                new(@"^(.+?)(?: - [｢「『【])(.+)(?:[」｣』】]).*(?=（Full Ver.）)"),
                 "%<1>s - %<2>s",
                 "Reformat 'ARTIST - \'TITLE\' ]'"),
             new(
-                new Regex(@"(.+) [-–] (.+) \((\d{4}).+\) [-–] (\d{1,3}) (.+)"),
+                new(@"(.+) [-–] (.+) \((\d{4}).+\) [-–] (\d{1,3}) (.+)"),
                 "%<1>s - %<2>s [%<3>s] - %<4>s - %<5>s",
                 "ARTIST - ALBUM (YEAR ...) - TRACK TITLE"),
             new(
-                new Regex(@"◆(.+?)(?:\d{1,2}(?:st|nd|rd|th)アルバム) [-–] 「(.+)」 .+ [-–] (\d{1,3}) [-–] (.+)"),
+                new(@"◆(.+?)(?:\d{1,2}(?:st|nd|rd|th)アルバム) [-–] 「(.+)」 .+ [-–] (\d{1,3}) [-–] (.+)"),
                 "%<1>s - %<2>s - %<3>s - %<4>s",
                 "◆ARTIST(...) - 「ALBUM」 ... - TRACK - TITLE"),
             new(
-                new Regex(@"(\d+) - \[(feat.+)\] (.+) ⧸ (.+)(?=\.\w{3,4})"),
+                new(@"(\d+) - \[(feat.+)\] (.+) ⧸ (.+)(?=\.\w{3,4})"),
                 "%<4>s - %<4>s - %<1>s - %<3>s (%<2>s)"
             ),
             new(
-                new Regex(@"(.+) ?⧸ ?(.+)(?= ：(?: \w+)?\.\w{3,4})"),
+                new(@"(.+) ?⧸ ?(.+)(?= ：(?: \w+)?\.\w{3,4})"),
                 "%<2>s - %<1>s"
             ),
             new(
-                new Regex(@"(.+) \- (.+) \[.+?\] ([12]\d{3})[^\.]+"),
+                new(@"(.+) \- (.+) \[.+?\] ([12]\d{3})[^\.]+"),
                 "%<1>s - %<2>s [%<3>s]",
                 "TITLE - ARTIST [...] YEAR ... (excluding the extension)"
             ),
 
             // Cleanup:
             new(
-                new Regex(@" - - "),
+                new(@" - - "),
                 " - ",
                 "Compress doubled hyphens"),
             new(
-                new Regex(@" – "),
+                new(@" – "),
                 " - ",
                 "Replace en dashes with hyphens")
         ];
