@@ -1,115 +1,13 @@
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 
 namespace CCVTAC.Console.PostProcessing;
 
 internal static class Renamer
 {
-    private readonly record struct RenamePattern(
-        Regex Regex,
-        string ReplaceWithPattern,
-        string? Description = null);
-
-    // TODO: Convert this into a setting.
-    private static readonly IReadOnlyList<RenamePattern> RenamePatterns =
-        [
-            // Universal, to always be run first.
-            new(
-                new(@"\s\[[\w_-]{11}\](?=\.\w{3,5})"),
-                string.Empty,
-                "Remove trailing video IDs (recommend running this first)"),
-            new(
-                new(@"\s{2,}"),
-                " ",
-                "Remove extra spaces"),
-            new(
-                new(@" ⧸ "),
-                " - "),
-
-            // Various patterns
-            new(
-                new(@"(?<= - )\d{3} (\d{1,3})\.?\s?"),
-                "%<1>s - ",
-                "Remove and reformat duplicate track numbers"),
-            new(
-                new(@"\s*[(（【［\[\-]?(?:[Oo]fficial +|OFFICIAL +)?(?:HD )?(?:[Mm]usic [Vv]ideo|MUSIC VIDEO|[Ll]yric [Vv]ideo|LYRIC VIDEO|[Vv]ideo|VIDEO|[Aa]udio|[Vv]isualizer|[Vv]isualiser|AUDIO|[Ff]ull (?:[Aa]lbum|LP|EP)|M(?:[_/])?V)[)】］）\]\-]?"),
-                string.Empty,
-                "Remove unneeded labels"),
-            new(
-                new("""\s?[\(（]歌詞入り[\)）]"""),
-                string.Empty,
-                "Remove \" (歌詞入り)\""),
-            new(
-                new("""【(.+)】(.+)"""), // 【person】title
-                "%<1>s - %<2>s",
-                "PERSON - TRACK"),
-            new(
-                new("""(.+?) - (.+?) ℗ ([\d\?？]{4})"""),
-                "%<1>s - %<2>s [%<3>s]",
-                "PERSON - TRACK ℗ YEAR"),
-            new(
-                new(@"(.+?)(?: - )(.+?) (?:\[[\w⧸]+\] .+ )?\(([\d\?？]{4})\)"),
-                "%<1>s - %<2>s [%<3>s]",
-                "PERSON - TRACK [YEAR]"),
-            new(
-                new(@"^(.+?)(?: - )?\s?[｢「『【](.+)[」｣』】]\s?\[?([12]\d{3})\]?(?:\s?MV)?"),
-                "%<1>s - %<2>s [%<3>s]",
-                "Reformat 'PERSON「TITLE」YEAR' and 'PERSON「TITLE」[YEAR]'"),
-            new(
-                new(@"^(.+?)(?: - )?\s?[｢「『【](.+?)[」｣』】](?:\s?MV)?(?=\.\w{3,4})"),
-                "%<1>s - %<2>s",
-                "Reformat 'PERSON「TITLE」' (alone, not followed by anything)"),
-            new(
-                new(@"^(.+?)(?: - )?\s?([｢「『【].+?[」｣』】](?:\s?MV)?.*)(?=\.\w{3,4})"),
-                "%<1>s - %<2>s",
-                "Reformat 'PERSON「TITLE」' followed by other info"),
-            new(
-                new(@"(^.+) \[\s(.+)\s\]"),
-                "%<1>s - %<2>s",
-                "Reformat 'ARTIST [ TITLE ]'"),
-            new(
-                new(@"^(.+)\s{1,}-\s{1,}['＂](.+)['＂]"),
-                "%<1>s - %<2>s",
-                """Reformat 'ARTIST - 'TITLE' ]', etc."""),
-            new(
-                new(@"^(.+?)(?: - [｢「『【])(.+)(?:[」｣』】]).*(?=（Full Ver.）)"),
-                "%<1>s - %<2>s",
-                "Reformat 'ARTIST - \'TITLE\' ]'"),
-            new(
-                new(@"(.+) [-–] (.+) \((\d{4}).+\) [-–] (\d{1,3}) (.+)"),
-                "%<1>s - %<2>s [%<3>s] - %<4>s - %<5>s",
-                "ARTIST - ALBUM (YEAR ...) - TRACK TITLE"),
-            new(
-                new(@"◆(.+?)(?:\d{1,2}(?:st|nd|rd|th)アルバム) [-–] 「(.+)」 .+ [-–] (\d{1,3}) [-–] (.+)"),
-                "%<1>s - %<2>s - %<3>s - %<4>s",
-                "◆ARTIST(...) - 「ALBUM」 ... - TRACK - TITLE"),
-            new(
-                new(@"(\d+) - \[(feat.+)\] (.+) ⧸ (.+)(?=\.\w{3,4})"),
-                "%<4>s - %<4>s - %<1>s - %<3>s (%<2>s)"
-            ),
-            new(
-                new(@"(.+) ?⧸ ?(.+)(?= ：(?: \w+)?\.\w{3,4})"),
-                "%<2>s - %<1>s"
-            ),
-            new(
-                new(@"(.+) \- (.+) \[.+?\] ([12]\d{3})[^\.]+"),
-                "%<1>s - %<2>s [%<3>s]",
-                "TITLE - ARTIST [...] YEAR ... (excluding the extension)"
-            ),
-
-            // Cleanup:
-            new(
-                new(@" - - "),
-                " - ",
-                "Compress doubled hyphens"),
-            new(
-                new(@" – "),
-                " - ",
-                "Replace en dashes with hyphens")
-        ];
-
-    public static void Run(string workingDirectory, bool isVerbose, Printer printer)
+    public static void Run(UserSettings settings, string workingDirectory, bool isVerbose, Printer printer)
     {
         Watch watch = new();
 
@@ -125,43 +23,62 @@ internal static class Renamer
         if (isVerbose)
             printer.Print($"Renaming {audioFilePaths.Count()} audio file(s)...");
 
+        string newFileName;
+        Regex regex;
+        Match match;
+        string matchedPatternSummary;
+
         foreach (FileInfo filePath in audioFilePaths)
         {
-            string newFileName = RenamePatterns.Aggregate(
-                new StringBuilder(filePath.Name),
-                (newFileNameSb, renamePattern) =>
-                {
-                    // Only continue if the current regex is a match.
-                    var match = renamePattern.Regex.Match(newFileNameSb.ToString());
-                    if (!match.Success)
+            newFileName =
+                settings.RenamePatterns.Aggregate(
+                    new StringBuilder(filePath.Name),
+                    (newFileNameSb, renamePattern) =>
+                    {
+                        // Only continue if the current regex is a match.
+                        regex = new Regex(renamePattern.Regex);
+                        match = regex.Match(newFileNameSb.ToString());
+
+                        if (!match.Success)
+                        {
+                            return newFileNameSb; // Continue to the next iteration.
+                        }
+
+                        if (isVerbose)
+                        {
+                            matchedPatternSummary = renamePattern.Description is null
+                                ? $"`{renamePattern.Regex}` (no description)"
+                                : $"\"{renamePattern.Description}\"";
+
+                            printer.Print($"Rename pattern {matchedPatternSummary} matched.");
+                        }
+
+                        // Delete the matched substring by index.
+                        newFileNameSb.Remove(match.Index, match.Length);
+
+                        // Work out the replacement text that should be inserted.
+                        string insertText =
+                            match.Groups.OfType<Group>()
+                                .Select((gr, i) =>
+                                (
+                                    SearchFor:   $"%<{i + 1}>s",
+                                    ReplaceWith: match.Groups[i + 1].Value
+                                ))
+                                .Aggregate(
+                                    new StringBuilder(renamePattern.ReplaceWithPattern),
+                                    (workingText, replacementParts) =>
+                                        workingText.Replace(
+                                            replacementParts.SearchFor,
+                                            replacementParts.ReplaceWith),
+                                    workingText => workingText.ToString()
+                                );
+
+                        // Insert the replacement text at the same starting position.
+                        newFileNameSb.Insert(match.Index, insertText);
+
                         return newFileNameSb;
-
-                    // Delete the matched substring by index.
-                    newFileNameSb.Remove(match.Index, match.Length);
-
-                    // Work out the replacement text that should be inserted.
-                    string insertText =
-                        match.Groups.OfType<Group>()
-                             .Select((gr, i) =>
-                             (
-                                SearchFor:   $"%<{i + 1}>s",
-                                ReplaceWith: match.Groups[i + 1].Value
-                             ))
-                             .Aggregate(
-                                 new StringBuilder(renamePattern.ReplaceWithPattern),
-                                 (workingText, replacementParts) =>
-                                     workingText.Replace(
-                                        replacementParts.SearchFor,
-                                        replacementParts.ReplaceWith),
-                                 workingText => workingText.ToString()
-                             );
-
-                    // Insert the replacement text at the same starting position.
-                    newFileNameSb.Insert(match.Index, insertText);
-
-                    return newFileNameSb;
-                },
-                newFileNameSb => newFileNameSb.ToString());
+                    },
+                    newFileNameSb => newFileNameSb.ToString());
 
             try
             {
