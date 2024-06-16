@@ -92,6 +92,11 @@ internal static class Renamer
                 new Regex(@"(.+) ?⧸ ?(.+)(?= ：(?: \w+)?\.\w{3,4})"),
                 "%<2>s - %<1>s"
             ),
+            new(
+                new Regex(@"(.+) \- (.+) \[.+?\] ([12]\d{3})[^\.]+"),
+                "%<1>s - %<2>s [%<3>s]",
+                "TITLE - ARTIST [...] YEAR ... (excluding the extension)"
+            ),
 
             // Cleanup:
             new(
