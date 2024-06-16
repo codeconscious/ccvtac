@@ -8,7 +8,7 @@ namespace CCVTAC.Console.PostProcessing;
 
 internal static class Mover
 {
-    private static readonly Regex _playlistImageRegex = new(@"\[[OP]L[\w\d_-]+\]"); // TODO: Add channels.
+    private static readonly Regex _playlistImageRegex = new(@"\[[OP]L[\w\d_-]{12,}\]");
     private const string _audioFileWildcard = "*.m4a";
     private const string _imageFileWildcard = "*.jp*";
 
@@ -77,11 +77,15 @@ internal static class Mover
     {
         var images = workingDirInfo.EnumerateFiles(_imageFileWildcard).ToImmutableArray();
         if (images.IsEmpty())
+        {
             return null;
+        }
 
         var playlistImages = images.Where(i => IsPlaylistImage(i.FullName));
         if (playlistImages.Any())
+        {
             return playlistImages.First();
+        }
 
         return audioFileCount > 1 && images.Length == 1
             ? images.First()
@@ -95,7 +99,9 @@ internal static class Mover
             if (Path.Exists(moveToDir))
             {
                 if (verbose)
+                {
                     printer.Print($"Found move-to directory \"{moveToDir}\".");
+                }
 
                 return Result.Ok();
             }
@@ -145,7 +151,9 @@ internal static class Mover
                 successCount++;
 
                 if (verbose)
+                {
                     printer.Print($"• Moved \"{file.Name}\"");
+                }
             }
             catch (Exception ex)
             {
@@ -221,10 +229,9 @@ internal static class Mover
             return Result.Fail($"Error reading JSON file \"{taggingSet.JsonFilePath}\": {ex.Message}.");
         }
 
-        VideoMetadata videoData;
         try
         {
-            videoData = JsonSerializer.Deserialize<VideoMetadata>(json);
+            var videoData = JsonSerializer.Deserialize<VideoMetadata>(json);
             return Result.Ok(videoData);
         }
         catch (JsonException ex)
