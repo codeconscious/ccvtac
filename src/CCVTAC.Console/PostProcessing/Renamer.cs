@@ -10,10 +10,10 @@ internal static class Renamer
     public static void Run(
         UserSettings settings,
         string workingDirectory,
-        bool verbose,
         Printer printer)
     {
         Watch watch = new();
+        bool verbose = settings.VerboseOutput;
 
         DirectoryInfo dir = new(workingDirectory);
         var audioFilePaths = dir.EnumerateFiles("*.m4a");

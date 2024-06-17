@@ -59,7 +59,7 @@ public sealed class PostProcessing
             Printer.Print(tagResult.Value);
 
             // AudioNormalizer.Run(workingDirectory, Printer); // TODO: normalize方法を要検討。
-            Renamer.Run(Settings, workingDirectory, verbose, Printer);
+            Renamer.Run(Settings, workingDirectory, Printer);
             Mover.Run(taggingSets, collectionJson, Settings, true, Printer);
 
             var taggingSetFileNames = taggingSets.SelectMany(set => set.AllFiles).ToImmutableList();
