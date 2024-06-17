@@ -45,24 +45,36 @@ If your `settings.json` file does not exist, one will be created in the applicat
 
 Sample settings file:
 
-```
+```json
 {
-  "workingDirectory": "/Users/me/temp",             // A temporary home for working files
-  "moveToDirectory": "/Users/me/Downloads",         // Where final audio files should be saved
-  "historyFile": "/Users/me/Downloads/history.log", // Log for your entered URLs
-  "historyDisplayCount": 20,                        // Count of entries to show for `history` command
-  "splitChapters": true,                            // Split videos with chapters into separate files?
-  "sleepSecondsBetweenDownloads": 10,               // Delay between video downloads in playlists and channels
-  "sleepSecondsBetweenBatches": 20,                 // Delay between batches (i.e., each URL entered)
-  "verboseOutput": true,                            // Use `false` for quiet mode
-  "embedImages": true,                              // Is embedding video thumbnails into audio files enabled?
-  "doNotEmbedUploaders": [                          // Channel names for which the video thumbnail should
-    "Channel Name",                                 //   never be embedded in the audio file.
-    "Another Channel Name
+  "workingDirectory": "/Users/me/temp",                // A temporary home for working files
+  "moveToDirectory": "/Users/me/Downloads",            // Where final audio files should be saved
+  "historyFile": "/Users/me/Downloads/history.log",    // Log for your entered URLs
+  "historyDisplayCount": 20,                           // Count of entries to show for `history` command
+  "splitChapters": true,                               // Split videos with chapters into separate files?
+  "sleepSecondsBetweenDownloads": 10,                  // Delay between video downloads in playlists and channels
+  "sleepSecondsBetweenBatches": 20,                    // Delay between batches (i.e., each URL entered)
+  "verboseOutput": true,                               // Use `false` for quiet mode
+  "embedImages": true,                                 // Is embedding video thumbnails into audio files enabled?
+  "doNotEmbedUploaders": [                             // Channel names for which the video thumbnail should
+    "Channel Name",                                    //   never be embedded in the audio file.
+    "Another Channel Name"
   ],
-  "ignoreUploadYearUploaders": [                    // By default, the upload year of the video is
-    "Channel Name",                                 //   saved to files' Year tag. However, this will
-    "Another Channel Name"                          //   not occur for videos on channels listed here.
+  "ignoreUploadYearUploaders": [                       // By default, the upload year of the video is
+    "Channel Name",                                    //   saved to files' Year tag. However, this will
+    "Another Channel Name"                             //   not occur for videos on channels listed here.
+  ],
+  "renamePatterns": [                                  // Collection of rules for auto-renaming audio files.
+    {
+      "regex": "\\s\\[[\\w_-]{11}\\](?=\\.\\w{3,5})",  // Regular expression that matches some or all of the filename.
+      "replacePattern": "",                            // What the matched text should be replaced with.
+      "description": "Remove trailing video IDs"       // Summary to display in the output (if "verbose" is on).
+    },
+    {
+      "regex": "【(.+)】(.+)",                         // Use regex groups to match specific text that will then
+      "replacePattern": "%<1>s - %<2>s",              // replace numbered placeholders in the replacement patterns!
+      "description": "Change `【artist】title` to `ARTIST - TRACK`"
+    },
   ]
 }
 ```
@@ -71,19 +83,29 @@ I added the `sleepSecondsBetweenDownloads` and `sleepSecondsBetweenBatches` sett
 
 Here's a mostly-empty version you can copy and paste:
 
-```
+```json
 {
   "workingDirectory": "",
-  "moveToDirectory": ""
-  "historyFile": ""
+  "moveToDirectory": "",
+  "historyFile": "",
   "historyDisplayCount": 20,
   "splitChapters": true,
-  "sleepSecondsBetweenDownloads": 10
-  "sleepSecondsBetweenBatches": 20
+  "sleepSecondsBetweenDownloads": 10,
+  "sleepSecondsBetweenBatches": 20,
   "verboseOutput": true,
   "embedImages": true,
   "doNotEmbedUploaders": [],
-  "ignoreUploadYearUploaders": []
+  "ignoreUploadYearUploaders": [
+    "Channel Name 1",
+    "Channel Name 2"
+  ],
+  "renamePatterns": [
+    {
+      "regex": "\\s\\[[\\w_-]{11}\\](?=\\.\\w{3,5})",
+      "replacePattern": "",
+      "description": "Remove trailing video IDs (recommend running this first)"
+    },
+  ]
 }
 ```
 
