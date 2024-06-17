@@ -54,25 +54,26 @@ Sample settings file with explanatory comments:
   # Where final audio files should be saved.
   "moveToDirectory": "/Users/me/Downloads",
 
-  # A history of all URLs entered.
+  # A local history of all URLs entered.
   "historyFile": "/Users/me/Downloads/history.log",
 
   # Count of entries to show for `history` command
   "historyDisplayCount": 20,
 
-  # Should videos with chapters be split into separate files?
+  # Split videos with chapters into separate files?
   "splitChapters": true,
 
-  # Delay between video downloads for playlists and channels.
+  # Delay in seconds between individual video downloads
+  # for playlists and channels.
   "sleepSecondsBetweenDownloads": 10,
 
-  # Delay between batches (i.e., each URL entered).
+  # Delay in seconds between batches (i.e., each URL entered).
   "sleepSecondsBetweenBatches": 20,
 
   # Whether output should be verbose (true) or quiet (false).
   "verboseOutput": true,
 
-  # Should video thumbnails be embedded into file tags?
+  # Embed video thumbnails into file tags?
   "embedImages": true,
 
   # Channel names for which the video thumbnail should
@@ -90,10 +91,10 @@ Sample settings file with explanatory comments:
     "Another Channel Name"
   ],
 
-  # Collection of rules for auto-renaming audio files.
+  # Rules for auto-renaming audio files.
   "renamePatterns": [
     {
-      # Regular expression that matches some or all of the filename.
+      # Regular expression that matches some or all of a filename.
       "regex": "\\s\\[[\\w_-]{11}\\](?=\\.\\w{3,5})",
 
       # What the matched text should be replaced with.
@@ -103,8 +104,9 @@ Sample settings file with explanatory comments:
       "description": "Remove trailing video IDs"
     },
     {
-      # Use regex groups to match specific substrings that will then
-      # replace numbered placeholders in the replacement patterns!
+      # Optionally use regex groups to match specific substrings.
+      # The matched groups will replace numbered placeholders (of
+      # the format `%<#>s`) in the replacement patterns!
       # (The placeholder numbers must match the regex groups'.)
       "regex": "【(.+)】(.+)",
       "replacePattern": "%<1>s - %<2>s",
