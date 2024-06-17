@@ -178,7 +178,7 @@ internal static class Tagger
             taggedFile.Tag.Comment = videoData.GenerateComment(collectionData);
 
             if (settings.EmbedImages &&
-                !settings.DoNotEmbedUploaders.Contains(videoData.Uploader) &&
+                !settings.DoNotEmbedImageUploaders.Contains(videoData.Uploader) &&
                 imageFilePath is not null)
             {
                 printer.Print("Embedding the image.");

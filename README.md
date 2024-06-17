@@ -77,7 +77,7 @@ Sample settings file with explanatory comments:
 
   # Channel names for which the video thumbnail should
   # never be embedded in the audio file.
-  "doNotEmbedUploaders": [
+  "doNotEmbedImageUploaders": [
     "Channel Name",
     "Another Channel Name"
   ],
@@ -129,7 +129,7 @@ Here's a mostly-empty setting files you can copy and paste to get started:
   "sleepSecondsBetweenBatches": 20,
   "verboseOutput": true,
   "embedImages": true,
-  "doNotEmbedUploaders": [
+  "doNotEmbedImageUploaders": [
     "Channel Name 1",
     "Channel Name 2"
   ],

@@ -22,7 +22,7 @@ module Settings =
         [<JsonPropertyName("sleepSecondsBetweenBatches")>]   SleepSecondsBetweenBatches: uint16
         [<JsonPropertyName("verboseOutput")>]                VerboseOutput: bool
         [<JsonPropertyName("embedImages")>]                  EmbedImages: bool
-        [<JsonPropertyName("doNotEmbedUploaders")>]          DoNotEmbedUploaders: string array
+        [<JsonPropertyName("doNotEmbedImageUploaders")>]     DoNotEmbedImageUploaders: string array
         [<JsonPropertyName("ignoreUploadYearUploaders")>]    IgnoreUploadYearUploaders: string array
         [<JsonPropertyName("renamePatterns")>]               RenamePatterns: RenamePattern array
     }
@@ -41,6 +41,7 @@ module Settings =
             ("Sleep between batches", settings.SleepSecondsBetweenBatches |> int |> pluralize  "second")
             ("Sleep between downloads", settings.SleepSecondsBetweenDownloads |> int |> pluralize "second")
             ("Ignore-upload-year channels", settings.IgnoreUploadYearUploaders.Length |> pluralize "channel")
+            ("Do-not-embed-image channels", settings.DoNotEmbedImageUploaders.Length |> pluralize "channel")
             ("Rename patterns", settings.RenamePatterns.Length |> pluralize "pattern")
             ("Working directory", settings.WorkingDirectory)
             ("Move-to directory", settings.MoveToDirectory)
@@ -123,7 +124,7 @@ module Settings =
                   SleepSecondsBetweenBatches = 20us
                   VerboseOutput = true
                   EmbedImages = true
-                  DoNotEmbedUploaders = [||]
+                  DoNotEmbedImageUploaders = [||]
                   IgnoreUploadYearUploaders = [||]
                   RenamePatterns = [||] }
             writeFile defaultSettings confirmedPath
