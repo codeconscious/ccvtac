@@ -43,47 +43,109 @@ By default, the application will look for a file named `settings.json` in its di
 
 If your `settings.json` file does not exist, one will be created in the application directory with default settings. At minimum, you will need to enter (1) an existing directory for temporary working files, (2) an existing directory to which the final audio files should be moved, and (3) a path to your history file. The other settings have sensible defaults.
 
-Sample settings file:
+Sample settings file with explanatory comments:
 
 ```
 {
-  "workingDirectory": "/Users/me/temp",             // A temporary home for working files
-  "moveToDirectory": "/Users/me/Downloads",         // Where final audio files should be saved
-  "historyFile": "/Users/me/Downloads/history.log", // Log for your entered URLs
-  "historyDisplayCount": 20,                        // Count of entries to show for `history` command
-  "splitChapters": true,                            // Split videos with chapters into separate files?
-  "sleepSecondsBetweenDownloads": 10,               // Delay between video downloads in playlists and channels
-  "sleepSecondsBetweenBatches": 20,                 // Delay between batches (i.e., each URL entered)
-  "verboseOutput": true,                            // Use `false` for quiet mode
-  "embedImages": true,                              // Is embedding video thumbnails into audio files enabled?
-  "doNotEmbedUploaders": [                          // Channel names for which the video thumbnail should
-    "Channel Name",                                 //   never be embedded in the audio file.
-    "Another Channel Name
+  # A temporary directory for working files.
+  # Cleared after processing a batch (i.e., URL).
+  "workingDirectory": "/Users/me/temp",
+
+  # Where final audio files should be saved.
+  "moveToDirectory": "/Users/me/Downloads",
+
+  # A local history of all URLs entered.
+  "historyFile": "/Users/me/Downloads/history.log",
+
+  # Count of entries to show for `history` command
+  "historyDisplayCount": 20,
+
+  # Split videos with chapters into separate files?
+  "splitChapters": true,
+
+  # Delay in seconds between individual video downloads
+  # for playlists and channels.
+  "sleepSecondsBetweenDownloads": 10,
+
+  # Delay in seconds between batches (i.e., each URL entered).
+  "sleepSecondsBetweenBatches": 20,
+
+  # Whether output should be verbose (true) or quiet (false).
+  "verboseOutput": true,
+
+  # Embed video thumbnails into file tags?
+  "embedImages": true,
+
+  # Channel names for which the video thumbnail should
+  # never be embedded in the audio file.
+  "doNotEmbedImageUploaders": [
+    "Channel Name",
+    "Another Channel Name"
   ],
-  "ignoreUploadYearUploaders": [                    // By default, the upload year of the video is
-    "Channel Name",                                 //   saved to files' Year tag. However, this will
-    "Another Channel Name"                          //   not occur for videos on channels listed here.
+
+  # By default, the upload year of the video is
+  # saved to files' Year tag. However, this will
+  # not occur for videos on channels listed here.
+  "ignoreUploadYearUploaders": [
+    "Channel Name",
+    "Another Channel Name"
+  ],
+
+  # Rules for auto-renaming audio files.
+  "renamePatterns": [
+    {
+      # Regular expression that matches some or all of a filename.
+      "regex": "\\s\\[[\\w_-]{11}\\](?=\\.\\w{3,5})",
+
+      # What the matched text should be replaced with.
+      "replacePattern": "",
+
+      # Friendly summary to display in the output (if verbose output is on).
+      "description": "Remove trailing video IDs"
+    },
+    {
+      # Optionally use regex groups to match specific substrings.
+      # The matched groups will replace numbered placeholders (of
+      # the format `%<#>s`) in the replacement patterns!
+      # (The placeholder numbers must match the regex groups'.)
+      "regex": "【(.+)】(.+)",
+      "replacePattern": "%<1>s - %<2>s",
+      "description": "Change `【artist】title` to `ARTIST - TRACK`"
+    },
   ]
 }
 ```
 
 I added the `sleepSecondsBetweenDownloads` and `sleepSecondsBetweenBatches` settings to help reduce concentrated loads on YouTube servers. Please use reasonable values to avoid slamming them with enormous, long-running downloads.
 
-Here's a mostly-empty version you can copy and paste:
+Here's a mostly-empty setting files you can copy and paste to get started:
 
-```
+```json
 {
   "workingDirectory": "",
-  "moveToDirectory": ""
-  "historyFile": ""
+  "moveToDirectory": "",
+  "historyFile": "",
   "historyDisplayCount": 20,
   "splitChapters": true,
-  "sleepSecondsBetweenDownloads": 10
-  "sleepSecondsBetweenBatches": 20
+  "sleepSecondsBetweenDownloads": 10,
+  "sleepSecondsBetweenBatches": 20,
   "verboseOutput": true,
   "embedImages": true,
-  "doNotEmbedUploaders": [],
-  "ignoreUploadYearUploaders": []
+  "doNotEmbedImageUploaders": [
+    "Channel Name 1",
+    "Channel Name 2"
+  ],
+  "ignoreUploadYearUploaders": [
+    "Channel Name 1",
+    "Channel Name 2"
+  ],
+  "renamePatterns": [
+    {
+      "regex": "\\s\\[[\\w_-]{11}\\](?=\\.\\w{3,5})",
+      "replacePattern": "",
+      "description": "Remove trailing video IDs (recommend running this first)"
+    },
+  ]
 }
 ```
 

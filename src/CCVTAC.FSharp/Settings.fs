@@ -2,8 +2,15 @@ namespace CCVTAC.FSharp
 
 module Settings =
     open System.Text.Json.Serialization
+    open System
 
     type FilePath = FilePath of string
+
+    type RenamePattern = {
+        [<JsonPropertyName("regex")>]          Regex : string
+        [<JsonPropertyName("replacePattern")>] ReplaceWithPattern : string
+        [<JsonPropertyName("description")>]    Description : string
+    }
 
     type UserSettings = {
         [<JsonPropertyName("workingDirectory")>]             WorkingDirectory: string
@@ -15,8 +22,9 @@ module Settings =
         [<JsonPropertyName("sleepSecondsBetweenBatches")>]   SleepSecondsBetweenBatches: uint16
         [<JsonPropertyName("verboseOutput")>]                VerboseOutput: bool
         [<JsonPropertyName("embedImages")>]                  EmbedImages: bool
-        [<JsonPropertyName("doNotEmbedUploaders")>]          DoNotEmbedUploaders: string array
+        [<JsonPropertyName("doNotEmbedImageUploaders")>]     DoNotEmbedImageUploaders: string array
         [<JsonPropertyName("ignoreUploadYearUploaders")>]    IgnoreUploadYearUploaders: string array
+        [<JsonPropertyName("renamePatterns")>]               RenamePatterns: RenamePattern array
     }
 
     [<CompiledName("Summarize")>]
@@ -33,13 +41,14 @@ module Settings =
             ("Sleep between batches", settings.SleepSecondsBetweenBatches |> int |> pluralize  "second")
             ("Sleep between downloads", settings.SleepSecondsBetweenDownloads |> int |> pluralize "second")
             ("Ignore-upload-year channels", settings.IgnoreUploadYearUploaders.Length |> pluralize "channel")
+            ("Do-not-embed-image channels", settings.DoNotEmbedImageUploaders.Length |> pluralize "channel")
+            ("Rename patterns", settings.RenamePatterns.Length |> pluralize "pattern")
             ("Working directory", settings.WorkingDirectory)
             ("Move-to directory", settings.MoveToDirectory)
             ("History log file", settings.HistoryFile)
         ]
 
     module IO =
-        open System
         open System.IO
         open System.Text.Json
         open System.Text.Unicode
@@ -79,7 +88,7 @@ module Settings =
                 |> verify
             with
                 | :? FileNotFoundException -> Error $"\"{path}\" was not found."
-                | :? JsonException -> Error $"Could not parse JSON in \"{path}\" to settings."
+                | :? JsonException as e -> Error $"Could not parse settings file \"{path}\": {e.Message}"
                 | e -> Error $"Settings unexpectedly could not be read from \"{path}\": {e.Message}"
 
         [<CompiledName("WriteFile")>]
@@ -115,6 +124,7 @@ module Settings =
                   SleepSecondsBetweenBatches = 20us
                   VerboseOutput = true
                   EmbedImages = true
-                  DoNotEmbedUploaders = [||]
-                  IgnoreUploadYearUploaders = [||] }
+                  DoNotEmbedImageUploaders = [||]
+                  IgnoreUploadYearUploaders = [||]
+                  RenamePatterns = [||] }
             writeFile defaultSettings confirmedPath
