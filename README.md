@@ -47,64 +47,64 @@ Sample settings file with explanatory comments:
 
 ```
 {
-  // A temporary directory for working files.
-  // Cleared after processing a batch (i.e., URL).
+  # A temporary directory for working files.
+  # Cleared after processing a batch (i.e., URL).
   "workingDirectory": "/Users/me/temp",
 
-  // Where final audio files should be saved.
+  # Where final audio files should be saved.
   "moveToDirectory": "/Users/me/Downloads",
 
-  // A history of all URLs entered.
+  # A history of all URLs entered.
   "historyFile": "/Users/me/Downloads/history.log",
 
-  // Count of entries to show for `history` command
+  # Count of entries to show for `history` command
   "historyDisplayCount": 20,
 
-  // Should videos with chapters be split into separate files?
+  # Should videos with chapters be split into separate files?
   "splitChapters": true,
 
-  // Delay between video downloads for playlists and channels.
+  # Delay between video downloads for playlists and channels.
   "sleepSecondsBetweenDownloads": 10,
 
-  // Delay between batches (i.e., each URL entered)
+  # Delay between batches (i.e., each URL entered)
   "sleepSecondsBetweenBatches": 20,
 
-  // Use `false` for quiet mode.
+  # Use `false` for quiet mode.
   "verboseOutput": true,
 
-  // Is embedding video thumbnails into audio files enabled?
+  # Is embedding video thumbnails into audio files enabled?
   "embedImages": true,
 
-  // Channel names for which the video thumbnail should
-  // never be embedded in the audio file.
+  # Channel names for which the video thumbnail should
+  # never be embedded in the audio file.
   "doNotEmbedUploaders": [
     "Channel Name",
     "Another Channel Name"
   ],
 
-  // By default, the upload year of the video is
-  // saved to files' Year tag. However, this will
-  // not occur for videos on channels listed here.
+  # By default, the upload year of the video is
+  # saved to files' Year tag. However, this will
+  # not occur for videos on channels listed here.
   "ignoreUploadYearUploaders": [
     "Channel Name",
     "Another Channel Name"
   ],
 
-  // Collection of rules for auto-renaming audio files.
+  # Collection of rules for auto-renaming audio files.
   "renamePatterns": [
     {
-      // Regular expression that matches some or all of the filename.
+      # Regular expression that matches some or all of the filename.
       "regex": "\\s\\[[\\w_-]{11}\\](?=\\.\\w{3,5})",
 
-      // What the matched text should be replaced with.
+      # What the matched text should be replaced with.
       "replacePattern": "",
 
-      // Friendly summary to display in the output (if verbose output is on).
+      # Friendly summary to display in the output (if verbose output is on).
       "description": "Remove trailing video IDs"
     },
     {
-      // Use regex groups to match specific substrings that will then
-      // replace numbered placeholders in the replacement patterns!
+      # Use regex groups to match specific substrings that will then
+      # replace numbered placeholders in the replacement patterns!
       "regex": "【(.+)】(.+)",
       "replacePattern": "%<1>s - %<2>s",
       "description": "Change `【artist】title` to `ARTIST - TRACK`"
