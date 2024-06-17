@@ -66,13 +66,13 @@ Sample settings file with explanatory comments:
   # Delay between video downloads for playlists and channels.
   "sleepSecondsBetweenDownloads": 10,
 
-  # Delay between batches (i.e., each URL entered)
+  # Delay between batches (i.e., each URL entered).
   "sleepSecondsBetweenBatches": 20,
 
-  # Use `false` for quiet mode.
+  # Whether output should be verbose (true) or quiet (false).
   "verboseOutput": true,
 
-  # Is embedding video thumbnails into audio files enabled?
+  # Should video thumbnails be embedded into file tags?
   "embedImages": true,
 
   # Channel names for which the video thumbnail should
@@ -105,6 +105,7 @@ Sample settings file with explanatory comments:
     {
       # Use regex groups to match specific substrings that will then
       # replace numbered placeholders in the replacement patterns!
+      # (The placeholder numbers must match the regex groups'.)
       "regex": "【(.+)】(.+)",
       "replacePattern": "%<1>s - %<2>s",
       "description": "Change `【artist】title` to `ARTIST - TRACK`"
@@ -128,7 +129,10 @@ Here's a mostly-empty setting files you can copy and paste to get started:
   "sleepSecondsBetweenBatches": 20,
   "verboseOutput": true,
   "embedImages": true,
-  "doNotEmbedUploaders": [],
+  "doNotEmbedUploaders": [
+    "Channel Name 1",
+    "Channel Name 2"
+  ],
   "ignoreUploadYearUploaders": [
     "Channel Name 1",
     "Channel Name 2"
