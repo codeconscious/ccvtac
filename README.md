@@ -118,7 +118,7 @@ Sample settings file with explanatory comments:
 
 I added the `sleepSecondsBetweenDownloads` and `sleepSecondsBetweenBatches` settings to help reduce concentrated loads on YouTube servers. Please use reasonable values to avoid slamming them with enormous, long-running downloads.
 
-Here's a mostly-empty setting files you can copy and paste to get started:
+Here are mostly-empty settings you can copy and save to `settings.json` to get started:
 
 ```json
 {
