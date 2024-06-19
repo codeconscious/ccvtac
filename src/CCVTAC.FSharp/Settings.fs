@@ -29,23 +29,37 @@ module Settings =
 
     [<CompiledName("Summarize")>]
     let summarize settings =
+        let onOrOff b =
+            if b = true then "ON" else "OFF"
+
         let pluralize label count =
             if count = 1
             then $"{count} {label}"
             else $"{count} {label}s"
 
         [
-            ("Split video chapters", if settings.SplitChapters then "ON" else "OFF")
-            ("Verbose mode", if settings.VerboseOutput then "ON" else "OFF")
-            ("Embed images", if settings.EmbedImages then "ON" else "OFF")
-            ("Sleep between batches", settings.SleepSecondsBetweenBatches |> int |> pluralize  "second")
-            ("Sleep between downloads", settings.SleepSecondsBetweenDownloads |> int |> pluralize "second")
-            ("Ignore-upload-year channels", settings.IgnoreUploadYearUploaders.Length |> pluralize "channel")
-            ("Do-not-embed-image channels", settings.DoNotEmbedImageUploaders.Length |> pluralize "channel")
-            ("Rename patterns", settings.RenamePatterns.Length |> pluralize "pattern")
-            ("Working directory", settings.WorkingDirectory)
-            ("Move-to directory", settings.MoveToDirectory)
-            ("History log file", settings.HistoryFile)
+            ("Working directory",
+             settings.WorkingDirectory)
+            ("Move-to directory",
+             settings.MoveToDirectory)
+            ("History log file",
+             settings.HistoryFile)
+            ("Split video chapters",
+             onOrOff settings.SplitChapters)
+            ("Verbose mode",
+             onOrOff settings.VerboseOutput)
+            ("Embed images",
+             onOrOff settings.EmbedImages)
+            ("Sleep between batches (URLs)",
+             settings.SleepSecondsBetweenBatches |> int |> pluralize "second")
+            ("Sleep between downloads",
+             settings.SleepSecondsBetweenDownloads |> int |> pluralize "second")
+            ("Ignore-upload-year channels",
+             settings.IgnoreUploadYearUploaders.Length |> pluralize "channel")
+            ("Do-not-embed-image channels",
+             settings.DoNotEmbedImageUploaders.Length |> pluralize "channel")
+            ("Rename patterns",
+             settings.RenamePatterns.Length |> pluralize "pattern")
         ]
 
     module IO =
