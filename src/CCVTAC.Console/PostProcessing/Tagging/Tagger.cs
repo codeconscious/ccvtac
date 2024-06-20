@@ -88,7 +88,7 @@ internal static class Tagger
                 printer.Print($"Current audio file: \"{audioFileName}\"");
 
             using TaggedFile taggedFile = TaggedFile.Create(audioFilePath);
-            TagDetector tagDetector = new();
+            TagDetector tagDetector = new(settings.TagDetectionPatterns);
 
             if (videoData.Track is string metadataTitle)
             {

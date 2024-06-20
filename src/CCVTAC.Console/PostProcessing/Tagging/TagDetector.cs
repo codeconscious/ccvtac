@@ -1,3 +1,5 @@
+using static CCVTAC.FSharp.Settings;
+
 namespace CCVTAC.Console.PostProcessing.Tagging;
 
 /// <summary>
@@ -5,32 +7,39 @@ namespace CCVTAC.Console.PostProcessing.Tagging;
 /// </summary>
 internal sealed class TagDetector
 {
-    internal string? DetectTitle(VideoMetadata videoData, string? defaultName = null)
+    private TagDetectionPatterns Patterns { get; init;}
+
+    internal TagDetector(TagDetectionPatterns tagDetectionPatterns)
     {
-        return Detectors.DetectSingle<string>(videoData, DetectionSchemeBank.Title, null)
-               ?? defaultName;
+        Patterns = tagDetectionPatterns;
+    }
+
+    internal string? DetectTitle(VideoMetadata videoData, string? defaultTitle = null)
+    {
+        return Detectors.DetectSingle<string>(videoData, Patterns.Title, null)
+               ?? defaultTitle;
     }
 
     internal string? DetectArtist(VideoMetadata videoData, string? defaultArtist = null)
     {
-        return Detectors.DetectSingle<string>(videoData, DetectionSchemeBank.Artist, null)
+        return Detectors.DetectSingle<string>(videoData, Patterns.Artist, null)
                ?? defaultArtist;
     }
 
     internal string? DetectAlbum(VideoMetadata videoData, string? defaultAlbum = null)
     {
-        return Detectors.DetectSingle<string>(videoData, DetectionSchemeBank.Album, null)
+        return Detectors.DetectSingle<string>(videoData, Patterns.Album, null)
                ?? defaultAlbum;
     }
 
     internal string? DetectComposers(VideoMetadata videoData)
     {
-        return Detectors.DetectMultiple<string>(videoData, DetectionSchemeBank.Composers, null, "; ");
+        return Detectors.DetectMultiple<string>(videoData, Patterns.Composer, null, "; ");
     }
 
     internal ushort? DetectReleaseYear(VideoMetadata videoData, ushort? defaultYear)
     {
-        ushort detectedYear = Detectors.DetectSingle<ushort>(videoData, DetectionSchemeBank.Year, default);
+        ushort detectedYear = Detectors.DetectSingle<ushort>(videoData, Patterns.Year, default);
 
         return detectedYear is default(ushort) // The default ushort value indicates no match was found.
             ? defaultYear

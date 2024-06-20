@@ -1,3 +1,6 @@
+using System.Text.RegularExpressions;
+using static CCVTAC.FSharp.Settings;
+
 namespace CCVTAC.Console.PostProcessing.Tagging;
 
 /// <summary>
@@ -11,22 +14,22 @@ internal static class Detectors
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="videoMetadata"></param>
-    /// <param name="schemes"></param>
+    /// <param name="patterns"></param>
     /// <param name="defaultValue">The value to return if nothing is matched.</param>
     /// <returns>A match of type T if there was a match; otherwise, the default value provided.</returns>
     internal static T? DetectSingle<T>(VideoMetadata videoMetadata,
-                                       IEnumerable<DetectionScheme> schemes,
+                                       IEnumerable<TagDetectionPattern> patterns,
                                        T? defaultValue)
     {
-        foreach (DetectionScheme scheme in schemes)
+        foreach (TagDetectionPattern pattern in patterns)
         {
-            string searchText = ExtractMetadataText(videoMetadata, scheme.SourceField);
-            var match = scheme.Regex.Match(searchText);
+            string searchText = ExtractMetadataText(videoMetadata, ConvertToSourceMetadataField(pattern.SearchField));
+            Match match = new Regex(pattern.Regex).Match(searchText); // TODO: Instantiate when first reading settings.
 
             if (!match.Success)
                 continue;
 
-            string? matchedText = match.Groups[scheme.MatchGroup].Value.Trim();
+            string? matchedText = match.Groups[pattern.MatchGroup].Value.Trim();
             return Cast(matchedText, defaultValue);
         }
 
@@ -39,29 +42,29 @@ internal static class Detectors
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="data"></param>
-    /// <param name="schemes"></param>
+    /// <param name="patterns"></param>
     /// <param name="defaultValue">The value to return if nothing is matched.</param>
     /// <param name="separator"></param>
     /// <returns>A match of type T if there were any matches; otherwise, the default value provided.</returns>
     internal static T? DetectMultiple<T>(VideoMetadata data,
-                                         IEnumerable<DetectionScheme> schemes,
+                                         IEnumerable<TagDetectionPattern> patterns,
                                          T? defaultValue,
                                          string separator = "; ")
     {
-        HashSet<string> matchedValues = new();
+        HashSet<string> matchedValues = [];
 
-        foreach (DetectionScheme scheme in schemes)
+        foreach (TagDetectionPattern pattern in patterns)
         {
-            string searchText = ExtractMetadataText(data, scheme.SourceField);
-            var matches = scheme.Regex.Matches(searchText);
+            string searchText = ExtractMetadataText(data, ConvertToSourceMetadataField(pattern.SearchField.ToLowerInvariant()));
+            MatchCollection matches = new Regex(pattern.Regex).Matches(searchText); // TODO: Instantiate when first reading settings.
 
             foreach (var match in matches.Where(m => m.Success))
             {
-                matchedValues.Add(match.Groups[scheme.MatchGroup].Value.Trim());
+                matchedValues.Add(match.Groups[pattern.MatchGroup].Value.Trim());
             }
         }
 
-        if (!matchedValues.Any())
+        if (matchedValues.Count == 0)
         {
             return defaultValue;
         }
@@ -71,7 +74,8 @@ internal static class Detectors
     }
 
     /// <summary>
-    /// Attempts casting the input text to type T and returning it. If casting fails, the provided default value is returned instead.
+    /// Attempts casting the input text to type T and returning it.
+    /// If casting fails, the default value is returned instead.
     /// </summary>
     private static T? Cast<T>(string? text, T? defaultValue)
     {
@@ -88,6 +92,16 @@ internal static class Detectors
         {
             return defaultValue;
         }
+    }
+
+    private static SourceMetadataField ConvertToSourceMetadataField(string tagName)
+    {
+        return tagName switch
+        {
+            "title" => SourceMetadataField.Title,
+            "description" => SourceMetadataField.Description,
+            _ => throw new ArgumentException($"\"{tagName}\" is an invalid tag name.")
+        };
     }
 
     /// <summary>
