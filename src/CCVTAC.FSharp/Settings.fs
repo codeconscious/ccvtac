@@ -9,7 +9,22 @@ module Settings =
     type RenamePattern = {
         [<JsonPropertyName("regex")>]          Regex : string
         [<JsonPropertyName("replacePattern")>] ReplaceWithPattern : string
-        [<JsonPropertyName("description")>]    Description : string
+        [<JsonPropertyName("summary")>]        Summary : string
+    }
+
+    type TagDetectionPattern = {
+        [<JsonPropertyName("regex")>]       Regex : string
+        [<JsonPropertyName("matchGroup")>]  MatchGroup : byte
+        [<JsonPropertyName("searchField")>] SearchField : string
+        [<JsonPropertyName("summary")>]     Summary : string option
+    }
+
+    type TagDetectionPatterns = {
+        [<JsonPropertyName("title")>]    Title : TagDetectionPattern array
+        [<JsonPropertyName("artist")>]   Artist : TagDetectionPattern array
+        [<JsonPropertyName("album")>]    Album : TagDetectionPattern array
+        [<JsonPropertyName("composer")>] Composer : TagDetectionPattern array
+        [<JsonPropertyName("year")>]     Year : TagDetectionPattern array
     }
 
     type UserSettings = {
@@ -24,6 +39,7 @@ module Settings =
         [<JsonPropertyName("embedImages")>]                  EmbedImages: bool
         [<JsonPropertyName("doNotEmbedImageUploaders")>]     DoNotEmbedImageUploaders: string array
         [<JsonPropertyName("ignoreUploadYearUploaders")>]    IgnoreUploadYearUploaders: string array
+        [<JsonPropertyName("tagDetectionPatterns")>]         TagDetectionPatterns: TagDetectionPatterns
         [<JsonPropertyName("renamePatterns")>]               RenamePatterns: RenamePattern array
     }
 
@@ -140,5 +156,12 @@ module Settings =
                   EmbedImages = true
                   DoNotEmbedImageUploaders = [||]
                   IgnoreUploadYearUploaders = [||]
+                  TagDetectionPatterns = {
+                    Title = [||]
+                    Artist = [||]
+                    Album = [||]
+                    Composer = [||]
+                    Year = [||]
+                  }
                   RenamePatterns = [||] }
             writeFile defaultSettings confirmedPath
