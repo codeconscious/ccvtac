@@ -7,8 +7,8 @@ namespace CCVTAC.Console.PostProcessing.Tagging;
 /// <remarks>I might eventually move these to the user settings files instead.</remarks>
 internal static class DetectionSchemeBank
 {
-    internal static IReadOnlyList<DetectionScheme> Title = new List<DetectionScheme>()
-    {
+    internal static IReadOnlyList<DetectionScheme> Title =
+    [
         new(
             """(.+?) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D""",
             MatchGroupId.First,
@@ -51,10 +51,10 @@ internal static class DetectionSchemeBank
             MatchGroupId.Second,
             SourceMetadataField.Title
         ),
-    };
+    ];
 
-    internal static IReadOnlyList<DetectionScheme> Artist = new List<DetectionScheme>()
-    {
+    internal static IReadOnlyList<DetectionScheme> Artist =
+    [
         new (
             """(.+?) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\d{3})\D""",
             MatchGroupId.Second,
@@ -102,10 +102,10 @@ internal static class DetectionSchemeBank
             MatchGroupId.Zero,
             SourceMetadataField.Description
         ),
-    };
+    ];
 
-    internal static IReadOnlyList<DetectionScheme> Album = new List<DetectionScheme>()
-    {
+    internal static IReadOnlyList<DetectionScheme> Album =
+    [
         new (
             """(?<=[Aa]lbum: ).+""",
             MatchGroupId.Zero,
@@ -153,10 +153,10 @@ internal static class DetectionSchemeBank
             MatchGroupId.Zero,
             SourceMetadataField.Description
         ),
-    };
+    ];
 
-    internal static IReadOnlyList<DetectionScheme> Composers = new List<DetectionScheme>()
-    {
+    internal static IReadOnlyList<DetectionScheme> Composers =
+    [
         new (
             """(?<=[Cc]omposed by |[Cc]omposed by: |[Cc]omposer: |作曲[:：・]).+""",
             MatchGroupId.Zero,
@@ -167,10 +167,10 @@ internal static class DetectionSchemeBank
             MatchGroupId.Zero,
             SourceMetadataField.Title
         )
-    };
+    ];
 
-    internal static IReadOnlyList<DetectionScheme> Year = new List<DetectionScheme>()
-    {
+    internal static IReadOnlyList<DetectionScheme> Year =
+    [
         new (
             """(?<=[(（\[［【])[12]\d{3}(?=[)）\]］】])""",
             MatchGroupId.Zero,
@@ -232,5 +232,5 @@ internal static class DetectionSchemeBank
             MatchGroupId.Third,
             SourceMetadataField.Title
         )
-    };
+    ];
 }
