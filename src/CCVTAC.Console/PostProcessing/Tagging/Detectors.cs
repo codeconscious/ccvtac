@@ -23,11 +23,14 @@ internal static class Detectors
     {
         foreach (TagDetectionPattern pattern in patterns)
         {
-            string searchText = ExtractMetadataText(videoMetadata, ConvertToSourceMetadataField(pattern.SearchField));
+            SourceMetadataField field = ConvertToSourceMetadataField(pattern.SearchField);
+            string searchText = ExtractMetadataText(videoMetadata, field);
             Match match = new Regex(pattern.Regex).Match(searchText); // TODO: Instantiate when first reading settings.
 
             if (!match.Success)
+            {
                 continue;
+            }
 
             string? matchedText = match.Groups[pattern.MatchGroup].Value.Trim();
             return Cast(matchedText, defaultValue);
@@ -55,7 +58,8 @@ internal static class Detectors
 
         foreach (TagDetectionPattern pattern in patterns)
         {
-            string searchText = ExtractMetadataText(data, ConvertToSourceMetadataField(pattern.SearchField.ToLowerInvariant()));
+            SourceMetadataField field = ConvertToSourceMetadataField(pattern.SearchField);
+            string searchText = ExtractMetadataText(data, field);
             MatchCollection matches = new Regex(pattern.Regex).Matches(searchText); // TODO: Instantiate when first reading settings.
 
             foreach (var match in matches.Where(m => m.Success))
@@ -107,8 +111,9 @@ internal static class Detectors
     /// <summary>
     /// Extracts the value of the specified tag field from the given data.
     /// </summary>
-    private static string ExtractMetadataText(VideoMetadata videoMetadata,
-                                              SourceMetadataField target)
+    private static string ExtractMetadataText(
+        VideoMetadata videoMetadata,
+        SourceMetadataField target)
     {
         return target switch
         {
