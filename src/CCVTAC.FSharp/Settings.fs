@@ -53,6 +53,13 @@ module Settings =
             then $"{count} {label}"
             else $"{count} {label}s"
 
+        let tagDetectionPatternCount (patterns:TagDetectionPatterns) =
+            patterns.Title.Length +
+            patterns.Artist.Length +
+            patterns.Album.Length +
+            patterns.Composer.Length +
+            patterns.Year.Length
+
         [
             ("Working directory",
              settings.WorkingDirectory)
@@ -74,6 +81,8 @@ module Settings =
              settings.IgnoreUploadYearUploaders.Length |> pluralize "channel")
             ("Do-not-embed-image channels",
              settings.DoNotEmbedImageUploaders.Length |> pluralize "channel")
+            ("Tag-detection patterns",
+             tagDetectionPatternCount settings.TagDetectionPatterns |> pluralize "pattern")
             ("Rename patterns",
              settings.RenamePatterns.Length |> pluralize "pattern")
         ]
