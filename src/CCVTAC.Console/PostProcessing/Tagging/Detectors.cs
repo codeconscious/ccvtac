@@ -17,15 +17,15 @@ internal static class Detectors
     /// <param name="patterns"></param>
     /// <param name="defaultValue">The value to return if nothing is matched.</param>
     /// <returns>A match of type T if there was a match; otherwise, the default value provided.</returns>
-    internal static T? DetectSingle<T>(VideoMetadata videoMetadata,
-                                       IEnumerable<TagDetectionPattern> patterns,
-                                       T? defaultValue)
+    internal static T? DetectSingle<T>(
+        VideoMetadata videoMetadata,
+        IEnumerable<TagDetectionPattern> patterns,
+        T? defaultValue)
     {
         foreach (TagDetectionPattern pattern in patterns)
         {
-            SourceMetadataField field = ConvertToSourceMetadataField(pattern.SearchField);
-            string searchText = ExtractMetadataText(videoMetadata, field);
-            Match match = new Regex(pattern.Regex).Match(searchText); // TODO: Instantiate when first reading settings.
+            string fieldText = ExtractMetadataText(videoMetadata, pattern.SearchField);
+            Match match = new Regex(pattern.Regex).Match(fieldText); // TODO: Instantiate when reading settings.
 
             if (!match.Success)
             {
@@ -49,18 +49,18 @@ internal static class Detectors
     /// <param name="defaultValue">The value to return if nothing is matched.</param>
     /// <param name="separator"></param>
     /// <returns>A match of type T if there were any matches; otherwise, the default value provided.</returns>
-    internal static T? DetectMultiple<T>(VideoMetadata data,
-                                         IEnumerable<TagDetectionPattern> patterns,
-                                         T? defaultValue,
-                                         string separator = "; ")
+    internal static T? DetectMultiple<T>(
+        VideoMetadata data,
+        IEnumerable<TagDetectionPattern> patterns,
+        T? defaultValue,
+        string separator = "; ")
     {
         HashSet<string> matchedValues = [];
 
         foreach (TagDetectionPattern pattern in patterns)
         {
-            SourceMetadataField field = ConvertToSourceMetadataField(pattern.SearchField);
-            string searchText = ExtractMetadataText(data, field);
-            MatchCollection matches = new Regex(pattern.Regex).Matches(searchText); // TODO: Instantiate when first reading settings.
+            string fieldText = ExtractMetadataText(data, pattern.SearchField);
+            MatchCollection matches = new Regex(pattern.Regex).Matches(fieldText); // TODO: Instantiate when reading settings.
 
             foreach (var match in matches.Where(m => m.Success))
             {
@@ -98,28 +98,19 @@ internal static class Detectors
         }
     }
 
-    private static SourceMetadataField ConvertToSourceMetadataField(string tagName)
-    {
-        return tagName switch
-        {
-            "title" => SourceMetadataField.Title,
-            "description" => SourceMetadataField.Description,
-            _ => throw new ArgumentException($"\"{tagName}\" is an invalid tag name.")
-        };
-    }
-
     /// <summary>
     /// Extracts the value of the specified tag field from the given data.
     /// </summary>
-    private static string ExtractMetadataText(
-        VideoMetadata videoMetadata,
-        SourceMetadataField target)
+    /// <param name="metadata"></param>
+    /// <param name="fieldName">The name of the field within the video metadata to read.</param>
+    /// <returns>The text of the requested field of the video metadata.</returns>
+    private static string ExtractMetadataText(VideoMetadata metadata, string fieldName)
     {
-        return target switch
+        return fieldName switch
         {
-            SourceMetadataField.Title       => videoMetadata.Title,
-            SourceMetadataField.Description => videoMetadata.Description,
-            _ => throw new ArgumentException($"\"{target}\" is an invalid {nameof(SourceMetadataField)}.")
+            "title"       => metadata.Title,
+            "description" => metadata.Description,
+            _ => throw new ArgumentException($"\"{fieldName}\" is an invalid video metadata field name.")
         };
     }
 }
