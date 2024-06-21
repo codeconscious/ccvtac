@@ -12,10 +12,6 @@ internal static class Detectors
     /// Finds and returns the first instance of text matching a given detection scheme pattern,
     /// parsing into T if necessary.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="videoMetadata"></param>
-    /// <param name="patterns"></param>
-    /// <param name="defaultValue">The value to return if nothing is matched.</param>
     /// <returns>A match of type T if there was a match; otherwise, the default value provided.</returns>
     internal static T? DetectSingle<T>(
         VideoMetadata videoMetadata,
@@ -25,7 +21,9 @@ internal static class Detectors
         foreach (TagDetectionPattern pattern in patterns)
         {
             string fieldText = ExtractMetadataText(videoMetadata, pattern.SearchField);
-            Match match = new Regex(pattern.Regex).Match(fieldText); // TODO: Instantiate when reading settings.
+
+            // TODO: Instantiate regexes during settings deserialization.
+            var match = new Regex(pattern.Regex).Match(fieldText);
 
             if (!match.Success)
             {
@@ -41,13 +39,9 @@ internal static class Detectors
 
     /// <summary>
     /// Finds and returns all instances of text matching a given detection scheme pattern,
-    /// concatentating them into a single string, then casting to type T if necessary.
+    /// concatentating them into a single string (using a custom separator), then casting
+    /// to type T if necessary.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="data"></param>
-    /// <param name="patterns"></param>
-    /// <param name="defaultValue">The value to return if nothing is matched.</param>
-    /// <param name="separator"></param>
     /// <returns>A match of type T if there were any matches; otherwise, the default value provided.</returns>
     internal static T? DetectMultiple<T>(
         VideoMetadata data,
@@ -60,9 +54,11 @@ internal static class Detectors
         foreach (TagDetectionPattern pattern in patterns)
         {
             string fieldText = ExtractMetadataText(data, pattern.SearchField);
-            MatchCollection matches = new Regex(pattern.Regex).Matches(fieldText); // TODO: Instantiate when reading settings.
 
-            foreach (var match in matches.Where(m => m.Success))
+            // TODO: Instantiate regexes during settings deserialization.
+            var matches = new Regex(pattern.Regex).Matches(fieldText);
+
+            foreach (Match match in matches.Where(m => m.Success))
             {
                 matchedValues.Add(match.Groups[pattern.MatchGroup].Value.Trim());
             }
@@ -103,13 +99,15 @@ internal static class Detectors
     /// </summary>
     /// <param name="metadata"></param>
     /// <param name="fieldName">The name of the field within the video metadata to read.</param>
-    /// <returns>The text of the requested field of the video metadata.</returns>
+    /// <returns>The text content of the requested field of the video metadata.</returns>
     private static string ExtractMetadataText(VideoMetadata metadata, string fieldName)
     {
         return fieldName switch
         {
             "title"       => metadata.Title,
             "description" => metadata.Description,
+
+            // TODO: It would be best to check for invalid entries upon settings deserialization.
             _ => throw new ArgumentException($"\"{fieldName}\" is an invalid video metadata field name.")
         };
     }
