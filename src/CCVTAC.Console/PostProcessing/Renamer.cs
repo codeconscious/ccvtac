@@ -51,9 +51,9 @@ internal static class Renamer
 
                         if (verbose)
                         {
-                            matchedPatternSummary = renamePattern.Description is null
+                            matchedPatternSummary = renamePattern.Summary is null
                                 ? $"`{renamePattern.Regex}` (no description)"
-                                : $"\"{renamePattern.Description}\"";
+                                : $"\"{renamePattern.Summary}\"";
 
                             printer.Print($"Rename pattern {matchedPatternSummary} matched.");
                         }

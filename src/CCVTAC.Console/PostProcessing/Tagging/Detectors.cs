@@ -1,3 +1,6 @@
+using System.Text.RegularExpressions;
+using static CCVTAC.FSharp.Settings;
+
 namespace CCVTAC.Console.PostProcessing.Tagging;
 
 /// <summary>
@@ -9,24 +12,25 @@ internal static class Detectors
     /// Finds and returns the first instance of text matching a given detection scheme pattern,
     /// parsing into T if necessary.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="videoMetadata"></param>
-    /// <param name="schemes"></param>
-    /// <param name="defaultValue">The value to return if nothing is matched.</param>
     /// <returns>A match of type T if there was a match; otherwise, the default value provided.</returns>
-    internal static T? DetectSingle<T>(VideoMetadata videoMetadata,
-                                       IEnumerable<DetectionScheme> schemes,
-                                       T? defaultValue)
+    internal static T? DetectSingle<T>(
+        VideoMetadata videoMetadata,
+        IEnumerable<TagDetectionPattern> patterns,
+        T? defaultValue)
     {
-        foreach (DetectionScheme scheme in schemes)
+        foreach (TagDetectionPattern pattern in patterns)
         {
-            string searchText = ExtractMetadataText(videoMetadata, scheme.SourceField);
-            var match = scheme.Regex.Match(searchText);
+            string fieldText = ExtractMetadataText(videoMetadata, pattern.SearchField);
+
+            // TODO: Instantiate regexes during settings deserialization.
+            var match = new Regex(pattern.Regex).Match(fieldText);
 
             if (!match.Success)
+            {
                 continue;
+            }
 
-            string? matchedText = match.Groups[scheme.MatchGroup].Value.Trim();
+            string? matchedText = match.Groups[pattern.MatchGroup].Value.Trim();
             return Cast(matchedText, defaultValue);
         }
 
@@ -35,33 +39,32 @@ internal static class Detectors
 
     /// <summary>
     /// Finds and returns all instances of text matching a given detection scheme pattern,
-    /// concatentating them into a single string, then casting to type T if necessary.
+    /// concatentating them into a single string (using a custom separator), then casting
+    /// to type T if necessary.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="data"></param>
-    /// <param name="schemes"></param>
-    /// <param name="defaultValue">The value to return if nothing is matched.</param>
-    /// <param name="separator"></param>
     /// <returns>A match of type T if there were any matches; otherwise, the default value provided.</returns>
-    internal static T? DetectMultiple<T>(VideoMetadata data,
-                                         IEnumerable<DetectionScheme> schemes,
-                                         T? defaultValue,
-                                         string separator = "; ")
+    internal static T? DetectMultiple<T>(
+        VideoMetadata data,
+        IEnumerable<TagDetectionPattern> patterns,
+        T? defaultValue,
+        string separator = "; ")
     {
-        HashSet<string> matchedValues = new();
+        HashSet<string> matchedValues = [];
 
-        foreach (DetectionScheme scheme in schemes)
+        foreach (TagDetectionPattern pattern in patterns)
         {
-            string searchText = ExtractMetadataText(data, scheme.SourceField);
-            var matches = scheme.Regex.Matches(searchText);
+            string fieldText = ExtractMetadataText(data, pattern.SearchField);
 
-            foreach (var match in matches.Where(m => m.Success))
+            // TODO: Instantiate regexes during settings deserialization.
+            var matches = new Regex(pattern.Regex).Matches(fieldText);
+
+            foreach (Match match in matches.Where(m => m.Success))
             {
-                matchedValues.Add(match.Groups[scheme.MatchGroup].Value.Trim());
+                matchedValues.Add(match.Groups[pattern.MatchGroup].Value.Trim());
             }
         }
 
-        if (!matchedValues.Any())
+        if (matchedValues.Count == 0)
         {
             return defaultValue;
         }
@@ -71,7 +74,8 @@ internal static class Detectors
     }
 
     /// <summary>
-    /// Attempts casting the input text to type T and returning it. If casting fails, the provided default value is returned instead.
+    /// Attempts casting the input text to type T and returning it.
+    /// If casting fails, the default value is returned instead.
     /// </summary>
     private static T? Cast<T>(string? text, T? defaultValue)
     {
@@ -93,14 +97,18 @@ internal static class Detectors
     /// <summary>
     /// Extracts the value of the specified tag field from the given data.
     /// </summary>
-    private static string ExtractMetadataText(VideoMetadata videoMetadata,
-                                              SourceMetadataField target)
+    /// <param name="metadata"></param>
+    /// <param name="fieldName">The name of the field within the video metadata to read.</param>
+    /// <returns>The text content of the requested field of the video metadata.</returns>
+    private static string ExtractMetadataText(VideoMetadata metadata, string fieldName)
     {
-        return target switch
+        return fieldName switch
         {
-            SourceMetadataField.Title       => videoMetadata.Title,
-            SourceMetadataField.Description => videoMetadata.Description,
-            _ => throw new ArgumentException($"\"{target}\" is an invalid {nameof(SourceMetadataField)}.")
+            "title"       => metadata.Title,
+            "description" => metadata.Description,
+
+            // TODO: It would be best to check for invalid entries upon settings deserialization.
+            _ => throw new ArgumentException($"\"{fieldName}\" is an invalid video metadata field name.")
         };
     }
 }

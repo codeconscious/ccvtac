@@ -7,24 +7,40 @@ module Settings =
     type FilePath = FilePath of string
 
     type RenamePattern = {
-        [<JsonPropertyName("regex")>]          Regex : string
-        [<JsonPropertyName("replacePattern")>] ReplaceWithPattern : string
-        [<JsonPropertyName("description")>]    Description : string
+        [<JsonPropertyName("regex")>]           Regex : string
+        [<JsonPropertyName("replacePattern")>]  ReplaceWithPattern : string
+        [<JsonPropertyName("summary")>]         Summary : string
+    }
+
+    type TagDetectionPattern = {
+        [<JsonPropertyName("regex")>]        Regex : string
+        [<JsonPropertyName("matchGroup")>]   MatchGroup : byte
+        [<JsonPropertyName("searchField")>]  SearchField : string
+        [<JsonPropertyName("summary")>]      Summary : string option
+    }
+
+    type TagDetectionPatterns = {
+        [<JsonPropertyName("title")>]     Title : TagDetectionPattern array
+        [<JsonPropertyName("artist")>]    Artist : TagDetectionPattern array
+        [<JsonPropertyName("album")>]     Album : TagDetectionPattern array
+        [<JsonPropertyName("composer")>]  Composer : TagDetectionPattern array
+        [<JsonPropertyName("year")>]      Year : TagDetectionPattern array
     }
 
     type UserSettings = {
-        [<JsonPropertyName("workingDirectory")>]             WorkingDirectory: string
-        [<JsonPropertyName("moveToDirectory")>]              MoveToDirectory: string
-        [<JsonPropertyName("historyFile")>]                  HistoryFile: string
-        [<JsonPropertyName("historyDisplayCount")>]          HistoryDisplayCount: byte
-        [<JsonPropertyName("splitChapters")>]                SplitChapters: bool
-        [<JsonPropertyName("sleepSecondsBetweenDownloads")>] SleepSecondsBetweenDownloads: uint16
-        [<JsonPropertyName("sleepSecondsBetweenBatches")>]   SleepSecondsBetweenBatches: uint16
-        [<JsonPropertyName("verboseOutput")>]                VerboseOutput: bool
-        [<JsonPropertyName("embedImages")>]                  EmbedImages: bool
-        [<JsonPropertyName("doNotEmbedImageUploaders")>]     DoNotEmbedImageUploaders: string array
-        [<JsonPropertyName("ignoreUploadYearUploaders")>]    IgnoreUploadYearUploaders: string array
-        [<JsonPropertyName("renamePatterns")>]               RenamePatterns: RenamePattern array
+        [<JsonPropertyName("workingDirectory")>]              WorkingDirectory: string
+        [<JsonPropertyName("moveToDirectory")>]               MoveToDirectory: string
+        [<JsonPropertyName("historyFile")>]                   HistoryFile: string
+        [<JsonPropertyName("historyDisplayCount")>]           HistoryDisplayCount: byte
+        [<JsonPropertyName("splitChapters")>]                 SplitChapters: bool
+        [<JsonPropertyName("sleepSecondsBetweenDownloads")>]  SleepSecondsBetweenDownloads: uint16
+        [<JsonPropertyName("sleepSecondsBetweenBatches")>]    SleepSecondsBetweenBatches: uint16
+        [<JsonPropertyName("verboseOutput")>]                 VerboseOutput: bool
+        [<JsonPropertyName("embedImages")>]                   EmbedImages: bool
+        [<JsonPropertyName("doNotEmbedImageUploaders")>]      DoNotEmbedImageUploaders: string array
+        [<JsonPropertyName("ignoreUploadYearUploaders")>]     IgnoreUploadYearUploaders: string array
+        [<JsonPropertyName("tagDetectionPatterns")>]          TagDetectionPatterns: TagDetectionPatterns
+        [<JsonPropertyName("renamePatterns")>]                RenamePatterns: RenamePattern array
     }
 
     [<CompiledName("Summarize")>]
@@ -36,6 +52,13 @@ module Settings =
             if count = 1
             then $"{count} {label}"
             else $"{count} {label}s"
+
+        let tagDetectionPatternCount (patterns:TagDetectionPatterns) =
+            patterns.Title.Length +
+            patterns.Artist.Length +
+            patterns.Album.Length +
+            patterns.Composer.Length +
+            patterns.Year.Length
 
         [
             ("Working directory",
@@ -58,6 +81,8 @@ module Settings =
              settings.IgnoreUploadYearUploaders.Length |> pluralize "channel")
             ("Do-not-embed-image channels",
              settings.DoNotEmbedImageUploaders.Length |> pluralize "channel")
+            ("Tag-detection patterns",
+             tagDetectionPatternCount settings.TagDetectionPatterns |> pluralize "pattern")
             ("Rename patterns",
              settings.RenamePatterns.Length |> pluralize "pattern")
         ]
@@ -140,5 +165,12 @@ module Settings =
                   EmbedImages = true
                   DoNotEmbedImageUploaders = [||]
                   IgnoreUploadYearUploaders = [||]
+                  TagDetectionPatterns = {
+                    Title = [||]
+                    Artist = [||]
+                    Album = [||]
+                    Composer = [||]
+                    Year = [||]
+                  }
                   RenamePatterns = [||] }
             writeFile defaultSettings confirmedPath

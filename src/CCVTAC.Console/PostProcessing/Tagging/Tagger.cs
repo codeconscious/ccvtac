@@ -8,11 +8,12 @@ namespace CCVTAC.Console.PostProcessing.Tagging;
 
 internal static class Tagger
 {
-    internal static Result<string> Run(UserSettings settings,
-                                       IEnumerable<TaggingSet> taggingSets,
-                                       CollectionMetadata? collectionJson,
-                                       MediaType mediaType,
-                                       Printer printer)
+    internal static Result<string> Run(
+        UserSettings settings,
+        IEnumerable<TaggingSet> taggingSets,
+        CollectionMetadata? collectionJson,
+        MediaType mediaType,
+        Printer printer)
     {
         if (settings.VerboseOutput)
             printer.Print("Adding file tags...");
@@ -51,153 +52,158 @@ internal static class Tagger
 
         TaggingSet finalTaggingSet = DeleteSourceFile(taggingSet, printer, settings.VerboseOutput);
 
-        // If a single video was split, the tagging set will have multiple audio paths.
-        // In this case, we will not embed the image file (with the assumption that
+        // If a single video was split, the tagging set will have multiple audio file paths.
+        // In this case, we will NOT embed the image file (with the assumption that
         // the standalone image file will be available in the move-to directory).
         string? maybeImagePath = embedImages && finalTaggingSet.AudioFilePaths.Count == 1
             ? finalTaggingSet.ImageFilePath
             : null;
 
-        foreach (string audioFilePath in finalTaggingSet.AudioFilePaths)
+        foreach (string audioPath in finalTaggingSet.AudioFilePaths)
         {
-            TagSingleFile(
-                settings,
-                parsedJsonResult.Value,
-                audioFilePath,
-                maybeImagePath,
-                collectionJson,
-                printer
-            );
+            try
+            {
+                TagSingleFile(
+                    settings,
+                    parsedJsonResult.Value,
+                    audioPath,
+                    maybeImagePath,
+                    collectionJson,
+                    printer
+                );
+            }
+            catch (Exception ex)
+            {
+                printer.Error($"Error tagging file: {ex.Message}");
+            }
         }
     }
 
-    static void TagSingleFile(UserSettings settings,
-                              VideoMetadata videoData,
-                              string audioFilePath,
-                              string? imageFilePath,
-                              CollectionMetadata? collectionData,
-                              Printer printer)
+    static void TagSingleFile(
+        UserSettings settings,
+        VideoMetadata videoData,
+        string audioFilePath,
+        string? imageFilePath,
+        CollectionMetadata? collectionData,
+        Printer printer)
     {
         bool verbose = settings.VerboseOutput;
 
-        try
+        string audioFileName = Path.GetFileName(audioFilePath);
+
+        if (verbose)
+            printer.Print($"Current audio file: \"{audioFileName}\"");
+
+        using TaggedFile taggedFile = TaggedFile.Create(audioFilePath);
+        TagDetector tagDetector = new(settings.TagDetectionPatterns);
+
+        if (videoData.Track is string metadataTitle)
         {
-            string audioFileName = Path.GetFileName(audioFilePath);
+            if (verbose)
+                printer.Print($"• Using metadata title \"{metadataTitle}\"");
+
+            taggedFile.Tag.Title = metadataTitle;
+        }
+        else
+        {
+            if (verbose)
+                printer.Print($"• Found title \"{taggedFile.Tag.Title}\"");
+
+            taggedFile.Tag.Title = tagDetector.DetectTitle(videoData, videoData.Title);
+        }
+
+        if (videoData.Artist is string metadataArtists)
+        {
+            var firstArtist = metadataArtists.Split(", ").First();
+            var diffSummary = firstArtist == metadataArtists
+                ? string.Empty
+                : $" (extracted from \"{metadataArtists}\")";
+            taggedFile.Tag.Performers = [firstArtist];
 
             if (verbose)
-                printer.Print($"Current audio file: \"{audioFileName}\"");
-
-            using TaggedFile taggedFile = TaggedFile.Create(audioFilePath);
-            TagDetector tagDetector = new();
-
-            if (videoData.Track is string metadataTitle)
-            {
-                if (verbose)
-                    printer.Print($"• Using metadata title \"{metadataTitle}\"");
-
-                taggedFile.Tag.Title = metadataTitle;
-            }
-            else
-            {
-                if (verbose)
-                    printer.Print($"• Found title \"{taggedFile.Tag.Title}\"");
-
-                taggedFile.Tag.Title = tagDetector.DetectTitle(videoData, videoData.Title);
-            }
-
-            if (videoData.Artist is string metadataArtists)
-            {
-                var firstArtist = metadataArtists.Split(", ").First();
-                var diffSummary = firstArtist == metadataArtists
-                    ? string.Empty
-                    : $" (extracted from \"{metadataArtists}\")";
-                taggedFile.Tag.Performers = [firstArtist];
-
-                if (verbose)
-                    printer.Print($"• Using metadata artist \"{firstArtist}\"{diffSummary}");
-            }
-            else if (tagDetector.DetectArtist(videoData) is string artist)
-            {
-                if (verbose)
-                    printer.Print($"• Found artist \"{artist}\"");
-
-                taggedFile.Tag.Performers = [artist];
-            }
-
-            if (videoData.Album is string metadataAlbum)
-            {
-                if (verbose)
-                    printer.Print($"• Using metadata album \"{metadataAlbum}\"");
-
-                taggedFile.Tag.Album = metadataAlbum;
-            }
-            else if (tagDetector.DetectAlbum(videoData, collectionData?.Title) is string album)
-            {
-                if (verbose)
-                    printer.Print($"• Found album \"{album}\"");
-
-                taggedFile.Tag.Album = album;
-            }
-
-            if (tagDetector.DetectComposers(videoData) is string composers)
-            {
-                if (verbose)
-                    printer.Print($"• Found composer(s) \"{composers}\"");
-
-                taggedFile.Tag.Composers = [composers];
-            }
-
-            if (videoData.PlaylistIndex is uint trackNo)
-            {
-                if (verbose)
-                    printer.Print($"• Using playlist index of {trackNo} for track number");
-
-                taggedFile.Tag.Track = trackNo;
-            }
-
-            if (videoData.ReleaseYear is uint releaseYear)
-            {
-                if (verbose)
-                    printer.Print($"• Using metadata release year \"{releaseYear}\"");
-
-                taggedFile.Tag.Year = releaseYear;
-            }
-            else
-            {
-                ushort? maybeDefaultYear = GetAppropriateReleaseDateIfAny(settings, videoData);
-
-                if (tagDetector.DetectReleaseYear(videoData, maybeDefaultYear) is ushort year)
-                {
-                    if (verbose)
-                        printer.Print($"• Found year \"{year}\"");
-
-                    taggedFile.Tag.Year = year;
-                }
-            }
-
-            taggedFile.Tag.Comment = videoData.GenerateComment(collectionData);
-
-            if (settings.EmbedImages &&
-                !settings.DoNotEmbedImageUploaders.Contains(videoData.Uploader) &&
-                imageFilePath is not null)
-            {
-                printer.Print("Embedding the image.");
-                WriteImage(taggedFile, imageFilePath, verbose, printer);
-            }
-            else
-            {
-                if (verbose)
-                    printer.Print("Skipping image embedding.");
-            }
-
-            taggedFile.Save();
-            if (verbose)
-                printer.Print($"Wrote tags to \"{audioFileName}\".");
+                printer.Print($"• Using metadata artist \"{firstArtist}\"{diffSummary}");
         }
-        catch (Exception ex)
+        else if (tagDetector.DetectArtist(videoData) is string artist)
         {
-            printer.Error($"Error tagging file: {ex.Message}");
+            if (verbose)
+                printer.Print($"• Found artist \"{artist}\"");
+
+            taggedFile.Tag.Performers = [artist];
         }
+
+        if (videoData.Album is string metadataAlbum)
+        {
+            if (verbose)
+                printer.Print($"• Using metadata album \"{metadataAlbum}\"");
+
+            taggedFile.Tag.Album = metadataAlbum;
+        }
+        else if (tagDetector.DetectAlbum(videoData, collectionData?.Title) is string album)
+        {
+            if (verbose)
+                printer.Print($"• Found album \"{album}\"");
+
+            taggedFile.Tag.Album = album;
+        }
+
+        if (tagDetector.DetectComposers(videoData) is string composers)
+        {
+            if (verbose)
+                printer.Print($"• Found composer(s) \"{composers}\"");
+
+            taggedFile.Tag.Composers = [composers];
+        }
+
+        if (videoData.PlaylistIndex is uint trackNo)
+        {
+            if (verbose)
+                printer.Print($"• Using playlist index of {trackNo} for track number");
+
+            taggedFile.Tag.Track = trackNo;
+        }
+
+        if (videoData.ReleaseYear is uint releaseYear)
+        {
+            if (verbose)
+                printer.Print($"• Using metadata release year \"{releaseYear}\"");
+
+            taggedFile.Tag.Year = releaseYear;
+        }
+        else
+        {
+            ushort? maybeDefaultYear = GetAppropriateReleaseDateIfAny(settings, videoData);
+
+            if (tagDetector.DetectReleaseYear(videoData, maybeDefaultYear) is ushort year)
+            {
+                if (verbose)
+                    printer.Print($"• Found year \"{year}\"");
+
+                taggedFile.Tag.Year = year;
+            }
+        }
+
+        taggedFile.Tag.Comment = videoData.GenerateComment(collectionData);
+
+        if (settings.EmbedImages &&
+            !settings.DoNotEmbedImageUploaders.Contains(videoData.Uploader) &&
+            imageFilePath is not null)
+        {
+            printer.Print("Embedding the image.");
+            WriteImage(taggedFile, imageFilePath, verbose, printer);
+        }
+        else
+        {
+            if (verbose)
+                printer.Print("Skipping image embedding.");
+        }
+
+        taggedFile.Save();
+
+        if (verbose)
+        {
+            printer.Print($"Wrote tags to \"{audioFileName}\".");
+        }
+
 
         /// <summary>
         /// If the supplied video uploader is specified in the settings, returns the video's upload year.
