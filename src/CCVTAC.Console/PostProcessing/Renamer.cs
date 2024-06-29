@@ -71,7 +71,7 @@ internal static class Renamer
                                 .Select((gr, i) =>
                                 (
                                     SearchFor:   $"%<{i + 1}>s", // Start with placeholder #1 because...
-                                    ReplaceWith: match.Groups[i + 1].Value // ...we start with regex group #1.
+                                    ReplaceWith: match.Groups[i + 1].Value.Trim() // ...we start with regex group #1.
                                 ))
                                 // Starting with the placeholder text from the settings, replace each
                                 // individual placeholder with the corrollated match text, then
