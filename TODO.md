@@ -28,7 +28,8 @@ Features and improvements I'm considering in the future. Not all ideas might be 
 - Count generated files for final output
 - Set up actual releases on GitHub, ideally using GitHub Actions
 - Output the counts of URL types too (e.g., "# videos, # playlists")
-- Don't download images when adding images is disabled in the settings.
+- Don't download images when adding images is disabled in the settings
+- Bug: Leftover temp files if the same video exists twice in a playlist. (So uncommon, maybe not worth fixing.)
 
 ## Rejected
 
