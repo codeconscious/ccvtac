@@ -94,7 +94,7 @@ internal static class Program
         }
 
         // The working directory should start empty.
-        var emptyDirResult = IoUtilties.Directories.WarnIfAnyFiles(settings.WorkingDirectory, printer);
+        var emptyDirResult = IoUtilties.Directories.WarnIfDirectoryHasFiles(settings.WorkingDirectory, printer);
         if (emptyDirResult.IsFailed)
         {
             printer.Print($"Aborting...");
@@ -161,7 +161,7 @@ internal static class Program
                 continue;
             }
 
-            var tempFiles = IoUtilties.Directories.GetDirectoryFiles(settings.WorkingDirectory);
+            var tempFiles = IoUtilties.Directories.GetDirectoryFileNames(settings.WorkingDirectory);
             if (tempFiles.Any())
             {
                 printer.Error($"{tempFiles.Count} file(s) unexpectedly found in the working directory ({settings.WorkingDirectory}), so will abort:");
