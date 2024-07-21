@@ -216,4 +216,4 @@ Periodically ensure you are running the latest version of yt-dlp, especially if 
 
 ## Reporting issues
 
-If you run into any issues, feel free to create an issue on GitHub with as much information as possible (e.g., entered URLs, system information, yt-dlp version information).
+If you run into any issues, feel free to create an issue on GitHub with as much information as possible (e.g., entered URLs, system information, yt-dlp version).

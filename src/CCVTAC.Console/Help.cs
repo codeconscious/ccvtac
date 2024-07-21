@@ -11,18 +11,18 @@ public static class Help
         channels, plus do some automatic post-processing (tagging, renaming, and
         moving) as well.
 
-        Feel free to use it yourself, but please do so responsibly. No warranties or
-        guarantees provided!
+        While I maintain it primarily for my own use, feel free to use it yourself.
+        No warranties or guarantees provided!
+
+        PREREQUISITES:
+
+        • .NET 8 runtime (https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+        • yt-dlp https://github.com/yt-dlp/yt-dlp
+        • [ffmpeg](https://ffmpeg.org/) (for yt-dlp artwork extraction)
+        • Optional: mogrify https://imagemagick.org/script/mogrify.php
+                    (for auto-trimming album art)
 
         RUNNING IT
-
-        Prerequisites:
-
-        • .NET 8 runtime https://dotnet.microsoft.com/en-us/download/dotnet/8.0
-        • A valid settings file (see below)
-        • yt-dlp https://github.com/yt-dlp/yt-dlp
-        • Optional: mogrify https://imagemagick.org/script/mogrify.php (for auto-
-        trimming album art)
 
         Settings:
 
@@ -42,6 +42,8 @@ public static class Help
         settings to help reduce concentrated loads on YouTube servers. Please avoid
         lowering these values too much and slamming their servers with enormous,
         long-running downloads (even if you feel their servers can take it).
+
+        See the README file on the GitHub repo for more about settings.
 
         Using the application:
 
@@ -65,8 +67,8 @@ public static class Help
 
         Reporting issues:
 
-        If you run into any issues, please create an issue on GitHub with as much
-        information as possible. Thank you!
+        If you run into any issues, feel free to create an issue on GitHub with as much
+        information as possible (e.g., entered URLs, system information, yt-dlp version).
         """";
 
         printer.Print(helpText, processMarkup: false);
