@@ -18,7 +18,7 @@ internal static class Renamer
         DirectoryInfo dir = new(workingDirectory);
         var audioFilePaths = dir.EnumerateFiles("*.m4a");
 
-        if (!audioFilePaths.Any())
+        if (audioFilePaths.None())
         {
             printer.Warning("No audio files to rename were found.");
             return;

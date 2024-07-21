@@ -51,10 +51,14 @@ public static class ExtensionMethods
     }
 
     /// <summary>
-    /// Determines whether a sequence contains no elements and, thus, is empty.
+    /// Determines whether a collection is empty.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="collection"></param>
-    /// <returns>true if the source sequence contains no elements; otherwise, false.</returns>
-    public static bool IsEmpty<T>(this IEnumerable<T> collection) => !collection.Any();
+    public static bool None<T>(this IEnumerable<T> collection) =>
+        !collection.Any();
+
+    /// <summary>
+    /// Determines whether no elements of a sequence satisfy a given condition.
+    /// </summary>
+    public static bool None<T>(this IEnumerable<T> collection, Func<T, bool> predicate) =>
+        !collection.Any(predicate);
 }

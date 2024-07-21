@@ -18,11 +18,11 @@ internal static class Directories
     {
         var ignoreFiles = customIgnoreFiles?.Distinct() ?? [];
 
-        return Directory.GetFiles(workingDirectory, AllFilesSearchPattern, EnumerationOptions)
-                        .Where(dirFilePath =>
-                            !ignoreFiles.Any(ignoreFile =>
-                                dirFilePath.EndsWith(ignoreFile)))
-                        .ToImmutableList();
+        return Directory
+            .GetFiles(workingDirectory, AllFilesSearchPattern, EnumerationOptions)
+            .Where(filePath =>
+                ignoreFiles.None(ignoreFile => filePath.EndsWith(ignoreFile)))
+            .ToImmutableList();
     }
 
     internal static Result WarnIfAnyFiles(string directory, Printer printer)

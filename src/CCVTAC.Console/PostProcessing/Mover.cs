@@ -35,7 +35,7 @@ internal static class Mover
         }
 
         var audioFileNames = workingDirInfo.EnumerateFiles(_audioFileWildcard).ToImmutableList();
-        if (audioFileNames.IsEmpty())
+        if (audioFileNames.IsEmpty)
         {
             printer.Error("No audio filenames were found.");
             return;
@@ -76,7 +76,7 @@ internal static class Mover
     private static FileInfo? GetCoverImage(DirectoryInfo workingDirInfo, int audioFileCount)
     {
         var images = workingDirInfo.EnumerateFiles(_imageFileWildcard).ToImmutableArray();
-        if (images.IsEmpty())
+        if (images.IsEmpty)
         {
             return null;
         }

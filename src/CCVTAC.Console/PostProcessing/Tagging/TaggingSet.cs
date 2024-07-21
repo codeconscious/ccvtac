@@ -75,7 +75,7 @@ internal readonly record struct TaggingSet
     /// <remarks>Does not include collection (playlist or channel) metadata files.</remarks>
     internal static ImmutableList<TaggingSet> CreateSets(IEnumerable<string> filePaths)
     {
-        if (filePaths is null || !filePaths.Any())
+        if (filePaths is null || filePaths.None())
         {
             return Enumerable.Empty<TaggingSet>().ToImmutableList();
         }
