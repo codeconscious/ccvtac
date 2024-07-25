@@ -10,7 +10,9 @@ internal static class Program
 {
     private static readonly string[] _helpFlags = ["-h", "--help"];
     private static readonly string[] _historyCommands = ["--history", "history", "show history"];
-    private static readonly string[] _toggleSplitChapterCommands = ["split", "toggle split"];
+    private static readonly string[] _toggleSplitChapterCommands = ["split", "toggle-split"];
+    private static readonly string[] _toggleEmbedImagesCommands = ["images", "toggle-images"];
+    private static readonly string[] _toggleVerboseOutputCommands = ["verbose", "toggle-verbose"];
     private static readonly string[] _settingsFileCommands = ["-s", "--settings"];
     private static readonly string[] _quitCommands = ["q", "quit", "exit", "bye"];
     private const string _urlPrompt =
@@ -136,16 +138,32 @@ internal static class Program
                                  .Distinct()
                                  .ToImmutableList();
 
-        if (_quitCommands.Contains(inputUrls[0].ToLowerInvariant()))
+        var firstInputLowered = inputUrls[0].ToLowerInvariant();
+
+        if (_quitCommands.Contains(firstInputLowered))
         {
             return NextAction.QuitAtUserRequest;
         }
 
-        if (_toggleSplitChapterCommands.Contains(inputUrls[0].ToLowerInvariant()))
+        if (_toggleSplitChapterCommands.Contains(firstInputLowered))
         {
             settings = SettingsAdapter.ToggleSplitChapters(settings);
-            // printer.Print($"Split Chapters is now {(settings.SplitChapters ? "ON" : "OFF")} for this session.");
-            SettingsAdapter.PrintSummary(settings, printer, "Split Chapters was toggled for this session.");
+            SettingsAdapter.PrintSummary(
+                settings, printer, "Split Chapters was toggled for this session.");
+        }
+
+        if (_toggleEmbedImagesCommands.Contains(firstInputLowered))
+        {
+            settings = SettingsAdapter.ToggleEmbedImages(settings);
+            SettingsAdapter.PrintSummary(
+                settings, printer, "Embed Images was toggled for this session.");
+        }
+
+        if (_toggleVerboseOutputCommands.Contains(firstInputLowered))
+        {
+            settings = SettingsAdapter.ToggleVerboseOutput(settings);
+            SettingsAdapter.PrintSummary(
+                settings, printer, "Verbose Output was toggled for this session.");
         }
 
         var checkedUrls = UrlHelper.SplitCombinedUrls(inputUrls);
@@ -177,9 +195,9 @@ internal static class Program
                 return NextAction.QuitDueToErrors;
             }
 
-            if (haveProcessedAny) // No need to sleep for the very first URL.
+            if (haveProcessedAny) // Don't sleep for the very first URL.
             {
-                // Declared here because of the `ref` variables cannot be used in lambda expressions.
+                // Declared here because `ref` instances cannot be used in lambda expressions.
                 ushort sleepSeconds = settings.SleepSecondsBetweenBatches;
                 ushort remainingSeconds = sleepSeconds;
 

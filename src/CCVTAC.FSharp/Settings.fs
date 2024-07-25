@@ -92,6 +92,16 @@ module Settings =
         let toggledSetting = not <| settings.SplitChapters
         { settings with SplitChapters = toggledSetting }
 
+    [<CompiledName("ToggleEmbedImages")>]
+    let toggleEmbedImages settings =
+        let toggledSetting = not <| settings.EmbedImages
+        { settings with EmbedImages = toggledSetting }
+
+    [<CompiledName("ToggleVerboseOutput")>]
+    let toggleVerboseOutput settings =
+        let toggledSetting = not <| settings.VerboseOutput
+        { settings with VerboseOutput = toggledSetting }
+
     module IO =
         open System.IO
         open System.Text.Json

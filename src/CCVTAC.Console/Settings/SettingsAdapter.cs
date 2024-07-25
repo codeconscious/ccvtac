@@ -59,11 +59,25 @@ public static class SettingsAdapter
     }
 
     /// <summary>
-    /// Returns a new Settings instance with the Toggle Split Chapters boolean's value
-    /// toggled. This only affects the current session; the settings file is not updated.
+    /// Returns a new Settings instance with the Split Chapters value toggled.
+    /// This only affects the current session; the settings file is not updated.
     /// </summary>
     internal static UserSettings ToggleSplitChapters(UserSettings settings) =>
         FSharp.Settings.ToggleSplitChapters(settings);
+
+    /// <summary>
+    /// Returns a new Settings instance with the Embed Images value toggled.
+    /// This only affects the current session; the settings file is not updated.
+    /// </summary>
+    internal static UserSettings ToggleEmbedImages(UserSettings settings) =>
+        FSharp.Settings.ToggleEmbedImages(settings);
+
+    /// <summary>
+    /// Returns a new Settings instance with the Verbose Output value toggled.
+    /// This only affects the current session; the settings file is not updated.
+    /// </summary>
+    internal static UserSettings ToggleVerboseOutput(UserSettings settings) =>
+        FSharp.Settings.ToggleVerboseOutput(settings);
 
     /// <summary>
     /// Prints a summary of the given settings.
