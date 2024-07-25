@@ -87,6 +87,11 @@ module Settings =
              settings.RenamePatterns.Length |> pluralize "pattern")
         ]
 
+    [<CompiledName("ToggleSplitChapters")>]
+    let toggleSplitChapters settings =
+        let toggledSetting = not <| settings.SplitChapters
+        { settings with SplitChapters = toggledSetting }
+
     module IO =
         open System.IO
         open System.Text.Json

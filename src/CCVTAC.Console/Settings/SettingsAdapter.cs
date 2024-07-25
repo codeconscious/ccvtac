@@ -17,7 +17,9 @@ public static class SettingsAdapter
     ///     3. `Fail`, indicating a failure in the read or write process or in settings validation.
     /// </returns>
     /// <remarks>This is intended to be a temporary solution until more code is moved to F#.</remarks>
-    internal static Result<UserSettings> ProcessSettings(string? maybeSettingsPath, Printer printer)
+    internal static Result<UserSettings> ProcessSettings(
+        string? maybeSettingsPath,
+        Printer printer)
     {
         var path = FSharp.Settings.FilePath.NewFilePath(maybeSettingsPath);
 
@@ -55,6 +57,13 @@ public static class SettingsAdapter
             return Result.Fail($"Error writing default settings: {ex.Message}");
         }
     }
+
+    /// <summary>
+    /// Returns a new Settings instance with the Toggle Split Chapters boolean's value
+    /// toggled. This only affects the current session; the settings file is not updated.
+    /// </summary>
+    internal static UserSettings ToggleSplitChapters(UserSettings settings) =>
+        FSharp.Settings.ToggleSplitChapters(settings);
 
     /// <summary>
     /// Prints a summary of the given settings.

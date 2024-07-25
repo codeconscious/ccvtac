@@ -9,7 +9,8 @@ namespace CCVTAC.Console;
 internal static class Program
 {
     private static readonly string[] _helpFlags = ["-h", "--help"];
-    private static readonly string[] _historyCommands = ["--history", "history"];
+    private static readonly string[] _historyCommands = ["--history", "history", "show history"];
+    private static readonly string[] _toggleSplitChapterCommands = ["split", "toggle split"];
     private static readonly string[] _settingsFileCommands = ["-s", "--settings"];
     private static readonly string[] _quitCommands = ["q", "quit", "exit", "bye"];
     private const string _urlPrompt =
@@ -105,7 +106,7 @@ internal static class Program
 
         while (true)
         {
-            var nextAction = ProcessBatch(settings, resultTracker, history, printer);
+            var nextAction = ProcessBatch(ref settings, resultTracker, history, printer);
             if (nextAction != NextAction.Continue)
             {
                 break;
@@ -120,7 +121,7 @@ internal static class Program
     /// </summary>
     /// <returns>The appropriate next action the application should take.</returns>
     private static NextAction ProcessBatch(
-        UserSettings settings,
+        ref UserSettings settings,
         ResultTracker resultHandler,
         History history,
         Printer printer)
@@ -138,6 +139,13 @@ internal static class Program
         if (_quitCommands.Contains(inputUrls[0].ToLowerInvariant()))
         {
             return NextAction.QuitAtUserRequest;
+        }
+
+        if (_toggleSplitChapterCommands.Contains(inputUrls[0].ToLowerInvariant()))
+        {
+            settings = SettingsAdapter.ToggleSplitChapters(settings);
+            // printer.Print($"Split Chapters is now {(settings.SplitChapters ? "ON" : "OFF")} for this session.");
+            SettingsAdapter.PrintSummary(settings, printer, "Split Chapters was toggled for this session.");
         }
 
         var checkedUrls = UrlHelper.SplitCombinedUrls(inputUrls);
@@ -171,21 +179,23 @@ internal static class Program
 
             if (haveProcessedAny) // No need to sleep for the very first URL.
             {
+                // Declared here because of the `ref` variables cannot be used in lambda expressions.
+                ushort sleepSeconds = settings.SleepSecondsBetweenBatches;
+                ushort remainingSeconds = sleepSeconds;
+
                 AnsiConsole.Status()
                     .Start($"Sleeping for {settings.SleepSecondsBetweenBatches} seconds...", ctx =>
                     {
                         ctx.Spinner(Spinner.Known.Star);
                         ctx.SpinnerStyle(Style.Parse("blue"));
 
-                        ushort remainingSeconds = settings.SleepSecondsBetweenBatches;
                         while (remainingSeconds > 0)
                         {
                             ctx.Status($"Sleeping for {remainingSeconds} seconds...");
                             remainingSeconds--;
                             Thread.Sleep(1000);
                         }
-                        printer.Print($"Slept for {settings.SleepSecondsBetweenBatches} second(s).",
-                                      appendLines: 1);
+                        printer.Print($"Slept for {sleepSeconds} second(s).", appendLines: 1);
                     });
             }
             else
