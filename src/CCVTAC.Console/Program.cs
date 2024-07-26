@@ -10,6 +10,7 @@ internal static class Program
 {
     private static readonly string[] _helpFlags = ["-h", "--help"];
     private static readonly string[] _historyCommands = ["--history", "history", "show history"];
+    private static readonly string[] _showSettingsCommands = ["settings"];
     private static readonly string[] _toggleSplitChapterCommands = ["split", "toggle-split"];
     private static readonly string[] _toggleEmbedImagesCommands = ["images", "toggle-images"];
     private static readonly string[] _toggleVerboseOutputCommands = ["verbose", "toggle-verbose"];
@@ -143,6 +144,11 @@ internal static class Program
         if (_quitCommands.Contains(firstInputLowered))
         {
             return NextAction.QuitAtUserRequest;
+        }
+
+        if (_showSettingsCommands.Contains(firstInputLowered))
+        {
+            SettingsAdapter.PrintSummary(settings, printer);
         }
 
         if (_toggleSplitChapterCommands.Contains(firstInputLowered))
