@@ -3,6 +3,7 @@ using CCVTAC.Console.Settings;
 using CCVTAC.Console.Downloading;
 using Spectre.Console;
 using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
+using System.Diagnostics.CodeAnalysis;
 
 namespace CCVTAC.Console;
 
@@ -139,33 +140,36 @@ internal static class Program
                                  .Distinct()
                                  .ToImmutableList();
 
-        var firstInputLowered = inputUrls[0].ToLowerInvariant();
+        var firstInput = inputUrls[0];
 
-        if (_quitCommands.Contains(firstInputLowered))
+        static bool CaseInsensitiveContains(string[] arr, string text) =>
+            arr.Contains(text, new CaseInsensitiveStringComparer());
+
+        if (CaseInsensitiveContains(_quitCommands, firstInput))
         {
             return NextAction.QuitAtUserRequest;
         }
 
-        if (_showSettingsCommands.Contains(firstInputLowered))
+        if (CaseInsensitiveContains(_showSettingsCommands, firstInput))
         {
             SettingsAdapter.PrintSummary(settings, printer);
         }
 
-        if (_toggleSplitChapterCommands.Contains(firstInputLowered))
+        if (CaseInsensitiveContains(_toggleSplitChapterCommands, firstInput))
         {
             settings = SettingsAdapter.ToggleSplitChapters(settings);
             SettingsAdapter.PrintSummary(
                 settings, printer, "Split Chapters was toggled for this session.");
         }
 
-        if (_toggleEmbedImagesCommands.Contains(firstInputLowered))
+        if (CaseInsensitiveContains(_toggleEmbedImagesCommands, firstInput))
         {
             settings = SettingsAdapter.ToggleEmbedImages(settings);
             SettingsAdapter.PrintSummary(
                 settings, printer, "Embed Images was toggled for this session.");
         }
 
-        if (_toggleVerboseOutputCommands.Contains(firstInputLowered))
+        if (CaseInsensitiveContains(_toggleVerboseOutputCommands, firstInput))
         {
             settings = SettingsAdapter.ToggleVerboseOutput(settings);
             SettingsAdapter.PrintSummary(
@@ -288,5 +292,23 @@ internal static class Program
         /// Program execution should end due to an inability to continue.
         /// </summary>
         QuitDueToErrors,
+    }
+
+    private sealed class CaseInsensitiveStringComparer : IEqualityComparer<string>
+    {
+        public bool Equals(string? x, string? y)
+        {
+            return (x, y) switch
+            {
+                (null, null)           => true,
+                (null, _) or (_, null) => false,
+                _ => string.Equals(x.Trim(), y.Trim(), StringComparison.OrdinalIgnoreCase)
+            };
+        }
+
+        public int GetHashCode([DisallowNull] string obj)
+        {
+            return obj.ToLower().GetHashCode();
+        }
     }
 }
