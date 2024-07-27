@@ -129,7 +129,7 @@ internal static class Program
     /// <returns>The appropriate next action the application should take.</returns>
     private static NextAction ProcessBatch(
         ref UserSettings settings,
-        ResultTracker resultHandler,
+        ResultTracker resultTracker,
         History history,
         Printer printer)
     {
@@ -253,7 +253,7 @@ internal static class Program
             history.Append(url, inputTime, settings.VerboseOutput, printer);
 
             var downloadResult = Downloader.Run(url, mediaType, settings, printer);
-            resultHandler.RegisterResult(downloadResult);
+            resultTracker.RegisterResult(downloadResult);
             if (downloadResult.IsFailed)
             {
                 return NextAction.Continue;
