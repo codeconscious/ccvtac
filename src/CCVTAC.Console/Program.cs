@@ -121,7 +121,7 @@ internal static class Program
         resultTracker.PrintFinalSummary();
     }
 
-    internal record Input(InputType InputType, string Text);
+    internal record CategorizedInput(string Text, InputType InputType);
 
     /// <summary>
     /// Processes a single user request, from input to downloading and file post-processing.
@@ -140,52 +140,27 @@ internal static class Program
 
         var splitInputs = UrlHelper.SplitInputs(userInput);
 
-        var categorizedInputs = splitInputs.Select(input =>
-                new Input(input.StartsWith('!') ? InputType.Command : InputType.Url, input)
-            ).ToFrozenSet();
+        var categorizedInputs = splitInputs
+            .Select(input =>
+                new CategorizedInput(
+                    input,
+                    input.StartsWith('!') ? InputType.Command : InputType.Url)
+            ).ToImmutableList();
 
         var urlCount = categorizedInputs.Count(i => i.InputType == InputType.Url);
-        var commandCount = categorizedInputs.Count - urlCount;
-        if (categorizedInputs.Count > 1)
-        {
-            var urlSummary = urlCount switch
-            {
-                1 => "1 URL",
-                >1 => $"{urlCount} URLs",
-                _ => string.Empty
-            };
-            var commandSummary = commandCount switch
-            {
-                1 => "1 command",
-                >1 => $"{commandCount} commands",
-                _ => string.Empty
-            };
-            var connector = urlSummary.HasText() && commandSummary.HasText()
-                ? " and "
-                : string.Empty;
-            printer.Print($"Batch of {urlSummary}{connector}{commandSummary} entered.");
-
-            foreach (Input input in categorizedInputs)
-            {
-                if (input.InputType is InputType.Url)
-                    printer.Print($"      URL: {input.Text}");
-                else
-                    printer.Print($"  Command: {input.Text}");
-            }
-            printer.PrintEmptyLines(1);
-        }
+        SummarizeInput(categorizedInputs, urlCount, printer);
 
         nuint currentBatch = 0;
         bool haveProcessedAny = false;
 
-        foreach (Input input in categorizedInputs)
+        foreach (CategorizedInput input in categorizedInputs)
         {
             if (input.InputType is InputType.Command)
             {
-                var result = ProcessCommand(input.Text, settings, history, printer);
+                var result = ProcessCommand(input.Text, ref settings, history, printer);
                 if (result.IsFailed)
                 {
-                    printer.Error($"Command error: ${result.Errors[0].Message}");
+                    printer.Error($"Command error: {result.Errors[0].Message}");
                     continue;
                 }
 
@@ -278,7 +253,7 @@ internal static class Program
 
     private static Result<NextAction> ProcessCommand(
         string command,
-        UserSettings settings,
+        ref UserSettings settings,
         History history,
         Printer printer)
     {
@@ -327,6 +302,43 @@ internal static class Program
         }
 
         return Result.Fail($"Command \"{command}\" is invalid.");
+    }
+
+    private static void SummarizeInput(
+        ImmutableList<CategorizedInput> categorizedInputs,
+        int urlCount,
+        Printer printer)
+    {
+        var commandCount = categorizedInputs.Count - urlCount;
+
+        if (categorizedInputs.Count > 1)
+        {
+            var urlSummary = urlCount switch
+            {
+                1 => "1 URL",
+                >1 => $"{urlCount} URLs",
+                _ => string.Empty
+            };
+            var commandSummary = commandCount switch
+            {
+                1 => "1 command",
+                >1 => $"{commandCount} commands",
+                _ => string.Empty
+            };
+            var connector = urlSummary.HasText() && commandSummary.HasText()
+                ? " and "
+                : string.Empty;
+            printer.Print($"Batch of {urlSummary}{connector}{commandSummary} entered.");
+
+            foreach (CategorizedInput input in categorizedInputs)
+            {
+                if (input.InputType is InputType.Url)
+                    printer.Print($"      URL: {input.Text}");
+                else
+                    printer.Print($"  Command: {input.Text}");
+            }
+            printer.PrintEmptyLines(1);
+        }
     }
 
     /// <summary>
