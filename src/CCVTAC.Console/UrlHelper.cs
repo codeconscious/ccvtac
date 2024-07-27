@@ -79,6 +79,6 @@ public static class UrlHelper
                 .Reverse());
 
 
-        return [.. safeUrls.Distinct()];
+        return [.. safeUrls];
     }
 }
