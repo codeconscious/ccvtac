@@ -2,23 +2,24 @@
 using CCVTAC.Console.Settings;
 using CCVTAC.Console.Downloading;
 using Spectre.Console;
-using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 using System.Diagnostics.CodeAnalysis;
+using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
+using System.Diagnostics;
 
 namespace CCVTAC.Console;
 
 internal static class Program
 {
     private static readonly string[] _helpFlags = ["-h", "--help"];
-    private static readonly string[] _historyCommands = ["--history", "history", "show history"];
-    private static readonly string[] _showSettingsCommands = ["settings"];
-    private static readonly string[] _toggleSplitChapterCommands = ["split", "toggle-split"];
-    private static readonly string[] _toggleEmbedImagesCommands = ["images", "toggle-images"];
-    private static readonly string[] _toggleVerboseOutputCommands = ["verbose", "toggle-verbose"];
     private static readonly string[] _settingsFileCommands = ["-s", "--settings"];
-    private static readonly string[] _quitCommands = ["q", "quit", "exit", "bye"];
+    private static readonly string[] _historyCommands = ["--history", "!history", "show history"];
+    private static readonly string[] _showSettingsCommands = ["!settings"];
+    private static readonly string[] _toggleSplitChapterCommands = ["!split", "!toggle-split"];
+    private static readonly string[] _toggleEmbedImagesCommands = ["!images", "!toggle-images"];
+    private static readonly string[] _toggleVerboseOutputCommands = ["!verbose", "!toggle-verbose"];
+    private static readonly string[] _quitCommands = ["q", "!q", "!quit", "!exit", "!bye"];
     private const string _urlPrompt =
-        "Enter one or more YouTube media URLs (spaces are optional), 'history', or 'quit':\n▶︎";
+        "Enter one or more YouTube media URLs (spaces are optional), '!history', or '!quit'/'!q':\n▶︎";
 
     private const string _defaultSettingsFileName = "settings.json";
 
@@ -120,6 +121,8 @@ internal static class Program
         resultTracker.PrintFinalSummary();
     }
 
+    internal record Input(InputType InputType, string Text);
+
     /// <summary>
     /// Processes a single user request, from input to downloading and file post-processing.
     /// </summary>
@@ -131,71 +134,71 @@ internal static class Program
         Printer printer)
     {
         string userInput = printer.GetInput(_urlPrompt);
-        DateTime inputTime = DateTime.Now;
 
+        var inputTime = DateTime.Now;
         Watch watch = new();
 
-        var inputUrls = userInput.Split(" ")
-                                 .Where(i => i.HasText())
-                                 .Distinct()
-                                 .ToImmutableList();
+        var splitInputs = UrlHelper.SplitInputs(userInput);
 
-        var firstInput = inputUrls[0];
+        var categorizedInputs = splitInputs.Select(input =>
+                new Input(input.StartsWith('!') ? InputType.Command : InputType.Url, input)
+            ).ToFrozenSet();
 
-        static bool CaseInsensitiveContains(string[] arr, string text) =>
-            arr.Contains(text, new CaseInsensitiveStringComparer());
-
-        if (CaseInsensitiveContains(_quitCommands, firstInput))
+        var urlCount = categorizedInputs.Count(i => i.InputType == InputType.Url);
+        var commandCount = categorizedInputs.Count - urlCount;
+        if (categorizedInputs.Count > 1)
         {
-            return NextAction.QuitAtUserRequest;
-        }
+            var urlSummary = urlCount switch
+            {
+                1 => "1 URL",
+                >1 => $"{urlCount} URLs",
+                _ => string.Empty
+            };
+            var commandSummary = commandCount switch
+            {
+                1 => "1 command",
+                >1 => $"{commandCount} commands",
+                _ => string.Empty
+            };
+            var connector = urlSummary.HasText() && commandSummary.HasText()
+                ? " and "
+                : string.Empty;
+            printer.Print($"Batch of {urlSummary}{connector}{commandSummary} entered.");
 
-        if (CaseInsensitiveContains(_showSettingsCommands, firstInput))
-        {
-            SettingsAdapter.PrintSummary(settings, printer);
-        }
-
-        if (CaseInsensitiveContains(_toggleSplitChapterCommands, firstInput))
-        {
-            settings = SettingsAdapter.ToggleSplitChapters(settings);
-            SettingsAdapter.PrintSummary(
-                settings, printer, "Split Chapters was toggled for this session.");
-        }
-
-        if (CaseInsensitiveContains(_toggleEmbedImagesCommands, firstInput))
-        {
-            settings = SettingsAdapter.ToggleEmbedImages(settings);
-            SettingsAdapter.PrintSummary(
-                settings, printer, "Embed Images was toggled for this session.");
-        }
-
-        if (CaseInsensitiveContains(_toggleVerboseOutputCommands, firstInput))
-        {
-            settings = SettingsAdapter.ToggleVerboseOutput(settings);
-            SettingsAdapter.PrintSummary(
-                settings, printer, "Verbose Output was toggled for this session.");
-        }
-
-        var checkedUrls = UrlHelper.SplitCombinedUrls(inputUrls);
-
-        if (checkedUrls.Count > 1)
-        {
-            printer.Print($"Batch of {checkedUrls.Count} URLs entered.");
-            checkedUrls.ForEach(i => printer.Print($"• {i}"));
+            foreach (Input input in categorizedInputs)
+            {
+                if (input.InputType is InputType.Url)
+                    printer.Print($"      URL: {input.Text}");
+                else
+                    printer.Print($"  Command: {input.Text}");
+            }
             printer.PrintEmptyLines(1);
         }
 
         nuint currentBatch = 0;
         bool haveProcessedAny = false;
 
-        foreach (string url in checkedUrls)
+        foreach (Input input in categorizedInputs)
         {
-            // Show the history if requested.
-            if (_historyCommands.Contains(url.ToLowerInvariant()))
+            if (input.InputType is InputType.Command)
             {
-                history.ShowRecent(printer);
+                var result = ProcessCommand(input.Text, settings, history, printer);
+                if (result.IsFailed)
+                {
+                    printer.Error($"Command error: ${result.Errors[0].Message}");
+                    continue;
+                }
+
+                NextAction next = result.Value;
+                if (next is NextAction.QuitAtUserRequest)
+                {
+                    return next;
+                }
+
                 continue;
             }
+
+            string url = input.Text;
 
             var tempFiles = IoUtilties.Directories.GetDirectoryFileNames(settings.WorkingDirectory);
             if (tempFiles.Any())
@@ -231,9 +234,9 @@ internal static class Program
                 haveProcessedAny = true;
             }
 
-            if (checkedUrls.Count > 1)
+            if (urlCount > 1)
             {
-                printer.Print($"Processing batch {++currentBatch} of {checkedUrls.Count}...");
+                printer.Print($"Processing batch {++currentBatch} of {urlCount}...");
             }
 
             Watch jobWatch = new();
@@ -259,18 +262,71 @@ internal static class Program
             var postProcessor = new PostProcessing.PostProcessing(settings, mediaType, printer);
             postProcessor.Run();
 
-            string batchClause = checkedUrls.Count > 1
-                ? $" (batch {currentBatch} of {checkedUrls.Count})"
+            string batchClause = urlCount > 1
+                ? $" (batch {currentBatch} of {urlCount})"
                 : string.Empty;
             printer.Print($"Processed '{url}'{batchClause} in {jobWatch.ElapsedFriendly}.");
         }
 
-        if (checkedUrls.Count > 1)
+        if (urlCount > 1)
         {
-            printer.Print($"\nAll done with {checkedUrls.Count} batches in {watch.ElapsedFriendly}.");
+            printer.Print($"\nAll done with {urlCount} batches in {watch.ElapsedFriendly}.");
         }
 
         return NextAction.Continue;
+    }
+
+    private static Result<NextAction> ProcessCommand(
+        string command,
+        UserSettings settings,
+        History history,
+        Printer printer)
+    {
+        static bool CaseInsensitiveContains(string[] arr, string text) =>
+            arr.Contains(text, new CaseInsensitiveStringComparer());
+
+        if (CaseInsensitiveContains(_quitCommands, command))
+        {
+            return Result.Ok(NextAction.QuitAtUserRequest);
+        }
+
+        if (_historyCommands.Contains(command.ToLowerInvariant()))
+        {
+            history.ShowRecent(printer);
+            return Result.Ok(NextAction.Continue);
+        }
+
+        if (CaseInsensitiveContains(_showSettingsCommands, command))
+        {
+            SettingsAdapter.PrintSummary(settings, printer);
+            return Result.Ok(NextAction.Continue);
+        }
+
+        if (CaseInsensitiveContains(_toggleSplitChapterCommands, command))
+        {
+            settings = SettingsAdapter.ToggleSplitChapters(settings);
+            SettingsAdapter.PrintSummary(
+                settings, printer, "Split Chapters was toggled for this session.");
+            return Result.Ok(NextAction.Continue);
+        }
+
+        if (CaseInsensitiveContains(_toggleEmbedImagesCommands, command))
+        {
+            settings = SettingsAdapter.ToggleEmbedImages(settings);
+            SettingsAdapter.PrintSummary(
+                settings, printer, "Embed Images was toggled for this session.");
+            return Result.Ok(NextAction.Continue);
+        }
+
+        if (CaseInsensitiveContains(_toggleVerboseOutputCommands, command))
+        {
+            settings = SettingsAdapter.ToggleVerboseOutput(settings);
+            SettingsAdapter.PrintSummary(
+                settings, printer, "Verbose Output was toggled for this session.");
+            return Result.Ok(NextAction.Continue);
+        }
+
+        return Result.Fail($"Command \"{command}\" is invalid.");
     }
 
     /// <summary>
@@ -311,4 +367,6 @@ internal static class Program
             return obj.ToLower().GetHashCode();
         }
     }
+
+    internal enum InputType { Url, Command }
 }
