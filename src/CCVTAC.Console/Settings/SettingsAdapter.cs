@@ -3,6 +3,14 @@ using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 
 namespace CCVTAC.Console.Settings;
 
+/// <summary>
+/// Settings are managed by the corresponding F# library. This class acts as
+/// the bridge between this project and the F# library.
+/// </summary>
+/// <remarks>
+/// It would be easier to do everything here in C#, but I incorporated F# in
+/// PR #38 as functional programming practice.
+/// </remarks>
 public static class SettingsAdapter
 {
     /// <summary>
