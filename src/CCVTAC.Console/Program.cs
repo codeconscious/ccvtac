@@ -4,7 +4,6 @@ using CCVTAC.Console.Downloading;
 using Spectre.Console;
 using System.Diagnostics.CodeAnalysis;
 using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
-using System.Diagnostics;
 
 namespace CCVTAC.Console;
 
@@ -45,7 +44,7 @@ internal static class Program
             printer.Errors(settingsResult.Errors.Select(e => e.Message));
             return;
         }
-        else if (settingsResult.Value is null)
+        else if (settingsResult.Value is null) // TODO: Indicate why it might be null.
         {
             return;
         }
@@ -57,7 +56,7 @@ internal static class Program
 
         History history = new(settings.HistoryFile, settings.HistoryDisplayCount);
 
-        // Catch the user's pressing Ctrl-C (SIGINT).
+        // Catch Ctrl-C (SIGINT).
         System.Console.CancelKeyPress += delegate
         {
             printer.Warning("\nQuitting at user's request. You might want to verify and delete the files in the working directory.");
@@ -73,7 +72,7 @@ internal static class Program
         {
             printer.Error($"Fatal error: {topException.Message}");
             AnsiConsole.WriteException(topException);
-            printer.Print("Please help improve this tool by reporting this error and any URLs you entered at https://github.com/codeconscious/ccvtac/issues.");
+            printer.Print("Please help improve this tool by reporting this error and any affected URLs at https://github.com/codeconscious/ccvtac/issues.");
         }
     }
 
@@ -151,6 +150,7 @@ internal static class Program
             if (input.InputType is InputType.Command)
             {
                 var result = ProcessCommand(input.Text, ref settings, history, printer);
+
                 if (result.IsFailed)
                 {
                     printer.Error($"Command error: {result.Errors[0].Message}");

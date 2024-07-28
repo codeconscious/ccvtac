@@ -54,9 +54,9 @@ public static class Help
         (video, playlist, or channel) at the prompt and press the Enter key.
         You can optionally omit spaces between the URLs.
 
-        Enter `quit` or `q` to quit.
+        Enter `!quit` or `!q` to quit.
 
-        Entering `history` will display your recent URL history.
+        Entering `!history` will display your recent URL history.
 
         Upgrading yt-dlp:
 
