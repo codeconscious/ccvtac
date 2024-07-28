@@ -36,104 +36,106 @@ By default, the application will look for a file named `settings.json` in its di
 
 If your `settings.json` file does not exist, one will be created in the application directory with default settings. At minimum, you will need to enter (1) an existing directory for temporary working files, (2) an existing directory to which the final audio files should be moved, and (3) a path to your history file. The other settings have sensible defaults.
 
-#### Sample file with explanatory comments
+#### Starter file with comments
+
+You can copy and paste this file to `settings.json` to get started. You will, in particular, need to update the three directories at the top.
 
 ```
 {
-  # Mandatory. A temporary directory for working files.
-  # Cleared after processing a batch (i.e., URL).
+  // Mandatory. A temporary directory for working files.
+  // Cleared after processing a batch (i.e., URL).
   "workingDirectory": "/Users/me/temp",
 
-  # Mandatory. Where final audio files should be saved.
+  // Mandatory. Where final audio files should be saved.
   "moveToDirectory": "/Users/me/Downloads",
 
-  # Mandatory. A local history of all URLs entered.
+  // Mandatory. A local history of all URLs entered.
   "historyFile": "/Users/me/Downloads/history.log",
 
-  # Count of entries to show for `history` command
+  // Count of entries to show for `history` command
   "historyDisplayCount": 20,
 
-  # Split videos with chapters into separate files?
+  // Split videos with chapters into separate files?
   "splitChapters": true,
 
-  # Delay in seconds between individual video downloads for
-  # playlists and channels. Use to avoid slamming YouTube servers
-  # with several downloads in succession.
+  // Delay in seconds between individual video downloads for
+  // playlists and channels. Use to avoid slamming YouTube servers
+  // with several downloads in succession.
   "sleepSecondsBetweenDownloads": 10,
 
-  # Delay in seconds between batches (i.e., each URL entered).
-  # Use to avoid slamming YouTube servers with several downloads
-  # in succession.
+  // Delay in seconds between batches (i.e., each URL entered).
+  // Use to avoid slamming YouTube servers with several downloads
+  // in succession.
   "sleepSecondsBetweenBatches": 20,
 
   # Whether to use quiet mode (true) or not (false).
   # Less output is shown in quiet mode.
   "quietMode": false,
 
-  # Embed video thumbnails into file tags?
+  // Embed video thumbnails into file tags?
   "embedImages": true,
 
-  # Channel names for which the video thumbnail should
-  # never be embedded in the audio file.
+  // Channel names for which the video thumbnail should
+  // never be embedded in the audio file.
   "doNotEmbedImageUploaders": [
     "Channel Name",
     "Another Channel Name"
   ],
 
-  # By default, the upload year of the video is
-  # saved to files' Year tag. However, this will
-  # not occur for videos on channels listed here.
+  // By default, the upload year of the video is
+  // saved to files' Year tag. However, this will
+  // not occur for videos on channels listed here.
   "ignoreUploadYearUploaders": [
     "Channel Name",
     "Another Channel Name"
   ],
 
-  # Rules for detecting tag data from video metadata.
+  // Rules for detecting tag data from video metadata.
   "tagDetectionPatterns": {
 
-    # Currently supports 5 tags -- this one (Title) and its siblings.
+    // Currently supports 5 tags -- this one (Title) and its siblings.
     "title": [
       {
-        # A regex pattern for searching in the video metadata field specified below.
+        // A regex pattern for searching in the video metadata field specified below.
         "regex": "(.+?) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\\d{3})\\D",
 
-        # Use the text that comprises this match group number.
-        # `1` and greater indicates the specified group. You must use groups in the regex pattern!
-        # `0` indicates the entirety of the match text.
+        // Use the text that comprises this match group number.
+        // `1` and greater indicates the specified group. You must use groups in the regex pattern!
+        // `0` indicates the entirety of the match text.
         "matchGroup": 1,
 
-        # Which video metadata field should be searched, `title` or `description`?
+        // Which video metadata field should be searched, `title` or `description`?
         "searchField": "description",
 
-        # An arbitrary name for the rule. It will appear in the output when this pattern is matched.
+        // An arbitrary name for the rule. It will appear in the output when this pattern is matched.
         "summary": "Topic style"
       }
     ],
 
-    # The same data format is applicable to these tags as well.
+    // The same data format is applicable to these tags as well.
     "artist": [],
     "album": [],
     "composer": [],
     "year": []
   },
 
-  # Rules for auto-renaming audio files.
+  // Rules for auto-renaming audio files.
   "renamePatterns": [
     {
-      # Regular expression that matches some or all of a filename.
+      // Regular expression that matches some or all of a filename.
       "regex": "\\s\\[[\\w_-]{11}\\](?=\\.\\w{3,5})",
 
-      # What the matched text should be replaced with.
+      // What the matched text should be replaced with.
       "replacePattern": "",
 
       # Friendly summary to display in the output (if quiet mode is off).
       "description": "Remove trailing video IDs"
     },
     {
-      # Optionally use regex groups to match specific substrings.
-      # The matched groups will replace numbered placeholders (of
-      # the format `%<#>s`) in the replacement patterns!
-      # (The placeholder numbers must match the regex groups'.)
+      // Optionally use regex groups to match specific substrings.
+      // The matched groups will replace numbered placeholders (of
+      // the format `%<#>s`) in the replacement patterns!
+      // (The placeholder numbers must match the regex groups'.)
       "regex": "【(.+)】(.+)",
       "replacePattern": "%<1>s - %<2>s",
       "description": "Change `【artist】title` to `ARTIST - TRACK`"
@@ -155,7 +157,7 @@ Below is a mostly-empty settings you can copy and save to `settings.json` to get
   "splitChapters": true,
   "sleepSecondsBetweenDownloads": 10,
   "sleepSecondsBetweenBatches": 20,
-  "quietMode": false,
+  "verboseOutput": true,
   "embedImages": true,
   "doNotEmbedImageUploaders": [
     "Channel Name 1",
