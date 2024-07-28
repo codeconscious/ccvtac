@@ -57,13 +57,6 @@ internal static class Program
 
         History history = new(settings.HistoryFile, settings.HistoryDisplayCount);
 
-        // Show the history if requested.
-        if (args.Length > 0 && _historyCommands.Contains(args[0].ToLowerInvariant()))
-        {
-            history.ShowRecent(printer);
-            return;
-        }
-
         // Catch the user's pressing Ctrl-C (SIGINT).
         System.Console.CancelKeyPress += delegate
         {
