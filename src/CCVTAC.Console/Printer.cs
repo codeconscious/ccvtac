@@ -101,6 +101,6 @@ public sealed class Printer
     public string GetInput(string prompt)
     {
         PrintEmptyLines(1);
-        return AnsiConsole.Ask<string>($"[yellow3]{prompt}[/]");
+        return AnsiConsole.Ask<string>($"[skyblue1]{prompt}[/]");
     }
 }
