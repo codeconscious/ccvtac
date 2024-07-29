@@ -29,8 +29,8 @@ public sealed class InputHelperTests
     [Fact]
     public void SingleCommandEntered_CorrectlyParsed()
     {
-        string combinedInput = "!images";
-        List<string> expected = ["!images"];
+        string combinedInput = "\\images";
+        List<string> expected = ["\\images"];
         var actual = InputHelper.SplitInputs(combinedInput);
         Assert.Equal(expected.Count, actual.Count);
         Assert.Equal(expected[0], actual[0]);
@@ -39,8 +39,8 @@ public sealed class InputHelperTests
     [Fact]
     public void MultipleDuplicateCommandsAndUrlsEntered_CorrectlyParsed()
     {
-        string combinedInput = "!imageshttps://youtu.be/5OpuZHsPBhQ https://youtu.be/NT22EGxTuNw!images  https://youtu.be/5OpuZHsPBhQ";
-        List<string> expected = ["!images", "https://youtu.be/5OpuZHsPBhQ", "https://youtu.be/NT22EGxTuNw"];
+        string combinedInput = "\\imageshttps://youtu.be/5OpuZHsPBhQ https://youtu.be/NT22EGxTuNw\\images  https://youtu.be/5OpuZHsPBhQ";
+        List<string> expected = ["\\images", "https://youtu.be/5OpuZHsPBhQ", "https://youtu.be/NT22EGxTuNw"];
         var actual = InputHelper.SplitInputs(combinedInput);
         Assert.Equal(expected.Count, actual.Count);
         Assert.Equal(expected[0], actual[0]);

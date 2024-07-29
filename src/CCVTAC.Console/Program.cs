@@ -11,14 +11,14 @@ internal static class Program
 {
     private static readonly string[] _helpFlags = ["-h", "--help"];
     private static readonly string[] _settingsFileCommands = ["-s", "--settings"];
-    private static readonly string[] _historyCommands = ["--history", "!history", "show history"];
-    private static readonly string[] _showSettingsCommands = ["!settings"];
-    private static readonly string[] _toggleSplitChapterCommands = ["!split", "!toggle-split"];
-    private static readonly string[] _toggleEmbedImagesCommands = ["!images", "!toggle-images"];
-    private static readonly string[] _toggleVerboseOutputCommands = ["!verbose", "!toggle-verbose"];
-    private static readonly string[] _quitCommands = ["q", "!q", "!quit", "!exit", "!bye"];
+    private static readonly string[] _historyCommands = ["--history", "\\history"];
+    private static readonly string[] _showSettingsCommands = ["\\settings"];
+    private static readonly string[] _toggleSplitChapterCommands = ["\\split", "\\toggle-split"];
+    private static readonly string[] _toggleEmbedImagesCommands = ["\\images", "\\toggle-images"];
+    private static readonly string[] _toggleVerboseOutputCommands = ["\\verbose", "\\toggle-verbose"];
+    private static readonly string[] _quitCommands = ["q", "\\q", "\\quit", "\\exit", "\\bye"];
     private const string _urlPrompt =
-        "Enter one or more YouTube media URLs (spaces are optional), '!history', or '!quit'/'!q':\n▶︎";
+        "Enter one or more YouTube media URLs, \\history, or \\quit (\\q):\n▶︎";
 
     private const string _defaultSettingsFileName = "settings.json";
 
@@ -134,7 +134,7 @@ internal static class Program
 
         if (splitInputs.IsEmpty)
         {
-            printer.Error("Invalid input. Enter only URLs or commands beginning with \"!\".");
+            printer.Error("Invalid input. Enter only URLs or commands beginning with \"\\\".");
             return NextAction.Continue;
         }
 
@@ -142,7 +142,7 @@ internal static class Program
             .Select(input =>
                 new CategorizedInput(
                     input,
-                    input.StartsWith('!') ? InputType.Command : InputType.Url)
+                    input.StartsWith('\\') ? InputType.Command : InputType.Url)
             )
             .ToImmutableList();
 

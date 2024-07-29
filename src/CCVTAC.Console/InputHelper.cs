@@ -4,7 +4,7 @@ namespace CCVTAC.Console;
 
 public static class InputHelper
 {
-    private static readonly Regex _inputRegex = new("(?:https:|!)");
+    private static readonly Regex _inputRegex = new("""(?:https:|\\)""");
 
     private record IndexPair(int Start, int End);
 
