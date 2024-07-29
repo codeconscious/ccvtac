@@ -118,7 +118,7 @@ internal static class Program
     /// <summary>
     /// Processes a single user request, from input to downloading and file post-processing.
     /// </summary>
-    /// <returns>The appropriate next action the application should take.</returns>
+    /// <returns>Return the next action the application should take (e.g., continue or quit).</returns>
     private static NextAction ProcessBatch(
         ref UserSettings settings,
         ResultTracker resultTracker,
@@ -130,14 +130,21 @@ internal static class Program
         var inputTime = DateTime.Now;
         Watch watch = new();
 
-        var splitInputs = UrlHelper.SplitInputs(userInput);
+        var splitInputs = InputHelper.SplitInputs(userInput);
+
+        if (splitInputs.IsEmpty)
+        {
+            printer.Error("Invalid input. Enter only URLs or commands beginning with \"!\".");
+            return NextAction.Continue;
+        }
 
         var categorizedInputs = splitInputs
             .Select(input =>
                 new CategorizedInput(
                     input,
                     input.StartsWith('!') ? InputType.Command : InputType.Url)
-            ).ToImmutableList();
+            )
+            .ToImmutableList();
 
         var urlCount = categorizedInputs.Count(i => i.InputType == InputType.Url);
         SummarizeInput(categorizedInputs, urlCount, printer);

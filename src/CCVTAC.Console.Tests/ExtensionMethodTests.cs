@@ -1,8 +1,7 @@
 using System;
 using System.IO;
-using CCVTAC.Console;
 
-namespace CCVTAC.Tests;
+namespace CCVTAC.Console.Tests;
 
 public sealed class ExtensionMethodTests
 {
