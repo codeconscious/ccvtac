@@ -11,14 +11,6 @@ internal static class Program
 {
     private static readonly string[] _helpFlags = ["-h", "--help"];
     private static readonly string[] _settingsFileCommands = ["-s", "--settings"];
-    private static readonly string[] _historyCommands = ["--history", "\\history"];
-    private static readonly string[] _showSettingsCommands = ["\\settings"];
-    private static readonly string[] _toggleSplitChapterCommands = ["\\split", "\\toggle-split"];
-    private static readonly string[] _toggleEmbedImagesCommands = ["\\images", "\\toggle-images"];
-    private static readonly string[] _toggleVerboseOutputCommands = ["\\verbose", "\\toggle-verbose"];
-    private static readonly string[] _quitCommands = ["q", "\\q", "\\quit", "\\exit", "\\bye"];
-    private const string _urlPrompt =
-        "Enter one or more YouTube media URLs, \\history, or \\quit (\\q):\n▶︎";
 
     private const string _defaultSettingsFileName = "settings.json";
 
@@ -118,14 +110,14 @@ internal static class Program
     /// <summary>
     /// Processes a single user request, from input to downloading and file post-processing.
     /// </summary>
-    /// <returns>Return the next action the application should take (e.g., continue or quit).</returns>
+    /// <returns>Returns the next action the application should take (e.g., continue or quit).</returns>
     private static NextAction ProcessBatch(
         ref UserSettings settings,
         ResultTracker resultTracker,
         History history,
         Printer printer)
     {
-        string userInput = printer.GetInput(_urlPrompt);
+        string userInput = printer.GetInput(Commands.InputPrompt);
 
         var inputTime = DateTime.Now;
         Watch watch = new();
@@ -160,7 +152,7 @@ internal static class Program
 
                 if (result.IsFailed)
                 {
-                    printer.Error($"Command error: {result.Errors[0].Message}");
+                    printer.Error(result.Errors[0].Message);
                     continue;
                 }
 
@@ -260,24 +252,24 @@ internal static class Program
         static bool CaseInsensitiveContains(string[] arr, string text) =>
             arr.Contains(text, new CaseInsensitiveStringComparer());
 
-        if (CaseInsensitiveContains(_quitCommands, command))
+        if (CaseInsensitiveContains(Commands._quitCommands, command))
         {
             return Result.Ok(NextAction.QuitAtUserRequest);
         }
 
-        if (_historyCommands.Contains(command.ToLowerInvariant()))
+        if (CaseInsensitiveContains(Commands._historyCommands, command))
         {
             history.ShowRecent(printer);
             return Result.Ok(NextAction.Continue);
         }
 
-        if (CaseInsensitiveContains(_showSettingsCommands, command))
+        if (CaseInsensitiveContains(Commands._showSettingsCommands, command))
         {
             SettingsAdapter.PrintSummary(settings, printer);
             return Result.Ok(NextAction.Continue);
         }
 
-        if (CaseInsensitiveContains(_toggleSplitChapterCommands, command))
+        if (CaseInsensitiveContains(Commands._toggleSplitChapterCommands, command))
         {
             settings = SettingsAdapter.ToggleSplitChapters(settings);
             SettingsAdapter.PrintSummary(
@@ -285,7 +277,7 @@ internal static class Program
             return Result.Ok(NextAction.Continue);
         }
 
-        if (CaseInsensitiveContains(_toggleEmbedImagesCommands, command))
+        if (CaseInsensitiveContains(Commands._toggleEmbedImagesCommands, command))
         {
             settings = SettingsAdapter.ToggleEmbedImages(settings);
             SettingsAdapter.PrintSummary(
@@ -293,7 +285,7 @@ internal static class Program
             return Result.Ok(NextAction.Continue);
         }
 
-        if (CaseInsensitiveContains(_toggleVerboseOutputCommands, command))
+        if (CaseInsensitiveContains(Commands._toggleVerboseOutputCommands, command))
         {
             settings = SettingsAdapter.ToggleVerboseOutput(settings);
             SettingsAdapter.PrintSummary(
@@ -301,7 +293,7 @@ internal static class Program
             return Result.Ok(NextAction.Continue);
         }
 
-        return Result.Fail($"Command \"{command}\" is invalid.");
+        return Result.Fail($"\"{command}\" is not a valid command.");
     }
 
     private static void SummarizeInput(

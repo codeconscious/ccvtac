@@ -4,7 +4,10 @@ namespace CCVTAC.Console;
 
 public static class InputHelper
 {
-    private static readonly Regex _inputRegex = new("""(?:https:|\\)""");
+    /// <summary>
+    /// A regular expression that detects where commands and URLs begin.
+    /// </summary>
+    private static readonly Regex _regex = new("""(?:https:|\\)""");
 
     private record IndexPair(int Start, int End);
 
@@ -12,7 +15,7 @@ public static class InputHelper
     {
         var splitInputs = new List<string>();
 
-        var matches = _inputRegex.Matches(input).OfType<Match>().ToImmutableArray();
+        var matches = _regex.Matches(input).OfType<Match>().ToImmutableArray();
 
         if (matches.Length == 0)
 

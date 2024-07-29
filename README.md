@@ -206,9 +206,9 @@ Once your settings file is ready, run the application with `dotnet run`. Optiona
 
 When the application is running, simply enter at least one YouTube media URL (video, playlist, or channel) at the prompt and press the Enter key. You can omit spaces between the URLs.
 
-Enter `!quit` or `!q` to quit.
+Enter `\quit` or `\q` to quit.
 
-Entering `!history` will display your recent URL history.
+Entering `\history` will display your recent URL history.
 
 ## Upgrading yt-dlp
 
