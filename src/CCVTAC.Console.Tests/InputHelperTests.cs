@@ -10,7 +10,18 @@ public sealed class InputHelperTests
         string combinedInput = "https://youtu.be/5OpuZHsPBhQhttps://youtu.be/NT22EGxTuNw";
         List<string> expected = ["https://youtu.be/5OpuZHsPBhQ", "https://youtu.be/NT22EGxTuNw"];
         var actual = InputHelper.SplitInputs(combinedInput);
-        Assert.Equal(expected.Count, actual.Count);
+        Assert.Equal(expected.Count, actual.Length);
+        Assert.Equal(expected[0], actual[0]);
+        Assert.Equal(expected[1], actual[1]);
+    }
+
+    [Fact]
+    public void MultipleUrlsEnteredWithSpaces_CorrectlyParsed()
+    {
+        string combinedInput = "https://youtu.be/5OpuZHsPBhQ  https://youtu.be/NT22EGxTuNw";
+        List<string> expected = ["https://youtu.be/5OpuZHsPBhQ", "https://youtu.be/NT22EGxTuNw"];
+        var actual = InputHelper.SplitInputs(combinedInput);
+        Assert.Equal(expected.Count, actual.Length);
         Assert.Equal(expected[0], actual[0]);
         Assert.Equal(expected[1], actual[1]);
     }
@@ -21,7 +32,7 @@ public sealed class InputHelperTests
         string combinedInput = "https://youtu.be/5OpuZHsPBhQhttps://youtu.be/NT22EGxTuNwhttps://youtu.be/5OpuZHsPBhQ";
         List<string> expected = ["https://youtu.be/5OpuZHsPBhQ", "https://youtu.be/NT22EGxTuNw"];
         var actual = InputHelper.SplitInputs(combinedInput);
-        Assert.Equal(expected.Count, actual.Count);
+        Assert.Equal(expected.Count, actual.Length);
         Assert.Equal(expected[0], actual[0]);
         Assert.Equal(expected[1], actual[1]);
     }
@@ -32,7 +43,7 @@ public sealed class InputHelperTests
         string combinedInput = "\\images";
         List<string> expected = ["\\images"];
         var actual = InputHelper.SplitInputs(combinedInput);
-        Assert.Equal(expected.Count, actual.Count);
+        Assert.Equal(expected.Count, actual.Length);
         Assert.Equal(expected[0], actual[0]);
     }
 
@@ -42,7 +53,7 @@ public sealed class InputHelperTests
         string combinedInput = "\\imageshttps://youtu.be/5OpuZHsPBhQ https://youtu.be/NT22EGxTuNw\\images  https://youtu.be/5OpuZHsPBhQ";
         List<string> expected = ["\\images", "https://youtu.be/5OpuZHsPBhQ", "https://youtu.be/NT22EGxTuNw"];
         var actual = InputHelper.SplitInputs(combinedInput);
-        Assert.Equal(expected.Count, actual.Count);
+        Assert.Equal(expected.Count, actual.Length);
         Assert.Equal(expected[0], actual[0]);
         Assert.Equal(expected[1], actual[1]);
         Assert.Equal(expected[2], actual[2]);
@@ -54,7 +65,7 @@ public sealed class InputHelperTests
         string combinedInput = string.Empty;
         List<string> expected = [];
         var actual = InputHelper.SplitInputs(combinedInput);
-        Assert.Equal(expected.Count, actual.Count);
+        Assert.Equal(expected.Count, actual.Length);
     }
 
     [Fact]
@@ -63,6 +74,6 @@ public sealed class InputHelperTests
         string combinedInput = "invalid";
         List<string> expected = [];
         var actual = InputHelper.SplitInputs(combinedInput);
-        Assert.Equal(expected.Count, actual.Count);
+        Assert.Equal(expected.Count, actual.Length);
     }
 }

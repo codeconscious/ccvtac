@@ -11,44 +11,45 @@ public static class InputHelper
 
     private record IndexPair(int Start, int End);
 
-    public static ImmutableList<string> SplitInputs(string input)
+    /// <summary>
+    /// Takes a user input string and splits it into a collection of inputs based
+    /// upon substrings detected by the class's regular expression pattern.
+    /// </summary>
+    public static ImmutableArray<string> SplitInputs(string input)
     {
-        var splitInputs = new List<string>();
-
-        var matches = _regex.Matches(input).OfType<Match>().ToImmutableArray();
+        var matches = _regex
+            .Matches(input)
+            .OfType<Match>()
+            .ToImmutableArray();
 
         if (matches.Length == 0)
         {
-            return [..splitInputs];
+            return [];
         }
 
         if (matches.Length == 1)
         {
-            splitInputs.Add(input);
-            return [.. splitInputs];
+            return [input];
         }
 
         var startIndices = matches
             .Select(m => m.Index)
-            .Reverse()
-            .ToImmutableList();
+            .ToImmutableArray();
 
-        var indexPairs =
-            startIndices
-                .Select((si, itemIndex) => {
-                        int endIndex = itemIndex == 0 // If the last URL entered by user.
-                            ? input.Length
-                            : startIndices[itemIndex-1];
-                        return new IndexPair(si, endIndex);
-                    })
-                .ToImmutableList();
+        var indexPairs = startIndices
+            .Select((startIndex, iterIndex) =>
+                {
+                    int endIndex = iterIndex == startIndices.Length - 1
+                        ? input.Length
+                        : startIndices[iterIndex + 1];
 
-        splitInputs.AddRange(
-            indexPairs
-                .Select(p => input[p.Start..p.End])
-                .Reverse());
+                    return new IndexPair(startIndex, endIndex);
+                });
 
+        var splitInputs = indexPairs
+            .Select(p => input[p.Start..p.End].Trim())
+            .Distinct();
 
-        return [.. splitInputs.Select(i => i.Trim()).Distinct()];
+        return [.. splitInputs];
     }
 }
