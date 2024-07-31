@@ -18,6 +18,9 @@ public static class InputHelper
         var matches = _regex.Matches(input).OfType<Match>().ToImmutableArray();
 
         if (matches.Length == 0)
+        {
+            return [..splitInputs];
+        }
 
         if (matches.Length == 1)
         {
