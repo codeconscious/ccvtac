@@ -1,8 +1,8 @@
-﻿using System.Threading;
-using CCVTAC.Console.Settings;
+﻿using CCVTAC.Console.Settings;
 using CCVTAC.Console.Downloading;
-using Spectre.Console;
+using System.Threading;
 using System.Diagnostics.CodeAnalysis;
+using Spectre.Console;
 using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 
 namespace CCVTAC.Console;
@@ -63,7 +63,7 @@ internal static class Program
         {
             printer.Error($"Fatal error: {topException.Message}");
             AnsiConsole.WriteException(topException);
-            printer.Print("Please help improve this tool by reporting this error and any affected URLs at https://github.com/codeconscious/ccvtac/issues.");
+            printer.Print("Please help improve this tool by reporting this error and any relevant URLs at https://github.com/codeconscious/ccvtac/issues.");
         }
     }
 
@@ -137,7 +137,7 @@ internal static class Program
             )
             .ToImmutableList();
 
-        var urlCount = categorizedInputs.Count(i => i.InputType == InputType.Url);
+        int urlCount = categorizedInputs.Count(i => i.InputType == InputType.Url);
         SummarizeInput(categorizedInputs, urlCount, printer);
 
         nuint currentBatch = 0;
