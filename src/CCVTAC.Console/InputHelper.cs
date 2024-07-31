@@ -2,12 +2,14 @@ using System.Text.RegularExpressions;
 
 namespace CCVTAC.Console;
 
-public static class InputHelper
+public static partial class InputHelper
 {
+
     /// <summary>
-    /// A regular expression that detects where commands and URLs begin.
+    /// A regular expression that detects where input commands and URLs begin in input strings.
     /// </summary>
-    private static readonly Regex _regex = new("""(?:https:|\\)""");
+    [GeneratedRegex("""(?:https:|\\)""")]
+    private static partial Regex UserInputRegex();
 
     private record IndexPair(int Start, int End);
 
@@ -17,7 +19,7 @@ public static class InputHelper
     /// </summary>
     public static ImmutableArray<string> SplitInputs(string input)
     {
-        var matches = _regex
+        var matches = UserInputRegex()
             .Matches(input)
             .OfType<Match>()
             .ToImmutableArray();

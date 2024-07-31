@@ -18,7 +18,7 @@ public sealed class InputHelperTests
     [Fact]
     public void MultipleUrlsEnteredWithSpaces_CorrectlyParsed()
     {
-        string combinedInput = "https://youtu.be/5OpuZHsPBhQ  https://youtu.be/NT22EGxTuNw";
+        string combinedInput = "  https://youtu.be/5OpuZHsPBhQ  https://youtu.be/NT22EGxTuNw  ";
         List<string> expected = ["https://youtu.be/5OpuZHsPBhQ", "https://youtu.be/NT22EGxTuNw"];
         var actual = InputHelper.SplitInputs(combinedInput);
         Assert.Equal(expected.Count, actual.Length);
