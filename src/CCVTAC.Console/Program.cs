@@ -133,7 +133,9 @@ internal static class Program
             .Select(input =>
                 new CategorizedInput(
                     input,
-                    input.StartsWith('\\') ? InputType.Command : InputType.Url)
+                    input.StartsWith(Commands.CommandPrefix)
+                        ? InputType.Command
+                        : InputType.Url)
             )
             .ToImmutableList();
 
