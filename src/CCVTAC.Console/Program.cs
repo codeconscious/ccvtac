@@ -125,7 +125,7 @@ internal static class Program
 
         if (splitInputs.IsEmpty)
         {
-            printer.Error("Invalid input. Enter only URLs or commands beginning with \"\\\".");
+            printer.Error($"Invalid input. Enter only URLs or commands beginning with \"{Commands.Prefix}\".");
             return NextAction.Continue;
         }
 
@@ -133,7 +133,7 @@ internal static class Program
             .Select(input =>
                 new CategorizedInput(
                     input,
-                    input.StartsWith(Commands.CommandPrefix)
+                    input.StartsWith(Commands.Prefix)
                         ? InputType.Command
                         : InputType.Url)
             )
@@ -178,24 +178,8 @@ internal static class Program
 
             if (haveProcessedAny) // Don't sleep for the very first URL.
             {
-                // Declared here because `ref` instances cannot be used in lambda expressions.
-                ushort sleepSeconds = settings.SleepSecondsBetweenBatches;
-                ushort remainingSeconds = sleepSeconds;
-
-                AnsiConsole.Status()
-                    .Start($"Sleeping for {settings.SleepSecondsBetweenBatches} seconds...", ctx =>
-                    {
-                        ctx.Spinner(Spinner.Known.Star);
-                        ctx.SpinnerStyle(Style.Parse("blue"));
-
-                        while (remainingSeconds > 0)
-                        {
-                            ctx.Status($"Sleeping for {remainingSeconds} seconds...");
-                            remainingSeconds--;
-                            Thread.Sleep(1000);
-                        }
-                        printer.Print($"Slept for {sleepSeconds} second(s).", appendLines: 1);
-                    });
+                Sleep(settings.SleepSecondsBetweenBatches);
+                printer.Print($"Slept for {settings.SleepSecondsBetweenBatches} second(s).", appendLines: 1);
             }
             else
             {
@@ -332,6 +316,25 @@ internal static class Program
             }
             printer.PrintEmptyLines(1);
         }
+    }
+
+    private static void Sleep(ushort sleepSeconds)
+    {
+        ushort remainingSeconds = sleepSeconds;
+
+        AnsiConsole.Status()
+            .Start($"Sleeping for {sleepSeconds} seconds...", ctx =>
+            {
+                ctx.Spinner(Spinner.Known.Star);
+                ctx.SpinnerStyle(Style.Parse("blue"));
+
+                while (remainingSeconds > 0)
+                {
+                    ctx.Status($"Sleeping for {remainingSeconds} seconds...");
+                    remainingSeconds--;
+                    Thread.Sleep(1000);
+                }
+            });
     }
 
     /// <summary>

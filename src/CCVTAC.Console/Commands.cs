@@ -2,7 +2,7 @@ namespace CCVTAC.Console;
 
 internal static class Commands
 {
-    internal static readonly char CommandPrefix = '\\';
+    internal static readonly char Prefix = '\\';
 
     internal static readonly string[] _historyCommands =
         [MakeCommand("history")];
@@ -33,6 +33,6 @@ internal static class Commands
         if (text.Contains(' '))
             throw new ArgumentException("The text should not contain any white space.", nameof(text));
 
-        return $"{CommandPrefix}{text}";
+        return $"{Prefix}{text}";
     }
 }
