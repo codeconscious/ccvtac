@@ -10,8 +10,7 @@ namespace CCVTAC.Console;
 internal static class Program
 {
     private static readonly string[] _helpFlags = ["-h", "--help"];
-    private static readonly string[] _settingsFileCommands = ["-s", "--settings"];
-
+    private static readonly string[] _settingsFileFlags = ["-s", "--settings"];
     private const string _defaultSettingsFileName = "settings.json";
 
     static void Main(string[] args)
@@ -25,7 +24,7 @@ internal static class Program
         }
 
         string? maybeSettingsPath = args.Length >= 2 &&
-                                    _settingsFileCommands.Contains(args[0].ToLowerInvariant())
+                                    _settingsFileFlags.Contains(args[0].ToLowerInvariant())
                 ? args[1] // Expected to be a settings file path.
                 : _defaultSettingsFileName;
 
