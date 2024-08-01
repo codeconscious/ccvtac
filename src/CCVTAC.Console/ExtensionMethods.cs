@@ -61,4 +61,7 @@ public static class ExtensionMethods
     /// </summary>
     public static bool None<T>(this IEnumerable<T> collection, Func<T, bool> predicate) =>
         !collection.Any(predicate);
+
+    public static bool CaseInsensitiveContains(this IEnumerable<string> arr, string text) =>
+            arr.Contains(text, new Comparers.CaseInsensitiveStringComparer());
 }
