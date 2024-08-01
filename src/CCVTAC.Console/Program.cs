@@ -235,7 +235,7 @@ internal static class Program
         Printer printer)
     {
         static bool CaseInsensitiveContains(string[] arr, string text) =>
-            arr.Contains(text, new CaseInsensitiveStringComparer());
+            arr.Contains(text, new Comparers.CaseInsensitiveStringComparer());
 
         if (CaseInsensitiveContains(Commands._quitCommands, command))
         {
@@ -356,24 +356,6 @@ internal static class Program
         /// Program execution should end due to an inability to continue.
         /// </summary>
         QuitDueToErrors,
-    }
-
-    private sealed class CaseInsensitiveStringComparer : IEqualityComparer<string>
-    {
-        public bool Equals(string? x, string? y)
-        {
-            return (x, y) switch
-            {
-                (null, null)           => true,
-                (null, _) or (_, null) => false,
-                _ => string.Equals(x.Trim(), y.Trim(), StringComparison.OrdinalIgnoreCase)
-            };
-        }
-
-        public int GetHashCode([DisallowNull] string obj)
-        {
-            return obj.ToLower().GetHashCode();
-        }
     }
 
     internal enum InputType { Url, Command }
