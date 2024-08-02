@@ -69,23 +69,131 @@ public sealed class ExtensionMethodTests
     public void None_WithPopulatedCollectionAndMatchingPredicate_ReturnsFalse()
     {
         List<byte> numbers = [2, 4, 6];
-        static bool evenBytePredicate(byte s) => s % 2 == 0;
-        Assert.False(numbers.None(evenBytePredicate));
+        static bool isEven(byte s) => s % 2 == 0;
+        Assert.False(numbers.None(isEven));
     }
 
     [Fact]
     public void None_WithPopulatedCollectionAndNonMatchingPredicate_ReturnsTrue()
     {
         List<byte> numbers = [1, 3, 5];
-        static bool evenBytePredicate(byte s) => s % 2 == 0;
-        Assert.True(numbers.None(evenBytePredicate));
+        static bool isEven(byte s) => s % 2 == 0;
+        Assert.True(numbers.None(isEven));
     }
 
     [Fact]
     public void None_WithEmptyCollectionAndPredicate_ReturnsTrue()
     {
         List<byte> numbers = [];
-        static bool evenBytePredicate(byte s) => s % 2 == 0;
-        Assert.True(numbers.None(evenBytePredicate));
+        static bool isEven(byte s) => s % 2 == 0;
+        Assert.True(numbers.None(isEven));
+    }
+
+    [Fact]
+    public void HasText_Null_ReturnsFalse()
+    {
+        string? noText = null;
+        Assert.False(noText.HasText(false));
+        Assert.False(noText.HasText(true));
+    }
+
+    [Fact]
+    public void HasText_EmptyString_ReturnsFalse()
+    {
+        var emptyText = string.Empty;
+        Assert.False(emptyText.HasText(false));
+        Assert.False(emptyText.HasText(true));
+    }
+
+    [Fact]
+    public void HasText_SingleByteWhiteSpaceOnlyWhenDisallowed_ReturnsFalse()
+    {
+        var whiteSpace = "   ";
+        Assert.False(whiteSpace.HasText(false));
+    }
+
+    [Fact]
+    public void HasText_SingleByteWhiteSpaceOnlyWhenAllowed_ReturnsTrue()
+    {
+        var whiteSpace = "   ";
+        Assert.True(whiteSpace.HasText(true));
+    }
+
+    [Fact]
+    public void HasText_DoubleByteWhiteSpaceOnlyWhenDisallowed_ReturnsFalse()
+    {
+        var whiteSpace = "　　　";
+        Assert.False(whiteSpace.HasText(false));
+    }
+
+    [Fact]
+    public void HasText_DoubleByteWhiteSpaceOnlyWhenAllowed_ReturnsTrue()
+    {
+        var whiteSpace = "　　　";
+        Assert.True(whiteSpace.HasText(true));
+    }
+
+    [Fact]
+    public void HasText_WithText_ReturnsTrue()
+    {
+        var text = "こんにちは！";
+        Assert.True(text.HasText(false));
+        Assert.True(text.HasText(true));
+    }
+
+    [Fact]
+    public void CaseInsensitiveContains_EmptyCollection_ReturnsFalse()
+    {
+        List<string> collection = [];
+        var actual = collection.CaseInsensitiveContains("text");
+        Assert.False(actual);
+    }
+
+    [Fact]
+    public void CaseInsensitiveContains_SearchAllCapsInPopulatedCollection_ReturnsTrue()
+    {
+        List<string> collection = ["Moon", "Mercury", "Mars", "Jupiter", "Venus"];
+        var actual = collection.CaseInsensitiveContains("MOON");
+        Assert.True(actual);
+    }
+
+    [Fact]
+    public void CaseInsensitiveContains_SearchAllLowercaseInPopulatedCollection_ReturnsTrue()
+    {
+        List<string> collection = ["Moon", "Mercury", "Mars", "Jupiter", "Venus"];
+        var actual = collection.CaseInsensitiveContains("moon");
+        Assert.True(actual);
+    }
+
+    [Fact]
+    public void CaseInsensitiveContains_SearchExactInPopulatedCollection_ReturnsTrue()
+    {
+        List<string> collection = ["Moon", "Mercury", "Mars", "Jupiter", "Venus"];
+        var actual = collection.CaseInsensitiveContains("Moon");
+        Assert.True(actual);
+    }
+
+    [Fact]
+    public void CaseInsensitiveContains_SearchPartialInPopulatedCollection_ReturnsFalse()
+    {
+        List<string> collection = ["Moon", "Mercury", "Mars", "Jupiter", "Venus"];
+        var actual = collection.CaseInsensitiveContains("Mo");
+        Assert.False(actual);
+    }
+
+    [Fact]
+    public void CaseInsensitiveContains_SearchExactButDoubleWidthInPopulatedCollection_ReturnsFalse()
+    {
+        List<string> collection = ["Moon", "Mercury", "Mars", "Jupiter", "Venus"];
+        var actual = collection.CaseInsensitiveContains("Ｍｏｏｎ");
+        Assert.False(actual);
+    }
+
+    [Fact]
+    public void CaseInsensitiveContains_SearchTextInEmptyCollection_ReturnsFalse()
+    {
+        List<string> collection = [];
+        var actual = collection.CaseInsensitiveContains("text");
+        Assert.False(actual);
     }
 }
