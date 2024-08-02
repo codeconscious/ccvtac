@@ -6,10 +6,13 @@ using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 
 namespace CCVTAC.Console;
 
+/// <summary>
+/// Drives the primary input gathering and processing tasks.
+/// </summary>
 internal class Orchestrator
 {
     /// <summary>
-     /// Performs initial setup, initiates each download request, and prints the final summary when the user requests to end the program.
+    /// Ensures the download environment is ready, then initiates the UI input and download process.
     /// </summary>
     internal static void Start(UserSettings settings, Printer printer)
     {
@@ -37,7 +40,8 @@ internal class Orchestrator
         while (true)
         {
             var nextAction = ProcessBatch(ref settings, resultTracker, history, printer);
-            if (nextAction != NextAction.Continue)
+
+            if (nextAction is not NextAction.Continue)
             {
                 break;
             }
