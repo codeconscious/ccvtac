@@ -4,31 +4,19 @@ CCVTAC (CodeConscious Video-to-Audio Converter) is a small .NET-powered CLI tool
 
 <img width="1451" alt="Sample download" src="https://github.com/codeconscious/ccvtac/assets/50596087/40fd5c56-0c39-44c4-9f5e-bc6398337820">
 
-While I maintain it primarily for my own use, feel free to use it yourself. No warranties or guarantees provided!
+While I maintain it primarily for my own use, feel free to use it yourself. No warranties or guarantees are provided, though.
 
 [![Build and test](https://github.com/codeconscious/ccvtac/actions/workflows/build-test.yml/badge.svg)](https://github.com/codeconscious/ccvtac/actions/workflows/build-test.yml)
 
 ## Features
 
 - Converts YouTube videos to local M4A audio files (via [yt-dlp](https://github.com/yt-dlp/yt-dlp))
-- Supports 5 kinds of downloads
-  - Video
-  - Video on a playlist
-  - Standard playlist (generally with the newest video at index 1)
-  - Release playlist (in which the playlist index represents the album track number)
-  - Channel
-- Writes ID3 tags (artists, title, etc.) to files where possible (via metadata or regex-based detection)
-- Adds limited video metadata (channel name and URL, video URL, etc.) summary to files' Comment tags
-- Auto-renames files via specified regex patterns (to remove resource IDs, etc.)
+- Supports 5 kinds of downloads: videos, playlist videos, playlists, and and channels
+- Writes ID3 tags (artists, title, etc.) to files where possible (via provided metadata or regex-based detection)
+- Adds limited video metadata (channel name and URL, video URL, etc.) to files' Comment tags
+- Auto-renames files via custom regex patterns (to remove media IDs, etc.)
 - Optionally auto-trims and writes video thumbnails to files as album art (if [mogrify](https://imagemagick.org/script/mogrify.php) is installed)
-- Customized behavior via a user settings file
-  - Optionally split video chapters into separate files
-  - Specify the working directory for temporary files
-  - Specify an output directory for audio files
-  - Specify channels for whom video upload years should _not_ be added to the tags' Year field (Adding the years is the default behavior)
-  - Apply rules for detecting tag data
-  - Apply rules for auto-renaming
-  - Set sleep times between batches (multiple URLs entered at once) and individual video downloads
+- Customized behavior via a user settings file — e.g., chapter splitting, image embedding, directories
 - Saves entered URLs to a local history file
 
 ## Prerequisites
@@ -206,9 +194,12 @@ Once your settings file is ready, run the application with `dotnet run`. Optiona
 
 When the application is running, simply enter at least one YouTube media URL (video, playlist, or channel) at the prompt and press the Enter key. You can omit spaces between the URLs.
 
-Enter `\quit` or `\q` to quit.
-
-Entering `\history` will display your recent URL history.
+You can also enter the following commands:
+- `\quit` or `\q` to quit
+- `\history` to see the last few URLs you entered
+- `\split` to toggle chapter splitting for the current session only
+- `\images` to toggle image embedding for the current session only
+- `\verbose` to toggle log verbosity for the current session only
 
 ## Upgrading yt-dlp
 
