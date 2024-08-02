@@ -54,9 +54,12 @@ public static class Help
         (video, playlist, or channel) at the prompt and press the Enter key.
         You can optionally omit spaces between the URLs.
 
-        Enter `\quit` or `\q` to quit.
-
-        Entering `\history` will display your recent URL history.
+        You can also enter the following commands:
+        - `\quit` or `\q` to quit
+        - `\history` to see the last few URLs you entered
+        - `\split` to toggle chapter splitting for the current session only
+        - `\images` to toggle image embedding for the current session only
+        - `\verbose` to toggle log verbosity for the current session only
 
         Upgrading yt-dlp:
 
