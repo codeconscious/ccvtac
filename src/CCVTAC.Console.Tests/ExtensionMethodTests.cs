@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace CCVTAC.Console.Tests;
@@ -55,5 +56,36 @@ public sealed class ExtensionMethodTests
     {
         const char knownInvalidChar = '/';
         Assert.Throws<ArgumentException>(() => _validBaseFileName.ReplaceInvalidPathChars(knownInvalidChar));
+    }
+
+    [Fact]
+    public void None_WithEmptyCollection_ReturnsTrue()
+    {
+        List<uint> numbers = [];
+        Assert.True(numbers.None());
+    }
+
+    [Fact]
+    public void None_WithPopulatedCollectionAndMatchingPredicate_ReturnsFalse()
+    {
+        List<byte> numbers = [2, 4, 6];
+        static bool evenBytePredicate(byte s) => s % 2 == 0;
+        Assert.False(numbers.None(evenBytePredicate));
+    }
+
+    [Fact]
+    public void None_WithPopulatedCollectionAndNonMatchingPredicate_ReturnsTrue()
+    {
+        List<byte> numbers = [1, 3, 5];
+        static bool evenBytePredicate(byte s) => s % 2 == 0;
+        Assert.True(numbers.None(evenBytePredicate));
+    }
+
+    [Fact]
+    public void None_WithEmptyCollectionAndPredicate_ReturnsTrue()
+    {
+        List<byte> numbers = [];
+        static bool evenBytePredicate(byte s) => s % 2 == 0;
+        Assert.True(numbers.None(evenBytePredicate));
     }
 }
