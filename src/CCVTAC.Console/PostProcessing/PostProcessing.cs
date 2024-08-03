@@ -64,7 +64,7 @@ public sealed class PostProcessing
 
             var taggingSetFileNames = taggingSets.SelectMany(set => set.AllFiles).ToImmutableList();
             Deleter.Run(taggingSetFileNames, collectionJson, workingDirectory, verbose, Printer);
-            IoUtilties.Directories.WarnIfHasFiles(workingDirectory, Printer);
+            IoUtilties.Directories.WarnIfAnyFiles(workingDirectory, 10);
         }
         else
         {

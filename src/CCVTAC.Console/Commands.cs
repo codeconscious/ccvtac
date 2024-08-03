@@ -22,6 +22,9 @@ internal static class Commands
     internal static readonly string[] _toggleVerboseOutput =
         [MakeCommand("verbose"), MakeCommand("toggle-verbose")];
 
+    // internal static readonly string[] _deleteTempFiles =
+    //     MakeCommand("delete-temp")];
+
     internal static string MakeCommand(string text)
     {
         if (string.IsNullOrWhiteSpace(text))

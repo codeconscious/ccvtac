@@ -111,4 +111,15 @@ public sealed class Printer
         PrintEmptyLines(1);
         return AnsiConsole.Ask<string>($"[skyblue1]{prompt}[/]");
     }
+
+    public string Ask(string title, string[] options)
+    {
+        return AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title(title)
+                .AddChoices(options));
+    }
+
+    public bool AskToBool(string title, string trueAnswer, string falseAnswer) =>
+        Ask(title, [trueAnswer, falseAnswer]) == trueAnswer;
 }

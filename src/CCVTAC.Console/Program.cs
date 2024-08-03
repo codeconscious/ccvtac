@@ -4,6 +4,7 @@ using System.Threading;
 using System.Diagnostics.CodeAnalysis;
 using Spectre.Console;
 using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
+using CCVTAC.Console.IoUtilties;
 
 namespace CCVTAC.Console;
 
@@ -46,13 +47,26 @@ internal static class Program
         {
             printer.Warning("\nQuitting at user's request.");
 
-            var emptyDirResult = IoUtilties.Directories.WarnIfHasFiles(settings.WorkingDirectory, 10);
-            if (emptyDirResult.IsFailed)
+            var warnResult = IoUtilties.Directories.WarnIfAnyFiles(settings.WorkingDirectory, 10);
+
+            if (warnResult.IsSuccess)
             {
-                printer.FirstError(emptyDirResult);
-                printer.Print($"Aborting...");
                 return;
             }
+
+            printer.FirstError(warnResult);
+
+            var deleteResult = Directories.AskToDeleteAllFiles(settings.WorkingDirectory, printer);
+            if (deleteResult.IsSuccess)
+            {
+                printer.Print($"{deleteResult.Value} file(s) deleted.");
+            }
+            else
+            {
+                printer.FirstError(deleteResult);
+            }
+
+            return;
         };
 
         // Top-level `try` block to catch and pretty-print unexpected exceptions.

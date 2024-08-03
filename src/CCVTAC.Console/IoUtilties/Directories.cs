@@ -8,7 +8,7 @@ internal static class Directories
     private static readonly string AllFilesSearchPattern = "*";
     private static readonly EnumerationOptions EnumerationOptions = new();
 
-    internal static Result WarnIfHasFiles(string directory, int showMax)
+    internal static Result WarnIfAnyFiles(string directory, int showMax)
     {
         var fileNames = GetDirectoryFileNames(directory);
         int fileCount = fileNames.Length;
@@ -18,8 +18,8 @@ internal static class Directories
             return Result.Ok();
         }
 
-        var remainLabel = fileCount == 1 ? "file remains" : "files remain";
-        var report = new StringBuilder($"{fileCount} {remainLabel} in working directory \"{directory}\":");
+        var fileLabel = fileCount == 1 ? "file" : "files";
+        var report = new StringBuilder($"Found {fileCount} {fileLabel} in working directory \"{directory}\":{Environment.NewLine}");
 
         foreach (string fileName in fileNames.Take(showMax))
         {
@@ -32,6 +32,54 @@ internal static class Directories
         }
 
         return Result.Fail(report.ToString());
+    }
+
+    internal static Result<int> DeleteAllFiles(string workingDirectory, int showMaxErrors)
+    {
+        var fileNames = GetDirectoryFileNames(workingDirectory);
+
+        int successes = 0;
+        var errors = new List<string>();
+
+        foreach (var fileName in fileNames)
+        {
+            try
+            {
+                File.Delete(fileName);
+                successes++;
+            }
+            catch (Exception ex)
+            {
+                errors.Add(ex.Message);
+            }
+        }
+
+        if (errors.Count == 0)
+        {
+            return Result.Ok(successes);
+        }
+
+        var output = new StringBuilder($"While {successes} files were deleted successfully, some files could not be deleted:");
+        foreach (string error in errors.Take(showMaxErrors))
+        {
+            output.AppendLine($"• {error}");
+        }
+
+        if (errors.Count > showMaxErrors)
+        {
+            output.AppendLine($"... plus {errors.Count - showMaxErrors} more.");
+        }
+
+        return Result.Fail(output.ToString());
+    }
+
+    internal static Result<int> AskToDeleteAllFiles(string workingDirectory, Printer printer)
+    {
+        bool doDelete = printer.AskToBool("Delete all temporary files?", "Yes", "No");
+
+        return doDelete
+            ? DeleteAllFiles(workingDirectory, 10)
+            : Result.Fail("Will not delete the files.");
     }
 
     /// <summary>

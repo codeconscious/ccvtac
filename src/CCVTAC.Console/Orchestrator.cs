@@ -4,6 +4,7 @@ using System.Threading;
 using Spectre.Console;
 using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 using static CCVTAC.Console.InputHelper;
+using CCVTAC.Console.IoUtilties;
 
 namespace CCVTAC.Console;
 
@@ -28,12 +29,22 @@ internal class Orchestrator
         }
 
         // The working directory should start empty.
-        var emptyDirResult = IoUtilties.Directories.WarnIfHasFiles(settings.WorkingDirectory, 10);
+        var emptyDirResult = IoUtilties.Directories.WarnIfAnyFiles(settings.WorkingDirectory, 10);
         if (emptyDirResult.IsFailed)
         {
             printer.FirstError(emptyDirResult);
-            printer.Print($"Aborting...");
-            return;
+
+            var deleteResult = Directories.AskToDeleteAllFiles(settings.WorkingDirectory, printer);
+            if (deleteResult.IsSuccess)
+            {
+                printer.Print($"{deleteResult.Value} file(s) deleted.");
+            }
+            else
+            {
+                printer.FirstError(deleteResult);
+                printer.Print($"Aborting...");
+                return;
+            }
         }
 
         var resultTracker = new ResultTracker(printer);
@@ -86,7 +97,7 @@ internal class Orchestrator
         {
             var result = input.InputType is InputType.Command
                 ? ProcessCommand(input.Text, ref settings, history, printer)
-                : ProcessUrl(input.Text, settings, resultTracker, history, printer, inputTime, urlCount, currentBatch++);
+                : ProcessUrl(input.Text, settings, resultTracker, history, printer, inputTime, urlCount, ++currentBatch);
 
             if (result.IsFailed)
             {
@@ -119,7 +130,7 @@ internal class Orchestrator
         int urlCount,
         nuint currentBatch)
     {
-        var emptyDirResult = IoUtilties.Directories.WarnIfHasFiles(settings.WorkingDirectory, 10);
+        var emptyDirResult = IoUtilties.Directories.WarnIfAnyFiles(settings.WorkingDirectory, 10);
         if (emptyDirResult.IsFailed)
         {
             // TODO: Create a command to clear temporary files.
