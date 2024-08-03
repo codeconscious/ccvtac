@@ -4,6 +4,9 @@ namespace CCVTAC.Console;
 
 public static partial class InputHelper
 {
+    // TODO: Refactor this?
+    internal static string Prompt =
+        $"Enter one or more YouTube media URLs, {Commands._history[0]}, or {Commands._quit[0]} ({Commands._quit[1]}):\n▶︎";
 
     /// <summary>
     /// A regular expression that detects where input commands and URLs begin in input strings.
@@ -17,7 +20,7 @@ public static partial class InputHelper
     /// Takes a user input string and splits it into a collection of inputs based
     /// upon substrings detected by the class's regular expression pattern.
     /// </summary>
-    public static ImmutableArray<string> SplitInputs(string input)
+    public static ImmutableArray<string> SplitInput(string input)
     {
         var matches = UserInputRegex()
             .Matches(input)
@@ -53,5 +56,23 @@ public static partial class InputHelper
             .Distinct();
 
         return [.. splitInputs];
+    }
+
+    internal enum InputType { Url, Command }
+
+    internal record CategorizedInput(string Text, InputType InputType);
+
+    internal static ImmutableArray<CategorizedInput> CategorizeInputs(ICollection<string> splitInputs)
+    {
+        return
+            [
+                ..splitInputs
+                    .Select(input =>
+                        new CategorizedInput(
+                            input,
+                            input.StartsWith(Commands.Prefix)
+                                ? InputType.Command
+                                : InputType.Url))
+            ];
     }
 }

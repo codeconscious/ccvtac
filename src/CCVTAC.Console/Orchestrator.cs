@@ -3,6 +3,7 @@ using CCVTAC.Console.Downloading;
 using System.Threading;
 using Spectre.Console;
 using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
+using static CCVTAC.Console.InputHelper;
 
 namespace CCVTAC.Console;
 
@@ -39,9 +40,21 @@ internal class Orchestrator
 
         while (true)
         {
-            var userInput = printer.GetInput(Commands.InputPrompt);
-            var nextAction = ProcessBatch(userInput, ref settings, resultTracker, history, printer);
+            var input = printer.GetInput(InputHelper.Prompt);
+            var splitInputs = InputHelper.SplitInput(input);
 
+            if (splitInputs.IsEmpty)
+            {
+                printer.Error($"Invalid input. Enter only URLs or commands beginning with \"{Commands.Prefix}\".");
+                continue;
+            }
+
+            var categorizedInputs = InputHelper.CategorizeInputs(splitInputs);
+
+            int urlCount = categorizedInputs.Count(i => i.InputType == InputType.Url);
+            SummarizeInput(categorizedInputs, urlCount, printer);
+
+            var nextAction = ProcessBatch(categorizedInputs, ref settings, resultTracker, history, urlCount, printer);
             if (nextAction is not NextAction.Continue)
             {
                 break;
@@ -51,42 +64,20 @@ internal class Orchestrator
         resultTracker.PrintSummary();
     }
 
-    internal record CategorizedInput(string Text, InputType InputType);
-
     /// <summary>
     /// Processes a single user request, from input to downloading and file post-processing.
     /// </summary>
     /// <returns>Returns the next action the application should take (e.g., continue or quit).</returns>
     private static NextAction ProcessBatch(
-        string userInput,
+        ImmutableArray<CategorizedInput> categorizedInputs,
         ref UserSettings settings,
         ResultTracker resultTracker,
         History history,
+        int urlCount,
         Printer printer)
     {
         var inputTime = DateTime.Now;
         Watch watch = new();
-
-        var splitInputs = InputHelper.SplitInputs(userInput);
-
-        if (splitInputs.IsEmpty)
-        {
-            printer.Error($"Invalid input. Enter only URLs or commands beginning with \"{Commands.Prefix}\".");
-            return NextAction.Continue;
-        }
-
-        var categorizedInputs = splitInputs
-            .Select(input =>
-                new CategorizedInput(
-                    input,
-                    input.StartsWith(Commands.Prefix)
-                        ? InputType.Command
-                        : InputType.Url)
-            )
-            .ToImmutableList();
-
-        int urlCount = categorizedInputs.Count(i => i.InputType == InputType.Url);
-        SummarizeInput(categorizedInputs, urlCount, printer);
 
         nuint currentBatch = 0;
 
@@ -184,24 +175,24 @@ internal class Orchestrator
         History history,
         Printer printer)
     {
-        if (Commands._quitCommands.CaseInsensitiveContains(command))
+        if (Commands._quit.CaseInsensitiveContains(command))
         {
             return Result.Ok(NextAction.QuitAtUserRequest);
         }
 
-        if (Commands._historyCommands.CaseInsensitiveContains(command))
+        if (Commands._history.CaseInsensitiveContains(command))
         {
             history.ShowRecent(printer);
             return Result.Ok(NextAction.Continue);
         }
 
-        if (Commands._showSettingsCommands.CaseInsensitiveContains(command))
+        if (Commands._showSettings.CaseInsensitiveContains(command))
         {
             SettingsAdapter.PrintSummary(settings, printer);
             return Result.Ok(NextAction.Continue);
         }
 
-        if (Commands._toggleSplitChapterCommands.CaseInsensitiveContains(command))
+        if (Commands._toggleSplitChapter.CaseInsensitiveContains(command))
         {
             settings = SettingsAdapter.ToggleSplitChapters(settings);
             SettingsAdapter.PrintSummary(
@@ -209,7 +200,7 @@ internal class Orchestrator
             return Result.Ok(NextAction.Continue);
         }
 
-        if (Commands._toggleEmbedImagesCommands.CaseInsensitiveContains(command))
+        if (Commands._toggleEmbedImages.CaseInsensitiveContains(command))
         {
             settings = SettingsAdapter.ToggleEmbedImages(settings);
             SettingsAdapter.PrintSummary(
@@ -217,7 +208,7 @@ internal class Orchestrator
             return Result.Ok(NextAction.Continue);
         }
 
-        if (Commands._toggleVerboseOutputCommands.CaseInsensitiveContains(command))
+        if (Commands._toggleVerboseOutput.CaseInsensitiveContains(command))
         {
             settings = SettingsAdapter.ToggleVerboseOutput(settings);
             SettingsAdapter.PrintSummary(
@@ -229,13 +220,13 @@ internal class Orchestrator
     }
 
     private static void SummarizeInput(
-        ImmutableList<CategorizedInput> categorizedInputs,
+        ImmutableArray<CategorizedInput> categorizedInputs,
         int urlCount,
         Printer printer)
     {
-        var commandCount = categorizedInputs.Count - urlCount;
+        var commandCount = categorizedInputs.Length - urlCount;
 
-        if (categorizedInputs.Count > 1)
+        if (categorizedInputs.Length > 1)
         {
             var urlSummary = urlCount switch
             {
@@ -304,6 +295,4 @@ internal class Orchestrator
         /// </summary>
         QuitDueToErrors,
     }
-
-    internal enum InputType { Url, Command }
 }

@@ -4,26 +4,23 @@ internal static class Commands
 {
     internal static readonly char Prefix = '\\';
 
-    internal static readonly string[] _historyCommands =
-        [MakeCommand("history")];
-
-    internal static readonly string[] _showSettingsCommands =
-        [MakeCommand("settings")];
-
-    internal static readonly string[] _toggleSplitChapterCommands =
-        [MakeCommand("split"), MakeCommand("toggle-split")];
-
-    internal static readonly string[] _toggleEmbedImagesCommands =
-        [MakeCommand("images"), MakeCommand("toggle-images")];
-
-    internal static readonly string[] _toggleVerboseOutputCommands =
-        [MakeCommand("verbose"), MakeCommand("toggle-verbose")];
-
-    internal static readonly string[] _quitCommands =
+    internal static readonly string[] _quit =
         [MakeCommand("quit"), MakeCommand("q"), MakeCommand("exit")];
 
-    internal static string InputPrompt =
-        $"Enter one or more YouTube media URLs, {_historyCommands[0]}, or {_quitCommands[0]} ({_quitCommands[1]}):\n▶︎";
+    internal static readonly string[] _history =
+        [MakeCommand("history")];
+
+    internal static readonly string[] _showSettings =
+        [MakeCommand("settings")];
+
+    internal static readonly string[] _toggleSplitChapter =
+        [MakeCommand("split"), MakeCommand("toggle-split")];
+
+    internal static readonly string[] _toggleEmbedImages =
+        [MakeCommand("images"), MakeCommand("toggle-images")];
+
+    internal static readonly string[] _toggleVerboseOutput =
+        [MakeCommand("verbose"), MakeCommand("toggle-verbose")];
 
     internal static string MakeCommand(string text)
     {
