@@ -46,11 +46,12 @@ internal static class Program
         {
             printer.Warning("\nQuitting at user's request.");
 
-            var tempFiles = IoUtilties.Directories.GetDirectoryFileNames(settings.WorkingDirectory);
-            if (tempFiles.Any())
+            var emptyDirResult = IoUtilties.Directories.WarnIfHasFiles(settings.WorkingDirectory, 10);
+            if (emptyDirResult.IsFailed)
             {
-                printer.Error($"Please clean up the {tempFiles.Count} file(s) leftover in the working directory ({settings.WorkingDirectory}):");
-                tempFiles.ForEach(file => printer.Warning($"• {file}"));
+                printer.FirstError(emptyDirResult);
+                printer.Print($"Aborting...");
+                return;
             }
         };
 

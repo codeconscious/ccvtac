@@ -28,9 +28,10 @@ internal class Orchestrator
         }
 
         // The working directory should start empty.
-        var emptyDirResult = IoUtilties.Directories.WarnIfDirectoryHasFiles(settings.WorkingDirectory, printer);
+        var emptyDirResult = IoUtilties.Directories.WarnIfHasFiles(settings.WorkingDirectory, 10);
         if (emptyDirResult.IsFailed)
         {
+            printer.FirstError(emptyDirResult);
             printer.Print($"Aborting...");
             return;
         }
@@ -118,12 +119,11 @@ internal class Orchestrator
         int urlCount,
         nuint currentBatch)
     {
-        var tempFiles = IoUtilties.Directories.GetDirectoryFileNames(settings.WorkingDirectory);
-        if (tempFiles.Count > 0)
+        var emptyDirResult = IoUtilties.Directories.WarnIfHasFiles(settings.WorkingDirectory, 10);
+        if (emptyDirResult.IsFailed)
         {
             // TODO: Create a command to clear temporary files.
-            printer.Error($"{tempFiles.Count} file(s) unexpectedly found in the working directory ({settings.WorkingDirectory}), so will abort:");
-            tempFiles.ForEach(file => printer.Warning($"• {file}"));
+            printer.FirstError(emptyDirResult);
             return NextAction.QuitDueToErrors;
         }
 

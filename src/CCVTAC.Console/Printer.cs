@@ -67,14 +67,22 @@ public sealed class Printer
         Errors(errors, appendLines);
     }
 
-    public void Errors<T>(Result<T> failingResult, byte appendLines = 0)
+    public void Errors<T>(Result<T> failResult, byte appendLines = 0)
     {
-        Errors(failingResult.Errors.Select(e => e.Message), appendLines);
+        Errors(failResult.Errors.Select(e => e.Message), appendLines);
     }
 
     public void Errors<T>(string headerMessage, Result<T> failingResult, byte appendLines = 0)
     {
         Errors(headerMessage, failingResult.Errors.Select(e => e.Message), appendLines);
+    }
+
+    public void FirstError(IResultBase failResult, string? prepend = null)
+    {
+        string pre = prepend is null ? string.Empty : $"{prepend} ";
+        string message = failResult?.Errors?.FirstOrDefault()?.Message ?? string.Empty;
+
+        Error($"{pre}{message}");
     }
 
     public void Warning(string message, byte appendLines = 0)
