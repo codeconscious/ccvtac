@@ -22,7 +22,7 @@ internal class Orchestrator
             printer.Error(
                 $"To use this program, please first install {Downloader.ExternalTool.Name} " +
                 $"({Downloader.ExternalTool.Url}) on this system.");
-            printer.Print("Pass '--help' to this program for more information.");
+            printer.Print("Pass '--help' for more information.");
             return;
         }
 
@@ -39,7 +39,8 @@ internal class Orchestrator
 
         while (true)
         {
-            var nextAction = ProcessBatch(ref settings, resultTracker, history, printer);
+            var userInput = printer.GetInput(Commands.InputPrompt);
+            var nextAction = ProcessBatch(userInput, ref settings, resultTracker, history, printer);
 
             if (nextAction is not NextAction.Continue)
             {
@@ -47,7 +48,7 @@ internal class Orchestrator
             }
         }
 
-        resultTracker.PrintFinalSummary();
+        resultTracker.PrintSummary();
     }
 
     internal record CategorizedInput(string Text, InputType InputType);
@@ -57,13 +58,12 @@ internal class Orchestrator
     /// </summary>
     /// <returns>Returns the next action the application should take (e.g., continue or quit).</returns>
     private static NextAction ProcessBatch(
+        string userInput,
         ref UserSettings settings,
         ResultTracker resultTracker,
         History history,
         Printer printer)
     {
-        string userInput = printer.GetInput(Commands.InputPrompt);
-
         var inputTime = DateTime.Now;
         Watch watch = new();
 
@@ -92,39 +92,34 @@ internal class Orchestrator
 
         foreach (CategorizedInput input in categorizedInputs)
         {
-            if (input.InputType is InputType.Command)
+            var result = input.InputType is InputType.Command
+                ? ProcessCommand(input.Text, ref settings, history, printer)
+                : ProcessUrl(input.Text, settings, resultTracker, history, printer, inputTime, urlCount, currentBatch++);
+
+            if (result.IsFailed)
             {
-                var result = ProcessCommand(input.Text, ref settings, history, printer);
-
-                if (result.IsFailed)
-                {
-                    printer.Error(result.Errors[0].Message);
-                    continue;
-                }
-
-                NextAction next = result.Value;
-                if (next is NextAction.QuitAtUserRequest)
-                {
-                    return next;
-                }
-
+                printer.Error(result.Errors[0].Message);
                 continue;
             }
 
-            currentBatch++;
-            return ProcessUrl(input, settings, resultTracker, history, printer, inputTime, urlCount, currentBatch);
+            NextAction next = result.Value;
+            if (next is NextAction.QuitAtUserRequest)
+            {
+                return next;
+            }
         }
 
         if (urlCount > 1)
         {
-            printer.Print($"\nAll done with {urlCount} batches in {watch.ElapsedFriendly}.");
+            printer.Print($"{Environment.NewLine}Finished with {urlCount} batches in {watch.ElapsedFriendly}.");
         }
 
         return NextAction.Continue;
     }
 
     private static NextAction ProcessUrl(
-        CategorizedInput input,UserSettings settings,
+        string url,
+        UserSettings settings,
         ResultTracker resultTracker,
         History history,
         Printer printer,
@@ -132,11 +127,10 @@ internal class Orchestrator
         int urlCount,
         nuint currentBatch)
     {
-        string url = input.Text;
-
         var tempFiles = IoUtilties.Directories.GetDirectoryFileNames(settings.WorkingDirectory);
-        if (tempFiles.Any())
+        if (tempFiles.Count > 0)
         {
+            // TODO: Create a command to clear temporary files.
             printer.Error($"{tempFiles.Count} file(s) unexpectedly found in the working directory ({settings.WorkingDirectory}), so will abort:");
             tempFiles.ForEach(file => printer.Warning($"• {file}"));
             return NextAction.QuitDueToErrors;
@@ -179,8 +173,8 @@ internal class Orchestrator
         string batchClause = urlCount > 1
             ? $" (batch {currentBatch} of {urlCount})"
             : string.Empty;
-        printer.Print($"Processed '{url}'{batchClause} in {jobWatch.ElapsedFriendly}.");
 
+        printer.Print($"Processed '{url}'{batchClause} in {jobWatch.ElapsedFriendly}.");
         return NextAction.Continue;
     }
 
