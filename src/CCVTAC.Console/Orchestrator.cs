@@ -89,7 +89,6 @@ internal class Orchestrator
         SummarizeInput(categorizedInputs, urlCount, printer);
 
         nuint currentBatch = 0;
-        bool haveProcessedAny = false;
 
         foreach (CategorizedInput input in categorizedInputs)
         {
@@ -112,64 +111,75 @@ internal class Orchestrator
                 continue;
             }
 
-            string url = input.Text;
-
-            var tempFiles = IoUtilties.Directories.GetDirectoryFileNames(settings.WorkingDirectory);
-            if (tempFiles.Any())
-            {
-                printer.Error($"{tempFiles.Count} file(s) unexpectedly found in the working directory ({settings.WorkingDirectory}), so will abort:");
-                tempFiles.ForEach(file => printer.Warning($"• {file}"));
-                return NextAction.QuitDueToErrors;
-            }
-
-            if (haveProcessedAny) // Don't sleep for the very first URL.
-            {
-                Sleep(settings.SleepSecondsBetweenBatches);
-                printer.Print($"Slept for {settings.SleepSecondsBetweenBatches} second(s).", appendLines: 1);
-            }
-            else
-            {
-                haveProcessedAny = true;
-            }
-
-            if (urlCount > 1)
-            {
-                printer.Print($"Processing batch {++currentBatch} of {urlCount}...");
-            }
-
-            Watch jobWatch = new();
-
-            var mediaTypeResult = Downloader.GetMediaType(url);
-            if (mediaTypeResult.IsFailed)
-            {
-                printer.Error($"Error parsing URL {url}: {mediaTypeResult.Errors.First().Message}");
-                return NextAction.Continue;
-            }
-            var mediaType = mediaTypeResult.Value;
-            printer.Print($"{mediaType.GetType().Name} URL '{url}' detected.");
-
-            history.Append(url, inputTime, settings.VerboseOutput, printer);
-
-            var downloadResult = Downloader.Run(url, mediaType, settings, printer);
-            resultTracker.RegisterResult(downloadResult);
-            if (downloadResult.IsFailed)
-            {
-                return NextAction.Continue;
-            }
-
-            var postProcessor = new PostProcessing.PostProcessing(settings, mediaType, printer);
-            postProcessor.Run();
-
-            string batchClause = urlCount > 1
-                ? $" (batch {currentBatch} of {urlCount})"
-                : string.Empty;
-            printer.Print($"Processed '{url}'{batchClause} in {jobWatch.ElapsedFriendly}.");
+            currentBatch++;
+            return ProcessUrl(input, settings, resultTracker, history, printer, inputTime, urlCount, currentBatch);
         }
 
         if (urlCount > 1)
         {
             printer.Print($"\nAll done with {urlCount} batches in {watch.ElapsedFriendly}.");
         }
+
+        return NextAction.Continue;
+    }
+
+    private static NextAction ProcessUrl(
+        CategorizedInput input,UserSettings settings,
+        ResultTracker resultTracker,
+        History history,
+        Printer printer,
+        DateTime inputTime,
+        int urlCount,
+        nuint currentBatch)
+    {
+        string url = input.Text;
+
+        var tempFiles = IoUtilties.Directories.GetDirectoryFileNames(settings.WorkingDirectory);
+        if (tempFiles.Any())
+        {
+            printer.Error($"{tempFiles.Count} file(s) unexpectedly found in the working directory ({settings.WorkingDirectory}), so will abort:");
+            tempFiles.ForEach(file => printer.Warning($"• {file}"));
+            return NextAction.QuitDueToErrors;
+        }
+
+        if (currentBatch > 1) // Don't sleep for the very first URL.
+        {
+            Sleep(settings.SleepSecondsBetweenBatches);
+            printer.Print($"Slept for {settings.SleepSecondsBetweenBatches} second(s).", appendLines: 1);
+        }
+
+        if (urlCount > 1)
+        {
+            printer.Print($"Processing batch {currentBatch} of {urlCount}...");
+        }
+
+        Watch jobWatch = new();
+
+        var mediaTypeResult = Downloader.GetMediaType(url);
+        if (mediaTypeResult.IsFailed)
+        {
+            printer.Error($"Error parsing URL {url}: {mediaTypeResult.Errors.First().Message}");
+            return NextAction.Continue;
+        }
+        var mediaType = mediaTypeResult.Value;
+        printer.Print($"{mediaType.GetType().Name} URL '{url}' detected.");
+
+        history.Append(url, inputTime, settings.VerboseOutput, printer);
+
+        var downloadResult = Downloader.Run(url, mediaType, settings, printer);
+        resultTracker.RegisterResult(downloadResult);
+        if (downloadResult.IsFailed)
+        {
+            return NextAction.Continue;
+        }
+
+        var postProcessor = new PostProcessing.PostProcessing(settings, mediaType, printer);
+        postProcessor.Run();
+
+        string batchClause = urlCount > 1
+            ? $" (batch {currentBatch} of {urlCount})"
+            : string.Empty;
+        printer.Print($"Processed '{url}'{batchClause} in {jobWatch.ElapsedFriendly}.");
 
         return NextAction.Continue;
     }
