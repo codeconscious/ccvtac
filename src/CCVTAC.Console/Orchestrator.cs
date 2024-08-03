@@ -62,11 +62,11 @@ internal class Orchestrator
             }
 
             var categorizedInputs = InputHelper.CategorizeInputs(splitInputs);
+            var categoryCounts = InputHelper.CountCategories(categorizedInputs);
 
-            int urlCount = categorizedInputs.Count(i => i.InputType == InputType.Url);
-            SummarizeInput(categorizedInputs, urlCount, printer);
+            SummarizeInput(categorizedInputs, categoryCounts, printer);
 
-            var nextAction = ProcessBatch(categorizedInputs, ref settings, resultTracker, history, urlCount, printer);
+            var nextAction = ProcessBatch(categorizedInputs, categoryCounts, ref settings, resultTracker, history, printer);
             if (nextAction is not NextAction.Continue)
             {
                 break;
@@ -82,10 +82,10 @@ internal class Orchestrator
     /// <returns>Returns the next action the application should take (e.g., continue or quit).</returns>
     private static NextAction ProcessBatch(
         ImmutableArray<CategorizedInput> categorizedInputs,
+        Dictionary<InputType, int> categoryCounts,
         ref UserSettings settings,
         ResultTracker resultTracker,
         History history,
-        int urlCount,
         Printer printer)
     {
         var inputTime = DateTime.Now;
@@ -97,7 +97,8 @@ internal class Orchestrator
         {
             var result = input.InputType is InputType.Command
                 ? ProcessCommand(input.Text, ref settings, history, printer)
-                : ProcessUrl(input.Text, settings, resultTracker, history, printer, inputTime, urlCount, ++currentBatch);
+                : ProcessUrl(input.Text, settings, resultTracker, history, inputTime,
+                             categoryCounts[InputType.Url], ++currentBatch, printer);
 
             if (result.IsFailed)
             {
@@ -112,9 +113,9 @@ internal class Orchestrator
             }
         }
 
-        if (urlCount > 1)
+        if (categoryCounts.Sum(type => type.Value) > 1)
         {
-            printer.Print($"{Environment.NewLine}Finished with {urlCount} batches in {watch.ElapsedFriendly}.");
+            printer.Print($"{Environment.NewLine}Finished with {categoryCounts} batches in {watch.ElapsedFriendly}.");
         }
 
         return NextAction.Continue;
@@ -125,10 +126,10 @@ internal class Orchestrator
         UserSettings settings,
         ResultTracker resultTracker,
         History history,
-        Printer printer,
-        DateTime inputTime,
+        DateTime urlInputTime,
         int urlCount,
-        nuint currentBatch)
+        nuint currentBatch,
+        Printer printer)
     {
         var emptyDirResult = IoUtilties.Directories.WarnIfAnyFiles(settings.WorkingDirectory, 10);
         if (emptyDirResult.IsFailed)
@@ -160,7 +161,7 @@ internal class Orchestrator
         var mediaType = mediaTypeResult.Value;
         printer.Print($"{mediaType.GetType().Name} URL '{url}' detected.");
 
-        history.Append(url, inputTime, settings.VerboseOutput, printer);
+        history.Append(url, urlInputTime, settings.VerboseOutput, printer);
 
         var downloadResult = Downloader.Run(url, mediaType, settings, printer);
         resultTracker.RegisterResult(downloadResult);
@@ -232,35 +233,36 @@ internal class Orchestrator
 
     private static void SummarizeInput(
         ImmutableArray<CategorizedInput> categorizedInputs,
-        int urlCount,
+        Dictionary<InputType, int> inputCounts,
         Printer printer)
     {
-        var commandCount = categorizedInputs.Length - urlCount;
-
         if (categorizedInputs.Length > 1)
         {
-            var urlSummary = urlCount switch
+            var urlSummary = inputCounts[InputType.Url] switch
             {
                 1 => "1 URL",
-                >1 => $"{urlCount} URLs",
+                >1 => $"{inputCounts[InputType.Url]} URLs",
                 _ => string.Empty
             };
-            var commandSummary = commandCount switch
+
+            var commandSummary = inputCounts[InputType.Url] switch
             {
                 1 => "1 command",
-                >1 => $"{commandCount} commands",
+                >1 => $"{inputCounts[InputType.Url]} commands",
                 _ => string.Empty
             };
+
             var connector = urlSummary.HasText() && commandSummary.HasText()
                 ? " and "
                 : string.Empty;
+
             printer.Print($"Batch of {urlSummary}{connector}{commandSummary} entered.");
 
             foreach (CategorizedInput input in categorizedInputs)
             {
                 printer.Print($" • {input.Text}");
             }
-            printer.PrintEmptyLines(1);
+            printer.EmptyLines(1);
         }
     }
 

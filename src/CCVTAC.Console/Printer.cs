@@ -14,7 +14,7 @@ public sealed class Printer
         if (string.IsNullOrWhiteSpace(message))
             throw new ArgumentNullException(nameof(message), "Message cannot be empty.");
 
-        PrintEmptyLines(prependLines);
+        EmptyLines(prependLines);
 
         if (processMarkup)
         {
@@ -32,7 +32,7 @@ public sealed class Printer
         if (appendLineBreak)
             AnsiConsole.WriteLine();
 
-        PrintEmptyLines(appendLines);
+        EmptyLines(appendLines);
     }
 
     public void Print(Table table)
@@ -43,7 +43,7 @@ public sealed class Printer
     public void Error(string message, byte appendLines = 0)
     {
         AnsiConsole.MarkupLineInterpolated($"[red]{message}[/]");
-        PrintEmptyLines(appendLines);
+        EmptyLines(appendLines);
     }
 
     public void Errors(IEnumerable<string> errors, byte appendLines = 0)
@@ -89,14 +89,14 @@ public sealed class Printer
     {
         // Print("[yellow]" + message + "[/]", true, appendLines: appendLines, processMarkup: true);
         AnsiConsole.MarkupLineInterpolated($"[yellow]{message}[/]");
-        PrintEmptyLines(appendLines);
+        EmptyLines(appendLines);
     }
 
     /// <summary>
     /// Prints the requested number of blank lines.
     /// </summary>
     /// <param name="count"></param>
-    public void PrintEmptyLines(byte count)
+    public void EmptyLines(byte count)
     {
         if (count == 0)
             return;
@@ -108,7 +108,7 @@ public sealed class Printer
 
     public string GetInput(string prompt)
     {
-        PrintEmptyLines(1);
+        EmptyLines(1);
         return AnsiConsole.Ask<string>($"[skyblue1]{prompt}[/]");
     }
 

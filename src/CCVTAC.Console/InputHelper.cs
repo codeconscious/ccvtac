@@ -75,4 +75,12 @@ public static partial class InputHelper
                                 : InputType.Url))
             ];
     }
+
+    internal static Dictionary<InputType, int> CountCategories(ICollection<CategorizedInput> inputs)
+    {
+        return
+            inputs
+                .GroupBy(i => i.InputType)
+                .ToDictionary(gr => gr.Key, gr => gr.Count());
+    }
 }
