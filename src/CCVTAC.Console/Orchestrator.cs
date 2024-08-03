@@ -258,10 +258,7 @@ internal class Orchestrator
 
             foreach (CategorizedInput input in categorizedInputs)
             {
-                if (input.InputType is InputType.Url)
-                    printer.Print($"      URL: {input.Text}");
-                else
-                    printer.Print($"  Command: {input.Text}");
+                printer.Print($" • {input.Text}");
             }
             printer.PrintEmptyLines(1);
         }
