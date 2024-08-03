@@ -82,7 +82,7 @@ internal class Orchestrator
     /// <returns>Returns the next action the application should take (e.g., continue or quit).</returns>
     private static NextAction ProcessBatch(
         ImmutableArray<CategorizedInput> categorizedInputs,
-        Dictionary<InputType, int> categoryCounts,
+        Dictionary<InputCategory, int> categoryCounts,
         ref UserSettings settings,
         ResultTracker resultTracker,
         History history,
@@ -95,14 +95,14 @@ internal class Orchestrator
 
         foreach (CategorizedInput input in categorizedInputs)
         {
-            var result = input.InputType is InputType.Command
+            var result = input.Category is InputCategory.Command
                 ? ProcessCommand(input.Text, ref settings, history, printer)
                 : ProcessUrl(input.Text, settings, resultTracker, history, inputTime,
-                             categoryCounts[InputType.Url], ++currentBatch, printer);
+                             categoryCounts[InputCategory.Url], ++currentBatch, printer);
 
             if (result.IsFailed)
             {
-                printer.Error(result.Errors[0].Message);
+                printer.FirstError(result);
                 continue;
             }
 
@@ -233,22 +233,22 @@ internal class Orchestrator
 
     private static void SummarizeInput(
         ImmutableArray<CategorizedInput> categorizedInputs,
-        Dictionary<InputType, int> inputCounts,
+        Dictionary<InputCategory, int> inputCounts,
         Printer printer)
     {
         if (categorizedInputs.Length > 1)
         {
-            var urlSummary = inputCounts[InputType.Url] switch
+            var urlSummary = inputCounts[InputCategory.Url] switch
             {
                 1 => "1 URL",
-                >1 => $"{inputCounts[InputType.Url]} URLs",
+                >1 => $"{inputCounts[InputCategory.Url]} URLs",
                 _ => string.Empty
             };
 
-            var commandSummary = inputCounts[InputType.Url] switch
+            var commandSummary = inputCounts[InputCategory.Url] switch
             {
                 1 => "1 command",
-                >1 => $"{inputCounts[InputType.Url]} commands",
+                >1 => $"{inputCounts[InputCategory.Url]} commands",
                 _ => string.Empty
             };
 

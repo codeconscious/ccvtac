@@ -58,29 +58,29 @@ public static partial class InputHelper
         return [.. splitInputs];
     }
 
-    internal enum InputType { Url, Command }
+    internal enum InputCategory { Url, Command }
 
-    internal record CategorizedInput(string Text, InputType InputType);
+    internal record CategorizedInput(string Text, InputCategory Category);
 
-    internal static ImmutableArray<CategorizedInput> CategorizeInputs(ICollection<string> splitInputs)
+    internal static ImmutableArray<CategorizedInput> CategorizeInputs(ICollection<string> inputs)
     {
         return
             [
-                ..splitInputs
+                ..inputs
                     .Select(input =>
                         new CategorizedInput(
                             input,
                             input.StartsWith(Commands.Prefix)
-                                ? InputType.Command
-                                : InputType.Url))
+                                ? InputCategory.Command
+                                : InputCategory.Url))
             ];
     }
 
-    internal static Dictionary<InputType, int> CountCategories(ICollection<CategorizedInput> inputs)
+    internal static Dictionary<InputCategory, int> CountCategories(ICollection<CategorizedInput> inputs)
     {
         return
             inputs
-                .GroupBy(i => i.InputType)
+                .GroupBy(i => i.Category)
                 .ToDictionary(gr => gr.Key, gr => gr.Count());
     }
 }
