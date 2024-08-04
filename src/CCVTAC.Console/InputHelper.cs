@@ -4,7 +4,6 @@ namespace CCVTAC.Console;
 
 public static partial class InputHelper
 {
-    // TODO: Refactor this?
     internal static string Prompt =
         $"Enter one or more YouTube media URLs, {Commands._history[0]}, or {Commands._quit[0]} ({Commands._quit[1]}):\n▶︎";
 

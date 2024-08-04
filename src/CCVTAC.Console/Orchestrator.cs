@@ -28,7 +28,7 @@ internal class Orchestrator
             return;
         }
 
-        // The working directory should start empty.
+        // The working directory should start empty. Give the user a chance to empty it.
         var emptyDirResult = IoUtilties.Directories.WarnIfAnyFiles(settings.WorkingDirectory, 10);
         if (emptyDirResult.IsFailed)
         {
@@ -245,10 +245,10 @@ internal class Orchestrator
                 _ => string.Empty
             };
 
-            var commandSummary = inputCounts[InputCategory.Url] switch
+            var commandSummary = inputCounts[InputCategory.Command] switch
             {
                 1 => "1 command",
-                >1 => $"{inputCounts[InputCategory.Url]} commands",
+                >1 => $"{inputCounts[InputCategory.Command]} commands",
                 _ => string.Empty
             };
 
