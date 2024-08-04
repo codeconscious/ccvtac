@@ -4,15 +4,15 @@ CCVTAC (CodeConscious Video-to-Audio Converter) is a small .NET-powered CLI tool
 
 <img width="1451" alt="Sample download" src="https://github.com/codeconscious/ccvtac/assets/50596087/40fd5c56-0c39-44c4-9f5e-bc6398337820">
 
-While I maintain it primarily for my own use, feel free to use it yourself. No warranties or guarantees are provided, though.
+While I maintain it primarily for my own use, feel free to use it yourself. No warranties or guarantees are provided.
 
 [![Build and test](https://github.com/codeconscious/ccvtac/actions/workflows/build-test.yml/badge.svg)](https://github.com/codeconscious/ccvtac/actions/workflows/build-test.yml)
 
 ## Features
 
 - Converts YouTube videos to local M4A audio files (via [yt-dlp](https://github.com/yt-dlp/yt-dlp))
-- Supports 5 kinds of downloads: videos, playlist videos, playlists, and and channels
-- Writes ID3 tags (artists, title, etc.) to files where possible (via provided metadata or regex-based detection)
+- Supports videos, playlists, and channels
+- Writes ID3 tags to files where possible using available or regex-detected metadata
 - Adds limited video metadata (channel name and URL, video URL, etc.) to files' Comment tags
 - Auto-renames files via custom regex patterns (to remove media IDs, etc.)
 - Optionally auto-trims and writes video thumbnails to files as album art (if [mogrify](https://imagemagick.org/script/mogrify.php) is installed)
