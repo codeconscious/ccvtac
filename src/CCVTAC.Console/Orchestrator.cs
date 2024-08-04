@@ -134,7 +134,6 @@ internal class Orchestrator
         var emptyDirResult = IoUtilties.Directories.WarnIfAnyFiles(settings.WorkingDirectory, 10);
         if (emptyDirResult.IsFailed)
         {
-            // TODO: Create a command to clear temporary files.
             printer.FirstError(emptyDirResult);
             return NextAction.QuitDueToErrors;
         }
