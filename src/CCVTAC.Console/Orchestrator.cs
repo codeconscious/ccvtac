@@ -82,7 +82,7 @@ internal class Orchestrator
     /// <returns>Returns the next action the application should take (e.g., continue or quit).</returns>
     private static NextAction ProcessBatch(
         ImmutableArray<CategorizedInput> categorizedInputs,
-        Dictionary<InputCategory, int> categoryCounts,
+        CategoryCounts categoryCounts,
         ref UserSettings settings,
         ResultTracker resultTracker,
         History history,
@@ -113,9 +113,9 @@ internal class Orchestrator
             }
         }
 
-        if (categoryCounts.Sum(type => type.Value) > 1)
+        if (categoryCounts[InputCategory.Url] > 1)
         {
-            printer.Print($"{Environment.NewLine}Finished with {categoryCounts} batches in {watch.ElapsedFriendly}.");
+            printer.Print($"{Environment.NewLine}Finished with {categoryCounts[InputCategory.Url]} batches in {watch.ElapsedFriendly}.");
         }
 
         return NextAction.Continue;
@@ -233,22 +233,22 @@ internal class Orchestrator
 
     private static void SummarizeInput(
         ImmutableArray<CategorizedInput> categorizedInputs,
-        Dictionary<InputCategory, int> inputCounts,
+        CategoryCounts counts,
         Printer printer)
     {
         if (categorizedInputs.Length > 1)
         {
-            var urlSummary = inputCounts[InputCategory.Url] switch
+            var urlSummary = counts[InputCategory.Url] switch
             {
                 1 => "1 URL",
-                >1 => $"{inputCounts[InputCategory.Url]} URLs",
+                >1 => $"{counts[InputCategory.Url]} URLs",
                 _ => string.Empty
             };
 
-            var commandSummary = inputCounts[InputCategory.Command] switch
+            var commandSummary = counts[InputCategory.Command] switch
             {
                 1 => "1 command",
-                >1 => $"{inputCounts[InputCategory.Command]} commands",
+                >1 => $"{counts[InputCategory.Command]} commands",
                 _ => string.Empty
             };
 

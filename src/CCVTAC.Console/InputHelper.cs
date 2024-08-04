@@ -75,11 +75,28 @@ public static partial class InputHelper
             ];
     }
 
-    internal static Dictionary<InputCategory, int> CountCategories(ICollection<CategorizedInput> inputs)
+    internal class CategoryCounts
     {
-        return
+        private readonly Dictionary<InputCategory, int> _counts;
+
+        internal CategoryCounts(Dictionary<InputCategory, int> input)
+        {
+            _counts = input;
+        }
+
+        public int this[InputCategory category]
+        {
+            get => _counts.TryGetValue(category, out var count) ? count : 0;
+        }
+    }
+
+    internal static CategoryCounts CountCategories(ICollection<CategorizedInput> inputs)
+    {
+        var counts =
             inputs
                 .GroupBy(i => i.Category)
                 .ToDictionary(gr => gr.Key, gr => gr.Count());
+
+        return new CategoryCounts(counts);
     }
 }
