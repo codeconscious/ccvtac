@@ -38,7 +38,7 @@ internal static class Directories
     {
         var fileNames = GetDirectoryFileNames(workingDirectory);
 
-        int successes = 0;
+        int successCount = 0;
         var errors = new List<string>();
 
         foreach (var fileName in fileNames)
@@ -46,7 +46,7 @@ internal static class Directories
             try
             {
                 File.Delete(fileName);
-                successes++;
+                successCount++;
             }
             catch (Exception ex)
             {
@@ -56,10 +56,10 @@ internal static class Directories
 
         if (errors.Count == 0)
         {
-            return Result.Ok(successes);
+            return Result.Ok(successCount);
         }
 
-        var output = new StringBuilder($"While {successes} files were deleted successfully, some files could not be deleted:");
+        var output = new StringBuilder($"While {successCount} files were deleted successfully, some files could not be deleted:");
         foreach (string error in errors.Take(showMaxErrors))
         {
             output.AppendLine($"• {error}");
