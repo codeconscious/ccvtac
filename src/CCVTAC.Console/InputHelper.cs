@@ -79,9 +79,9 @@ public static partial class InputHelper
     {
         private readonly Dictionary<InputCategory, int> _counts;
 
-        internal CategoryCounts(Dictionary<InputCategory, int> input)
+        internal CategoryCounts(Dictionary<InputCategory, int> counts)
         {
-            _counts = input;
+            _counts = counts;
         }
 
         public int this[InputCategory category]
