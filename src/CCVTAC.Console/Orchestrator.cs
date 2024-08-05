@@ -1,10 +1,10 @@
 using CCVTAC.Console.Settings;
 using CCVTAC.Console.Downloading;
-using System.Threading;
+using CCVTAC.Console.IoUtilties;
 using Spectre.Console;
+using System.Threading;
 using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 using static CCVTAC.Console.InputHelper;
-using CCVTAC.Console.IoUtilties;
 
 namespace CCVTAC.Console;
 
@@ -49,8 +49,9 @@ internal class Orchestrator
 
         var resultTracker = new ResultTracker(printer);
         var history = new History(settings.HistoryFile, settings.HistoryDisplayCount);
+        var nextAction = NextAction.Continue;
 
-        while (true)
+        while (nextAction is NextAction.Continue)
         {
             var input = printer.GetInput(InputHelper.Prompt);
             var splitInputs = InputHelper.SplitInput(input);
@@ -66,11 +67,9 @@ internal class Orchestrator
 
             SummarizeInput(categorizedInputs, categoryCounts, printer);
 
-            var nextAction = ProcessBatch(categorizedInputs, categoryCounts, ref settings, resultTracker, history, printer);
-            if (nextAction is not NextAction.Continue)
-            {
-                break;
-            }
+            nextAction = ProcessBatch(
+                categorizedInputs, categoryCounts, ref settings,
+                resultTracker, history, printer);
         }
 
         resultTracker.PrintSummary();
