@@ -24,11 +24,16 @@ public sealed class Printer
                 { Level.Debug, new("gray", null) },
             };
 
-    private Level MinimumLogLevel { get; init; }
+    private Level MinimumLogLevel { get; set; }
 
-    public Printer(Level minimumLogLevel)
+    public Printer(bool showDebug)
     {
-        MinimumLogLevel = minimumLogLevel;
+        MinimumLogLevel = showDebug ? Level.Debug : Level.Info;
+    }
+
+    public void ShowDebug(bool show)
+    {
+        MinimumLogLevel = show ? Level.Debug : Level.Info;
     }
 
     /// <summary>
@@ -154,6 +159,14 @@ public sealed class Printer
         Errors(headerMessage, failingResult.Errors.Select(e => e.Message));
     }
 
+    public void FirstError(IResultBase failResult, string? prepend = null)
+    {
+        string pre = prepend is null ? string.Empty : $"{prepend} ";
+        string message = failResult?.Errors?.FirstOrDefault()?.Message ?? string.Empty;
+
+        Error($"{pre}{message}");
+    }
+
     public void Warning(
         string message,
         bool appendLineBreak = true,
@@ -176,12 +189,15 @@ public sealed class Printer
         Print(Level.Info, message, appendLineBreak, prependLines, appendLines, processMarkup);
     }
 
-    public void FirstError(IResultBase failResult, string? prepend = null)
+    public void Debug(
+        string message,
+        bool appendLineBreak = true,
+        byte prependLines = 0,
+        byte appendLines = 0,
+        bool processMarkup = true
+    )
     {
-        string pre = prepend is null ? string.Empty : $"{prepend} ";
-        string message = failResult?.Errors?.FirstOrDefault()?.Message ?? string.Empty;
-
-        Error($"{pre}{message}");
+        Print(Level.Debug, message, appendLineBreak, prependLines, appendLines, processMarkup);
     }
 
     /// <summary>

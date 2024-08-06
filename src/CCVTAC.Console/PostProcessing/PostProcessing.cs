@@ -21,7 +21,6 @@ public sealed class PostProcessing
     internal void Run()
     {
         Watch watch = new();
-        bool verbose = Settings.VerboseOutput;
         string workingDirectory = Settings.WorkingDirectory;
 
         Printer.Info("Starting post-processing...");
@@ -38,8 +37,7 @@ public sealed class PostProcessing
         CollectionMetadata? collectionJson;
         if (collectionJsonResult.IsFailed)
         {
-            if (Settings.VerboseOutput)
-                Printer.Info($"No playlist or channel metadata found: {collectionJsonResult.Errors.First().Message}");
+            Printer.Debug($"No playlist or channel metadata found: {collectionJsonResult.Errors.First().Message}");
 
             collectionJson = null;
         }
@@ -50,7 +48,7 @@ public sealed class PostProcessing
 
         if (Settings.EmbedImages)
         {
-            ImageProcessor.Run(workingDirectory, verbose, Printer);
+            ImageProcessor.Run(workingDirectory, Printer);
         }
 
         var tagResult = Tagger.Run(Settings, taggingSets, collectionJson, MediaType, Printer);
@@ -63,7 +61,7 @@ public sealed class PostProcessing
             Mover.Run(taggingSets, collectionJson, Settings, true, Printer);
 
             var taggingSetFileNames = taggingSets.SelectMany(set => set.AllFiles).ToImmutableList();
-            Deleter.Run(taggingSetFileNames, collectionJson, workingDirectory, verbose, Printer);
+            Deleter.Run(taggingSetFileNames, collectionJson, workingDirectory, Printer);
             IoUtilties.Directories.WarnIfAnyFiles(workingDirectory, 10);
         }
         else

@@ -16,7 +16,7 @@ internal static class Program
 
     static void Main(string[] args)
     {
-        Printer printer = new(Printer.Level.Debug);
+        Printer printer = new(showDebug: true);
 
         // TODO: DELETE -- for testing use only.
         // printer.Critical("Critical message!");
@@ -84,7 +84,7 @@ internal static class Program
         }
         catch (Exception topException)
         {
-            printer.Error($"Fatal error: {topException.Message}");
+            printer.Critical($"Fatal error: {topException.Message}");
             AnsiConsole.WriteException(topException);
             printer.Info("Please help improve this tool by reporting this error and any relevant URLs at https://github.com/codeconscious/ccvtac/issues.");
         }

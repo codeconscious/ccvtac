@@ -40,7 +40,7 @@ internal static class Downloader
     {
         Watch watch = new();
 
-        if (!mediaType.IsVideo && !settings.VerboseOutput)
+        if (!mediaType.IsVideo)
         {
             printer.Info("Please wait for the multiple videos to be downloaded...");
         }
@@ -50,7 +50,7 @@ internal static class Downloader
         string args = GenerateDownloadArgs(settings, mediaType, urls[0]);
         var downloadSettings =
             new ToolSettings(ExternalTool, args, settings.WorkingDirectory!, ExitCodes);
-        var downloadResult = Runner.Run(downloadSettings, settings.VerboseOutput, printer);
+        var downloadResult = Runner.Run(downloadSettings, printer);
 
         if (downloadResult.IsFailed)
         {
@@ -68,7 +68,7 @@ internal static class Downloader
                 ExitCodes);
 
             Result<int> supplementaryDownloadResult =
-                Runner.Run(supplementaryDownloadSettings, settings.VerboseOutput, printer);
+                Runner.Run(supplementaryDownloadSettings, printer);
 
             if (supplementaryDownloadResult.IsSuccess)
             {

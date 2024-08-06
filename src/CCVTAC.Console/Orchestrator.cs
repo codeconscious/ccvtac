@@ -159,7 +159,7 @@ internal class Orchestrator
         var mediaType = mediaTypeResult.Value;
         printer.Info($"{mediaType.GetType().Name} URL '{url}' detected.");
 
-        history.Append(url, urlInputTime, settings.VerboseOutput, printer);
+        history.Append(url, urlInputTime, printer);
 
         var downloadResult = Downloader.Run(url, mediaType, settings, printer);
         resultTracker.RegisterResult(downloadResult);
