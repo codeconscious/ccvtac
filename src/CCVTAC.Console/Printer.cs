@@ -99,7 +99,7 @@ public sealed class Printer
         EmptyLines(appendLines);
     }
 
-    public static void PrintTable(Table table)
+    public void PrintTable(Table table)
     {
         AnsiConsole.Write(table);
     }

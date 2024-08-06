@@ -16,7 +16,15 @@ internal static class Program
 
     static void Main(string[] args)
     {
-        Printer printer = new();
+        Printer printer = new(Printer.Level.Debug);
+
+        // TODO: DELETE -- for testing use only.
+        // printer.Critical("Critical message!");
+        // printer.Error("Error message!");
+        // printer.Warning("Warning message!");
+        // printer.Info("Info message!");
+        // printer.Debug("Debug message!");
+        // return;
 
         if (args.Length > 0 && _helpFlags.CaseInsensitiveContains(args[0]))
         {
@@ -59,7 +67,7 @@ internal static class Program
             var deleteResult = Directories.AskToDeleteAllFiles(settings.WorkingDirectory, printer);
             if (deleteResult.IsSuccess)
             {
-                printer.Print($"{deleteResult.Value} file(s) deleted.");
+                printer.Info($"{deleteResult.Value} file(s) deleted.");
             }
             else
             {
@@ -78,7 +86,7 @@ internal static class Program
         {
             printer.Error($"Fatal error: {topException.Message}");
             AnsiConsole.WriteException(topException);
-            printer.Print("Please help improve this tool by reporting this error and any relevant URLs at https://github.com/codeconscious/ccvtac/issues.");
+            printer.Info("Please help improve this tool by reporting this error and any relevant URLs at https://github.com/codeconscious/ccvtac/issues.");
         }
     }
 }

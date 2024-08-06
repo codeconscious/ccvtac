@@ -42,7 +42,7 @@ internal static class Downloader
 
         if (!mediaType.IsVideo && !settings.VerboseOutput)
         {
-            printer.Print("Please wait for the multiple videos to be downloaded...");
+            printer.Info("Please wait for the multiple videos to be downloaded...");
         }
 
         var urls = FSharp.Downloading.downloadUrls(mediaType);
@@ -72,7 +72,7 @@ internal static class Downloader
 
             if (supplementaryDownloadResult.IsSuccess)
             {
-                printer.Print("Supplementary download completed OK.");
+                printer.Info("Supplementary download completed OK.");
             }
             else
             {

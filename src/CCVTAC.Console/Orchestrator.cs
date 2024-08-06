@@ -24,7 +24,7 @@ internal class Orchestrator
             printer.Error(
                 $"To use this program, please first install {Downloader.ExternalTool.Name} " +
                 $"({Downloader.ExternalTool.Url}) on this system.");
-            printer.Print("Pass '--help' for more information.");
+            printer.Info("Pass '--help' for more information.");
             return;
         }
 
@@ -37,12 +37,12 @@ internal class Orchestrator
             var deleteResult = Directories.AskToDeleteAllFiles(settings.WorkingDirectory, printer);
             if (deleteResult.IsSuccess)
             {
-                printer.Print($"{deleteResult.Value} file(s) deleted.");
+                printer.Info($"{deleteResult.Value} file(s) deleted.");
             }
             else
             {
                 printer.FirstError(deleteResult);
-                printer.Print($"Aborting...");
+                printer.Info($"Aborting...");
                 return;
             }
         }
@@ -114,7 +114,7 @@ internal class Orchestrator
 
         if (categoryCounts[InputCategory.Url] > 1)
         {
-            printer.Print($"{Environment.NewLine}Finished with {categoryCounts[InputCategory.Url]} batches in {watch.ElapsedFriendly}.");
+            printer.Info($"{Environment.NewLine}Finished with {categoryCounts[InputCategory.Url]} batches in {watch.ElapsedFriendly}.");
         }
 
         return NextAction.Continue;
@@ -140,12 +140,12 @@ internal class Orchestrator
         if (currentBatch > 1) // Don't sleep for the very first URL.
         {
             Sleep(settings.SleepSecondsBetweenBatches);
-            printer.Print($"Slept for {settings.SleepSecondsBetweenBatches} second(s).", appendLines: 1);
+            printer.Info($"Slept for {settings.SleepSecondsBetweenBatches} second(s).", appendLines: 1);
         }
 
         if (urlCount > 1)
         {
-            printer.Print($"Processing batch {currentBatch} of {urlCount}...");
+            printer.Info($"Processing batch {currentBatch} of {urlCount}...");
         }
 
         Watch jobWatch = new();
@@ -157,7 +157,7 @@ internal class Orchestrator
             return NextAction.Continue;
         }
         var mediaType = mediaTypeResult.Value;
-        printer.Print($"{mediaType.GetType().Name} URL '{url}' detected.");
+        printer.Info($"{mediaType.GetType().Name} URL '{url}' detected.");
 
         history.Append(url, urlInputTime, settings.VerboseOutput, printer);
 
@@ -175,7 +175,7 @@ internal class Orchestrator
             ? $" (batch {currentBatch} of {urlCount})"
             : string.Empty;
 
-        printer.Print($"Processed '{url}'{batchClause} in {jobWatch.ElapsedFriendly}.");
+        printer.Info($"Processed '{url}'{batchClause} in {jobWatch.ElapsedFriendly}.");
         return NextAction.Continue;
     }
 
@@ -254,11 +254,11 @@ internal class Orchestrator
                 ? " and "
                 : string.Empty;
 
-            printer.Print($"Batch of {urlSummary}{connector}{commandSummary} entered.");
+            printer.Info($"Batch of {urlSummary}{connector}{commandSummary} entered.");
 
             foreach (CategorizedInput input in categorizedInputs)
             {
-                printer.Print($" • {input.Text}");
+                printer.Info($" • {input.Text}");
             }
             printer.EmptyLines(1);
         }

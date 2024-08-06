@@ -43,7 +43,7 @@ internal static class Mover
 
         if (verbose)
         {
-            printer.Print($"Moving {audioFileNames.Count} audio file(s) to \"{fullMoveToDir}\"...");
+            printer.Info($"Moving {audioFileNames.Count} audio file(s) to \"{fullMoveToDir}\"...");
         }
 
         var (successCount, failureCount) =
@@ -59,7 +59,7 @@ internal static class Mover
             printer);
 
         var fileLabel = successCount == 1 ? "file" : "files";
-        printer.Print($"Moved {successCount} audio {fileLabel} in {watch.ElapsedFriendly}.");
+        printer.Info($"Moved {successCount} audio {fileLabel} in {watch.ElapsedFriendly}.");
 
         if (failureCount > 0)
         {
@@ -100,7 +100,7 @@ internal static class Mover
             {
                 if (verbose)
                 {
-                    printer.Print($"Found move-to directory \"{moveToDir}\".");
+                    printer.Info($"Found move-to directory \"{moveToDir}\".");
                 }
 
                 return Result.Ok();
@@ -108,7 +108,7 @@ internal static class Mover
 
             if (verbose)
             {
-                printer.Print($"Creating move-to directory \"{moveToDir}\" (based on playlist metadata)... ",
+                printer.Info($"Creating move-to directory \"{moveToDir}\" (based on playlist metadata)... ",
                               appendLineBreak: false);
             }
 
@@ -116,7 +116,7 @@ internal static class Mover
 
             if (verbose)
             {
-                printer.Print("OK.");
+                printer.Info("OK.");
             }
 
             return Result.Ok();
@@ -152,7 +152,7 @@ internal static class Mover
 
                 if (verbose)
                 {
-                    printer.Print($"• Moved \"{file.Name}\"");
+                    printer.Info($"• Moved \"{file.Name}\"");
                 }
             }
             catch (Exception ex)
@@ -186,7 +186,7 @@ internal static class Mover
                     Path.Combine(moveToDir, $"{baseFileName.Trim()}.jpg"),
                     overwrite: overwrite);
 
-                printer.Print("Moved image file.");
+                printer.Info("Moved image file.");
             }
         }
         catch (Exception ex)

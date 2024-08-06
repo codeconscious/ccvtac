@@ -26,7 +26,7 @@ internal static class Renamer
 
         if (verbose)
         {
-            printer.Print($"Renaming {audioFilePaths.Count()} audio file(s)...");
+            printer.Info($"Renaming {audioFilePaths.Count()} audio file(s)...");
         }
 
         string newFileName;
@@ -56,7 +56,7 @@ internal static class Renamer
                                 : $"\"{renamePattern.Summary}\"";
 
                             if (verbose)
-                                printer.Print($"Rename pattern {matchedPatternSummary} matched.");
+                                printer.Info($"Rename pattern {matchedPatternSummary} matched.");
                         }
 
                         // Delete the matched substring from the filename by index.
@@ -101,8 +101,8 @@ internal static class Renamer
 
                 if (verbose)
                 {
-                    printer.Print($"• From: \"{filePath.Name}\"");
-                    printer.Print($"    To: \"{newFileName}\"");
+                    printer.Info($"• From: \"{filePath.Name}\"");
+                    printer.Info($"    To: \"{newFileName}\"");
                 }
             }
             catch (Exception ex)
@@ -111,6 +111,6 @@ internal static class Renamer
             }
         }
 
-        printer.Print($"Renaming done in {watch.ElapsedFriendly}.");
+        printer.Info($"Renaming done in {watch.ElapsedFriendly}.");
     }
 }

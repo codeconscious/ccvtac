@@ -31,7 +31,7 @@ public class History
             File.AppendAllText(FilePath, serializedEntryTime + Separator + url + Environment.NewLine);
 
             if (verbose)
-                printer.Print($"Added \"{url}\" to the history log.");
+                printer.Info($"Added \"{url}\" to the history log.");
         }
         catch (Exception ex)
         {
@@ -64,7 +64,7 @@ public class History
                 table.AddRow(formattedTime, urls);
             }
 
-            printer.Print(table);
+            printer.PrintTable(table);
         }
         catch (Exception ex)
         {

@@ -20,7 +20,7 @@ internal static class Deleter
 
             if (verbose)
             {
-                printer.Print($"Found {files.Count} collection files.");
+                printer.Info($"Found {files.Count} collection files.");
             }
         }
         else
@@ -38,11 +38,11 @@ internal static class Deleter
         }
 
         if (verbose)
-            printer.Print($"Deleting {allFileNames.Count} temporary files...");
+            printer.Info($"Deleting {allFileNames.Count} temporary files...");
 
         DeleteAll(allFileNames, verbose, printer);
 
-        printer.Print("Deleted temporary files.");
+        printer.Info("Deleted temporary files.");
     }
 
     internal static Result<ImmutableList<string>> GetCollectionFiles(
@@ -72,7 +72,7 @@ internal static class Deleter
                 File.Delete(fileName);
 
                 if (verbose)
-                    printer.Print($"• Deleted \"{fileName}\"");
+                    printer.Info($"• Deleted \"{fileName}\"");
             }
             catch (Exception ex)
             {
