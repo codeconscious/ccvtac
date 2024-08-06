@@ -223,6 +223,7 @@ internal class Orchestrator
             settings = SettingsAdapter.ToggleVerboseOutput(settings);
             SettingsAdapter.PrintSummary(
                 settings, printer, "Verbose Output was toggled for this session.");
+            printer.ShowDebug(settings.VerboseOutput);
             return Result.Ok(NextAction.Continue);
         }
 

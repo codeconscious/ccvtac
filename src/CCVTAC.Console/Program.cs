@@ -18,14 +18,6 @@ internal static class Program
     {
         Printer printer = new(showDebug: true);
 
-        // TODO: DELETE -- for testing use only.
-        // printer.Critical("Critical message!");
-        // printer.Error("Error message!");
-        // printer.Warning("Warning message!");
-        // printer.Info("Info message!");
-        // printer.Debug("Debug message!");
-        // return;
-
         if (args.Length > 0 && _helpFlags.CaseInsensitiveContains(args[0]))
         {
             Help.Print(printer);
@@ -49,6 +41,8 @@ internal static class Program
         }
         var settings = settingsResult.Value;
         SettingsAdapter.PrintSummary(settings, printer, header: "Settings loaded OK.");
+
+        printer.ShowDebug(settings.VerboseOutput);
 
         // Catch Ctrl-C (SIGINT).
         System.Console.CancelKeyPress += delegate
