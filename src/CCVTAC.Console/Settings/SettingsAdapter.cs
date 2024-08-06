@@ -3,6 +3,14 @@ using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 
 namespace CCVTAC.Console.Settings;
 
+/// <summary>
+/// Settings are managed by the corresponding F# library. This class acts as
+/// the bridge between this project and the F# library.
+/// </summary>
+/// <remarks>
+/// It would be easier to do everything here in C#, but I incorporated F# in
+/// PR #38 as functional programming practice.
+/// </remarks>
 public static class SettingsAdapter
 {
     /// <summary>
@@ -17,7 +25,9 @@ public static class SettingsAdapter
     ///     3. `Fail`, indicating a failure in the read or write process or in settings validation.
     /// </returns>
     /// <remarks>This is intended to be a temporary solution until more code is moved to F#.</remarks>
-    internal static Result<UserSettings> ProcessSettings(string? maybeSettingsPath, Printer printer)
+    internal static Result<UserSettings> ProcessSettings(
+        string? maybeSettingsPath,
+        Printer printer)
     {
         var path = FSharp.Settings.FilePath.NewFilePath(maybeSettingsPath);
 
@@ -55,6 +65,27 @@ public static class SettingsAdapter
             return Result.Fail($"Error writing default settings: {ex.Message}");
         }
     }
+
+    /// <summary>
+    /// Returns a new Settings instance with the Split Chapters value toggled.
+    /// This only affects the current session; the settings file is not updated.
+    /// </summary>
+    internal static UserSettings ToggleSplitChapters(UserSettings settings) =>
+        FSharp.Settings.ToggleSplitChapters(settings);
+
+    /// <summary>
+    /// Returns a new Settings instance with the Embed Images value toggled.
+    /// This only affects the current session; the settings file is not updated.
+    /// </summary>
+    internal static UserSettings ToggleEmbedImages(UserSettings settings) =>
+        FSharp.Settings.ToggleEmbedImages(settings);
+
+    /// <summary>
+    /// Returns a new Settings instance with the Verbose Output value toggled.
+    /// This only affects the current session; the settings file is not updated.
+    /// </summary>
+    internal static UserSettings ToggleVerboseOutput(UserSettings settings) =>
+        FSharp.Settings.ToggleVerboseOutput(settings);
 
     /// <summary>
     /// Prints a summary of the given settings.

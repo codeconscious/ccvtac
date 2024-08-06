@@ -7,14 +7,25 @@ public static class Help
         string helpText = """"
         CCVTAC (CodeConscious Video-to-Audio Converter) is a small .NET-powered CLI
         tool that acts as a wrapper around yt-dlp (https://github.com/yt-dlp/yt-dlp)
-        to enable easier downloads of M4A audio from YouTube videos, playlist, and
+        to enable easier downloads of M4A audio from YouTube videos, playlists, and
         channels, plus do some automatic post-processing (tagging, renaming, and
-        moving) as well.
+        moving) too.
 
         While I maintain it primarily for my own use, feel free to use it yourself.
-        No warranties or guarantees provided!
+        No warranties or guarantees are provided.
 
-        PREREQUISITES:
+        FEATURES
+
+        - Converts YouTube videos to local M4A audio files via yt-dlp
+        - Supports videos, playlists, and channels
+        - Writes ID3 tags to files where possible using available or regex-detected metadata
+        - Adds limited video metadata (channel name and URL, video URL, etc.) to files' Comment tags
+        - Auto-renames files via custom regex patterns (to remove media IDs, etc.)
+        - Optionally auto-trims and writes video thumbnails to files as album art (if mogrify is installed)
+        - Customized behavior via a user settings file -- e.g., chapter splitting, image embedding, directories
+        - Saves entered URLs to a local history file
+
+        PREREQUISITES
 
         • .NET 8 runtime (https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
         • yt-dlp https://github.com/yt-dlp/yt-dlp
@@ -54,9 +65,12 @@ public static class Help
         (video, playlist, or channel) at the prompt and press the Enter key.
         You can optionally omit spaces between the URLs.
 
-        Enter `quit` or `q` to quit.
-
-        Entering `history` will display your recent URL history.
+        You can also enter the following commands:
+        - `\quit` or `\q` to quit
+        - `\history` to see the last few URLs you entered
+        - `\split` to toggle chapter splitting for the current session only
+        - `\images` to toggle image embedding for the current session only
+        - `\verbose` to toggle log verbosity for the current session only
 
         Upgrading yt-dlp:
 
