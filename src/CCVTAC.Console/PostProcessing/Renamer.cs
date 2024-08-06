@@ -55,7 +55,8 @@ internal static class Renamer
                                 ? $"`{renamePattern.Regex}` (no description)"
                                 : $"\"{renamePattern.Summary}\"";
 
-                            printer.Print($"Rename pattern {matchedPatternSummary} matched.");
+                            if (verbose)
+                                printer.Print($"Rename pattern {matchedPatternSummary} matched.");
                         }
 
                         // Delete the matched substring from the filename by index.
