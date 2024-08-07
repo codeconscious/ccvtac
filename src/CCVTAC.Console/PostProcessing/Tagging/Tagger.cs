@@ -95,14 +95,13 @@ internal static class Tagger
         if (videoData.Track is string metadataTitle)
         {
             printer.Debug($"• Using metadata title \"{metadataTitle}\"");
-
             taggedFile.Tag.Title = metadataTitle;
         }
         else
         {
-            printer.Debug($"• Found title \"{taggedFile.Tag.Title}\"");
-
-            taggedFile.Tag.Title = tagDetector.DetectTitle(videoData, videoData.Title);
+            var title = tagDetector.DetectTitle(videoData, videoData.Title);
+            printer.Debug($"• Found title \"{title}\"");
+            taggedFile.Tag.Title = title;
         }
 
         if (videoData.Artist is string metadataArtists)
@@ -118,41 +117,35 @@ internal static class Tagger
         else if (tagDetector.DetectArtist(videoData) is string artist)
         {
             printer.Debug($"• Found artist \"{artist}\"");
-
             taggedFile.Tag.Performers = [artist];
         }
 
         if (videoData.Album is string metadataAlbum)
         {
             printer.Debug($"• Using metadata album \"{metadataAlbum}\"");
-
             taggedFile.Tag.Album = metadataAlbum;
         }
         else if (tagDetector.DetectAlbum(videoData, collectionData?.Title) is string album)
         {
             printer.Debug($"• Found album \"{album}\"");
-
             taggedFile.Tag.Album = album;
         }
 
         if (tagDetector.DetectComposers(videoData) is string composers)
         {
             printer.Debug($"• Found composer(s) \"{composers}\"");
-
             taggedFile.Tag.Composers = [composers];
         }
 
         if (videoData.PlaylistIndex is uint trackNo)
         {
             printer.Debug($"• Using playlist index of {trackNo} for track number");
-
             taggedFile.Tag.Track = trackNo;
         }
 
         if (videoData.ReleaseYear is uint releaseYear)
         {
             printer.Debug($"• Using metadata release year \"{releaseYear}\"");
-
             taggedFile.Tag.Year = releaseYear;
         }
         else
@@ -162,7 +155,6 @@ internal static class Tagger
             if (tagDetector.DetectReleaseYear(videoData, maybeDefaultYear) is ushort year)
             {
                 printer.Debug($"• Found year \"{year}\"");
-
                 taggedFile.Tag.Year = year;
             }
         }
@@ -173,12 +165,12 @@ internal static class Tagger
             !settings.DoNotEmbedImageUploaders.Contains(videoData.Uploader) &&
             imageFilePath is not null)
         {
-            printer.Info("Embedding the image.");
+            printer.Info("Embedding artwork.");
             WriteImage(taggedFile, imageFilePath, printer);
         }
         else
         {
-            printer.Debug("Skipping image embedding.");
+            printer.Debug("Skipping artwork embedding.");
         }
 
         taggedFile.Save();
