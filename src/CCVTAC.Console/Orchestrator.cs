@@ -202,27 +202,27 @@ internal class Orchestrator
             return Result.Ok(NextAction.Continue);
         }
 
+        static string SummarizeToggle(string settingName, bool setting)
+            => $"{settingName} was toggled for this session and is now {(setting ? "ON" : "OFF")}.";
+
         if (Commands._toggleSplitChapter.CaseInsensitiveContains(command))
         {
             settings = SettingsAdapter.ToggleSplitChapters(settings);
-            SettingsAdapter.PrintSummary(
-                settings, printer, "Split Chapters was toggled for this session.");
+            printer.Info(SummarizeToggle("Split Chapters", settings.SplitChapters));
             return Result.Ok(NextAction.Continue);
         }
 
         if (Commands._toggleEmbedImages.CaseInsensitiveContains(command))
         {
             settings = SettingsAdapter.ToggleEmbedImages(settings);
-            SettingsAdapter.PrintSummary(
-                settings, printer, "Embed Images was toggled for this session.");
+            printer.Info(SummarizeToggle("Embed Images", settings.EmbedImages));
             return Result.Ok(NextAction.Continue);
         }
 
         if (Commands._toggleQuietMode.CaseInsensitiveContains(command))
         {
             settings = SettingsAdapter.ToggleQuietMode(settings);
-            SettingsAdapter.PrintSummary(
-                settings, printer, "Quiet Mode was toggled for this session.");
+            printer.Info(SummarizeToggle("Quiet Mode", settings.QuietMode));
             printer.ShowDebug(!settings.QuietMode);
             return Result.Ok(NextAction.Continue);
         }
