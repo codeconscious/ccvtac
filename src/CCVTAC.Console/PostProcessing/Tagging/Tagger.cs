@@ -15,8 +15,7 @@ internal static class Tagger
         MediaType mediaType,
         Printer printer)
     {
-        if (settings.VerboseOutput)
-            printer.Print("Adding file tags...");
+        printer.Debug("Adding file tags...");
 
         Watch watch = new();
 
@@ -38,8 +37,7 @@ internal static class Tagger
         bool embedImages,
         Printer printer)
     {
-        if (settings.VerboseOutput)
-            printer.Print($"{taggingSet.AudioFilePaths.Count} audio file(s) with resource ID \"{taggingSet.ResourceId}\"");
+        printer.Debug($"{taggingSet.AudioFilePaths.Count} audio file(s) with resource ID \"{taggingSet.ResourceId}\"");
 
         var parsedJsonResult = ParseVideoJson(taggingSet);
         if (parsedJsonResult.IsFailed)
@@ -50,7 +48,7 @@ internal static class Tagger
             return;
         }
 
-        TaggingSet finalTaggingSet = DeleteSourceFile(taggingSet, printer, settings.VerboseOutput);
+        TaggingSet finalTaggingSet = DeleteSourceFile(taggingSet, printer);
 
         // If a single video was split, the tagging set will have multiple audio file paths.
         // In this case, we will NOT embed the image file (with the assumption that
@@ -87,29 +85,23 @@ internal static class Tagger
         CollectionMetadata? collectionData,
         Printer printer)
     {
-        bool verbose = settings.VerboseOutput;
-
         string audioFileName = Path.GetFileName(audioFilePath);
 
-        if (verbose)
-            printer.Print($"Current audio file: \"{audioFileName}\"");
+        printer.Debug($"Current audio file: \"{audioFileName}\"");
 
         using TaggedFile taggedFile = TaggedFile.Create(audioFilePath);
         TagDetector tagDetector = new(settings.TagDetectionPatterns);
 
         if (videoData.Track is string metadataTitle)
         {
-            if (verbose)
-                printer.Print($"• Using metadata title \"{metadataTitle}\"");
-
+            printer.Debug($"• Using metadata title \"{metadataTitle}\"");
             taggedFile.Tag.Title = metadataTitle;
         }
         else
         {
-            if (verbose)
-                printer.Print($"• Found title \"{taggedFile.Tag.Title}\"");
-
-            taggedFile.Tag.Title = tagDetector.DetectTitle(videoData, videoData.Title);
+            var title = tagDetector.DetectTitle(videoData, videoData.Title);
+            printer.Debug($"• Found title \"{title}\"");
+            taggedFile.Tag.Title = title;
         }
 
         if (videoData.Artist is string metadataArtists)
@@ -120,53 +112,40 @@ internal static class Tagger
                 : $" (extracted from \"{metadataArtists}\")";
             taggedFile.Tag.Performers = [firstArtist];
 
-            if (verbose)
-                printer.Print($"• Using metadata artist \"{firstArtist}\"{diffSummary}");
+            printer.Debug($"• Using metadata artist \"{firstArtist}\"{diffSummary}");
         }
         else if (tagDetector.DetectArtist(videoData) is string artist)
         {
-            if (verbose)
-                printer.Print($"• Found artist \"{artist}\"");
-
+            printer.Debug($"• Found artist \"{artist}\"");
             taggedFile.Tag.Performers = [artist];
         }
 
         if (videoData.Album is string metadataAlbum)
         {
-            if (verbose)
-                printer.Print($"• Using metadata album \"{metadataAlbum}\"");
-
+            printer.Debug($"• Using metadata album \"{metadataAlbum}\"");
             taggedFile.Tag.Album = metadataAlbum;
         }
         else if (tagDetector.DetectAlbum(videoData, collectionData?.Title) is string album)
         {
-            if (verbose)
-                printer.Print($"• Found album \"{album}\"");
-
+            printer.Debug($"• Found album \"{album}\"");
             taggedFile.Tag.Album = album;
         }
 
         if (tagDetector.DetectComposers(videoData) is string composers)
         {
-            if (verbose)
-                printer.Print($"• Found composer(s) \"{composers}\"");
-
+            printer.Debug($"• Found composer(s) \"{composers}\"");
             taggedFile.Tag.Composers = [composers];
         }
 
         if (videoData.PlaylistIndex is uint trackNo)
         {
-            if (verbose)
-                printer.Print($"• Using playlist index of {trackNo} for track number");
-
+            printer.Debug($"• Using playlist index of {trackNo} for track number");
             taggedFile.Tag.Track = trackNo;
         }
 
         if (videoData.ReleaseYear is uint releaseYear)
         {
-            if (verbose)
-                printer.Print($"• Using metadata release year \"{releaseYear}\"");
-
+            printer.Debug($"• Using metadata release year \"{releaseYear}\"");
             taggedFile.Tag.Year = releaseYear;
         }
         else
@@ -175,9 +154,7 @@ internal static class Tagger
 
             if (tagDetector.DetectReleaseYear(videoData, maybeDefaultYear) is ushort year)
             {
-                if (verbose)
-                    printer.Print($"• Found year \"{year}\"");
-
+                printer.Debug($"• Found year \"{year}\"");
                 taggedFile.Tag.Year = year;
             }
         }
@@ -188,22 +165,16 @@ internal static class Tagger
             !settings.DoNotEmbedImageUploaders.Contains(videoData.Uploader) &&
             imageFilePath is not null)
         {
-            printer.Print("Embedding the image.");
-            WriteImage(taggedFile, imageFilePath, verbose, printer);
+            printer.Info("Embedding artwork.");
+            WriteImage(taggedFile, imageFilePath, printer);
         }
         else
         {
-            if (verbose)
-                printer.Print("Skipping image embedding.");
+            printer.Debug("Skipping artwork embedding.");
         }
 
         taggedFile.Save();
-
-        if (verbose)
-        {
-            printer.Print($"Wrote tags to \"{audioFileName}\".");
-        }
-
+        printer.Debug($"Wrote tags to \"{audioFileName}\".");
 
         /// <summary>
         /// If the supplied video uploader is specified in the settings, returns the video's upload year.
@@ -253,7 +224,7 @@ internal static class Tagger
     /// </summary>
     /// <param name="taggingSet"></param>
     /// <param name="printer"></param>
-    private static TaggingSet DeleteSourceFile(TaggingSet taggingSet, Printer printer, bool verbose)
+    private static TaggingSet DeleteSourceFile(TaggingSet taggingSet, Printer printer)
     {
         // If there is only one file, then there are no child files, so no action is necessary.
         if (taggingSet.AudioFilePaths.Count <= 1)
@@ -279,9 +250,7 @@ internal static class Tagger
         try
         {
             File.Delete(largestFileInfo.FullName);
-
-            if (verbose)
-                printer.Print($"Deleted pre-split source file \"{largestFileInfo.Name}\"");
+            printer.Debug($"Deleted pre-split source file \"{largestFileInfo.Name}\"");
 
             return taggingSet with { AudioFilePaths = taggingSet.AudioFilePaths.Remove(largestFileInfo.FullName) };
         }
@@ -299,7 +268,6 @@ internal static class Tagger
     private static void WriteImage(
         TaggedFile taggedFile,
         string imageFilePath,
-        bool verbose,
         Printer printer)
     {
         if (string.IsNullOrWhiteSpace(imageFilePath))
@@ -314,8 +282,7 @@ internal static class Tagger
             pics[0] = new TagLib.Picture(imageFilePath);
             taggedFile.Tag.Pictures = pics;
 
-            if (verbose)
-                printer.Print("Image written to file tags OK.");
+            printer.Debug("Image written to file tags OK.");
         }
         catch (Exception ex)
         {

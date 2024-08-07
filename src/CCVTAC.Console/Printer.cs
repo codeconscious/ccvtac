@@ -4,46 +4,130 @@ namespace CCVTAC.Console;
 
 public sealed class Printer
 {
-    public void Print(
+    public enum Level { Critical, Error, Warning, Info, Debug }
+
+    public record ColorFormat(string? Foreground, string? Background, bool Bold = false);
+
+    /// <summary>
+    /// Color reference: https://spectreconsole.net/appendix/colors
+    /// </summary>
+    private static readonly Dictionary<Level, ColorFormat> Colors =
+        new()
+            {
+                { Level.Critical, new("white", "red", true) },
+                { Level.Error, new("red", null) },
+                { Level.Warning, new("yellow", null) },
+                { Level.Info, new(null, null) },
+                { Level.Debug, new("grey70", null) },
+            };
+
+    private Level MinimumLogLevel { get; set; }
+
+    public Printer(bool showDebug)
+    {
+        MinimumLogLevel = showDebug ? Level.Debug : Level.Info;
+    }
+
+    public void ShowDebug(bool show)
+    {
+        MinimumLogLevel = show ? Level.Debug : Level.Info;
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    private static string EscapeText(string text) =>
+        text
+            .Replace("{", "{{")
+            .Replace("}", "}}")
+            .Replace("[", "[[")
+            .Replace("]", "]]");
+
+    private static string AddMarkup(string message, ColorFormat colors)
+    {
+        if (colors.Foreground is null &&
+            colors.Background is null &&
+            !colors.Bold)
+        {
+            return message;
+        }
+
+        var bold = colors.Bold ? "bold " : string.Empty;
+        var fg = colors.Foreground is null ? "default" : colors.Foreground;
+        var bg = colors.Background is null ? string.Empty : $" on {colors.Background}";
+        var markUp = $"{bold}{fg}{bg}";
+
+        return $"[{markUp}]{message}[/]";
+    }
+
+    private void Print(
+        Level logLevel,
         string message,
         bool appendLineBreak = true,
         byte prependLines = 0,
         byte appendLines = 0,
-        bool processMarkup = false)
+        bool processMarkup = true)
     {
+        if (logLevel > MinimumLogLevel)
+        {
+            return;
+        }
+
         if (string.IsNullOrWhiteSpace(message))
+        {
             throw new ArgumentNullException(nameof(message), "Message cannot be empty.");
+        }
 
         EmptyLines(prependLines);
 
+        var escapedMessage = EscapeText(message);
         if (processMarkup)
         {
-            AnsiConsole.Markup(message);
+
+            var markedUpMessage = AddMarkup(escapedMessage, Colors[logLevel]);
+            AnsiConsole.Markup(markedUpMessage);
         }
         else
         {
             // `AnsiConsole.Write()` calls an internal function that uses format strings,
             // so we must duplicate any curly brackets to safely escape the message text.
             // See https://github.com/spectreconsole/spectre.console/issues/1495.
-            var safeMessage = message.Replace("{", "{{").Replace("}", "}}");
-            AnsiConsole.Write(safeMessage.EscapeMarkup());
+            AnsiConsole.Write(escapedMessage);
         }
 
         if (appendLineBreak)
+        {
             AnsiConsole.WriteLine();
+        }
 
         EmptyLines(appendLines);
     }
 
-    public void Print(Table table)
+    public void PrintTable(Table table)
     {
         AnsiConsole.Write(table);
     }
 
-    public void Error(string message, byte appendLines = 0)
+    public void Critical(
+        string message,
+        bool appendLineBreak = true,
+        byte prependLines = 0,
+        byte appendLines = 0,
+        bool processMarkup = true
+    )
     {
-        AnsiConsole.MarkupLineInterpolated($"[red]{message}[/]");
-        EmptyLines(appendLines);
+        Print(Level.Critical, message, appendLineBreak, prependLines, appendLines, processMarkup);
+    }
+
+    public void Error(
+        string message,
+        bool appendLineBreak = true,
+        byte prependLines = 0,
+        byte appendLines = 0,
+        bool processMarkup = true
+    )
+    {
+        Print(Level.Error, message, appendLineBreak, prependLines, appendLines, processMarkup);
     }
 
     public void Errors(IEnumerable<string> errors, byte appendLines = 0)
@@ -51,20 +135,17 @@ public sealed class Printer
         if (errors?.Any() != true)
             throw new ArgumentException("No errors were provided!", nameof(errors));
 
-        errors.ToList().ForEach(e =>
-            AnsiConsole.MarkupLineInterpolated($"[red]- {e}[/]"));
-    }
-
-    public void Errors(string headerMessage, IEnumerable<string> errors, byte appendLines = 0)
-    {
-        if (headerMessage is not null)
+        foreach (var error in errors.Where(e => e.HasText()))
         {
-            Print("[red]" + headerMessage.EscapeMarkup() + "[/]",
-                  appendLines: appendLines,
-                  processMarkup: true);
+            Error(error);
         }
 
-        Errors(errors, appendLines);
+        EmptyLines(appendLines);
+    }
+
+    public void Errors(string headerMessage, IEnumerable<string> errors)
+    {
+        Errors([headerMessage!, ..errors]);
     }
 
     public void Errors<T>(Result<T> failResult, byte appendLines = 0)
@@ -72,9 +153,9 @@ public sealed class Printer
         Errors(failResult.Errors.Select(e => e.Message), appendLines);
     }
 
-    public void Errors<T>(string headerMessage, Result<T> failingResult, byte appendLines = 0)
+    public void Errors<T>(string headerMessage, Result<T> failingResult)
     {
-        Errors(headerMessage, failingResult.Errors.Select(e => e.Message), appendLines);
+        Errors(headerMessage, failingResult.Errors.Select(e => e.Message));
     }
 
     public void FirstError(IResultBase failResult, string? prepend = null)
@@ -85,11 +166,37 @@ public sealed class Printer
         Error($"{pre}{message}");
     }
 
-    public void Warning(string message, byte appendLines = 0)
+    public void Warning(
+        string message,
+        bool appendLineBreak = true,
+        byte prependLines = 0,
+        byte appendLines = 0,
+        bool processMarkup = true
+    )
     {
-        // Print("[yellow]" + message + "[/]", true, appendLines: appendLines, processMarkup: true);
-        AnsiConsole.MarkupLineInterpolated($"[yellow]{message}[/]");
-        EmptyLines(appendLines);
+        Print(Level.Warning, message, appendLineBreak, prependLines, appendLines, processMarkup);
+    }
+
+    public void Info(
+        string message,
+        bool appendLineBreak = true,
+        byte prependLines = 0,
+        byte appendLines = 0,
+        bool processMarkup = true
+    )
+    {
+        Print(Level.Info, message, appendLineBreak, prependLines, appendLines, processMarkup);
+    }
+
+    public void Debug(
+        string message,
+        bool appendLineBreak = true,
+        byte prependLines = 0,
+        byte appendLines = 0,
+        bool processMarkup = true
+    )
+    {
+        Print(Level.Debug, message, appendLineBreak, prependLines, appendLines, processMarkup);
     }
 
     /// <summary>

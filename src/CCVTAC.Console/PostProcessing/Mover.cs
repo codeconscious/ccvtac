@@ -21,14 +21,13 @@ internal static class Mover
     {
         Watch watch = new();
 
-        bool verbose = settings.VerboseOutput;
         var workingDirInfo = new DirectoryInfo(settings.WorkingDirectory);
 
         string subFolderName = GetSafeSubDirectoryName(maybeCollectionData, taggingSets.First());
         string collectionName = maybeCollectionData?.Title ?? string.Empty;
         string fullMoveToDir = Path.Combine(settings.MoveToDirectory, subFolderName, collectionName);
 
-        var dirResult = EnsureDirectoryExists(fullMoveToDir, verbose, printer);
+        var dirResult = EnsureDirectoryExists(fullMoveToDir, printer);
         if (dirResult.IsFailed)
         {
             return; // The error message is printed within the above method.
@@ -41,13 +40,10 @@ internal static class Mover
             return;
         }
 
-        if (verbose)
-        {
-            printer.Print($"Moving {audioFileNames.Count} audio file(s) to \"{fullMoveToDir}\"...");
-        }
+        printer.Debug($"Moving {audioFileNames.Count} audio file(s) to \"{fullMoveToDir}\"...");
 
         var (successCount, failureCount) =
-            MoveAudioFiles(audioFileNames, fullMoveToDir, overwrite, verbose, printer);
+            MoveAudioFiles(audioFileNames, fullMoveToDir, overwrite, printer);
 
         MoveImageFile(
             collectionName,
@@ -59,7 +55,7 @@ internal static class Mover
             printer);
 
         var fileLabel = successCount == 1 ? "file" : "files";
-        printer.Print($"Moved {successCount} audio {fileLabel} in {watch.ElapsedFriendly}.");
+        printer.Info($"Moved {successCount} audio {fileLabel} in {watch.ElapsedFriendly}.");
 
         if (failureCount > 0)
         {
@@ -92,33 +88,22 @@ internal static class Mover
             : null;
     }
 
-    private static Result EnsureDirectoryExists(string moveToDir, bool verbose, Printer printer)
+    private static Result EnsureDirectoryExists(string moveToDir, Printer printer)
     {
         try
         {
             if (Path.Exists(moveToDir))
             {
-                if (verbose)
-                {
-                    printer.Print($"Found move-to directory \"{moveToDir}\".");
-                }
+                printer.Debug($"Found move-to directory \"{moveToDir}\".");
 
                 return Result.Ok();
             }
 
-            if (verbose)
-            {
-                printer.Print($"Creating move-to directory \"{moveToDir}\" (based on playlist metadata)... ",
+            printer.Debug($"Creating move-to directory \"{moveToDir}\" (based on playlist metadata)... ",
                               appendLineBreak: false);
-            }
 
             Directory.CreateDirectory(moveToDir);
-
-            if (verbose)
-            {
-                printer.Print("OK.");
-            }
-
+            printer.Debug("OK.");
             return Result.Ok();
 
         }
@@ -133,7 +118,6 @@ internal static class Mover
         ICollection<FileInfo> audioFiles,
         string moveToDir,
         bool overwrite,
-        bool verbose,
         Printer printer)
     {
         uint successCount = 0;
@@ -150,10 +134,7 @@ internal static class Mover
 
                 successCount++;
 
-                if (verbose)
-                {
-                    printer.Print($"• Moved \"{file.Name}\"");
-                }
+                printer.Debug($"• Moved \"{file.Name}\"");
             }
             catch (Exception ex)
             {
@@ -186,7 +167,7 @@ internal static class Mover
                     Path.Combine(moveToDir, $"{baseFileName.Trim()}.jpg"),
                     overwrite: overwrite);
 
-                printer.Print("Moved image file.");
+                printer.Info("Moved image file.");
             }
         }
         catch (Exception ex)

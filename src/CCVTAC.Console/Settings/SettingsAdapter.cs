@@ -57,7 +57,7 @@ public static class SettingsAdapter
                 return Result.Fail($"Unexpected error writing the default settings: {result.ErrorValue}");
             }
 
-            printer.Print(result.ResultValue); // The new-file message.
+            printer.Info(result.ResultValue); // The new-file message.
             return Result.Ok();
         }
         catch (Exception ex)
@@ -99,7 +99,7 @@ public static class SettingsAdapter
         string? header = null)
     {
         if (header.HasText())
-            printer.Print(header!);
+            printer.Info(header!);
 
         var table = new Table();
         table.Expand();
@@ -115,6 +115,6 @@ public static class SettingsAdapter
             table.AddRow(pair.Item1, pair.Item2);
         }
 
-        printer.Print(table);
+        printer.PrintTable(table);
     }
 }

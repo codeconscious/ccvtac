@@ -21,10 +21,9 @@ public sealed class PostProcessing
     internal void Run()
     {
         Watch watch = new();
-        bool verbose = Settings.VerboseOutput;
         string workingDirectory = Settings.WorkingDirectory;
 
-        Printer.Print("Starting post-processing...");
+        Printer.Info("Starting post-processing...");
 
         var taggingSetsResult = GenerateTaggingSets(workingDirectory);
         if (taggingSetsResult.IsFailed)
@@ -38,8 +37,7 @@ public sealed class PostProcessing
         CollectionMetadata? collectionJson;
         if (collectionJsonResult.IsFailed)
         {
-            if (Settings.VerboseOutput)
-                Printer.Print($"No playlist or channel metadata found: {collectionJsonResult.Errors.First().Message}");
+            Printer.Debug($"No playlist or channel metadata found: {collectionJsonResult.Errors.First().Message}");
 
             collectionJson = null;
         }
@@ -50,20 +48,20 @@ public sealed class PostProcessing
 
         if (Settings.EmbedImages)
         {
-            ImageProcessor.Run(workingDirectory, verbose, Printer);
+            ImageProcessor.Run(workingDirectory, Printer);
         }
 
         var tagResult = Tagger.Run(Settings, taggingSets, collectionJson, MediaType, Printer);
         if (tagResult.IsSuccess)
         {
-            Printer.Print(tagResult.Value);
+            Printer.Info(tagResult.Value);
 
             // AudioNormalizer.Run(workingDirectory, Printer); // TODO: normalize方法を要検討。
             Renamer.Run(Settings, workingDirectory, Printer);
             Mover.Run(taggingSets, collectionJson, Settings, true, Printer);
 
             var taggingSetFileNames = taggingSets.SelectMany(set => set.AllFiles).ToImmutableList();
-            Deleter.Run(taggingSetFileNames, collectionJson, workingDirectory, verbose, Printer);
+            Deleter.Run(taggingSetFileNames, collectionJson, workingDirectory, Printer);
             IoUtilties.Directories.WarnIfAnyFiles(workingDirectory, 10);
         }
         else
@@ -71,7 +69,7 @@ public sealed class PostProcessing
             Printer.Errors("Tagging error(s) preventing further post-processing: ", tagResult);
         }
 
-        Printer.Print($"Post-processing done in {watch.ElapsedFriendly}.");
+        Printer.Info($"Post-processing done in {watch.ElapsedFriendly}.");
     }
 
     internal Result<CollectionMetadata> GetCollectionJson(string workingDirectory)

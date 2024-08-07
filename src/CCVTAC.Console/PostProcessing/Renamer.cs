@@ -13,7 +13,6 @@ internal static class Renamer
         Printer printer)
     {
         Watch watch = new();
-        bool verbose = settings.VerboseOutput;
 
         DirectoryInfo dir = new(workingDirectory);
         var audioFilePaths = dir.EnumerateFiles("*.m4a");
@@ -24,10 +23,7 @@ internal static class Renamer
             return;
         }
 
-        if (verbose)
-        {
-            printer.Print($"Renaming {audioFilePaths.Count()} audio file(s)...");
-        }
+        printer.Debug($"Renaming {audioFilePaths.Count()} audio file(s)...");
 
         string newFileName;
         Regex regex;
@@ -49,14 +45,13 @@ internal static class Renamer
                             return newNameSb; // Continue to the next iteration.
                         }
 
-                        if (verbose)
+                        if (settings.VerboseOutput)
                         {
                             matchedPatternSummary = renamePattern.Summary is null
                                 ? $"`{renamePattern.Regex}` (no description)"
                                 : $"\"{renamePattern.Summary}\"";
 
-                            if (verbose)
-                                printer.Print($"Rename pattern {matchedPatternSummary} matched.");
+                            printer.Debug($"Rename pattern {matchedPatternSummary} matched.");
                         }
 
                         // Delete the matched substring from the filename by index.
@@ -99,11 +94,8 @@ internal static class Renamer
                     filePath.FullName,
                     Path.Combine(workingDirectory, newFileName));
 
-                if (verbose)
-                {
-                    printer.Print($"• From: \"{filePath.Name}\"");
-                    printer.Print($"    To: \"{newFileName}\"");
-                }
+                printer.Debug($"• From: \"{filePath.Name}\"");
+                printer.Debug($"    To: \"{newFileName}\"");
             }
             catch (Exception ex)
             {
@@ -111,6 +103,6 @@ internal static class Renamer
             }
         }
 
-        printer.Print($"Renaming done in {watch.ElapsedFriendly}.");
+        printer.Info($"Renaming done in {watch.ElapsedFriendly}.");
     }
 }

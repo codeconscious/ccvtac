@@ -40,9 +40,9 @@ internal static class Downloader
     {
         Watch watch = new();
 
-        if (!mediaType.IsVideo && !settings.VerboseOutput)
+        if (!mediaType.IsVideo)
         {
-            printer.Print("Please wait for the multiple videos to be downloaded...");
+            printer.Info("Please wait for the multiple videos to be downloaded...");
         }
 
         var urls = FSharp.Downloading.downloadUrls(mediaType);
@@ -50,7 +50,7 @@ internal static class Downloader
         string args = GenerateDownloadArgs(settings, mediaType, urls[0]);
         var downloadSettings =
             new ToolSettings(ExternalTool, args, settings.WorkingDirectory!, ExitCodes);
-        var downloadResult = Runner.Run(downloadSettings, settings.VerboseOutput, printer);
+        var downloadResult = Runner.Run(downloadSettings, printer);
 
         if (downloadResult.IsFailed)
         {
@@ -68,11 +68,11 @@ internal static class Downloader
                 ExitCodes);
 
             Result<int> supplementaryDownloadResult =
-                Runner.Run(supplementaryDownloadSettings, settings.VerboseOutput, printer);
+                Runner.Run(supplementaryDownloadSettings, printer);
 
             if (supplementaryDownloadResult.IsSuccess)
             {
-                printer.Print("Supplementary download completed OK.");
+                printer.Info("Supplementary download completed OK.");
             }
             else
             {

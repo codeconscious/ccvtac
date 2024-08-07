@@ -19,7 +19,7 @@ sealed class ResultTracker
             _successCount++;
 
             if (downloadResult.Value.HasText())
-                _printer.Print(downloadResult.Value);
+                _printer.Info(downloadResult.Value);
         }
         else
         {
@@ -35,6 +35,6 @@ sealed class ResultTracker
         string successLabel = _successCount == 1 ? "success" : "successes";
         string failureLabel = _failureCount == 1 ? "failure" : "failures";
 
-        _printer.Print($"Quitting with {_successCount} {successLabel} and {_failureCount} {failureLabel}.");
+        _printer.Info($"Quitting with {_successCount} {successLabel} and {_failureCount} {failureLabel}.");
     }
 }

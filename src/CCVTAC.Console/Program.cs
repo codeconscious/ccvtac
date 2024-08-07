@@ -16,7 +16,7 @@ internal static class Program
 
     static void Main(string[] args)
     {
-        Printer printer = new();
+        Printer printer = new(showDebug: true);
 
         if (args.Length > 0 && _helpFlags.CaseInsensitiveContains(args[0]))
         {
@@ -42,6 +42,8 @@ internal static class Program
         var settings = settingsResult.Value;
         SettingsAdapter.PrintSummary(settings, printer, header: "Settings loaded OK.");
 
+        printer.ShowDebug(settings.VerboseOutput);
+
         // Catch Ctrl-C (SIGINT).
         System.Console.CancelKeyPress += delegate
         {
@@ -59,7 +61,7 @@ internal static class Program
             var deleteResult = Directories.AskToDeleteAllFiles(settings.WorkingDirectory, printer);
             if (deleteResult.IsSuccess)
             {
-                printer.Print($"{deleteResult.Value} file(s) deleted.");
+                printer.Info($"{deleteResult.Value} file(s) deleted.");
             }
             else
             {
@@ -76,9 +78,9 @@ internal static class Program
         }
         catch (Exception topException)
         {
-            printer.Error($"Fatal error: {topException.Message}");
+            printer.Critical($"Fatal error: {topException.Message}");
             AnsiConsole.WriteException(topException);
-            printer.Print("Please help improve this tool by reporting this error and any relevant URLs at https://github.com/codeconscious/ccvtac/issues.");
+            printer.Info("Please help improve this tool by reporting this error and any relevant URLs at https://github.com/codeconscious/ccvtac/issues.");
         }
     }
 }

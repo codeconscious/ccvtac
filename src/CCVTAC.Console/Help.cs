@@ -85,6 +85,6 @@ public static class Help
         information as possible (e.g., entered URLs, system information, yt-dlp version).
         """";
 
-        printer.Print(helpText, processMarkup: false);
+        printer.Info(helpText, processMarkup: false);
     }
 }

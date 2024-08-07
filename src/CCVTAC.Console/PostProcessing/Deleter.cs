@@ -8,7 +8,6 @@ internal static class Deleter
         IReadOnlyCollection<string> taggingSetFileNames,
         CollectionMetadata? collectionMetadata,
         string workingDirectory,
-        bool verbose,
         Printer printer)
     {
         ImmutableList<string> collectionFileNames;
@@ -18,10 +17,7 @@ internal static class Deleter
             var files = getFileResult.Value;
             collectionFileNames = files;
 
-            if (verbose)
-            {
-                printer.Print($"Found {files.Count} collection files.");
-            }
+            printer.Debug($"Found {files.Count} collection files.");
         }
         else
         {
@@ -37,12 +33,11 @@ internal static class Deleter
             return;
         }
 
-        if (verbose)
-            printer.Print($"Deleting {allFileNames.Count} temporary files...");
+        printer.Debug($"Deleting {allFileNames.Count} temporary files...");
 
-        DeleteAll(allFileNames, verbose, printer);
+        DeleteAll(allFileNames, printer);
 
-        printer.Print("Deleted temporary files.");
+        printer.Info("Deleted temporary files.");
     }
 
     internal static Result<ImmutableList<string>> GetCollectionFiles(
@@ -63,7 +58,7 @@ internal static class Deleter
         }
     }
 
-    private static void DeleteAll(IEnumerable<string> fileNames, bool verbose, Printer printer)
+    private static void DeleteAll(IEnumerable<string> fileNames, Printer printer)
     {
         foreach (var fileName in fileNames)
         {
@@ -71,8 +66,7 @@ internal static class Deleter
             {
                 File.Delete(fileName);
 
-                if (verbose)
-                    printer.Print($"• Deleted \"{fileName}\"");
+                printer.Debug($"• Deleted \"{fileName}\"");
             }
             catch (Exception ex)
             {
