@@ -45,7 +45,7 @@ internal static class Renamer
                             return newNameSb; // Continue to the next iteration.
                         }
 
-                        if (settings.VerboseOutput) // TODO: Think about this.
+                        if (settings.VerboseOutput)
                         {
                             matchedPatternSummary = renamePattern.Summary is null
                                 ? $"`{renamePattern.Regex}` (no description)"
