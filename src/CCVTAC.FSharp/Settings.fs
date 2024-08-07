@@ -35,7 +35,7 @@ module Settings =
         [<JsonPropertyName("splitChapters")>]                 SplitChapters: bool
         [<JsonPropertyName("sleepSecondsBetweenDownloads")>]  SleepSecondsBetweenDownloads: uint16
         [<JsonPropertyName("sleepSecondsBetweenBatches")>]    SleepSecondsBetweenBatches: uint16
-        [<JsonPropertyName("verboseOutput")>]                 VerboseOutput: bool
+        [<JsonPropertyName("quietMode")>]                     QuietMode: bool
         [<JsonPropertyName("embedImages")>]                   EmbedImages: bool
         [<JsonPropertyName("doNotEmbedImageUploaders")>]      DoNotEmbedImageUploaders: string array
         [<JsonPropertyName("ignoreUploadYearUploaders")>]     IgnoreUploadYearUploaders: string array
@@ -69,8 +69,8 @@ module Settings =
              settings.HistoryFile)
             ("Split video chapters",
              onOrOff settings.SplitChapters)
-            ("Verbose mode",
-             onOrOff settings.VerboseOutput)
+            ("Quiet mode",
+             onOrOff settings.QuietMode)
             ("Embed images",
              onOrOff settings.EmbedImages)
             ("Sleep between batches (URLs)",
@@ -97,10 +97,10 @@ module Settings =
         let toggledSetting = not <| settings.EmbedImages
         { settings with EmbedImages = toggledSetting }
 
-    [<CompiledName("ToggleVerboseOutput")>]
-    let toggleVerboseOutput settings =
-        let toggledSetting = not <| settings.VerboseOutput
-        { settings with VerboseOutput = toggledSetting }
+    [<CompiledName("ToggleQuietMode")>]
+    let toggleQuietMode settings =
+        let toggledSetting = not <| settings.QuietMode
+        { settings with QuietMode = toggledSetting }
 
     module IO =
         open System.IO
@@ -176,7 +176,7 @@ module Settings =
                   SplitChapters = true
                   SleepSecondsBetweenDownloads = 10us
                   SleepSecondsBetweenBatches = 20us
-                  VerboseOutput = true
+                  QuietMode = false
                   EmbedImages = true
                   DoNotEmbedImageUploaders = [||]
                   IgnoreUploadYearUploaders = [||]

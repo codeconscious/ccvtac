@@ -111,9 +111,9 @@ internal static class Downloader
                  ]
         };
 
-        // yt-dlp has its own `--verbose` option too, but that's too much data.
+        // yt-dlp has a `--verbose` option too, but that's too much data.
         // It might be worth incorporating it in the future as a third option.
-        args.Add(settings.VerboseOutput ? string.Empty : "--quiet --no-warnings");
+        args.Add(settings.QuietMode ? "--quiet --no-warnings" : string.Empty);
 
         if (mediaType is not null)
         {

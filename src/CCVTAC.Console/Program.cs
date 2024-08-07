@@ -42,7 +42,7 @@ internal static class Program
         var settings = settingsResult.Value;
         SettingsAdapter.PrintSummary(settings, printer, header: "Settings loaded OK.");
 
-        printer.ShowDebug(settings.VerboseOutput);
+        printer.ShowDebug(!settings.QuietMode);
 
         // Catch Ctrl-C (SIGINT).
         System.Console.CancelKeyPress += delegate
