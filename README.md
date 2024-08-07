@@ -67,6 +67,7 @@ If your `settings.json` file does not exist, one will be created in the applicat
   "sleepSecondsBetweenBatches": 20,
 
   # Whether to use quiet mode (true) or not (false).
+  # Less output is shown in quiet mode.
   "quietMode": false,
 
   # Embed video thumbnails into file tags?
