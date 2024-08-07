@@ -6,10 +6,7 @@ public sealed class Printer
 {
     public enum Level { Critical, Error, Warning, Info, Debug }
 
-    public record ColorFormat(
-        string? Foreground,
-        string? Background,
-        bool Bold = false);
+    public record ColorFormat(string? Foreground, string? Background, bool Bold = false);
 
     /// <summary>
     /// Color reference: https://spectreconsole.net/appendix/colors
@@ -69,7 +66,7 @@ public sealed class Printer
         bool appendLineBreak = true,
         byte prependLines = 0,
         byte appendLines = 0,
-        bool processMarkup = true) // TODO: Should probably be a setting.
+        bool processMarkup = true)
     {
         if (logLevel > MinimumLogLevel)
         {
