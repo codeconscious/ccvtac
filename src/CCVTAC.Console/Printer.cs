@@ -21,7 +21,7 @@ public sealed class Printer
                 { Level.Error, new("red", null) },
                 { Level.Warning, new("yellow", null) },
                 { Level.Info, new(null, null) },
-                { Level.Debug, new("gray", null) },
+                { Level.Debug, new("grey70", null) },
             };
 
     private Level MinimumLogLevel { get; set; }
@@ -99,7 +99,9 @@ public sealed class Printer
         }
 
         if (appendLineBreak)
+        {
             AnsiConsole.WriteLine();
+        }
 
         EmptyLines(appendLines);
     }
