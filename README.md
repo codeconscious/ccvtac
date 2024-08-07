@@ -40,6 +40,9 @@ If your `settings.json` file does not exist, one will be created in the applicat
 
 You can copy and paste this file to `settings.json` to get started. You will, in particular, need to update the three directories at the top.
 
+<details>
+  <summary>Click here to expand the settings!</summary>
+
 ```
 {
   // Mandatory. A temporary directory for working files.
@@ -143,6 +146,7 @@ You can copy and paste this file to `settings.json` to get started. You will, in
   ]
 }
 ```
+</details>
 
 ### Using the application
 
