@@ -69,10 +69,10 @@ module Settings =
              settings.HistoryFile)
             ("Split video chapters",
              onOrOff settings.SplitChapters)
-            ("Quiet mode",
-             onOrOff settings.QuietMode)
             ("Embed images",
              onOrOff settings.EmbedImages)
+            ("Quiet mode",
+             onOrOff settings.QuietMode)
             ("Sleep between batches (URLs)",
              settings.SleepSecondsBetweenBatches |> int |> pluralize "second")
             ("Sleep between downloads",
