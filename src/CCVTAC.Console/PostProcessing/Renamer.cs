@@ -45,7 +45,7 @@ internal static class Renamer
                             return newNameSb; // Continue to the next iteration.
                         }
 
-                        if (settings.VerboseOutput)
+                        if (!settings.QuietMode)
                         {
                             matchedPatternSummary = renamePattern.Summary is null
                                 ? $"`{renamePattern.Regex}` (no description)"
@@ -99,7 +99,7 @@ internal static class Renamer
             }
             catch (Exception ex)
             {
-                printer.Error($"• Could not rename \"{filePath.Name}\": {ex.Message}");
+                printer.Error($"• Error renaming \"{filePath.Name}\": {ex.Message}");
             }
         }
 

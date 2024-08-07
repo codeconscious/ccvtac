@@ -19,8 +19,8 @@ internal static class Commands
     internal static readonly string[] _toggleEmbedImages =
         [MakeCommand("images"), MakeCommand("toggle-images")];
 
-    internal static readonly string[] _toggleVerboseOutput =
-        [MakeCommand("verbose"), MakeCommand("toggle-verbose")];
+    internal static readonly string[] _toggleQuietMode =
+        [MakeCommand("quiet"), MakeCommand("toggle-quiet")];
 
     // internal static readonly string[] _deleteTempFiles =
     //     MakeCommand("delete-temp")];

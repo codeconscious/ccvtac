@@ -218,12 +218,12 @@ internal class Orchestrator
             return Result.Ok(NextAction.Continue);
         }
 
-        if (Commands._toggleVerboseOutput.CaseInsensitiveContains(command))
+        if (Commands._toggleQuietMode.CaseInsensitiveContains(command))
         {
-            settings = SettingsAdapter.ToggleVerboseOutput(settings);
+            settings = SettingsAdapter.ToggleQuietMode(settings);
             SettingsAdapter.PrintSummary(
-                settings, printer, "Verbose Output was toggled for this session.");
-            printer.ShowDebug(settings.VerboseOutput);
+                settings, printer, "Quiet Mode was toggled for this session.");
+            printer.ShowDebug(!settings.QuietMode);
             return Result.Ok(NextAction.Continue);
         }
 

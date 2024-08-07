@@ -81,11 +81,11 @@ public static class SettingsAdapter
         FSharp.Settings.ToggleEmbedImages(settings);
 
     /// <summary>
-    /// Returns a new Settings instance with the Verbose Output value toggled.
+    /// Returns a new Settings instance with the Quiet Mode value toggled.
     /// This only affects the current session; the settings file is not updated.
     /// </summary>
-    internal static UserSettings ToggleVerboseOutput(UserSettings settings) =>
-        FSharp.Settings.ToggleVerboseOutput(settings);
+    internal static UserSettings ToggleQuietMode(UserSettings settings) =>
+        FSharp.Settings.ToggleQuietMode(settings);
 
     /// <summary>
     /// Prints a summary of the given settings.
@@ -99,7 +99,9 @@ public static class SettingsAdapter
         string? header = null)
     {
         if (header.HasText())
+        {
             printer.Info(header!);
+        }
 
         var table = new Table();
         table.Expand();

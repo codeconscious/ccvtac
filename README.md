@@ -66,8 +66,9 @@ If your `settings.json` file does not exist, one will be created in the applicat
   # in succession.
   "sleepSecondsBetweenBatches": 20,
 
-  # Whether output should be verbose (true) or quiet (false).
-  "verboseOutput": true,
+  # Whether to use quiet mode (true) or not (false).
+  # Less output is shown in quiet mode.
+  "quietMode": false,
 
   # Embed video thumbnails into file tags?
   "embedImages": true,
@@ -125,7 +126,7 @@ If your `settings.json` file does not exist, one will be created in the applicat
       # What the matched text should be replaced with.
       "replacePattern": "",
 
-      # Friendly summary to display in the output (if verbose output is on).
+      # Friendly summary to display in the output (if quiet mode is off).
       "description": "Remove trailing video IDs"
     },
     {
@@ -154,7 +155,7 @@ Below is a mostly-empty settings you can copy and save to `settings.json` to get
   "splitChapters": true,
   "sleepSecondsBetweenDownloads": 10,
   "sleepSecondsBetweenBatches": 20,
-  "verboseOutput": true,
+  "quietMode": false,
   "embedImages": true,
   "doNotEmbedImageUploaders": [
     "Channel Name 1",
@@ -199,7 +200,7 @@ You can also enter the following commands:
 - `\history` to see the last few URLs you entered
 - `\split` to toggle chapter splitting for the current session only
 - `\images` to toggle image embedding for the current session only
-- `\verbose` to toggle log verbosity for the current session only
+- `\quiet` to toggle quiet mode for the current session only
 
 ## Upgrading yt-dlp
 
