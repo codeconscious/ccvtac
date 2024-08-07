@@ -99,7 +99,9 @@ public static class SettingsAdapter
         string? header = null)
     {
         if (header.HasText())
+        {
             printer.Info(header!);
+        }
 
         var table = new Table();
         table.Expand();
