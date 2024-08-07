@@ -144,53 +144,6 @@ You can copy and paste this file to `settings.json` to get started. You will, in
 }
 ```
 
-#### Starting template
-
-Below is a mostly-empty settings you can copy and save to `settings.json` to get started. Be sure to fill out the first three entries!
-
-```json
-{
-  "workingDirectory": "",
-  "moveToDirectory": "",
-  "historyFile": "",
-  "historyDisplayCount": 20,
-  "splitChapters": true,
-  "sleepSecondsBetweenDownloads": 10,
-  "sleepSecondsBetweenBatches": 20,
-  "verboseOutput": true,
-  "embedImages": true,
-  "doNotEmbedImageUploaders": [
-    "Channel Name 1",
-    "Channel Name 2"
-  ],
-  "ignoreUploadYearUploaders": [
-    "Channel Name 1",
-    "Channel Name 2"
-  ],
-  "tagDetectionPatterns": {
-    "title": [
-      {
-        "regex": "(.+?) · (.+)(?:\n|\r|\r\n){2}(.+)(?:\n|\r|\r\n){2}.*℗ ([12]\\d{3})\\D",
-        "matchGroup": 1,
-        "searchField": "description",
-        "summary": "Topic style"
-      }
-    ],
-    "artist": [],
-    "album": [],
-    "composer": [],
-    "year": []
-  },
-  "renamePatterns": [
-    {
-      "regex": "\\s\\[[\\w_-]{11}\\](?=\\.\\w{3,5})",
-      "replacePattern": "",
-      "description": "Remove trailing video IDs (recommend running this first)"
-    }
-  ]
-}
-```
-
 ### Using the application
 
 Once your settings file is ready, run the application with `dotnet run`. Optionally, pass `-h` or `--help` for instructions (e.g., `dotnet run -- --help`).
