@@ -99,7 +99,7 @@ internal static class Renamer
             }
             catch (Exception ex)
             {
-                printer.Error($"• Could not rename \"{filePath.Name}\": {ex.Message}");
+                printer.Error($"• Error renaming \"{filePath.Name}\": {ex.Message}");
             }
         }
 
