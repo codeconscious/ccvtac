@@ -108,6 +108,13 @@ module Settings =
         open System.Text.Unicode
         open System.Text.Encodings.Web
 
+        let deserialize<'a> (json:string) =
+            let options = new JsonSerializerOptions()
+            options.AllowTrailingCommas <- true
+            options.ReadCommentHandling <- JsonCommentHandling.Skip
+
+            JsonSerializer.Deserialize<'a>(json, options)
+
         [<CompiledName("FileExists")>]
         let fileExists filePath =
             let (FilePath file) = filePath
@@ -138,7 +145,7 @@ module Settings =
             try
                 path
                 |> File.ReadAllText
-                |> JsonSerializer.Deserialize<UserSettings>
+                |> deserialize<UserSettings>
                 |> verify
             with
                 | :? FileNotFoundException -> Error $"\"{path}\" was not found."
