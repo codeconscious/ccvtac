@@ -7,7 +7,7 @@ using static CCVTAC.FSharp.Downloading;
 
 namespace CCVTAC.Console.PostProcessing;
 
-public sealed class PostProcessing
+public sealed partial class PostProcessing
 {
     private UserSettings Settings { get; }
     private MediaType MediaType { get; }
@@ -38,11 +38,11 @@ public sealed class PostProcessing
         if (collectionJsonResult.IsFailed)
         {
             Printer.Debug($"No playlist or channel metadata found: {collectionJsonResult.Errors.First().Message}");
-
             collectionJson = null;
         }
         else
         {
+            Printer.Debug("Found playlist/channel metadata.");
             collectionJson = collectionJsonResult.Value;
         }
 
@@ -58,10 +58,12 @@ public sealed class PostProcessing
 
             // AudioNormalizer.Run(workingDirectory, Printer); // TODO: normalize方法を要検討。
             Renamer.Run(Settings, workingDirectory, Printer);
+
             Mover.Run(taggingSets, collectionJson, Settings, true, Printer);
 
-            var taggingSetFileNames = taggingSets.SelectMany(set => set.AllFiles).ToImmutableList();
+            var taggingSetFileNames = taggingSets.SelectMany(set => set.AllFiles).ToList();
             Deleter.Run(taggingSetFileNames, collectionJson, workingDirectory, Printer);
+
             IoUtilties.Directories.WarnIfAnyFiles(workingDirectory, 10);
         }
         else
@@ -74,13 +76,11 @@ public sealed class PostProcessing
 
     internal Result<CollectionMetadata> GetCollectionJson(string workingDirectory)
     {
-        Regex regex = new("""(?<=\[)[\w\-]{17,}(?=\]\.info.json)"""); // Assumes a minimum ID length.
-
         try
         {
             var fileNames = Directory.GetFiles(workingDirectory)
-                                     .Where(f => regex.IsMatch(f))
-                                     .ToFrozenSet();
+                                     .Where(f => CollectionMetadataRegex().IsMatch(f))
+                                     .ToImmutableHashSet();
 
             if (fileNames.Count == 0)
             {
@@ -94,7 +94,8 @@ public sealed class PostProcessing
 
             string fileName = fileNames.Single();
             string json = File.ReadAllText(fileName);
-            CollectionMetadata collectionData = JsonSerializer.Deserialize<CollectionMetadata>(json);
+            var collectionData = JsonSerializer.Deserialize<CollectionMetadata>(json);
+
             return Result.Ok(collectionData);
         }
         catch (Exception ex)
@@ -108,9 +109,9 @@ public sealed class PostProcessing
         try
         {
             string[] files = Directory.GetFiles(directory);
-            ImmutableList<TaggingSet> taggingSets = TaggingSet.CreateSets(files);
+            var taggingSets = TaggingSet.CreateSets(files);
 
-            return taggingSets is not null && taggingSets.Any()
+            return taggingSets?.Any() == true
                 ? Result.Ok(taggingSets)
                 : Result.Fail($"No tagging sets were created using working directory \"{directory}\".");
         }
@@ -123,4 +124,10 @@ public sealed class PostProcessing
             return Result.Fail($"Error reading working directory files: {ex.Message}");
         }
     }
+
+    /// <summary>
+    /// A regular expression that detects metadata files for collections.
+    /// </summary>
+    [GeneratedRegex("""(?<=\[)[\w\-]{17,}(?=\]\.info.json)""")]
+    private static partial Regex CollectionMetadataRegex();
 }
