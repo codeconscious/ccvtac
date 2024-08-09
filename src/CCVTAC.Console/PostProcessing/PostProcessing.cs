@@ -47,7 +47,6 @@ internal static partial class PostProcessor
         {
             printer.Info(tagResult.Value);
 
-            // AudioNormalizer.Run(workingDirectory, Printer); // TODO: normalize方法を要検討。
             Renamer.Run(settings, workingDirectory, printer);
 
             Mover.Run(taggingSets, collectionJson, settings, true, printer);
