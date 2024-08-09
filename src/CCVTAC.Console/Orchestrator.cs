@@ -1,6 +1,7 @@
 using CCVTAC.Console.Settings;
 using CCVTAC.Console.Downloading;
 using CCVTAC.Console.IoUtilties;
+using CCVTAC.Console.PostProcessing;
 using Spectre.Console;
 using System.Threading;
 using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
@@ -168,8 +169,7 @@ internal class Orchestrator
             return NextAction.Continue;
         }
 
-        var postProcessor = new PostProcessing.PostProcessing(settings, mediaType, printer);
-        postProcessor.Run();
+        PostProcessor.Run(settings, mediaType, printer);
 
         string batchClause = urlCount > 1
             ? $" (batch {currentBatch} of {urlCount})"
