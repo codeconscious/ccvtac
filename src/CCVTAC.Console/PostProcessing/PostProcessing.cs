@@ -7,7 +7,7 @@ using static CCVTAC.FSharp.Downloading;
 
 namespace CCVTAC.Console.PostProcessing;
 
-internal static partial class PostProcessor
+public sealed partial class PostProcessing
 {
     internal static void Run(UserSettings settings, MediaType mediaType, Printer printer)
     {
@@ -28,12 +28,12 @@ internal static partial class PostProcessor
         CollectionMetadata? collectionJson;
         if (collectionJsonResult.IsFailed)
         {
-            printer.Debug($"No playlist or channel metadata found: {collectionJsonResult.Errors.First().Message}");
+            Printer.Debug($"No playlist or channel metadata found: {collectionJsonResult.Errors.First().Message}");
             collectionJson = null;
         }
         else
         {
-            printer.Debug("Found playlist/channel metadata.");
+            Printer.Debug("Found playlist/channel metadata.");
             collectionJson = collectionJsonResult.Value;
         }
 
@@ -48,12 +48,12 @@ internal static partial class PostProcessor
             printer.Info(tagResult.Value);
 
             // AudioNormalizer.Run(workingDirectory, Printer); // TODO: normalize方法を要検討。
-            Renamer.Run(settings, workingDirectory, printer);
+            Renamer.Run(Settings, workingDirectory, Printer);
 
-            Mover.Run(taggingSets, collectionJson, settings, true, printer);
+            Mover.Run(taggingSets, collectionJson, Settings, true, Printer);
 
             var taggingSetFileNames = taggingSets.SelectMany(set => set.AllFiles).ToList();
-            Deleter.Run(taggingSetFileNames, collectionJson, workingDirectory, printer);
+            Deleter.Run(taggingSetFileNames, collectionJson, workingDirectory, Printer);
 
             IoUtilties.Directories.WarnIfAnyFiles(workingDirectory, 10);
         }
