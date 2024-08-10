@@ -101,17 +101,16 @@ internal static class Downloader
 
         HashSet<string> args = mediaType switch
         {
-            // Metadata-only download
+            // For metadata-only downloads
             null => [ $"--flat-playlist {writeJson} {trimFileNames}" ],
 
-            // Video(s) with their metadata
+            // For video(s) with their respective metadata files (JSON and artwork).
             _ => [
-                    //  $"--extract-audio -f m4a",
-                     $"--extract-audio",
-                     "--write-thumbnail --convert-thumbnails jpg", // For album art
-                     writeJson, // Contains metadata
-                     trimFileNames,
-                     "--retries 2", // Default is 10, which seems like overall
+                    settings.AudioFormat == string.Empty ? "--extract-audio" : $"--extract-audio -f m4a",
+                    "--write-thumbnail --convert-thumbnails jpg", // For album art
+                    writeJson, // Contains metadata
+                    trimFileNames,
+                    "--retries 2", // Default is 10, which seems like overall
                  ]
         };
 

@@ -32,6 +32,7 @@ module Settings =
         [<JsonPropertyName("moveToDirectory")>]               MoveToDirectory: string
         [<JsonPropertyName("historyFile")>]                   HistoryFile: string
         [<JsonPropertyName("historyDisplayCount")>]           HistoryDisplayCount: byte
+        [<JsonPropertyName("audioFormat")>]                   AudioFormat: string
         [<JsonPropertyName("splitChapters")>]                 SplitChapters: bool
         [<JsonPropertyName("sleepSecondsBetweenDownloads")>]  SleepSecondsBetweenDownloads: uint16
         [<JsonPropertyName("sleepSecondsBetweenBatches")>]    SleepSecondsBetweenBatches: uint16
@@ -60,6 +61,11 @@ module Settings =
             patterns.Composer.Length +
             patterns.Year.Length
 
+        let summarizeAudioFormat (format:string) =
+            match format with
+            | "" -> "None specified (Will use default)"
+            | _ -> format
+
         [
             ("Working directory",
              settings.WorkingDirectory)
@@ -73,6 +79,8 @@ module Settings =
              onOrOff settings.EmbedImages)
             ("Quiet mode",
              onOrOff settings.QuietMode)
+            ("Audio format",
+             summarizeAudioFormat settings.AudioFormat)
             ("Sleep between batches (URLs)",
              settings.SleepSecondsBetweenBatches |> int |> pluralize "second")
             ("Sleep between downloads",
@@ -130,6 +138,16 @@ module Settings =
                 let isEmpty str = str |> String.IsNullOrWhiteSpace
                 let dirMissing str = not <| (Directory.Exists str)
 
+                let approvedAudioFormats = [|"aac"; "alac"; "flac"; "m4a"; "mp3"; "opus"; "vorbis"; "wav"|]
+
+                let checkApprovedAudioFormats (t: string) =
+                    // Source: https://github.com/yt-dlp/yt-dlp/?tab=readme-ov-file#post-processing-options
+
+                    match t with
+                    | t when t = "" -> true
+                    | t when Array.contains t approvedAudioFormats -> true
+                    | _ -> false
+
                 match settings with
                 | { WorkingDirectory = w } when isEmpty w ->
                     Error $"No working directory was specified."
@@ -139,6 +157,9 @@ module Settings =
                     Error $"No move-to directory was specified."
                 | { MoveToDirectory = m } when dirMissing m ->
                     Error $"Move-to directory \"{m}\" is missing."
+                | { AudioFormat = af } when not (checkApprovedAudioFormats af) ->
+                    let approved = String.concat ", " approvedAudioFormats
+                    Error $"{af} is not a valid audio format! Use one of the following: {approved}."
                 | _ ->
                     Ok settings
 
@@ -183,6 +204,7 @@ module Settings =
                   SplitChapters = true
                   SleepSecondsBetweenDownloads = 10us
                   SleepSecondsBetweenBatches = 20us
+                  AudioFormat = String.Empty
                   QuietMode = false
                   EmbedImages = true
                   DoNotEmbedImageUploaders = [||]
