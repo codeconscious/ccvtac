@@ -34,8 +34,7 @@ module Settings =
         [<JsonPropertyName("moveToDirectory")>]               MoveToDirectory: string
         [<JsonPropertyName("historyFile")>]                   HistoryFile: string
         [<JsonPropertyName("historyDisplayCount")>]           HistoryDisplayCount: byte
-        [<JsonPropertyName("audioFormats")>]                  AudioFormats: string array
-        [<JsonPropertyName("audioQuality")>]                  AudioQuality: byte
+        [<JsonPropertyName("audioFormat")>]                   AudioFormat: string
         [<JsonPropertyName("splitChapters")>]                 SplitChapters: bool
         [<JsonPropertyName("sleepSecondsBetweenDownloads")>]  SleepSecondsBetweenDownloads: uint16
         [<JsonPropertyName("sleepSecondsBetweenURLs")>]       SleepSecondsBetweenURLs: uint16
@@ -65,21 +64,38 @@ module Settings =
             patterns.Composer.Length +
             patterns.Year.Length
 
+        let summarizeAudioFormat (format:string) =
+            match format with
+            | "" -> "None specified (Will use default)"
+            | _ -> format
+
         [
-            ("Working directory", settings.WorkingDirectory)
-            ("Move-to directory", settings.MoveToDirectory)
-            ("History log file", settings.HistoryFile)
-            ("Split video chapters", onOrOff settings.SplitChapters)
-            ("Embed images", onOrOff settings.EmbedImages)
-            ("Quiet mode", onOrOff settings.QuietMode)
-            ("Audio formats", String.Join(", ", settings.AudioFormats))
-            ("Audio quality (10 up to 0)", settings.AudioQuality |> sprintf "%B")
-            ("Sleep between URLs", settings.SleepSecondsBetweenURLs |> int |> pluralize "second")
-            ("Sleep between downloads", settings.SleepSecondsBetweenDownloads |> int |> pluralize "second")
-            ("Ignore-upload-year channels", settings.IgnoreUploadYearUploaders.Length |> pluralize "channel")
-            ("Do-not-embed-image channels", settings.DoNotEmbedImageUploaders.Length |> pluralize "channel")
-            ("Tag-detection patterns", tagDetectionPatternCount settings.TagDetectionPatterns |> pluralize "pattern")
-            ("Rename patterns", settings.RenamePatterns.Length |> pluralize "pattern")
+            ("Working directory",
+             settings.WorkingDirectory)
+            ("Move-to directory",
+             settings.MoveToDirectory)
+            ("History log file",
+             settings.HistoryFile)
+            ("Split video chapters",
+             onOrOff settings.SplitChapters)
+            ("Embed images",
+             onOrOff settings.EmbedImages)
+            ("Quiet mode",
+             onOrOff settings.QuietMode)
+            ("Audio format",
+             summarizeAudioFormat settings.AudioFormat)
+            ("Sleep between batches (URLs)",
+             settings.SleepSecondsBetweenBatches |> int |> pluralize "second")
+            ("Sleep between downloads",
+             settings.SleepSecondsBetweenDownloads |> int |> pluralize "second")
+            ("Ignore-upload-year channels",
+             settings.IgnoreUploadYearUploaders.Length |> pluralize "channel")
+            ("Do-not-embed-image channels",
+             settings.DoNotEmbedImageUploaders.Length |> pluralize "channel")
+            ("Tag-detection patterns",
+             tagDetectionPatternCount settings.TagDetectionPatterns |> pluralize "pattern")
+            ("Rename patterns",
+             settings.RenamePatterns.Length |> pluralize "pattern")
         ]
 
     module Validation =
@@ -135,7 +151,38 @@ module Settings =
             | false -> Error $"The file \"path\" does not exist."
 
         [<CompiledName("Read")>]
-        let read (FilePath path) =
+        let read filePath =
+            let (FilePath path) = filePath
+
+            let verify settings =
+                let isEmpty str = str |> String.IsNullOrWhiteSpace
+                let dirMissing str = not <| (Directory.Exists str)
+
+                let approvedAudioFormats = [|"aac"; "alac"; "flac"; "m4a"; "mp3"; "opus"; "vorbis"; "wav"|]
+
+                let checkApprovedAudioFormats (t: string) =
+                    // Source: https://github.com/yt-dlp/yt-dlp/?tab=readme-ov-file#post-processing-options
+
+                    match t with
+                    | t when t = "" -> true
+                    | t when Array.contains t approvedAudioFormats -> true
+                    | _ -> false
+
+                match settings with
+                | { WorkingDirectory = w } when isEmpty w ->
+                    Error $"No working directory was specified."
+                | { WorkingDirectory = w } when dirMissing w ->
+                    Error $"Working directory \"{w}\" is missing."
+                | { MoveToDirectory = m } when isEmpty m ->
+                    Error $"No move-to directory was specified."
+                | { MoveToDirectory = m } when dirMissing m ->
+                    Error $"Move-to directory \"{m}\" is missing."
+                | { AudioFormat = af } when not (checkApprovedAudioFormats af) ->
+                    let approved = String.concat ", " approvedAudioFormats
+                    Error $"{af} is not a valid audio format! Use one of the following: {approved}."
+                | _ ->
+                    Ok settings
+
             try
                 path
                 |> File.ReadAllText
@@ -175,9 +222,8 @@ module Settings =
                   HistoryDisplayCount = 25uy // byte
                   SplitChapters = true
                   SleepSecondsBetweenDownloads = 10us
-                  SleepSecondsBetweenURLs = 15us
-                  AudioFormats = [||]
-                  AudioQuality = 0uy
+                  SleepSecondsBetweenBatches = 20us
+                  AudioFormat = String.Empty
                   QuietMode = false
                   EmbedImages = true
                   DoNotEmbedImageUploaders = [||]
