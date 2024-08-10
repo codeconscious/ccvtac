@@ -7,6 +7,10 @@ namespace CCVTAC.Console.PostProcessing;
 
 internal static class Renamer
 {
+    // TODO: Move this repeated code elsewhere.
+    private static readonly string[] _audioExtensions =
+        [".m4a", ".mp3", ".ogg", ".vorbis", ".opus"];
+
     public static void Run(
         UserSettings settings,
         string workingDirectory,
@@ -17,7 +21,7 @@ internal static class Renamer
         var workingDirInfo = new DirectoryInfo(workingDirectory);
         var audioFilePaths = workingDirInfo
             .EnumerateFiles()
-            .Where(f => PostProcessor.AudioExtensions.CaseInsensitiveContains(f.Extension))
+            .Where(f => _audioExtensions.CaseInsensitiveContains(f.Extension))
             .ToImmutableList();
 
         if (audioFilePaths.None())
