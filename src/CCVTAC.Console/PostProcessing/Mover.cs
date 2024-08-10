@@ -10,6 +10,7 @@ internal static class Mover
 {
     private static readonly Regex _playlistImageRegex = new(@"\[[OP]L[\w\d_-]{12,}\]");
 
+    // TODO: Move this repeated code elsewhere.
     private static readonly string[] _audioExtensions =
         [".m4a", ".mp3", ".ogg", ".vorbis", ".opus"];
 
