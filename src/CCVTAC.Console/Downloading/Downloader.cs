@@ -103,11 +103,12 @@ internal static class Downloader
         {
             null => [ $"--flat-playlist {writeJson} {trimFileNames}" ], // Metadata-only download
             _ => [
-                     $"--extract-audio -f m4a",
+                    //  $"--extract-audio -f m4a",
+                     $"--extract-audio",
                      "--write-thumbnail --convert-thumbnails jpg", // For album art
                      writeJson, // Contains metadata
                      trimFileNames,
-                     "--retries 3", // Default is 10, which seems more than necessary
+                     "--retries 2", // Default is 10, which seems more than necessary
                  ]
         };
 
