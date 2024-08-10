@@ -122,13 +122,12 @@ internal static class Downloader
 
             // For video(s) with their respective metadata files (JSON and artwork).
             _ => [
-                    "--extract-audio",
-                    formatArg,
-                    $"--audio-quality {settings.AudioQuality}",
-                    "--write-thumbnail --convert-thumbnails jpg", // For album art
-                    writeJson, // Contains metadata
-                    trimFileNames,
-                    "--retries 2", // Default is 10, which seems like overkill
+                    //  $"--extract-audio -f m4a",
+                     $"--extract-audio",
+                     "--write-thumbnail --convert-thumbnails jpg", // For album art
+                     writeJson, // Contains metadata
+                     trimFileNames,
+                     "--retries 2", // Default is 10, which seems more than necessary
                  ]
         };
 
