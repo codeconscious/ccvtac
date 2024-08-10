@@ -16,7 +16,8 @@ public static class Help
 
         FEATURES
 
-        - Converts YouTube videos, playlists, and channels to local audio files (via yt-dlp)
+        - Converts YouTube videos to local audio files via yt-dlp
+        - Supports videos, playlists, and channels
         - Writes ID3 tags to files where possible using available or regex-detected metadata
         - Adds video metadata (channel name and URL, video URL, etc.) to files' Comment tags
         - Auto-renames files via custom regex patterns (to remove media IDs, etc.)

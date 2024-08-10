@@ -117,17 +117,17 @@ internal static class Downloader
 
         HashSet<string> args = mediaType switch
         {
-            // For metadata-only downloads
+            // Metadata-only download
             null => [ $"--flat-playlist {writeJson} {trimFileNames}" ],
 
-            // For video(s) with their respective metadata files (JSON and artwork).
+            // Video(s) with their metadata
             _ => [
                     //  $"--extract-audio -f m4a",
                      $"--extract-audio",
                      "--write-thumbnail --convert-thumbnails jpg", // For album art
                      writeJson, // Contains metadata
                      trimFileNames,
-                     "--retries 2", // Default is 10, which seems more than necessary
+                     "--retries 2", // Default is 10, which seems like overall
                  ]
         };
 
