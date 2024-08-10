@@ -13,7 +13,7 @@ Features and improvements I'm considering in the future. Not all ideas might be 
 - Logging to files
 - Add a post-processing–only option for already-downloaded temporary files (via aborted downloads, etc.)
 - Changing, saving, and reloading of settings while running the program
-- Add audio normalization (once I find a command line tool or NuGet package that works with M4A files)
+- Add audio normalization (once I find a suitable command line tool or NuGet package)
 - Disable image cropping when adding images is disabled in the settings.
 
 ## Maybe
