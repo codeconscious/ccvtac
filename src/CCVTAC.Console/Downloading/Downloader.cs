@@ -108,7 +108,7 @@ internal static class Downloader
             _ => [
                     "--extract-audio",
                     settings.AudioFormat == "default" ? string.Empty : $"-f {settings.AudioFormat}",
-                    "--audio-quality 0", // Highest quality
+                    $"--audio-quality {settings.AudioQuality}",
                     "--write-thumbnail --convert-thumbnails jpg", // For album art
                     writeJson, // Contains metadata
                     trimFileNames,
