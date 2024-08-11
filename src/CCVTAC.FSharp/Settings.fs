@@ -62,40 +62,21 @@ module Settings =
             patterns.Composer.Length +
             patterns.Year.Length
 
-        let summarizeAudioFormat (format:string) =
-            match format with
-            | "" -> "None specified (Will use default)"
-            | _ -> format
-
         [
-            ("Working directory",
-             settings.WorkingDirectory)
-            ("Move-to directory",
-             settings.MoveToDirectory)
-            ("History log file",
-             settings.HistoryFile)
-            ("Split video chapters",
-             onOrOff settings.SplitChapters)
-            ("Embed images",
-             onOrOff settings.EmbedImages)
-            ("Quiet mode",
-             onOrOff settings.QuietMode)
-            ("Audio format",
-             summarizeAudioFormat settings.AudioFormat)
-            ("Audio quality (10 up to 0)",
-             settings.AudioQuality |> sprintf "%B")
-            ("Sleep between batches (URLs)",
-             settings.SleepSecondsBetweenBatches |> int |> pluralize "second")
-            ("Sleep between downloads",
-             settings.SleepSecondsBetweenDownloads |> int |> pluralize "second")
-            ("Ignore-upload-year channels",
-             settings.IgnoreUploadYearUploaders.Length |> pluralize "channel")
-            ("Do-not-embed-image channels",
-             settings.DoNotEmbedImageUploaders.Length |> pluralize "channel")
-            ("Tag-detection patterns",
-             tagDetectionPatternCount settings.TagDetectionPatterns |> pluralize "pattern")
-            ("Rename patterns",
-             settings.RenamePatterns.Length |> pluralize "pattern")
+            ("Working directory", settings.WorkingDirectory)
+            ("Move-to directory", settings.MoveToDirectory)
+            ("History log file", settings.HistoryFile)
+            ("Split video chapters", onOrOff settings.SplitChapters)
+            ("Embed images", onOrOff settings.EmbedImages)
+            ("Quiet mode", onOrOff settings.QuietMode)
+            ("Audio format", settings.AudioFormat)
+            ("Audio quality (10 up to 0)", settings.AudioQuality |> sprintf "%B")
+            ("Sleep between batches (URLs)", settings.SleepSecondsBetweenBatches |> int |> pluralize "second")
+            ("Sleep between downloads", settings.SleepSecondsBetweenDownloads |> int |> pluralize "second")
+            ("Ignore-upload-year channels", settings.IgnoreUploadYearUploaders.Length |> pluralize "channel")
+            ("Do-not-embed-image channels", settings.DoNotEmbedImageUploaders.Length |> pluralize "channel")
+            ("Tag-detection patterns", tagDetectionPatternCount settings.TagDetectionPatterns |> pluralize "pattern")
+            ("Rename patterns", settings.RenamePatterns.Length |> pluralize "pattern")
         ]
 
     [<CompiledName("ToggleSplitChapters")>]
