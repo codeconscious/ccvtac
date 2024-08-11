@@ -158,14 +158,13 @@ module Settings =
                 let isEmpty str = str |> String.IsNullOrWhiteSpace
                 let dirMissing str = not <| (Directory.Exists str)
 
-                let approvedAudioFormats = [|"aac"; "alac"; "flac"; "m4a"; "mp3"; "opus"; "vorbis"; "wav"|]
+                // Source: https://github.com/yt-dlp/yt-dlp/?tab=readme-ov-file#post-processing-options
+                let supportedAudioFormats = [|"aac"; "alac"; "flac"; "m4a"; "mp3"; "opus"; "vorbis"; "wav"|]
 
-                let checkApprovedAudioFormats (t: string) =
-                    // Source: https://github.com/yt-dlp/yt-dlp/?tab=readme-ov-file#post-processing-options
-
-                    match t with
-                    | t when t = "" -> true
-                    | t when Array.contains t approvedAudioFormats -> true
+                let validAudioFormat (format: string) =
+                    match format with
+                    | fmt when fmt = "default" -> true
+                    | fmt when supportedAudioFormats |> Array.contains fmt -> true
                     | _ -> false
 
                 match settings with
@@ -177,9 +176,9 @@ module Settings =
                     Error $"No move-to directory was specified."
                 | { MoveToDirectory = m } when dirMissing m ->
                     Error $"Move-to directory \"{m}\" is missing."
-                | { AudioFormat = af } when not (checkApprovedAudioFormats af) ->
-                    let approved = String.concat ", " approvedAudioFormats
-                    Error $"{af} is not a valid audio format! Use one of the following: {approved}."
+                | { AudioFormat = af } when not (validAudioFormat af) ->
+                    let approved = supportedAudioFormats |> String.concat ", "
+                    Error $"{af} is not a valid audio format. Use \"default\" or one of the following: {approved}."
                 | _ ->
                     Ok settings
 
