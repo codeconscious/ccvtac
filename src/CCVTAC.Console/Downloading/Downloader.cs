@@ -122,7 +122,9 @@ internal static class Downloader
 
             // For video(s) with their respective metadata files (JSON and artwork).
             _ => [
-                    settings.AudioFormat == string.Empty ? "--extract-audio" : $"--extract-audio -f m4a",
+                    "--extract-audio",
+                    settings.AudioFormat == "default" ? string.Empty : $"-f {settings.AudioFormat}",
+                    "--audio-quality 0", // Highest quality
                     "--write-thumbnail --convert-thumbnails jpg", // For album art
                     writeJson, // Contains metadata
                     trimFileNames,
