@@ -68,10 +68,9 @@ You can copy and paste the sample settings file below to a JSON file named `sett
   // Count of entries to show for `history` command
   "historyDisplayCount": 20,
 
-  // The audio format (codec) to extract audio to.
-  // Options: best, aac, alac, flac, m4a, mp3, opus, vorbis, wav
-  // Not all options are available for all videos.
-  "audioFormat": "best",
+  // The audio format (codec) to extract to, based on the yt-dlp list at
+  // https://github.com/yt-dlp/yt-dlp/?tab=readme-ov-file#post-processing-options.
+  "audioFormat": "default",
 
   // The audio quality to use, with 10 being the lowest and 0 being the highest.
   "audioQuality": 0,
