@@ -35,6 +35,7 @@ module Settings =
         [<JsonPropertyName("historyFile")>]                   HistoryFile: string
         [<JsonPropertyName("historyDisplayCount")>]           HistoryDisplayCount: byte
         [<JsonPropertyName("audioFormat")>]                   AudioFormat: string
+        [<JsonPropertyName("audioQuality")>]                  AudioQuality: byte
         [<JsonPropertyName("splitChapters")>]                 SplitChapters: bool
         [<JsonPropertyName("sleepSecondsBetweenDownloads")>]  SleepSecondsBetweenDownloads: uint16
         [<JsonPropertyName("sleepSecondsBetweenURLs")>]       SleepSecondsBetweenURLs: uint16
@@ -84,6 +85,8 @@ module Settings =
              onOrOff settings.QuietMode)
             ("Audio format",
              summarizeAudioFormat settings.AudioFormat)
+            ("Audio quality (10 up to 0)",
+             settings.AudioQuality |> sprintf "%B")
             ("Sleep between batches (URLs)",
              settings.SleepSecondsBetweenBatches |> int |> pluralize "second")
             ("Sleep between downloads",
@@ -176,9 +179,11 @@ module Settings =
                     Error $"No move-to directory was specified."
                 | { MoveToDirectory = m } when dirMissing m ->
                     Error $"Move-to directory \"{m}\" is missing."
+                | { AudioQuality = q } when q > 10uy ->
+                    Error $"Audio quality must be between 10 (lowest) and 0 (highest)."
                 | { AudioFormat = af } when not (validAudioFormat af) ->
                     let approved = supportedAudioFormats |> String.concat ", "
-                    Error $"{af} is not a valid audio format. Use \"default\" or one of the following: {approved}."
+                    Error $"\"{af}\" is not a valid audio format. Use \"default\" or one of the following: {approved}."
                 | _ ->
                     Ok settings
 
@@ -223,6 +228,7 @@ module Settings =
                   SleepSecondsBetweenDownloads = 10us
                   SleepSecondsBetweenBatches = 20us
                   AudioFormat = String.Empty
+                  AudioQuality = 0uy
                   QuietMode = false
                   EmbedImages = true
                   DoNotEmbedImageUploaders = [||]
