@@ -59,7 +59,7 @@ internal static class Mover
             workingDirInfo,
             fullMoveToDir,
             audioFileNames.Count,
-            overwrite: true,
+            overwrite: false,
             printer);
 
         var fileLabel = successCount == 1 ? "file" : "files";
