@@ -50,7 +50,7 @@ module Settings =
         let onOrOff b =
             if b = true then "ON" else "OFF"
 
-        let pluralize label count =
+        let pluralize (label: string) count =
             if count = 1
             then $"{count} {label}"
             else $"{count} {label}s"
@@ -71,7 +71,7 @@ module Settings =
             ("Quiet mode", onOrOff settings.QuietMode)
             ("Audio format", settings.AudioFormat)
             ("Audio quality (10 up to 0)", settings.AudioQuality |> sprintf "%B")
-            ("Sleep between batches (URLs)", settings.SleepSecondsBetweenBatches |> int |> pluralize "second")
+            ("Sleep between batches", settings.SleepSecondsBetweenBatches |> int |> pluralize "second")
             ("Sleep between downloads", settings.SleepSecondsBetweenDownloads |> int |> pluralize "second")
             ("Ignore-upload-year channels", settings.IgnoreUploadYearUploaders.Length |> pluralize "channel")
             ("Do-not-embed-image channels", settings.DoNotEmbedImageUploaders.Length |> pluralize "channel")
@@ -108,26 +108,22 @@ module Settings =
             JsonSerializer.Deserialize<'a>(json, options)
 
         [<CompiledName("FileExists")>]
-        let fileExists filePath =
-            let (FilePath file) = filePath
+        let fileExists (FilePath file) =
             match file |> File.Exists with
             | true -> Ok()
             | false -> Error $"The file \"path\" does not exist."
 
         [<CompiledName("Read")>]
-        let read filePath =
-            let (FilePath path) = filePath
-
-            let verify settings =
+        let read (FilePath path) =
+            let validate settings =
                 let isEmpty str = str |> String.IsNullOrWhiteSpace
                 let dirMissing str = not <| (Directory.Exists str)
 
                 // Source: https://github.com/yt-dlp/yt-dlp/?tab=readme-ov-file#post-processing-options
-                let supportedAudioFormats = [|"aac"; "alac"; "flac"; "m4a"; "mp3"; "opus"; "vorbis"; "wav"|]
+                let supportedAudioFormats = [|"best"; "aac"; "alac"; "flac"; "m4a"; "mp3"; "opus"; "vorbis"; "wav"|]
 
-                let validAudioFormat (format: string) =
-                    match format with
-                    | fmt when fmt = "default" -> true
+                let validAudioFormat =
+                    function
                     | fmt when supportedAudioFormats |> Array.contains fmt -> true
                     | _ -> false
 
@@ -142,9 +138,9 @@ module Settings =
                     Error $"Move-to directory \"{m}\" is missing."
                 | { AudioQuality = q } when q > 10uy ->
                     Error $"Audio quality must be between 10 (lowest) and 0 (highest)."
-                | { AudioFormat = af } when not (validAudioFormat af) ->
+                | { AudioFormat = fmt } when not (validAudioFormat fmt) ->
                     let approved = supportedAudioFormats |> String.concat ", "
-                    Error $"\"{af}\" is not a valid audio format. Use \"default\" or one of the following: {approved}."
+                    Error $"\"{fmt}\" is an invalid audio format. Use \"default\" or one of the following: {approved}."
                 | _ ->
                     Ok settings
 
@@ -152,18 +148,17 @@ module Settings =
                 path
                 |> File.ReadAllText
                 |> deserialize<UserSettings>
-                |> verify
+                |> validate
             with
-                | :? FileNotFoundException -> Error $"\"{path}\" was not found."
-                | :? JsonException as e -> Error $"Could not parse settings file \"{path}\": {e.Message}"
-                | e -> Error $"Settings unexpectedly could not be read from \"{path}\": {e.Message}"
+                | :? FileNotFoundException -> Error $"File \"{path}\" was not found."
+                | :? JsonException as e -> Error $"Parse error in \"{path}\": {e.Message}"
+                | e -> Error $"Unexpected error reading from \"{path}\": {e.Message}"
 
         [<CompiledName("WriteFile")>]
-        let private writeFile settings filePath =
+        let private writeFile settings (FilePath file) =
             let unicodeEncoder = UnicodeRanges.All |> JavaScriptEncoder.Create
             let writeIndented = true
             let options = JsonSerializerOptions(WriteIndented = writeIndented, Encoder = unicodeEncoder)
-            let (FilePath file) = filePath
 
             try
                 let json = JsonSerializer.Serialize(settings, options)
@@ -175,9 +170,9 @@ module Settings =
                 | e -> Error $"Failure writing settings to \"{file}\": {e.Message}"
 
         [<CompiledName("WriteDefaultFile")>]
-        let writeDefaultFile (filePath: FilePath option) =
+        let writeDefaultFile (filePath: FilePath option) defaultFileName =
             let confirmedPath =
-                let defaultFileName = "settings.json"
+                // let defaultFileName = "settings.json"
                 match filePath with
                 | Some p -> p
                 | None -> FilePath <| Path.Combine(AppContext.BaseDirectory, defaultFileName);

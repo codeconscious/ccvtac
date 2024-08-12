@@ -13,6 +13,8 @@ namespace CCVTAC.Console.Settings;
 /// </remarks>
 public static class SettingsAdapter
 {
+    private static readonly string _defaultFileName = "settings.json";
+
     /// <summary>
     /// Reads settings or creates a new default settings file.
     /// </summary>
@@ -51,7 +53,7 @@ public static class SettingsAdapter
 
         try
         {
-            var result = FSharp.Settings.IO.WriteDefaultFile(path);
+            var result = FSharp.Settings.IO.WriteDefaultFile(path, _defaultFileName);
             if (result is { IsError: true })
             {
                 return Result.Fail($"Unexpected error writing the default settings: {result.ErrorValue}");
