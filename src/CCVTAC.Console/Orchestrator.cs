@@ -261,7 +261,6 @@ internal class Orchestrator
         if (command.StartsWith(Commands._updateAudioFormatPrefix, StringComparison.InvariantCultureIgnoreCase))
         {
             var format = command.Replace(Commands._updateAudioFormatPrefix, string.Empty).ToLowerInvariant();
-            // System.Console.WriteLine(format);
             var updateResult = SettingsAdapter.UpdateAudioFormat(settings, format);
             if (updateResult.IsError)
             {
@@ -270,6 +269,25 @@ internal class Orchestrator
 
             settings = updateResult.ResultValue;
             printer.Info(SummarizeUpdate("Audio Format", settings.AudioFormat));
+            return Result.Ok(NextAction.Continue);
+        }
+
+        if (command.StartsWith(Commands._updateAudioQualityPrefix, StringComparison.InvariantCultureIgnoreCase))
+        {
+            var inputQuality = command.Replace(Commands._updateAudioQualityPrefix, string.Empty);
+            if (!byte.TryParse(inputQuality, out var quality))
+            {
+                return Result.Fail($"\"{inputQuality}\" is an invalid quality value.");
+            }
+
+            var updateResult = SettingsAdapter.UpdateAudioQuality(settings, quality);
+            if (updateResult.IsError)
+            {
+                return Result.Fail(updateResult.ErrorValue); // For out-of-range values
+            }
+
+            settings = updateResult.ResultValue;
+            printer.Info(SummarizeUpdate("Audio Quality", settings.AudioQuality.ToString()));
             return Result.Ok(NextAction.Continue);
         }
 

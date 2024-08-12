@@ -68,14 +68,11 @@ public static class Help
         You can also enter the following commands:
         - "\quit" or "\q" to quit
         - "\history" to see the last few URLs you entered
-        - Modify the current session only (without updating the settings file):
-            - `\split` toggles chapter splitting
-            - `\images` toggles image embedding
-            - `\quiet` toggles quiet mode
-            - `\format-` followed by a supported audio format (e.g., `\format-m4a`) changes the format
-            - `\quality-` followed by a supported audio quality (e.g., `\quality-0`) changes the audio quality
-
-        Enter `\commands` to see this summary in the application.
+        - "\split" to toggle chapter splitting for the current session only
+        - "\images" to toggle image embedding for the current session only
+        - "\quiet" to toggle quiet mode for the current session only
+        - "\format-" followed by a supported audio format (e.g., "\format-m4a") to change the format for the current session only
+        - "\quality-" followed by a supported audio quality (e.g., "\quality-0") to change the audio quality for the current session only
 
         Upgrading yt-dlp:
 

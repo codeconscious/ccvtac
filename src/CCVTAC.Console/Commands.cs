@@ -24,6 +24,8 @@ internal static class Commands
 
     internal static readonly string _updateAudioFormatPrefix = MakeCommand("format-");
 
+    internal static readonly string _updateAudioQualityPrefix = MakeCommand("quality-");
+
     // internal static readonly string[] _deleteTempFiles =
     //     MakeCommand("delete-temp")];
 
