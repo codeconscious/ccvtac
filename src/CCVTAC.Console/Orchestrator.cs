@@ -203,7 +203,10 @@ internal class Orchestrator
         }
 
         static string SummarizeToggle(string settingName, bool setting)
-            => $"{settingName} was toggled for this session and is now {(setting ? "ON" : "OFF")}.";
+            => $"{settingName} was toggled to {(setting ? "ON" : "OFF")} for this session.";
+
+        static string SummarizeUpdate(string settingName, string setting)
+            => $"{settingName} was updated to \"{setting}\" for this session.";
 
         if (Commands._toggleSplitChapter.CaseInsensitiveContains(command))
         {
@@ -224,6 +227,21 @@ internal class Orchestrator
             settings = SettingsAdapter.ToggleQuietMode(settings);
             printer.Info(SummarizeToggle("Quiet Mode", settings.QuietMode));
             printer.ShowDebug(!settings.QuietMode);
+            return Result.Ok(NextAction.Continue);
+        }
+
+        if (command.StartsWith(Commands._updateAudioFormatPrefix, StringComparison.InvariantCultureIgnoreCase))
+        {
+            var format = command.Replace(Commands._updateAudioFormatPrefix, string.Empty).ToLowerInvariant();
+            // System.Console.WriteLine(format);
+            var updateResult = SettingsAdapter.UpdateAudioFormat(settings, format);
+            if (updateResult.IsError)
+            {
+                return Result.Fail(updateResult.ErrorValue);
+            }
+
+            settings = updateResult.ResultValue;
+            printer.Info(SummarizeUpdate("Audio Format", settings.AudioFormat));
             return Result.Ok(NextAction.Continue);
         }
 

@@ -4,6 +4,8 @@ module Settings =
     open System.Text.Json.Serialization
     open System
 
+    let newLine = Environment.NewLine
+
     type FilePath = FilePath of string
 
     type RenamePattern = {
@@ -79,26 +81,44 @@ module Settings =
             ("Rename patterns", settings.RenamePatterns.Length |> pluralize "pattern")
         ]
 
-    [<CompiledName("ToggleSplitChapters")>]
-    let toggleSplitChapters settings =
-        let toggledSetting = not <| settings.SplitChapters
-        { settings with SplitChapters = toggledSetting }
+    module Validation =
+        open System.IO
 
-    [<CompiledName("ToggleEmbedImages")>]
-    let toggleEmbedImages settings =
-        let toggledSetting = not <| settings.EmbedImages
-        { settings with EmbedImages = toggledSetting }
+        let validate settings =
+            let isEmpty str = str |> String.IsNullOrWhiteSpace
+            let dirMissing str = not <| (Directory.Exists str)
 
-    [<CompiledName("ToggleQuietMode")>]
-    let toggleQuietMode settings =
-        let toggledSetting = not <| settings.QuietMode
-        { settings with QuietMode = toggledSetting }
+            // Source: https://github.com/yt-dlp/yt-dlp/?tab=readme-ov-file#post-processing-options
+            let supportedAudioFormats = [|"best"; "aac"; "alac"; "flac"; "m4a"; "mp3"; "opus"; "vorbis"; "wav"|]
+
+            let validAudioFormat =
+                function
+                | fmt when supportedAudioFormats |> Array.contains fmt -> true
+                | _ -> false
+
+            match settings with
+            | { WorkingDirectory = w } when isEmpty w ->
+                Error $"No working directory was specified."
+            | { WorkingDirectory = w } when dirMissing w ->
+                Error $"Working directory \"{w}\" is missing."
+            | { MoveToDirectory = m } when isEmpty m ->
+                Error $"No move-to directory was specified."
+            | { MoveToDirectory = m } when dirMissing m ->
+                Error $"Move-to directory \"{m}\" is missing."
+            | { AudioQuality = q } when q > 10uy ->
+                Error $"Audio quality must be between 10 (lowest) and 0 (highest)."
+            | { AudioFormat = fmt } when not (validAudioFormat fmt) ->
+                let approved = supportedAudioFormats |> String.concat ", "
+                Error $"\"{fmt}\" is an invalid audio format. Use \"default\" or one of the following: {approved}."
+            | _ ->
+                Ok settings
 
     module IO =
         open System.IO
         open System.Text.Json
         open System.Text.Unicode
         open System.Text.Encodings.Web
+        open Validation
 
         let deserialize<'a> (json:string) =
             let options = new JsonSerializerOptions()
@@ -115,35 +135,6 @@ module Settings =
 
         [<CompiledName("Read")>]
         let read (FilePath path) =
-            let validate settings =
-                let isEmpty str = str |> String.IsNullOrWhiteSpace
-                let dirMissing str = not <| (Directory.Exists str)
-
-                // Source: https://github.com/yt-dlp/yt-dlp/?tab=readme-ov-file#post-processing-options
-                let supportedAudioFormats = [|"best"; "aac"; "alac"; "flac"; "m4a"; "mp3"; "opus"; "vorbis"; "wav"|]
-
-                let validAudioFormat =
-                    function
-                    | fmt when supportedAudioFormats |> Array.contains fmt -> true
-                    | _ -> false
-
-                match settings with
-                | { WorkingDirectory = w } when isEmpty w ->
-                    Error $"No working directory was specified."
-                | { WorkingDirectory = w } when dirMissing w ->
-                    Error $"Working directory \"{w}\" is missing."
-                | { MoveToDirectory = m } when isEmpty m ->
-                    Error $"No move-to directory was specified."
-                | { MoveToDirectory = m } when dirMissing m ->
-                    Error $"Move-to directory \"{m}\" is missing."
-                | { AudioQuality = q } when q > 10uy ->
-                    Error $"Audio quality must be between 10 (lowest) and 0 (highest)."
-                | { AudioFormat = fmt } when not (validAudioFormat fmt) ->
-                    let approved = supportedAudioFormats |> String.concat ", "
-                    Error $"\"{fmt}\" is an invalid audio format. Use \"default\" or one of the following: {approved}."
-                | _ ->
-                    Ok settings
-
             try
                 path
                 |> File.ReadAllText
@@ -163,7 +154,7 @@ module Settings =
             try
                 let json = JsonSerializer.Serialize(settings, options)
                 (file, json) |> File.WriteAllText
-                Ok $"A new default settings file was created at \"{file}\".\nPlease populate it with your desired settings."
+                Ok $"A new default settings file was created at \"{file}\".{newLine}Please populate it with your desired settings."
             with
                 | :? FileNotFoundException -> Error $"\"{file}\" was not found."
                 | :? JsonException -> Error $"Failure parsing user settings to JSON."
@@ -199,3 +190,26 @@ module Settings =
                   }
                   RenamePatterns = [||] }
             writeFile defaultSettings confirmedPath
+
+    module LiveUpdating =
+        open Validation
+
+        [<CompiledName("ToggleSplitChapters")>]
+        let toggleSplitChapters settings =
+            let toggledSetting = not <| settings.SplitChapters
+            { settings with SplitChapters = toggledSetting }
+
+        [<CompiledName("ToggleEmbedImages")>]
+        let toggleEmbedImages settings =
+            let toggledSetting = not <| settings.EmbedImages
+            { settings with EmbedImages = toggledSetting }
+
+        [<CompiledName("ToggleQuietMode")>]
+        let toggleQuietMode settings =
+            let toggledSetting = not <| settings.QuietMode
+            { settings with QuietMode = toggledSetting }
+
+        [<CompiledName("UpdateAudioFormat")>]
+        let updateAudioFormat settings newFormat =
+            let updatedSettings = { settings with AudioFormat = newFormat}
+            validate updatedSettings

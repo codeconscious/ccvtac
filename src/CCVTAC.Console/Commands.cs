@@ -22,6 +22,8 @@ internal static class Commands
     internal static readonly string[] _toggleQuietMode =
         [MakeCommand("quiet"), MakeCommand("toggle-quiet")];
 
+    internal static readonly string _updateAudioFormatPrefix = MakeCommand("format-");
+
     // internal static readonly string[] _deleteTempFiles =
     //     MakeCommand("delete-temp")];
 

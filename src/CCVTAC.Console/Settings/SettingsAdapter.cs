@@ -1,5 +1,6 @@
 using Spectre.Console;
 using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
+using Microsoft.FSharp.Core;
 
 namespace CCVTAC.Console.Settings;
 
@@ -73,21 +74,28 @@ public static class SettingsAdapter
     /// This only affects the current session; the settings file is not updated.
     /// </summary>
     internal static UserSettings ToggleSplitChapters(UserSettings settings) =>
-        FSharp.Settings.ToggleSplitChapters(settings);
+        FSharp.Settings.LiveUpdating.ToggleSplitChapters(settings);
 
     /// <summary>
     /// Returns a new Settings instance with the Embed Images value toggled.
     /// This only affects the current session; the settings file is not updated.
     /// </summary>
     internal static UserSettings ToggleEmbedImages(UserSettings settings) =>
-        FSharp.Settings.ToggleEmbedImages(settings);
+        FSharp.Settings.LiveUpdating.ToggleEmbedImages(settings);
 
     /// <summary>
     /// Returns a new Settings instance with the Quiet Mode value toggled.
     /// This only affects the current session; the settings file is not updated.
     /// </summary>
     internal static UserSettings ToggleQuietMode(UserSettings settings) =>
-        FSharp.Settings.ToggleQuietMode(settings);
+        FSharp.Settings.LiveUpdating.ToggleQuietMode(settings);
+
+    /// <summary>
+    /// Returns a Result containing a new Settings instance with the Audio Format value updated,
+    /// or else an Error. This only affects the current session; the settings file is not updated.
+    /// </summary>
+    internal static FSharpResult<UserSettings, string> UpdateAudioFormat(UserSettings settings, string newFormat) =>
+        FSharp.Settings.LiveUpdating.UpdateAudioFormat(settings, newFormat);
 
     /// <summary>
     /// Prints a summary of the given settings.
