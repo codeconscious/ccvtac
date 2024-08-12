@@ -87,30 +87,30 @@ module Settings =
 
         let validate settings =
             let isEmpty str = str |> String.IsNullOrWhiteSpace
-            let dirMissing str = not (Directory.Exists str)
+            let dirMissing str = not <| (Directory.Exists str)
 
             // Source: https://github.com/yt-dlp/yt-dlp/?tab=readme-ov-file#post-processing-options
             let supportedAudioFormats = [|"best"; "aac"; "alac"; "flac"; "m4a"; "mp3"; "opus"; "vorbis"; "wav"|]
 
-            let validAudioFormat fmt =
-                supportedAudioFormats |> Array.contains fmt
+            let validAudioFormat =
+                function
+                | fmt when supportedAudioFormats |> Array.contains fmt -> true
+                | _ -> false
 
             match settings with
-            | { WorkingDirectory = d } when d |> isEmpty ->
+            | { WorkingDirectory = w } when isEmpty w ->
                 Error $"No working directory was specified."
-            | { WorkingDirectory = d } when d |> dirMissing ->
-                Error $"Working directory \"{d}\" is missing."
-            | { MoveToDirectory = d } when d |> isEmpty ->
+            | { WorkingDirectory = w } when dirMissing w ->
+                Error $"Working directory \"{w}\" is missing."
+            | { MoveToDirectory = m } when isEmpty m ->
                 Error $"No move-to directory was specified."
-            | { MoveToDirectory = d } when d |> dirMissing ->
-                Error $"Move-to directory \"{d}\" is missing."
+            | { MoveToDirectory = m } when dirMissing m ->
+                Error $"Move-to directory \"{m}\" is missing."
             | { AudioQuality = q } when q > 10uy ->
-                Error $"Audio quality must be in the range 10 (lowest) and 0 (highest)."
-            | { AudioFormats = fmt } when not (fmt |> Array.forall (fun f -> f |> validAudioFormat)) ->
-                let formats = String.Join(", ", fmt)
+                Error $"Audio quality must be between 10 (lowest) and 0 (highest)."
+            | { AudioFormat = fmt } when not (validAudioFormat fmt) ->
                 let approved = supportedAudioFormats |> String.concat ", "
-                let nl = Environment.NewLine
-                Error $"Audio formats (\"%s{formats}\") include an unsupported audio format.{nl}Only the following supported formats: {approved}."
+                Error $"\"{fmt}\" is an invalid audio format. Use \"default\" or one of the following: {approved}."
             | _ ->
                 Ok settings
 
@@ -136,35 +136,6 @@ module Settings =
 
         [<CompiledName("Read")>]
         let read (FilePath path) =
-            let validate settings =
-                let isEmpty str = str |> String.IsNullOrWhiteSpace
-                let dirMissing str = not <| (Directory.Exists str)
-
-                // Source: https://github.com/yt-dlp/yt-dlp/?tab=readme-ov-file#post-processing-options
-                let supportedAudioFormats = [|"best"; "aac"; "alac"; "flac"; "m4a"; "mp3"; "opus"; "vorbis"; "wav"|]
-
-                let validAudioFormat =
-                    function
-                    | fmt when supportedAudioFormats |> Array.contains fmt -> true
-                    | _ -> false
-
-                match settings with
-                | { WorkingDirectory = w } when isEmpty w ->
-                    Error $"No working directory was specified."
-                | { WorkingDirectory = w } when dirMissing w ->
-                    Error $"Working directory \"{w}\" is missing."
-                | { MoveToDirectory = m } when isEmpty m ->
-                    Error $"No move-to directory was specified."
-                | { MoveToDirectory = m } when dirMissing m ->
-                    Error $"Move-to directory \"{m}\" is missing."
-                | { AudioQuality = q } when q > 10uy ->
-                    Error $"Audio quality must be between 10 (lowest) and 0 (highest)."
-                | { AudioFormat = fmt } when not (validAudioFormat fmt) ->
-                    let approved = supportedAudioFormats |> String.concat ", "
-                    Error $"\"{fmt}\" is an invalid audio format. Use \"default\" or one of the following: {approved}."
-                | _ ->
-                    Ok settings
-
             try
                 path
                 |> File.ReadAllText
@@ -228,25 +199,20 @@ module Settings =
 
         [<CompiledName("ToggleSplitChapters")>]
         let toggleSplitChapters settings =
-            let toggledSetting = not settings.SplitChapters
+            let toggledSetting = not <| settings.SplitChapters
             { settings with SplitChapters = toggledSetting }
 
         [<CompiledName("ToggleEmbedImages")>]
         let toggleEmbedImages settings =
-            let toggledSetting = not settings.EmbedImages
+            let toggledSetting = not <| settings.EmbedImages
             { settings with EmbedImages = toggledSetting }
 
         [<CompiledName("ToggleQuietMode")>]
         let toggleQuietMode settings =
-            let toggledSetting = not settings.QuietMode
+            let toggledSetting = not <| settings.QuietMode
             { settings with QuietMode = toggledSetting }
 
         [<CompiledName("UpdateAudioFormat")>]
         let updateAudioFormat settings newFormat =
-            let updatedSettings = { settings with AudioFormats = newFormat}
-            validate updatedSettings
-
-        [<CompiledName("UpdateAudioQuality")>]
-        let updateAudioQuality settings newQuality =
-            let updatedSettings = { settings with AudioQuality = newQuality}
+            let updatedSettings = { settings with AudioFormat = newFormat}
             validate updatedSettings

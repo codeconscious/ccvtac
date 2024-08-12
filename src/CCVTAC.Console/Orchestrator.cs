@@ -233,6 +233,9 @@ internal class Orchestrator
         static string SummarizeUpdate(string settingName, string setting)
             => $"{settingName} was updated to \"{setting}\" for this session.";
 
+        static string SummarizeUpdate(string settingName, string setting)
+            => $"{settingName} was updated to \"{setting}\" for this session.";
+
         if (Commands.SplitChapterToggles.CaseInsensitiveContains(command))
         {
             settings = SettingsAdapter.ToggleSplitChapters(settings);
@@ -255,15 +258,10 @@ internal class Orchestrator
             return Result.Ok(NextAction.Continue);
         }
 
-        if (command.StartsWith(Commands.UpdateAudioFormatPrefix, StringComparison.InvariantCultureIgnoreCase))
+        if (command.StartsWith(Commands._updateAudioFormatPrefix, StringComparison.InvariantCultureIgnoreCase))
         {
-            var format = command.Replace(Commands.UpdateAudioFormatPrefix, string.Empty).ToLowerInvariant();
-
-            if (format == string.Empty)
-            {
-                return Result.Fail($"You must append one or more supported audio format separated by commas (e.g., \"m4a,opus,best\").");
-            }
-
+            var format = command.Replace(Commands._updateAudioFormatPrefix, string.Empty).ToLowerInvariant();
+            // System.Console.WriteLine(format);
             var updateResult = SettingsAdapter.UpdateAudioFormat(settings, format);
             if (updateResult.IsError)
             {
@@ -271,32 +269,7 @@ internal class Orchestrator
             }
 
             settings = updateResult.ResultValue;
-            printer.Info(SummarizeUpdate("Audio Formats", string.Join(", ", settings.AudioFormats)));
-            return Result.Ok(NextAction.Continue);
-        }
-
-        if (command.StartsWith(Commands.UpdateAudioQualityPrefix, StringComparison.InvariantCultureIgnoreCase))
-        {
-            var inputQuality = command.Replace(Commands.UpdateAudioQualityPrefix, string.Empty);
-
-            if (inputQuality == string.Empty)
-            {
-                return Result.Fail($"You must enter a number representing an audio quality.");
-            }
-
-            if (!byte.TryParse(inputQuality, out var quality))
-            {
-                return Result.Fail($"\"{inputQuality}\" is an invalid quality value.");
-            }
-
-            var updateResult = SettingsAdapter.UpdateAudioQuality(settings, quality);
-            if (updateResult.IsError)
-            {
-                return Result.Fail(updateResult.ErrorValue); // For out-of-range values
-            }
-
-            settings = updateResult.ResultValue;
-            printer.Info(SummarizeUpdate("Audio Quality", settings.AudioQuality.ToString()));
+            printer.Info(SummarizeUpdate("Audio Format", settings.AudioFormat));
             return Result.Ok(NextAction.Continue);
         }
 

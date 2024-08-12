@@ -1,6 +1,7 @@
 using Spectre.Console;
 using Microsoft.FSharp.Core;
 using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
+using Microsoft.FSharp.Core;
 
 namespace CCVTAC.Console.Settings;
 
@@ -95,14 +96,7 @@ public static class SettingsAdapter
     /// or else an Error. This only affects the current session; the settings file is not updated.
     /// </summary>
     internal static FSharpResult<UserSettings, string> UpdateAudioFormat(UserSettings settings, string newFormat) =>
-        FSharp.Settings.LiveUpdating.UpdateAudioFormat(settings, newFormat.Split(','));
-    /// <summary>
-
-    /// Returns a Result containing a new Settings instance with the Audio Quality value updated,
-    /// or else an Error. This only affects the current session; the settings file is not updated.
-    /// </summary>
-    internal static FSharpResult<UserSettings, string> UpdateAudioQuality(UserSettings settings, byte newQuality) =>
-        FSharp.Settings.LiveUpdating.UpdateAudioQuality(settings, newQuality);
+        FSharp.Settings.LiveUpdating.UpdateAudioFormat(settings, newFormat);
 
     /// <summary>
     /// Prints a summary of the given settings.

@@ -22,20 +22,10 @@ internal static class Commands
     internal static string[] QuietModeToggles { get; } =
         [MakeCommand("quiet"), MakeCommand("toggle-quiet")];
 
-    internal static string UpdateAudioFormatPrefix { get; } = MakeCommand("format-");
+    internal static readonly string _updateAudioFormatPrefix = MakeCommand("format-");
 
-    internal static string UpdateAudioQualityPrefix { get; } = MakeCommand("quality-");
-
-    internal static Dictionary<string, string> Summary { get; } = new()
-    {
-        { History[0], "See the most recently entered URLs" },
-        { SplitChapterToggles[0], "Toggles chapter splitting for the current session only" },
-        { EmbedImagesToggles[0], "Toggles image embedding for the current session only" },
-        { QuietModeToggles[0], "Toggles quiet mode for the current session only" },
-        { UpdateAudioFormatPrefix, $"Followed by a supported audio format (e.g., {UpdateAudioFormatPrefix}m4a), changes the audio format for the current session only" },
-        { UpdateAudioQualityPrefix, $"Followed by a supported audio quality (e.g., {UpdateAudioQualityPrefix}0), changes the audio quality for the current session only" },
-        { $"{QuitOptions[0]} or {QuitOptions[1]}", "Quit the application" },
-    };
+    // internal static readonly string[] _deleteTempFiles =
+    //     MakeCommand("delete-temp")];
 
     internal static string MakeCommand(string text)
     {
