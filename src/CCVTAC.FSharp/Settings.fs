@@ -213,3 +213,8 @@ module Settings =
         let updateAudioFormat settings newFormat =
             let updatedSettings = { settings with AudioFormat = newFormat}
             validate updatedSettings
+
+        [<CompiledName("UpdateAudioQuality")>]
+        let updateAudioQuality settings newQuality =
+            let updatedSettings = { settings with AudioQuality = newQuality}
+            validate updatedSettings
