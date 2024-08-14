@@ -92,23 +92,21 @@ module Settings =
             // Source: https://github.com/yt-dlp/yt-dlp/?tab=readme-ov-file#post-processing-options
             let supportedAudioFormats = [|"best"; "aac"; "alac"; "flac"; "m4a"; "mp3"; "opus"; "vorbis"; "wav"|]
 
-            let validAudioFormat =
-                function
-                | fmt when supportedAudioFormats |> Array.contains fmt -> true
-                | _ -> false
+            let validAudioFormat fmt =
+                supportedAudioFormats |> Array.contains fmt
 
             match settings with
-            | { WorkingDirectory = w } when isEmpty w ->
+            | { WorkingDirectory = d } when d |> isEmpty ->
                 Error $"No working directory was specified."
-            | { WorkingDirectory = w } when dirMissing w ->
-                Error $"Working directory \"{w}\" is missing."
-            | { MoveToDirectory = m } when isEmpty m ->
+            | { WorkingDirectory = d } when d |> dirMissing ->
+                Error $"Working directory \"{d}\" is missing."
+            | { MoveToDirectory = d } when d |> isEmpty ->
                 Error $"No move-to directory was specified."
-            | { MoveToDirectory = m } when dirMissing m ->
-                Error $"Move-to directory \"{m}\" is missing."
+            | { MoveToDirectory = d } when d |> dirMissing ->
+                Error $"Move-to directory \"{d}\" is missing."
             | { AudioQuality = q } when q > 10uy ->
-                Error $"Audio quality must be between 10 (lowest) and 0 (highest)."
-            | { AudioFormat = fmt } when not (validAudioFormat fmt) ->
+                Error $"Audio quality must be in the range 10 (lowest) and 0 (highest)."
+            | { AudioFormat = fmt } when not (fmt |> validAudioFormat) ->
                 let approved = supportedAudioFormats |> String.concat ", "
                 Error $"\"{fmt}\" is an invalid audio format. Use \"default\" or one of the following: {approved}."
             | _ ->
@@ -164,7 +162,6 @@ module Settings =
         [<CompiledName("WriteDefaultFile")>]
         let writeDefaultFile (filePath: FilePath option) defaultFileName =
             let confirmedPath =
-                // let defaultFileName = "settings.json"
                 match filePath with
                 | Some p -> p
                 | None -> FilePath <| Path.Combine(AppContext.BaseDirectory, defaultFileName);
