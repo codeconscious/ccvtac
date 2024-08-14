@@ -9,13 +9,13 @@ module Settings =
     type FilePath = FilePath of string
 
     type RenamePattern = {
-        [<JsonPropertyName("regex")>]           Regex : string
+        [<JsonPropertyName("regex")>]           RegexPattern : string
         [<JsonPropertyName("replacePattern")>]  ReplaceWithPattern : string
         [<JsonPropertyName("summary")>]         Summary : string
     }
 
     type TagDetectionPattern = {
-        [<JsonPropertyName("regex")>]        Regex : string
+        [<JsonPropertyName("regex")>]        RegexPattern : string
         [<JsonPropertyName("matchGroup")>]   MatchGroup : byte
         [<JsonPropertyName("searchField")>]  SearchField : string
         [<JsonPropertyName("summary")>]      Summary : string option
@@ -156,7 +156,7 @@ module Settings =
             with
                 | :? FileNotFoundException -> Error $"\"{file}\" was not found."
                 | :? JsonException -> Error $"Failure parsing user settings to JSON."
-                | e -> Error $"Failure writing settings to \"{file}\": {e.Message}"
+                | e -> Error $"Failure writing to \"{file}\": {e.Message}"
 
         [<CompiledName("WriteDefaultFile")>]
         let writeDefaultFile (filePath: FilePath option) defaultFileName =
@@ -164,6 +164,7 @@ module Settings =
                 match filePath with
                 | Some p -> p
                 | None -> FilePath <| Path.Combine(AppContext.BaseDirectory, defaultFileName);
+
             let defaultSettings =
                 { WorkingDirectory = String.Empty
                   MoveToDirectory = String.Empty
@@ -171,7 +172,7 @@ module Settings =
                   HistoryDisplayCount = 25uy // byte
                   SplitChapters = true
                   SleepSecondsBetweenDownloads = 10us
-                  SleepSecondsBetweenBatches = 20us
+                  SleepSecondsBetweenBatches = 15us
                   AudioFormat = String.Empty
                   AudioQuality = 0uy
                   QuietMode = false
@@ -186,6 +187,7 @@ module Settings =
                     Year = [||]
                   }
                   RenamePatterns = [||] }
+
             writeFile defaultSettings confirmedPath
 
     module LiveUpdating =

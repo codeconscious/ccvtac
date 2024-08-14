@@ -44,7 +44,7 @@ internal static class Renamer
                     new StringBuilder(filePath.Name), // Seed is the original filename
                     (newNameSb, renamePattern) =>
                     {
-                        regex = new Regex(renamePattern.Regex);
+                        regex = new Regex(renamePattern.RegexPattern);
                         match = regex.Match(newNameSb.ToString());
 
                         if (!match.Success)
@@ -55,7 +55,7 @@ internal static class Renamer
                         if (!settings.QuietMode)
                         {
                             matchedPatternSummary = renamePattern.Summary is null
-                                ? $"`{renamePattern.Regex}` (no description)"
+                                ? $"`{renamePattern.RegexPattern}` (no description)"
                                 : $"\"{renamePattern.Summary}\"";
 
                             printer.Debug($"Rename pattern {matchedPatternSummary} matched.");
