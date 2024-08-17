@@ -19,10 +19,7 @@ internal sealed class ResultTracker<T>
         _printer = printer;
     }
 
-    /// <summary>
-    /// Logs the result for a specific corresponding input.
-    /// </summary>
-    internal void RegisterResult(string input, Result<T> result)
+    public void RegisterResult(string url, Result<string> result)
     {
         if (result.IsSuccess)
         {
@@ -30,11 +27,8 @@ internal sealed class ResultTracker<T>
             return;
         }
 
-        string errors = CombineErrors(result);
-        if (!_failures.TryAdd(input, errors))
-        {
-            // Keep only the latest error for each input.
-            _failures[input] = errors;
+            if (result.Value.HasText())
+                _printer.Info(result.Value);
         }
     }
 
@@ -45,17 +39,9 @@ internal sealed class ResultTracker<T>
     {
         if (_failures.Count == 0)
         {
-            _printer.Debug("No failures in batch.");
-            return;
-        }
+            _printer.Errors(result);
 
-        var failureLabel = _failures.Count == 1 ? "failure" : "failures";
-
-        _printer.Info($"{_failures.Count} {failureLabel} in this batch:");
-
-        foreach (var (url, error) in _failures)
-        {
-            _printer.Warning($"- {url}: {error}");
+            _failures.Add(url, result.Value);
         }
     }
 
@@ -65,8 +51,8 @@ internal sealed class ResultTracker<T>
     /// </summary>
     internal void PrintSessionSummary()
     {
-        var successLabel = _successCount == 1 ? "success" : "successes";
-        var failureLabel = _failures.Count == 1 ? "failure" : "failures";
+        string successLabel = _successCount == 1 ? "success" : "successes";
+        string failureLabel = _failures.Count == 1 ? "failure" : "failures";
 
         _printer.Info($"Quitting with {_successCount} {successLabel} and {_failures.Count} {failureLabel}.");
 
