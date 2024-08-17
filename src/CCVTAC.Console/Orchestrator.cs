@@ -163,7 +163,7 @@ internal class Orchestrator
         history.Append(url, urlInputTime, printer);
 
         var downloadResult = Downloader.Run(url, mediaType, settings, printer);
-        resultTracker.RegisterResult(downloadResult);
+        resultTracker.RegisterResult(url, downloadResult);
         if (downloadResult.IsFailed)
         {
             return NextAction.Continue;
