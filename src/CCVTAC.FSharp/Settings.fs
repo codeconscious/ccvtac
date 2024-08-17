@@ -49,8 +49,9 @@ module Settings =
 
     [<CompiledName("Summarize")>]
     let summarize settings =
-        let onOrOff b =
-            if b = true then "ON" else "OFF"
+        let onOrOff = function
+            | true -> "ON"
+            | false -> "OFF"
 
         let pluralize (label: string) count =
             if count = 1
