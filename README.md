@@ -68,7 +68,7 @@ You can copy and paste the sample settings file below to a JSON file named `sett
   // The audio format (codec) to extract audio to.
   // Options: best, aac, alac, flac, m4a, mp3, opus, vorbis, wav
   // Not all options are available for all videos.
-  "audioFormat": "default",
+  "audioFormat": "best",
 
   // The audio quality to use, with 10 being the lowest and 0 being the highest.
   "audioQuality": 0,
