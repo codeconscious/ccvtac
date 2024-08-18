@@ -1,6 +1,6 @@
 using Spectre.Console;
-using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 using Microsoft.FSharp.Core;
+using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 
 namespace CCVTAC.Console.Settings;
 
