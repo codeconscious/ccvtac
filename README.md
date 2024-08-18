@@ -2,8 +2,6 @@
 
 CCVTAC (CodeConscious Video-to-Audio Converter) is a small .NET-powered CLI tool that acts as a wrapper around [yt-dlp](https://github.com/yt-dlp/yt-dlp) to enable easier download and extractions of audio from YouTube videos, playlists, and channels, plus do some automatic post-processing (tagging, renaming, and moving).
 
-<img width="1451" alt="Sample download" src="https://github.com/codeconscious/ccvtac/assets/50596087/40fd5c56-0c39-44c4-9f5e-bc6398337820">
-
 While I maintain it primarily for my own use, feel free to use it yourself. No warranties or guarantees are provided.
 
 [![Build and test](https://github.com/codeconscious/ccvtac/actions/workflows/build-test.yml/badge.svg)](https://github.com/codeconscious/ccvtac/actions/workflows/build-test.yml)
@@ -18,6 +16,16 @@ While I maintain it primarily for my own use, feel free to use it yourself. No w
 - Optionally auto-trims and writes video thumbnails to files as album art (if [mogrify](https://imagemagick.org/script/mogrify.php) is installed)
 - Customized behavior via a user settings file — e.g., chapter splitting, image embedding, directories
 - Saves entered URLs to a local history file
+
+## Screenshots
+
+### Normal output
+
+<img width="1512" alt="ccvtac" src="https://github.com/user-attachments/assets/6d4020a5-5db0-4904-bdf9-cd668f1d60f3">
+
+### Quiet mode
+
+![ccvtac-quiet](https://github.com/user-attachments/assets/382785d1-f313-42ae-8ca3-afeaf25cd357)
 
 ## Prerequisites
 
