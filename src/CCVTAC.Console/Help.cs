@@ -16,12 +16,11 @@ public static class Help
 
         FEATURES
 
-        - Converts YouTube videos to local audio files via yt-dlp
-        - Supports videos, playlists, and channels
+        - Converts YouTube videos, playlists, and channels to local audio files (via yt-dlp)
         - Writes ID3 tags to files where possible using available or regex-detected metadata
-        - Adds limited video metadata (channel name and URL, video URL, etc.) to files' Comment tags
+        - Adds video metadata (channel name and URL, video URL, etc.) to files' Comment tags
         - Auto-renames files via custom regex patterns (to remove media IDs, etc.)
-        - Optionally auto-trims and writes video thumbnails to files as album art (if mogrify is installed)
+        - Optionally writes video thumbnails to files as artwork (if mogrify is installed)
         - Customized behavior via a user settings file -- e.g., chapter splitting, image embedding, directories
         - Saves entered URLs to a local history file
 
@@ -68,11 +67,12 @@ public static class Help
         You can also enter the following commands:
         - "\quit" or "\q" to quit
         - "\history" to see the last few URLs you entered
-        - "\split" to toggle chapter splitting for the current session only
-        - "\images" to toggle image embedding for the current session only
-        - "\quiet" to toggle quiet mode for the current session only
-        - "\format-" followed by a supported audio format (e.g., "\format-m4a") to change the format for the current session only
-        - "\quality-" followed by a supported audio quality (e.g., "\quality-0") to change the audio quality for the current session only
+        - Modify the current session only (without updating the settings file):
+            - `\split` toggles chapter splitting
+            - `\images` toggles image embedding
+            - `\quiet` toggles quiet mode
+            - `\format-` followed by a supported audio format (e.g., `\format-m4a`) changes the format
+            - `\quality-` followed by a supported audio quality (e.g., `\quality-0`) changes the audio quality
 
         Upgrading yt-dlp:
 
