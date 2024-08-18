@@ -8,14 +8,20 @@ While I maintain it primarily for my own use, feel free to use it yourself. No w
 
 ## Features
 
-- Converts YouTube videos to local audio files (via [yt-dlp](https://github.com/yt-dlp/yt-dlp))
-- Supports videos, playlists, and channels
+- Converts YouTube videos, playlists, and channels to local audio files (via [yt-dlp](https://github.com/yt-dlp/yt-dlp))
 - Writes ID3 tags to files where possible using available or regex-detected metadata
-- Adds limited video metadata (channel name and URL, video URL, etc.) to files' Comment tags
+- Adds video metadata (channel name and URL, video URL, etc.) to files' Comment tags
 - Auto-renames files via custom regex patterns (to remove media IDs, etc.)
-- Optionally auto-trims and writes video thumbnails to files as album art (if [mogrify](https://imagemagick.org/script/mogrify.php) is installed)
+- Optionally writes video thumbnails to files as artwork (if [mogrify](https://imagemagick.org/script/mogrify.php) is installed)
 - Customized behavior via a user settings file — e.g., chapter splitting, image embedding, directories
 - Saves entered URLs to a local history file
+
+## Prerequisites
+
+- [.NET 8 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp)
+- [ffmpeg](https://ffmpeg.org/) (for yt-dlp artwork extraction)
+- Optional: [mogrify](https://imagemagick.org/script/mogrify.php) (for auto-trimming album art)
 
 ## Screenshots
 
@@ -26,13 +32,6 @@ While I maintain it primarily for my own use, feel free to use it yourself. No w
 ### Quiet mode
 
 ![ccvtac-quiet](https://github.com/user-attachments/assets/382785d1-f313-42ae-8ca3-afeaf25cd357)
-
-## Prerequisites
-
-- [.NET 8 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
-- [yt-dlp](https://github.com/yt-dlp/yt-dlp)
-- [ffmpeg](https://ffmpeg.org/) (for yt-dlp artwork extraction)
-- Optional: [mogrify](https://imagemagick.org/script/mogrify.php) (for auto-trimming album art)
 
 ## Running It
 
