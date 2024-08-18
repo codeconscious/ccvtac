@@ -112,7 +112,7 @@ internal static class Downloader
                     "--write-thumbnail --convert-thumbnails jpg", // For album art
                     writeJson, // Contains metadata
                     trimFileNames,
-                    "--retries 2", // Default is 10, which seems like overall
+                    "--retries 2", // Default is 10, which seems like overkill
                  ]
         };
 
