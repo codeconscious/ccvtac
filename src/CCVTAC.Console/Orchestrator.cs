@@ -185,6 +185,23 @@ internal class Orchestrator
         History history,
         Printer printer)
     {
+        if (Commands._showSummary == command)
+        {
+            Table table = new();
+            table.Border(TableBorder.Simple);
+            table.AddColumns("Command", "Description");
+            table.HideHeaders();
+            table.Columns[0].PadRight(3);
+
+            foreach (var (setting, description) in Commands.Summary)
+            {
+                table.AddRow(setting, description);
+            }
+
+            printer.PrintTable(table);
+            return Result.Ok(NextAction.Continue);
+        }
+
         if (Commands._quit.CaseInsensitiveContains(command))
         {
             return Result.Ok(NextAction.QuitAtUserRequest);
