@@ -184,6 +184,8 @@ You can also enter the following commands:
   - `\format-` followed by a supported audio format (e.g., `\format-m4a`) changes the format
   - `\quality-` followed by a supported audio quality (e.g., `\quality-0`) changes the audio quality
 
+Enter `\commands` to see this summary in the application.
+
 ## Upgrading yt-dlp
 
 Periodically ensure you are running the latest version of yt-dlp, especially if you start experiencing download errors. See the [yt-dlp GitHub page](https://github.com/yt-dlp/yt-dlp#update) for more. (Likely commands are `sudo yt-dlp -U` or `pip install --upgrade yt-dlp`.)

@@ -185,7 +185,7 @@ internal class Orchestrator
         History history,
         Printer printer)
     {
-        if (Commands._showSummary == command)
+        if (Commands.CommandSummary == command)
         {
             Table table = new();
             table.Border(TableBorder.Simple);
@@ -202,18 +202,18 @@ internal class Orchestrator
             return Result.Ok(NextAction.Continue);
         }
 
-        if (Commands._quit.CaseInsensitiveContains(command))
+        if (Commands.Quit.CaseInsensitiveContains(command))
         {
             return Result.Ok(NextAction.QuitAtUserRequest);
         }
 
-        if (Commands._history.CaseInsensitiveContains(command))
+        if (Commands.History.CaseInsensitiveContains(command))
         {
             history.ShowRecent(printer);
             return Result.Ok(NextAction.Continue);
         }
 
-        if (Commands._showSettings.CaseInsensitiveContains(command))
+        if (Commands.SettingsSummary.CaseInsensitiveContains(command))
         {
             SettingsAdapter.PrintSummary(settings, printer);
             return Result.Ok(NextAction.Continue);
@@ -225,21 +225,21 @@ internal class Orchestrator
         static string SummarizeUpdate(string settingName, string setting)
             => $"{settingName} was updated to \"{setting}\" for this session.";
 
-        if (Commands._toggleSplitChapter.CaseInsensitiveContains(command))
+        if (Commands.SplitChapterToggles.CaseInsensitiveContains(command))
         {
             settings = SettingsAdapter.ToggleSplitChapters(settings);
             printer.Info(SummarizeToggle("Split Chapters", settings.SplitChapters));
             return Result.Ok(NextAction.Continue);
         }
 
-        if (Commands._toggleEmbedImages.CaseInsensitiveContains(command))
+        if (Commands.EmbedImagesToggles.CaseInsensitiveContains(command))
         {
             settings = SettingsAdapter.ToggleEmbedImages(settings);
             printer.Info(SummarizeToggle("Embed Images", settings.EmbedImages));
             return Result.Ok(NextAction.Continue);
         }
 
-        if (Commands._toggleQuietMode.CaseInsensitiveContains(command))
+        if (Commands.QuietModeToggles.CaseInsensitiveContains(command))
         {
             settings = SettingsAdapter.ToggleQuietMode(settings);
             printer.Info(SummarizeToggle("Quiet Mode", settings.QuietMode));
@@ -247,9 +247,9 @@ internal class Orchestrator
             return Result.Ok(NextAction.Continue);
         }
 
-        if (command.StartsWith(Commands._updateAudioFormatPrefix, StringComparison.InvariantCultureIgnoreCase))
+        if (command.StartsWith(Commands.UpdateAudioFormatPrefix, StringComparison.InvariantCultureIgnoreCase))
         {
-            var format = command.Replace(Commands._updateAudioFormatPrefix, string.Empty).ToLowerInvariant();
+            var format = command.Replace(Commands.UpdateAudioFormatPrefix, string.Empty).ToLowerInvariant();
             var updateResult = SettingsAdapter.UpdateAudioFormat(settings, format);
             if (updateResult.IsError)
             {
@@ -261,9 +261,9 @@ internal class Orchestrator
             return Result.Ok(NextAction.Continue);
         }
 
-        if (command.StartsWith(Commands._updateAudioQualityPrefix, StringComparison.InvariantCultureIgnoreCase))
+        if (command.StartsWith(Commands.UpdateAudioQualityPrefix, StringComparison.InvariantCultureIgnoreCase))
         {
-            var inputQuality = command.Replace(Commands._updateAudioQualityPrefix, string.Empty);
+            var inputQuality = command.Replace(Commands.UpdateAudioQualityPrefix, string.Empty);
             if (!byte.TryParse(inputQuality, out var quality))
             {
                 return Result.Fail($"\"{inputQuality}\" is an invalid quality value.");

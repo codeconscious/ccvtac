@@ -74,6 +74,8 @@ public static class Help
             - `\format-` followed by a supported audio format (e.g., `\format-m4a`) changes the format
             - `\quality-` followed by a supported audio quality (e.g., `\quality-0`) changes the audio quality
 
+        Enter `\commands` to see this summary in the application.
+
         Upgrading yt-dlp:
 
         Periodically ensure you are running the latest version of yt-dlp, especially

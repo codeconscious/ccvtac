@@ -5,7 +5,7 @@ namespace CCVTAC.Console;
 public static partial class InputHelper
 {
     internal static string Prompt =
-        $"Enter one or more YouTube media URLs, {Commands._history[0]}, or {Commands._quit[0]} ({Commands._quit[1]}):\n▶︎";
+        $"Enter one or more YouTube media URLs or commands (or \"{Commands.CommandSummary}\"):\n▶︎";
 
     /// <summary>
     /// A regular expression that detects where commands and URLs begin in input strings.

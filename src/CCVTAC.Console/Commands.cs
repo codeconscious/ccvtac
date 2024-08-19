@@ -4,39 +4,37 @@ internal static class Commands
 {
     internal static readonly char Prefix = '\\';
 
-    internal static readonly string[] _quit =
+    internal static string[] Quit { get; } =
         [MakeCommand("quit"), MakeCommand("q"), MakeCommand("exit")];
 
-    internal static readonly string[] _history =
-        [MakeCommand("history")];
+    internal static string CommandSummary { get; } = MakeCommand("commands");
 
-    internal static readonly string[] _showSettings =
-        [MakeCommand("settings")];
+    internal static string[] SettingsSummary  { get; } = [MakeCommand("settings")];
 
-    internal static readonly string[] _toggleSplitChapter =
+    internal static string[] History { get; } = [MakeCommand("history")];
+
+    internal static string[] SplitChapterToggles { get; } =
         [MakeCommand("split"), MakeCommand("toggle-split")];
 
-    internal static readonly string[] _toggleEmbedImages =
+    internal static string[] EmbedImagesToggles { get; } =
         [MakeCommand("images"), MakeCommand("toggle-images")];
 
-    internal static readonly string[] _toggleQuietMode =
+    internal static string[] QuietModeToggles { get; } =
         [MakeCommand("quiet"), MakeCommand("toggle-quiet")];
 
-    internal static readonly string _updateAudioFormatPrefix = MakeCommand("format-");
+    internal static string UpdateAudioFormatPrefix { get; } = MakeCommand("format-");
 
-    internal static readonly string _updateAudioQualityPrefix = MakeCommand("quality-");
+    internal static string UpdateAudioQualityPrefix { get; } = MakeCommand("quality-");
 
-    internal static readonly string _showSummary = MakeCommand("commands");
-
-    internal static readonly Dictionary<string, string> Summary = new()
+    internal static Dictionary<string, string> Summary { get; } = new()
     {
-        { _history[0], "See the most recently entered URLs" },
-        { _toggleSplitChapter[0], "Toggles chapter splitting for the current session only" },
-        { _toggleEmbedImages[0], "Toggles image embedding for the current session only" },
-        { _toggleQuietMode[0], "Toggles quiet mode for the current session only" },
-        { _updateAudioFormatPrefix, $"Followed by a supported audio format (e.g., {_updateAudioFormatPrefix}m4a), changes the audio format for the current session only" },
-        { _updateAudioQualityPrefix, $"Followed by a supported audio quality (e.g., {_updateAudioQualityPrefix}0), changes the audio quality for the current session only" },
-        { _quit[0], "Quit the application" },
+        { History[0], "See the most recently entered URLs" },
+        { SplitChapterToggles[0], "Toggles chapter splitting for the current session only" },
+        { EmbedImagesToggles[0], "Toggles image embedding for the current session only" },
+        { QuietModeToggles[0], "Toggles quiet mode for the current session only" },
+        { UpdateAudioFormatPrefix, $"Followed by a supported audio format (e.g., {UpdateAudioFormatPrefix}m4a), changes the audio format for the current session only" },
+        { UpdateAudioQualityPrefix, $"Followed by a supported audio quality (e.g., {UpdateAudioQualityPrefix}0), changes the audio quality for the current session only" },
+        { Quit[0], "Quit the application" },
     };
 
     internal static string MakeCommand(string text)
