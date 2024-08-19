@@ -50,7 +50,7 @@ You can copy and paste the sample settings file below to a JSON file named `sett
 <details>
   <summary>Click here to expand!</summary>
 
-```
+```js
 {
   // Mandatory. The working directory for temporary files.
   // It is cleared after processing each URL.
