@@ -25,13 +25,13 @@ While I maintain it primarily for my own use, feel free to use it yourself. No w
 
 ## Screenshots
 
-### Normal output
-
-<img width="1512" alt="ccvtac" src="https://github.com/user-attachments/assets/6d4020a5-5db0-4904-bdf9-cd668f1d60f3">
-
 ### Quiet mode
 
 ![ccvtac-quiet](https://github.com/user-attachments/assets/382785d1-f313-42ae-8ca3-afeaf25cd357)
+
+### Normal mode
+
+<img width="1512" alt="ccvtac" src="https://github.com/user-attachments/assets/6d4020a5-5db0-4904-bdf9-cd668f1d60f3">
 
 ## Running It
 
