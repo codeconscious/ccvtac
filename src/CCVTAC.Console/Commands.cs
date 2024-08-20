@@ -7,7 +7,7 @@ internal static class Commands
     internal static string[] QuitOptions { get; } =
         [MakeCommand("quit"), MakeCommand("q"), MakeCommand("exit")];
 
-    internal static string CommandSummary { get; } = MakeCommand("commands");
+    internal static string SummaryCommand { get; } = MakeCommand("commands");
 
     internal static string[] SettingsSummary  { get; } = [MakeCommand("settings")];
 
