@@ -193,9 +193,9 @@ internal class Orchestrator
             table.HideHeaders();
             table.Columns[0].PadRight(3);
 
-            foreach (var (setting, description) in Commands.Summary)
+            foreach (var (cmd, description) in Commands.Summary)
             {
-                table.AddRow(setting, description);
+                table.AddRow(cmd, description);
             }
 
             printer.PrintTable(table);
