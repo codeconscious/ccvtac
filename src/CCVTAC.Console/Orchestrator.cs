@@ -264,6 +264,12 @@ internal class Orchestrator
         if (command.StartsWith(Commands.UpdateAudioQualityPrefix, StringComparison.InvariantCultureIgnoreCase))
         {
             var inputQuality = command.Replace(Commands.UpdateAudioQualityPrefix, string.Empty);
+
+            if (inputQuality == string.Empty)
+            {
+                return Result.Fail($"You must enter a number representing an audio quality.");
+            }
+
             if (!byte.TryParse(inputQuality, out var quality))
             {
                 return Result.Fail($"\"{inputQuality}\" is an invalid quality value.");
