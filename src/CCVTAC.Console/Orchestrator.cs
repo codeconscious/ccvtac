@@ -250,6 +250,12 @@ internal class Orchestrator
         if (command.StartsWith(Commands.UpdateAudioFormatPrefix, StringComparison.InvariantCultureIgnoreCase))
         {
             var format = command.Replace(Commands.UpdateAudioFormatPrefix, string.Empty).ToLowerInvariant();
+
+            if (format == string.Empty)
+            {
+                return Result.Fail($"You must append a supported audio format (e.g., \"best\" or \"m4a\").");
+            }
+
             var updateResult = SettingsAdapter.UpdateAudioFormat(settings, format);
             if (updateResult.IsError)
             {
