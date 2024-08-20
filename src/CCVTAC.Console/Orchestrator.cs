@@ -185,7 +185,7 @@ internal class Orchestrator
         History history,
         Printer printer)
     {
-        if (Commands.SummaryCommand == command)
+        if (Commands.SummaryCommand.Equals(command, StringComparison.InvariantCultureIgnoreCase))
         {
             Table table = new();
             table.Border(TableBorder.Simple);
