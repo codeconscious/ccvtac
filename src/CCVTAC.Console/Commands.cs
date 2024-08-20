@@ -4,7 +4,7 @@ internal static class Commands
 {
     internal static readonly char Prefix = '\\';
 
-    internal static string[] Quit { get; } =
+    internal static string[] QuitOptions { get; } =
         [MakeCommand("quit"), MakeCommand("q"), MakeCommand("exit")];
 
     internal static string CommandSummary { get; } = MakeCommand("commands");
@@ -34,7 +34,7 @@ internal static class Commands
         { QuietModeToggles[0], "Toggles quiet mode for the current session only" },
         { UpdateAudioFormatPrefix, $"Followed by a supported audio format (e.g., {UpdateAudioFormatPrefix}m4a), changes the audio format for the current session only" },
         { UpdateAudioQualityPrefix, $"Followed by a supported audio quality (e.g., {UpdateAudioQualityPrefix}0), changes the audio quality for the current session only" },
-        { Quit[0], "Quit the application" },
+        { $"{QuitOptions[0]} or {QuitOptions[1]}", "Quit the application" },
     };
 
     internal static string MakeCommand(string text)

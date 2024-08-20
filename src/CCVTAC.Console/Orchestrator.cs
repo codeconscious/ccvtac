@@ -202,7 +202,7 @@ internal class Orchestrator
             return Result.Ok(NextAction.Continue);
         }
 
-        if (Commands.Quit.CaseInsensitiveContains(command))
+        if (Commands.QuitOptions.CaseInsensitiveContains(command))
         {
             return Result.Ok(NextAction.QuitAtUserRequest);
         }
