@@ -14,8 +14,11 @@ internal static class Renamer
     {
         Watch watch = new();
 
-        DirectoryInfo dir = new(workingDirectory);
-        var audioFilePaths = dir.EnumerateFiles("*.m4a");
+        var workingDirInfo = new DirectoryInfo(workingDirectory);
+        var audioFilePaths = workingDirInfo
+            .EnumerateFiles()
+            .Where(f => PostProcessor.AudioExtensions.CaseInsensitiveContains(f.Extension))
+            .ToImmutableList();
 
         if (audioFilePaths.None())
         {
@@ -23,7 +26,7 @@ internal static class Renamer
             return;
         }
 
-        printer.Debug($"Renaming {audioFilePaths.Count()} audio file(s)...");
+        printer.Debug($"Renaming {audioFilePaths.Count} audio file(s)...");
 
         string newFileName;
         Regex regex;
@@ -37,7 +40,7 @@ internal static class Renamer
                     new StringBuilder(filePath.Name), // Seed is the original filename
                     (newNameSb, renamePattern) =>
                     {
-                        regex = new Regex(renamePattern.Regex);
+                        regex = new Regex(renamePattern.RegexPattern);
                         match = regex.Match(newNameSb.ToString());
 
                         if (!match.Success)
@@ -48,7 +51,7 @@ internal static class Renamer
                         if (!settings.QuietMode)
                         {
                             matchedPatternSummary = renamePattern.Summary is null
-                                ? $"`{renamePattern.Regex}` (no description)"
+                                ? $"`{renamePattern.RegexPattern}` (no description)"
                                 : $"\"{renamePattern.Summary}\"";
 
                             printer.Debug($"Rename pattern {matchedPatternSummary} matched.");

@@ -9,7 +9,7 @@ namespace CCVTAC.Console.PostProcessing;
 internal static class Mover
 {
     private static readonly Regex _playlistImageRegex = new(@"\[[OP]L[\w\d_-]{12,}\]");
-    private const string _audioFileWildcard = "*.m4a";
+
     private const string _imageFileWildcard = "*.jp*";
 
     internal static void Run(
@@ -33,10 +33,14 @@ internal static class Mover
             return; // The error message is printed within the above method.
         }
 
-        var audioFileNames = workingDirInfo.EnumerateFiles(_audioFileWildcard).ToImmutableList();
+        var audioFileNames = workingDirInfo
+            .EnumerateFiles()
+            .Where(f => PostProcessor.AudioExtensions.CaseInsensitiveContains(f.Extension))
+            .ToImmutableList();
+
         if (audioFileNames.IsEmpty)
         {
-            printer.Error("No audio filenames were found.");
+            printer.Error("No audio filenames to move found.");
             return;
         }
 
@@ -51,7 +55,7 @@ internal static class Mover
             workingDirInfo,
             fullMoveToDir,
             audioFileNames.Count,
-            overwrite: true,
+            overwrite: false,
             printer);
 
         var fileLabel = successCount == 1 ? "file" : "files";

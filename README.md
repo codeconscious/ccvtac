@@ -1,8 +1,6 @@
 # CCVTAC
 
-CCVTAC (CodeConscious Video-to-Audio Converter) is a small .NET-powered CLI tool that acts as a wrapper around [yt-dlp](https://github.com/yt-dlp/yt-dlp) to enable easier download and extractions of M4A audio from YouTube videos, playlists, and channels, plus do some automatic post-processing (tagging, renaming, and moving).
-
-<img width="1451" alt="Sample download" src="https://github.com/codeconscious/ccvtac/assets/50596087/40fd5c56-0c39-44c4-9f5e-bc6398337820">
+CCVTAC (CodeConscious Video-to-Audio Converter) is a small .NET-powered CLI tool that acts as a wrapper around [yt-dlp](https://github.com/yt-dlp/yt-dlp) to enable easier download and extractions of audio from YouTube videos, playlists, and channels, plus do some automatic post-processing (tagging, renaming, and moving).
 
 While I maintain it primarily for my own use, feel free to use it yourself. No warranties or guarantees are provided.
 
@@ -10,12 +8,11 @@ While I maintain it primarily for my own use, feel free to use it yourself. No w
 
 ## Features
 
-- Converts YouTube videos to local M4A audio files (via [yt-dlp](https://github.com/yt-dlp/yt-dlp))
-- Supports videos, playlists, and channels
+- Converts YouTube videos, playlists, and channels to local audio files (via [yt-dlp](https://github.com/yt-dlp/yt-dlp))
 - Writes ID3 tags to files where possible using available or regex-detected metadata
-- Adds limited video metadata (channel name and URL, video URL, etc.) to files' Comment tags
+- Adds video metadata (channel name and URL, video URL, etc.) to files' Comment tags
 - Auto-renames files via custom regex patterns (to remove media IDs, etc.)
-- Optionally auto-trims and writes video thumbnails to files as album art (if [mogrify](https://imagemagick.org/script/mogrify.php) is installed)
+- Optionally writes video thumbnails to files as artwork (if [mogrify](https://imagemagick.org/script/mogrify.php) is installed)
 - Customized behavior via a user settings file — e.g., chapter splitting, image embedding, directories
 - Saves entered URLs to a local history file
 
@@ -25,6 +22,16 @@ While I maintain it primarily for my own use, feel free to use it yourself. No w
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp)
 - [ffmpeg](https://ffmpeg.org/) (for yt-dlp artwork extraction)
 - Optional: [mogrify](https://imagemagick.org/script/mogrify.php) (for auto-trimming album art)
+
+## Screenshots
+
+### Quiet mode
+
+![ccvtac-quiet](https://github.com/user-attachments/assets/382785d1-f313-42ae-8ca3-afeaf25cd357)
+
+### Normal mode
+
+<img width="1512" alt="ccvtac" src="https://github.com/user-attachments/assets/6d4020a5-5db0-4904-bdf9-cd668f1d60f3">
 
 ## Running It
 
@@ -43,7 +50,7 @@ You can copy and paste the sample settings file below to a JSON file named `sett
 <details>
   <summary>Click here to expand!</summary>
 
-```
+```js
 {
   // Mandatory. The working directory for temporary files.
   // It is cleared after processing each URL.
@@ -57,6 +64,14 @@ You can copy and paste the sample settings file below to a JSON file named `sett
 
   // Count of entries to show for `history` command
   "historyDisplayCount": 20,
+
+  // The audio format (codec) to extract audio to.
+  // Options: best, aac, alac, flac, m4a, mp3, opus, vorbis, wav
+  // Not all options are available for all videos.
+  "audioFormat": "best",
+
+  // The audio quality to use, with 10 being the lowest and 0 being the highest.
+  "audioQuality": 0,
 
   // Split videos with chapters into separate files?
   "splitChapters": true,
@@ -161,10 +176,15 @@ When the application is running, simply enter at least one YouTube media URL (vi
 
 You can also enter the following commands:
 - `\quit` or `\q` to quit
-- `\history` to see the last few URLs you entered
-- `\split` to toggle chapter splitting for the current session only
-- `\images` to toggle image embedding for the current session only
-- `\quiet` to toggle quiet mode for the current session only
+- `\history` to see the URLs you most recently entered
+- Modify the current session only (without updating the settings file):
+  - `\split` toggles chapter splitting
+  - `\images` toggles image embedding
+  - `\quiet` toggles quiet mode
+  - `\format-` followed by a supported audio format (e.g., `\format-m4a`) changes the format
+  - `\quality-` followed by a supported audio quality (e.g., `\quality-0`) changes the audio quality
+
+Enter `\commands` to see this summary in the application.
 
 ## Upgrading yt-dlp
 

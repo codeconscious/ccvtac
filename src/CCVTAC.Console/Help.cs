@@ -7,7 +7,7 @@ public static class Help
         string helpText = """"
         CCVTAC (CodeConscious Video-to-Audio Converter) is a small .NET-powered CLI
         tool that acts as a wrapper around yt-dlp (https://github.com/yt-dlp/yt-dlp)
-        to enable easier downloads of M4A audio from YouTube videos, playlists, and
+        to enable easier downloads of audio from YouTube videos, playlists, and
         channels, plus do some automatic post-processing (tagging, renaming, and
         moving) too.
 
@@ -16,12 +16,11 @@ public static class Help
 
         FEATURES
 
-        - Converts YouTube videos to local M4A audio files via yt-dlp
-        - Supports videos, playlists, and channels
+        - Converts YouTube videos, playlists, and channels to local audio files (via yt-dlp)
         - Writes ID3 tags to files where possible using available or regex-detected metadata
-        - Adds limited video metadata (channel name and URL, video URL, etc.) to files' Comment tags
+        - Adds video metadata (channel name and URL, video URL, etc.) to files' Comment tags
         - Auto-renames files via custom regex patterns (to remove media IDs, etc.)
-        - Optionally auto-trims and writes video thumbnails to files as album art (if mogrify is installed)
+        - Optionally writes video thumbnails to files as artwork (if mogrify is installed)
         - Customized behavior via a user settings file -- e.g., chapter splitting, image embedding, directories
         - Saves entered URLs to a local history file
 
@@ -66,11 +65,16 @@ public static class Help
         You can optionally omit spaces between the URLs.
 
         You can also enter the following commands:
-        - `\quit` or `\q` to quit
-        - `\history` to see the last few URLs you entered
-        - `\split` to toggle chapter splitting for the current session only
-        - `\images` to toggle image embedding for the current session only
-        - `\quiet` to toggle quiet mode for the current session only
+        - "\quit" or "\q" to quit
+        - "\history" to see the last few URLs you entered
+        - Modify the current session only (without updating the settings file):
+            - `\split` toggles chapter splitting
+            - `\images` toggles image embedding
+            - `\quiet` toggles quiet mode
+            - `\format-` followed by a supported audio format (e.g., `\format-m4a`) changes the format
+            - `\quality-` followed by a supported audio quality (e.g., `\quality-0`) changes the audio quality
+
+        Enter `\commands` to see this summary in the application.
 
         Upgrading yt-dlp:
 

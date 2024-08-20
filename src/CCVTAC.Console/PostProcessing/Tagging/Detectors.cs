@@ -23,7 +23,7 @@ internal static class Detectors
             string fieldText = ExtractMetadataText(videoMetadata, pattern.SearchField);
 
             // TODO: Instantiate regexes during settings deserialization.
-            var match = new Regex(pattern.Regex).Match(fieldText);
+            var match = new Regex(pattern.RegexPattern).Match(fieldText);
 
             if (!match.Success)
             {
@@ -56,7 +56,7 @@ internal static class Detectors
             string fieldText = ExtractMetadataText(data, pattern.SearchField);
 
             // TODO: Instantiate regexes during settings deserialization.
-            var matches = new Regex(pattern.Regex).Matches(fieldText);
+            var matches = new Regex(pattern.RegexPattern).Matches(fieldText);
 
             foreach (Match match in matches.Where(m => m.Success))
             {

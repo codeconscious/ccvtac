@@ -1,4 +1,5 @@
 using Spectre.Console;
+using Microsoft.FSharp.Core;
 using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 
 namespace CCVTAC.Console.Settings;
@@ -13,6 +14,8 @@ namespace CCVTAC.Console.Settings;
 /// </remarks>
 public static class SettingsAdapter
 {
+    private static readonly string _defaultFileName = "settings.json";
+
     /// <summary>
     /// Reads settings or creates a new default settings file.
     /// </summary>
@@ -51,7 +54,7 @@ public static class SettingsAdapter
 
         try
         {
-            var result = FSharp.Settings.IO.WriteDefaultFile(path);
+            var result = FSharp.Settings.IO.WriteDefaultFile(path, _defaultFileName);
             if (result is { IsError: true })
             {
                 return Result.Fail($"Unexpected error writing the default settings: {result.ErrorValue}");
@@ -71,21 +74,35 @@ public static class SettingsAdapter
     /// This only affects the current session; the settings file is not updated.
     /// </summary>
     internal static UserSettings ToggleSplitChapters(UserSettings settings) =>
-        FSharp.Settings.ToggleSplitChapters(settings);
+        FSharp.Settings.LiveUpdating.ToggleSplitChapters(settings);
 
     /// <summary>
     /// Returns a new Settings instance with the Embed Images value toggled.
     /// This only affects the current session; the settings file is not updated.
     /// </summary>
     internal static UserSettings ToggleEmbedImages(UserSettings settings) =>
-        FSharp.Settings.ToggleEmbedImages(settings);
+        FSharp.Settings.LiveUpdating.ToggleEmbedImages(settings);
 
     /// <summary>
     /// Returns a new Settings instance with the Quiet Mode value toggled.
     /// This only affects the current session; the settings file is not updated.
     /// </summary>
     internal static UserSettings ToggleQuietMode(UserSettings settings) =>
-        FSharp.Settings.ToggleQuietMode(settings);
+        FSharp.Settings.LiveUpdating.ToggleQuietMode(settings);
+
+    /// <summary>
+    /// Returns a Result containing a new Settings instance with the Audio Format value updated,
+    /// or else an Error. This only affects the current session; the settings file is not updated.
+    /// </summary>
+    internal static FSharpResult<UserSettings, string> UpdateAudioFormat(UserSettings settings, string newFormat) =>
+        FSharp.Settings.LiveUpdating.UpdateAudioFormat(settings, newFormat);
+    /// <summary>
+
+    /// Returns a Result containing a new Settings instance with the Audio Quality value updated,
+    /// or else an Error. This only affects the current session; the settings file is not updated.
+    /// </summary>
+    internal static FSharpResult<UserSettings, string> UpdateAudioQuality(UserSettings settings, byte newQuality) =>
+        FSharp.Settings.LiveUpdating.UpdateAudioQuality(settings, newQuality);
 
     /// <summary>
     /// Prints a summary of the given settings.

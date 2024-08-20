@@ -185,45 +185,110 @@ internal class Orchestrator
         History history,
         Printer printer)
     {
-        if (Commands._quit.CaseInsensitiveContains(command))
+        if (Commands.SummaryCommand.Equals(command, StringComparison.InvariantCultureIgnoreCase))
+        {
+            Table table = new();
+            table.Border(TableBorder.Simple);
+            table.AddColumns("Command", "Description");
+            table.HideHeaders();
+            table.Columns[0].PadRight(3);
+
+            foreach (var (cmd, description) in Commands.Summary)
+            {
+                table.AddRow(cmd, description);
+            }
+
+            printer.PrintTable(table);
+            return Result.Ok(NextAction.Continue);
+        }
+
+        if (Commands.QuitOptions.CaseInsensitiveContains(command))
         {
             return Result.Ok(NextAction.QuitAtUserRequest);
         }
 
-        if (Commands._history.CaseInsensitiveContains(command))
+        if (Commands.History.CaseInsensitiveContains(command))
         {
             history.ShowRecent(printer);
             return Result.Ok(NextAction.Continue);
         }
 
-        if (Commands._showSettings.CaseInsensitiveContains(command))
+        if (Commands.SettingsSummary.CaseInsensitiveContains(command))
         {
             SettingsAdapter.PrintSummary(settings, printer);
             return Result.Ok(NextAction.Continue);
         }
 
         static string SummarizeToggle(string settingName, bool setting)
-            => $"{settingName} was toggled for this session and is now {(setting ? "ON" : "OFF")}.";
+            => $"{settingName} was toggled to {(setting ? "ON" : "OFF")} for this session.";
 
-        if (Commands._toggleSplitChapter.CaseInsensitiveContains(command))
+        static string SummarizeUpdate(string settingName, string setting)
+            => $"{settingName} was updated to \"{setting}\" for this session.";
+
+        if (Commands.SplitChapterToggles.CaseInsensitiveContains(command))
         {
             settings = SettingsAdapter.ToggleSplitChapters(settings);
             printer.Info(SummarizeToggle("Split Chapters", settings.SplitChapters));
             return Result.Ok(NextAction.Continue);
         }
 
-        if (Commands._toggleEmbedImages.CaseInsensitiveContains(command))
+        if (Commands.EmbedImagesToggles.CaseInsensitiveContains(command))
         {
             settings = SettingsAdapter.ToggleEmbedImages(settings);
             printer.Info(SummarizeToggle("Embed Images", settings.EmbedImages));
             return Result.Ok(NextAction.Continue);
         }
 
-        if (Commands._toggleQuietMode.CaseInsensitiveContains(command))
+        if (Commands.QuietModeToggles.CaseInsensitiveContains(command))
         {
             settings = SettingsAdapter.ToggleQuietMode(settings);
             printer.Info(SummarizeToggle("Quiet Mode", settings.QuietMode));
             printer.ShowDebug(!settings.QuietMode);
+            return Result.Ok(NextAction.Continue);
+        }
+
+        if (command.StartsWith(Commands.UpdateAudioFormatPrefix, StringComparison.InvariantCultureIgnoreCase))
+        {
+            var format = command.Replace(Commands.UpdateAudioFormatPrefix, string.Empty).ToLowerInvariant();
+
+            if (format == string.Empty)
+            {
+                return Result.Fail($"You must append a supported audio format (e.g., \"best\" or \"m4a\").");
+            }
+
+            var updateResult = SettingsAdapter.UpdateAudioFormat(settings, format);
+            if (updateResult.IsError)
+            {
+                return Result.Fail(updateResult.ErrorValue);
+            }
+
+            settings = updateResult.ResultValue;
+            printer.Info(SummarizeUpdate("Audio Format", settings.AudioFormat));
+            return Result.Ok(NextAction.Continue);
+        }
+
+        if (command.StartsWith(Commands.UpdateAudioQualityPrefix, StringComparison.InvariantCultureIgnoreCase))
+        {
+            var inputQuality = command.Replace(Commands.UpdateAudioQualityPrefix, string.Empty);
+
+            if (inputQuality == string.Empty)
+            {
+                return Result.Fail($"You must enter a number representing an audio quality.");
+            }
+
+            if (!byte.TryParse(inputQuality, out var quality))
+            {
+                return Result.Fail($"\"{inputQuality}\" is an invalid quality value.");
+            }
+
+            var updateResult = SettingsAdapter.UpdateAudioQuality(settings, quality);
+            if (updateResult.IsError)
+            {
+                return Result.Fail(updateResult.ErrorValue); // For out-of-range values
+            }
+
+            settings = updateResult.ResultValue;
+            printer.Info(SummarizeUpdate("Audio Quality", settings.AudioQuality.ToString()));
             return Result.Ok(NextAction.Continue);
         }
 
