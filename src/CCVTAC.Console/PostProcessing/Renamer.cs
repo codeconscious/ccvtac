@@ -21,7 +21,7 @@ internal static class Renamer
         var workingDirInfo = new DirectoryInfo(workingDirectory);
         var audioFilePaths = workingDirInfo
             .EnumerateFiles()
-            .Where(f => _audioExtensions.CaseInsensitiveContains(f.Extension))
+            .Where(f => PostProcessor.AudioExtensions.CaseInsensitiveContains(f.Extension))
             .ToImmutableList();
 
         if (audioFilePaths.None())

@@ -100,7 +100,7 @@ internal readonly record struct TaggingSet
                     // Next, ensure the correct count of image and JSON files, ignoring those that don't match.
                     // (For thought: It might be an option to track and report the invalid ones as well.)
                     .Where(gr =>
-                        gr.Any(f => _audioExtensions.CaseInsensitiveContains(Path.GetExtension(f))) &&
+                        gr.Any(f => PostProcessor.AudioExtensions.CaseInsensitiveContains(Path.GetExtension(f))) &&
                         gr.Count(f => f.EndsWith(jsonFileExt, StringComparison.OrdinalIgnoreCase)) == 1 &&
                         gr.Count(f => f.EndsWith(imageFileExt, StringComparison.OrdinalIgnoreCase)) == 1)
 
@@ -108,7 +108,7 @@ internal readonly record struct TaggingSet
                     .Select(gr => {
                         return new TaggingSet(
                             gr.Key, // Video ID
-                            gr.Where(f => _audioExtensions.CaseInsensitiveContains(Path.GetExtension(f))),
+                            gr.Where(f => PostProcessor.AudioExtensions.CaseInsensitiveContains(Path.GetExtension(f))),
                             gr.Where(f => f.EndsWith(jsonFileExt)).Single(),
                             gr.Where(f => f.EndsWith(imageFileExt)).Single()
                         );

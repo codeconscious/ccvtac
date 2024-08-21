@@ -10,10 +10,6 @@ internal static class Mover
 {
     private static readonly Regex _playlistImageRegex = new(@"\[[OP]L[\w\d_-]{12,}\]");
 
-    // TODO: Move this repeated code elsewhere.
-    private static readonly string[] _audioExtensions =
-        [".m4a", ".mp3", ".ogg", ".vorbis", ".opus"];
-
     private const string _imageFileWildcard = "*.jp*";
 
     internal static void Run(
@@ -39,7 +35,7 @@ internal static class Mover
 
         var audioFileNames = workingDirInfo
             .EnumerateFiles()
-            .Where(f => _audioExtensions.CaseInsensitiveContains(f.Extension))
+            .Where(f => PostProcessor.AudioExtensions.CaseInsensitiveContains(f.Extension))
             .ToImmutableList();
 
         if (audioFileNames.IsEmpty)

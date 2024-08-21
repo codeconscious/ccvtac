@@ -9,6 +9,9 @@ namespace CCVTAC.Console.PostProcessing;
 
 internal static partial class PostProcessor
 {
+    internal static readonly string[] AudioExtensions =
+        [".aac", ".alac", ".flac", ".m4a", ".mp3", ".ogg", ".vorbis", ".opus", ".wav"];
+
     internal static void Run(UserSettings settings, MediaType mediaType, Printer printer)
     {
         Watch watch = new();
