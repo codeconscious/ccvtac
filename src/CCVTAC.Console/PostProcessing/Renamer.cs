@@ -7,10 +7,6 @@ namespace CCVTAC.Console.PostProcessing;
 
 internal static class Renamer
 {
-    // TODO: Move this repeated code elsewhere.
-    private static readonly string[] _audioExtensions =
-        [".m4a", ".mp3", ".ogg", ".vorbis", ".opus"];
-
     public static void Run(
         UserSettings settings,
         string workingDirectory,
