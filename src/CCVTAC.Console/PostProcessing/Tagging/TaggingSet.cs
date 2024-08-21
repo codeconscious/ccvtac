@@ -43,9 +43,6 @@ internal readonly record struct TaggingSet
     /// </summary>
     internal static Regex FileNamesWithVideoIdsRegex = new(@".+\[([\w_\-]{11})\](?:.*)?\.(\w+)");
 
-    private static readonly string[] _audioExtensions =
-        [".m4a", ".mp3", ".ogg", ".vorbis", ".opus"];
-
     internal TaggingSet(
         string resourceId,
         IEnumerable<string> audioFilePaths,
