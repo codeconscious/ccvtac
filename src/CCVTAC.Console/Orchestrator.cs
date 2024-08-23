@@ -127,7 +127,7 @@ internal class Orchestrator
         ResultTracker resultTracker,
         History history,
         DateTime urlInputTime,
-        int urlCount,
+        int batchSize,
         nuint currentBatch,
         Printer printer)
     {
@@ -144,9 +144,9 @@ internal class Orchestrator
             printer.Info($"Slept for {settings.SleepSecondsBetweenBatches} second(s).", appendLines: 1);
         }
 
-        if (urlCount > 1)
+        if (batchSize > 1)
         {
-            printer.Info($"Processing batch {currentBatch} of {urlCount}...");
+            printer.Info($"Processing batch {currentBatch} of {batchSize}...");
         }
 
         Watch jobWatch = new();
@@ -158,12 +158,13 @@ internal class Orchestrator
             return NextAction.Continue;
         }
         var mediaType = mediaTypeResult.Value;
-        printer.Info($"{mediaType.GetType().Name} URL '{url}' detected.");
 
+        printer.Info($"{mediaType.GetType().Name} URL '{url}' detected.");
         history.Append(url, urlInputTime, printer);
 
         var downloadResult = Downloader.Run(url, mediaType, settings, printer);
         resultTracker.RegisterResult(url, downloadResult);
+
         if (downloadResult.IsFailed)
         {
             return NextAction.Continue;
@@ -171,8 +172,8 @@ internal class Orchestrator
 
         PostProcessor.Run(settings, mediaType, printer);
 
-        string batchClause = urlCount > 1
-            ? $" (batch {currentBatch} of {urlCount})"
+        string batchClause = batchSize > 1
+            ? $" (batch {currentBatch} of {batchSize})"
             : string.Empty;
 
         printer.Info($"Processed '{url}'{batchClause} in {jobWatch.ElapsedFriendly}.");
