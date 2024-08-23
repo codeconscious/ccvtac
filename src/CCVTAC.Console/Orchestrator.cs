@@ -130,7 +130,7 @@ internal class Orchestrator
         History history,
         DateTime urlInputTime,
         int batchSize,
-        int urlIndex,
+        nuint currentBatch,
         Printer printer)
     {
         var emptyDirResult = IoUtilties.Directories.WarnIfAnyFiles(settings.WorkingDirectory, 10);
@@ -148,7 +148,7 @@ internal class Orchestrator
 
         if (batchSize > 1)
         {
-            printer.Info($"Processing group {urlIndex} of {batchSize}...");
+            printer.Info($"Processing batch {currentBatch} of {batchSize}...");
         }
 
         Watch jobWatch = new();
@@ -167,6 +167,7 @@ internal class Orchestrator
 
         var downloadResult = Downloader.Run(url, mediaType, settings, printer);
         resultTracker.RegisterResult(url, downloadResult);
+
         if (downloadResult.IsFailed)
         {
             var errorMsg = $"Download error: {downloadResult.Errors.First().Message}";
@@ -178,8 +179,8 @@ internal class Orchestrator
 
         PostProcessor.Run(settings, mediaType, printer);
 
-        string groupClause = batchSize > 1
-            ? $" (group {urlIndex} of {batchSize})"
+        string batchClause = batchSize > 1
+            ? $" (batch {currentBatch} of {batchSize})"
             : string.Empty;
 
         printer.Info($"Processed '{url}'{groupClause} in {jobWatch.ElapsedFriendly}.");
