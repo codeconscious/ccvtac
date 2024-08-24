@@ -36,24 +36,26 @@ internal static class Downloader
         return Result.Ok(mediaTypeOrError.ResultValue);
     }
 
-    internal static Result<string> Run(string url, MediaType mediaType, UserSettings settings, Printer printer)
+    internal static Result Run(MediaType mediaType, UserSettings settings, Printer printer)
     {
         Watch watch = new();
+        bool hasErrors = false;
 
-        if (!mediaType.IsVideo)
+        if (!mediaType.IsVideo && !mediaType.IsPlaylistVideo)
         {
             printer.Info("Please wait for the multiple videos to be downloaded...");
         }
 
         var urls = FSharp.Downloading.downloadUrls(mediaType);
 
-        string args = GenerateDownloadArgs(settings, mediaType, urls[0]);
-        var downloadSettings =
-            new ToolSettings(ExternalTool, args, settings.WorkingDirectory!, ExitCodes);
+        string combinedArgs = GenerateDownloadArgs(settings, mediaType, urls[0]);
+        var downloadSettings = new ToolSettings(ExternalTool, combinedArgs, settings.WorkingDirectory!, ExitCodes);
+
         var downloadResult = Runner.Run(downloadSettings, printer);
 
         if (downloadResult.IsFailed)
         {
+            hasErrors = true;
             downloadResult.Errors.ForEach(e => printer.Error(e.Message));
             printer.Warning("However, post-processing will still be attempted."); // For any partial downloads
         }
@@ -67,8 +69,7 @@ internal static class Downloader
                 settings.WorkingDirectory!,
                 ExitCodes);
 
-            Result<int> supplementaryDownloadResult =
-                Runner.Run(supplementaryDownloadSettings, printer);
+            Result<int> supplementaryDownloadResult = Runner.Run(supplementaryDownloadSettings, printer);
 
             if (supplementaryDownloadResult.IsSuccess)
             {
@@ -76,12 +77,15 @@ internal static class Downloader
             }
             else
             {
+                hasErrors = true;
                 printer.Error("Supplementary download failed.");
                 supplementaryDownloadResult.Errors.ForEach(e => printer.Error(e.Message));
             }
         }
 
-        return Result.Ok();
+        return hasErrors
+            ? Result.Fail("Completed with errors.")
+            : Result.Ok();
     }
 
     /// <summary>
