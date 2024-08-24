@@ -106,10 +106,10 @@ internal class Orchestrator
                 continue;
             }
 
-            NextAction next = result.Value;
-            if (next is NextAction.QuitAtUserRequest)
+            var nextAction = result.Value;
+            if (nextAction is not NextAction.Continue)
             {
-                return next;
+                return nextAction;
             }
         }
 
