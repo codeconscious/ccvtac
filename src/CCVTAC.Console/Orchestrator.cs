@@ -105,11 +105,10 @@ internal class Orchestrator
                 continue;
             }
 
-            nextAction = result.Value;
-
+            var nextAction = result.Value;
             if (nextAction is not NextAction.Continue)
             {
-                break;
+                return nextAction;
             }
         }
 
