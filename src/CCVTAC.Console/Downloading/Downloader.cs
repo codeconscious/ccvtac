@@ -23,13 +23,10 @@ internal static class Downloader
             : Result.Fail(result.ErrorValue);
     }
 
-    /// <summary>
-    /// Completes the actual download process.
-    /// </summary>
-    /// <returns>A `Result` that, if successful, contains the name of the successfully downloaded format.</returns>
-    internal static Result<string?> Run(MediaTypeWithUrls mediaType, UserSettings settings, Printer printer)
+    internal static Result Run(MediaType mediaType, UserSettings settings, Printer printer)
     {
         Watch watch = new();
+        bool hasErrors = false;
 
         if (!mediaType.IsVideo && !mediaType.IsPlaylistVideo)
         {
@@ -42,26 +39,14 @@ internal static class Downloader
         Result downloadResult = new();
         string? successfulFormat = null;
 
-        foreach (string format in settings.AudioFormats)
-        {
-            string args = GenerateDownloadArgs(format, settings, mediaType, urls.Primary);
-            var downloadSettings = new ToolSettings(ExternalTool, args, settings.WorkingDirectory!);
+        string combinedArgs = GenerateDownloadArgs(settings, mediaType, urls[0]);
+        var downloadSettings = new ToolSettings(ExternalTool, combinedArgs, settings.WorkingDirectory!, ExitCodes);
 
-            downloadResult = Runner.Run(downloadSettings, printer);
-
-            if (downloadResult.IsSuccess)
-            {
-                successfulFormat = format;
-                break;
-            }
-
-            printer.Debug($"Failure downloading \"{format}\" format.");
-        }
-
-        var errors = downloadResult.Errors.Select(e => e.Message).ToList();
+        var downloadResult = Runner.Run(downloadSettings, printer);
 
         if (downloadResult.IsFailed)
         {
+            hasErrors = true;
             downloadResult.Errors.ForEach(e => printer.Error(e.Message));
             printer.Info("Post-processing will still be attempted."); // For any partial downloads
         }
@@ -75,7 +60,7 @@ internal static class Downloader
                     supplementaryArgs,
                     settings.WorkingDirectory!);
 
-            var supplementaryDownloadResult = Runner.Run(supplementaryDownloadSettings, printer);
+            Result<int> supplementaryDownloadResult = Runner.Run(supplementaryDownloadSettings, printer);
 
             if (supplementaryDownloadResult.IsSuccess)
             {
@@ -83,14 +68,15 @@ internal static class Downloader
             }
             else
             {
+                hasErrors = true;
                 printer.Error("Supplementary download failed.");
                 errors.AddRange(supplementaryDownloadResult.Errors.Select(e => e.Message));
             }
         }
 
-        return errors.Count > 0
-            ? Result.Fail(string.Join(" / ", errors))
-            : Result.Ok(successfulFormat);
+        return hasErrors
+            ? Result.Fail("Completed with errors.")
+            : Result.Ok();
     }
 
     /// <summary>
