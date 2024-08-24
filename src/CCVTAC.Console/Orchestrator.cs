@@ -91,7 +91,7 @@ internal class Orchestrator
         var inputTime = DateTime.Now;
         Watch watch = new();
 
-        nuint currentBatch = 0;
+        int currentBatch = 0;
 
         foreach (CategorizedInput input in categorizedInputs)
         {
@@ -128,7 +128,7 @@ internal class Orchestrator
         History history,
         DateTime urlInputTime,
         int batchSize,
-        nuint currentBatch,
+        int currentBatch,
         Printer printer)
     {
         var emptyDirResult = IoUtilties.Directories.WarnIfAnyFiles(settings.WorkingDirectory, 10);
