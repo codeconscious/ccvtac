@@ -23,14 +23,11 @@ internal sealed class ResultTracker<T>
             return;
         }
 
-        if (_failures.ContainsKey(input))
+        var errors = CombinedErrors(result);
+        if (!_failures.TryAdd(input, errors))
         {
-            // Keep only the latest error for a specific input.
-            _failures[input] = CombinedErrors(result);
-        }
-        else
-        {
-            _failures.Add(input, CombinedErrors(result));
+            // Keep the latest error for a specific input.
+            _failures[input] = errors;
         }
     }
 
