@@ -39,7 +39,6 @@ internal static class Downloader
     internal static Result Run(MediaType mediaType, UserSettings settings, Printer printer)
     {
         Watch watch = new();
-        bool hasErrors = false; // TODO: Determine if actually needed.
 
         if (!mediaType.IsVideo && !mediaType.IsPlaylistVideo)
         {
@@ -60,7 +59,6 @@ internal static class Downloader
 
         if (downloadResult.IsFailed)
         {
-            hasErrors = true;
             downloadResult.Errors.ForEach(e => printer.Error(e.Message));
             printer.Info("Post-processing will still be attempted."); // For any partial downloads
         }
@@ -82,19 +80,18 @@ internal static class Downloader
             }
             else
             {
-                hasErrors = true;
                 printer.Error("Supplementary download failed.");
                 errors.AddRange(supplementaryDownloadResult.Errors.Select(e => e.Message));
             }
         }
 
-        var combinedErrors =
-            string.Join(
-                " / ",
-                downloadResult.Errors.Select(e => e.Message)
-                    .Concat(supplementaryDownloadResult.Errors.Select(e => e.Message)));
+        var errors = downloadResult.Errors
+            .Select(e => e.Message)
+            .Concat(supplementaryDownloadResult.Errors.Select(e => e.Message));
 
-        return hasErrors
+        var combinedErrors = string.Join(" / ", errors);
+
+        return combinedErrors.Length > 0
             ? Result.Fail($"Completed with errors: {combinedErrors}")
             : Result.Ok();
     }
