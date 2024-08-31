@@ -1,9 +1,5 @@
 namespace CCVTAC.Console;
 
-/// <summary>
-/// Tracks the successes and failures of various operations.
-/// Successes are only counted; failure error messages are tracked.
-/// </summary>
 internal sealed class ResultTracker<T>
 {
     private nuint _successCount;
@@ -19,7 +15,7 @@ internal sealed class ResultTracker<T>
         _printer = printer;
     }
 
-    public void RegisterResult(string url, Result<string> result)
+    public void RegisterResult(string input, Result<T> result)
     {
         if (result.IsSuccess)
         {
@@ -27,8 +23,10 @@ internal sealed class ResultTracker<T>
             return;
         }
 
-            if (result.Value.HasText())
-                _printer.Info(result.Value);
+        if (_failures.ContainsKey(input))
+        {
+            // Keep only the latest error for a specific input.
+            _failures[input] = string.Join(" / ", result.Errors.Select(e => e.Message));
         }
     }
 
@@ -39,20 +37,32 @@ internal sealed class ResultTracker<T>
     {
         if (_failures.Count == 0)
         {
-            _printer.Errors(result);
-
-            _failures.Add(url, result.Value);
+            _failures.Add(input, string.Join(" / ", result.Errors.Select(e => e.Message)));
         }
     }
 
-    /// <summary>
-    /// Prints the output for the current application session.
-    /// Expected to be used upon quitting.
-    /// </summary>
-    internal void PrintSessionSummary()
+    public void PrintBatchFailures()
     {
-        string successLabel = _successCount == 1 ? "success" : "successes";
-        string failureLabel = _failures.Count == 1 ? "failure" : "failures";
+        if (_failures.Count == 0)
+        {
+            _printer.Debug("No failures in batch.");
+            return;
+        }
+
+        var failureLabel = _failures.Count == 1 ? "failure" : "failures";
+
+        _printer.Info($"{_failures.Count} {failureLabel} in this batch:");
+
+        foreach (var (url, error) in _failures)
+        {
+            _printer.Warning($"- {url}: {error}");
+        }
+    }
+
+    public void PrintSessionSummary()
+    {
+        var successLabel = _successCount == 1 ? "success" : "successes";
+        var failureLabel = _failures.Count == 1 ? "failure" : "failures";
 
         _printer.Info($"Quitting with {_successCount} {successLabel} and {_failures.Count} {failureLabel}.");
 

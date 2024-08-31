@@ -14,7 +14,20 @@ internal static class Downloader
         "YouTube downloads and audio extraction"
     );
 
-    internal static Result<MediaTypeWithUrls> WrapUrlInMediaType(string url)
+    /// <summary>
+    /// All known error codes returned by yt-dlp with their meanings.
+    /// </summary>
+    /// <remarks>Source: https://github.com/yt-dlp/yt-dlp/issues/4262#issuecomment-1173133105</remarks>
+    internal static Dictionary<int, string> ExitCodes = new()
+    {
+        { 0, "Success" },
+        { 1, "General error" }, // Actually "unspecified error"
+        { 2, "Error in provided options" },
+        { 100, "yt-dlp must restart for update to complete" },
+        { 101, "Download cancelled by --max-downloads, etc." },
+    };
+
+    internal static Result<MediaType> GetMediaType(string url)
     {
         var result = FSharp.Downloading.MediaTypeWithIds(url);
 
@@ -26,7 +39,7 @@ internal static class Downloader
     internal static Result Run(MediaType mediaType, UserSettings settings, Printer printer)
     {
         Watch watch = new();
-        bool hasErrors = false;
+        bool hasErrors = false; // TODO: Determine if actually needed.
 
         if (!mediaType.IsVideo && !mediaType.IsPlaylistVideo)
         {
@@ -43,6 +56,7 @@ internal static class Downloader
         var downloadSettings = new ToolSettings(ExternalTool, combinedArgs, settings.WorkingDirectory!, ExitCodes);
 
         var downloadResult = Runner.Run(downloadSettings, printer);
+        Result<int> supplementaryDownloadResult = new();
 
         if (downloadResult.IsFailed)
         {
@@ -60,7 +74,7 @@ internal static class Downloader
                     supplementaryArgs,
                     settings.WorkingDirectory!);
 
-            Result<int> supplementaryDownloadResult = Runner.Run(supplementaryDownloadSettings, printer);
+            supplementaryDownloadResult = Runner.Run(supplementaryDownloadSettings, printer);
 
             if (supplementaryDownloadResult.IsSuccess)
             {
@@ -74,8 +88,14 @@ internal static class Downloader
             }
         }
 
+        var combinedErrors =
+            string.Join(
+                " / ",
+                downloadResult.Errors.Select(e => e.Message)
+                    .Concat(supplementaryDownloadResult.Errors.Select(e => e.Message)));
+
         return hasErrors
-            ? Result.Fail("Completed with errors.")
+            ? Result.Fail($"Completed with errors: {combinedErrors}")
             : Result.Ok();
     }
 

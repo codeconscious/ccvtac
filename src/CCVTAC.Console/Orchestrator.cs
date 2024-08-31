@@ -47,7 +47,7 @@ internal class Orchestrator
             }
         }
 
-        var results = new ResultTracker<string?>(printer);
+        var resultTracker = new ResultTracker<string>(printer);
         var history = new History(settings.HistoryFile, settings.HistoryDisplayCount);
         var nextAction = NextAction.Continue;
 
@@ -70,7 +70,7 @@ internal class Orchestrator
             nextAction = ProcessBatch(categorizedInputs, categoryCounts, ref settings, results, history, printer);
         }
 
-        results.PrintSessionSummary();
+        resultTracker.PrintSessionSummary();
     }
 
     /// <summary>
@@ -81,7 +81,7 @@ internal class Orchestrator
         ImmutableArray<CategorizedInput> categorizedInputs,
         CategoryCounts categoryCounts,
         ref UserSettings settings,
-        ResultTracker<string?> resultTracker,
+        ResultTracker<string> resultTracker,
         History history,
         Printer printer)
     {
@@ -90,6 +90,7 @@ internal class Orchestrator
         Watch watch = new();
 
         int currentBatch = 0;
+        ResultTracker<NextAction> batchResultTracker = new(printer);
 
         foreach (CategorizedInput input in categorizedInputs)
         {
@@ -100,22 +101,25 @@ internal class Orchestrator
 
             batchResults.RegisterResult(input.Text, result);
 
+            batchResultTracker.RegisterResult(input.Text, result);
+
             if (result.IsFailed)
             {
                 continue;
             }
 
-            var nextAction = result.Value;
+            nextAction = result.Value;
+
             if (nextAction is not NextAction.Continue)
             {
-                return nextAction;
+                break;
             }
         }
 
         if (categoryCounts[InputCategory.Url] > 1)
         {
-            printer.Info($"{Environment.NewLine}Finished with batch of {categoryCounts[InputCategory.Url]} URLs in {watch.ElapsedFriendly}.");
-            batchResults.PrintBatchFailures();
+            printer.Info($"{Environment.NewLine}Finished with {categoryCounts[InputCategory.Url]} batches in {watch.ElapsedFriendly}.");
+            batchResultTracker.PrintBatchFailures();
         }
 
         return nextAction;
@@ -124,7 +128,7 @@ internal class Orchestrator
     private static Result<NextAction> ProcessUrl(
         string url,
         UserSettings settings,
-        ResultTracker<string?> resultTracker,
+        ResultTracker<string> resultTracker,
         History history,
         DateTime urlInputTime,
         int batchSize,
