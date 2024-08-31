@@ -150,45 +150,6 @@ public sealed class ExtensionMethodTests
         }
     }
 
-    public sealed class IsStringWithTextTests
-    {
-        [Fact]
-        public void IsStringWithText_StringWithText_ReturnsTrue()
-        {
-            var text = "こんにちは！";
-            Assert.True(text.IsStringWithText(false));
-            Assert.True(text.IsStringWithText(true));
-        }
-
-        [Fact]
-        public void IsStringWithText_StringWithAllowedWhiteSpace_ReturnsTrue()
-        {
-            var text = "　　　　";
-            Assert.True(text.IsStringWithText(true));
-        }
-
-        [Fact]
-        public void IsStringWithText_StringWithDisallowedWhiteSpace_ReturnsFalse()
-        {
-            var text = "　　　　";
-            Assert.False(text.IsStringWithText(false));
-        }
-
-        [Fact]
-        public void IsStringWithText_NonStringReferenceType_ReturnsFalse()
-        {
-            var obj = new Object();
-            Assert.False(obj.IsStringWithText(false));
-        }
-
-        [Fact]
-        public void IsStringWithText_NonStringValueType_ReturnsFalse()
-        {
-            var number = 1;
-            Assert.False(number.IsStringWithText(false));
-        }
-    }
-
     public sealed class CaseInsensitiveContainsTests
     {
         private static readonly List<string> _celestialBodies = ["Moon", "Mercury", "Mars", "Jupiter", "Venus"];

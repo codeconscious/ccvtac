@@ -19,22 +19,6 @@ public static class ExtensionMethods
     }
 
     /// <summary>
-    /// Determines whether a generic object is string containing text.
-    /// </summary>
-    /// <param name="maybeString"></param>
-    /// <param name="allowWhiteSpace">Specifies whether whitespace characters are allowed.</param>
-    /// <returns>Returns true if the string contains text; otherwise, false.</returns>
-    public static bool IsStringWithText<T>(this T? maybeString, bool allowWhiteSpace = false)
-    {
-        if (maybeString is not string text)
-        {
-            return false;
-        }
-
-        return text.HasText(allowWhiteSpace);
-    }
-
-    /// <summary>
     /// Determines whether a collection is empty.
     /// </summary>
     public static bool None<T>(this IEnumerable<T> collection) =>
