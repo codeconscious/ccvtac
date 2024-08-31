@@ -14,7 +14,7 @@ public sealed class Printer
     private static readonly Dictionary<Level, ColorFormat> Colors =
         new()
             {
-                { Level.Critical, new("white", "red", true) },
+                { Level.Critical, new("white", "red3", true) },
                 { Level.Error, new("red", null) },
                 { Level.Warning, new("yellow", null) },
                 { Level.Info, new(null, null) },
