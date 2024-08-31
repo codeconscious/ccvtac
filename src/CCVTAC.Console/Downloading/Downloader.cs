@@ -19,7 +19,7 @@ internal static class Downloader
     internal static Dictionary<int, string> ExitCodes = new()
     {
         { 0, "Success" },
-        { 1, "Unspecified error" },
+        { 1, "General error" }, // Actually "unspecified error"
         { 2, "Error in provided options" },
         { 100, "yt-dlp must restart for update to complete" },
         { 101, "Download cancelled by --max-downloads, etc." },
@@ -39,7 +39,7 @@ internal static class Downloader
     internal static Result Run(MediaType mediaType, UserSettings settings, Printer printer)
     {
         Watch watch = new();
-        bool hasErrors = false;
+        bool hasErrors = false; // TODO: Determine if actually needed.
 
         if (!mediaType.IsVideo && !mediaType.IsPlaylistVideo)
         {
@@ -52,12 +52,13 @@ internal static class Downloader
         var downloadSettings = new ToolSettings(ExternalTool, combinedArgs, settings.WorkingDirectory!, ExitCodes);
 
         var downloadResult = Runner.Run(downloadSettings, printer);
+        Result<int> supplementaryDownloadResult = new();
 
         if (downloadResult.IsFailed)
         {
             hasErrors = true;
             downloadResult.Errors.ForEach(e => printer.Error(e.Message));
-            printer.Warning("However, post-processing will still be attempted."); // For any partial downloads
+            printer.Info("Post-processing will still be attempted."); // For any partial downloads
         }
         else if (urls.Length > 1) // Meaning there's a supplementary URL for downloading playlist metadata.
         {
@@ -69,7 +70,7 @@ internal static class Downloader
                 settings.WorkingDirectory!,
                 ExitCodes);
 
-            Result<int> supplementaryDownloadResult = Runner.Run(supplementaryDownloadSettings, printer);
+            supplementaryDownloadResult = Runner.Run(supplementaryDownloadSettings, printer);
 
             if (supplementaryDownloadResult.IsSuccess)
             {
@@ -83,8 +84,14 @@ internal static class Downloader
             }
         }
 
+        var combinedErrors =
+            string.Join(
+                " / ",
+                downloadResult.Errors.Select(e => e.Message)
+                    .Concat(supplementaryDownloadResult.Errors.Select(e => e.Message)));
+
         return hasErrors
-            ? Result.Fail("Completed with errors.")
+            ? Result.Fail($"Completed with errors: {combinedErrors}")
             : Result.Ok();
     }
 

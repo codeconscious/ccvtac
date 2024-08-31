@@ -48,7 +48,7 @@ internal class Orchestrator
             }
         }
 
-        var resultTracker = new ResultTracker(printer);
+        var resultTracker = new ResultTracker<string>(printer);
         var history = new History(settings.HistoryFile, settings.HistoryDisplayCount);
         var nextAction = NextAction.Continue;
 
@@ -73,7 +73,7 @@ internal class Orchestrator
                 resultTracker, history, printer);
         }
 
-        resultTracker.PrintSummary();
+        resultTracker.PrintSessionSummary();
     }
 
     /// <summary>
@@ -84,14 +84,16 @@ internal class Orchestrator
         ImmutableArray<CategorizedInput> categorizedInputs,
         CategoryCounts categoryCounts,
         ref UserSettings settings,
-        ResultTracker resultTracker,
+        ResultTracker<string> resultTracker,
         History history,
         Printer printer)
     {
         var inputTime = DateTime.Now;
+        var nextAction = NextAction.Continue;
         Watch watch = new();
 
         int currentBatch = 0;
+        ResultTracker<NextAction> batchResultTracker = new(printer);
 
         foreach (CategorizedInput input in categorizedInputs)
         {
@@ -100,31 +102,34 @@ internal class Orchestrator
                 : ProcessUrl(input.Text, settings, resultTracker, history, inputTime,
                              categoryCounts[InputCategory.Url], ++currentBatch, printer);
 
+            batchResultTracker.RegisterResult(input.Text, result);
+
             if (result.IsFailed)
             {
-                printer.FirstError(result);
                 continue;
             }
 
-            var nextAction = result.Value;
+            nextAction = result.Value;
+
             if (nextAction is not NextAction.Continue)
             {
-                return nextAction;
+                break;
             }
         }
 
         if (categoryCounts[InputCategory.Url] > 1)
         {
             printer.Info($"{Environment.NewLine}Finished with {categoryCounts[InputCategory.Url]} batches in {watch.ElapsedFriendly}.");
+            batchResultTracker.PrintBatchFailures();
         }
 
-        return NextAction.Continue;
+        return nextAction;
     }
 
-    private static NextAction ProcessUrl(
+    private static Result<NextAction> ProcessUrl(
         string url,
         UserSettings settings,
-        ResultTracker resultTracker,
+        ResultTracker<string> resultTracker,
         History history,
         DateTime urlInputTime,
         int batchSize,
@@ -135,7 +140,7 @@ internal class Orchestrator
         if (emptyDirResult.IsFailed)
         {
             printer.FirstError(emptyDirResult);
-            return NextAction.QuitDueToErrors;
+            return NextAction.QuitDueToErrors; // TODO: Perhaps determine a better way.
         }
 
         if (currentBatch > 1) // Don't sleep for the very first URL.
@@ -154,8 +159,9 @@ internal class Orchestrator
         var mediaTypeResult = Downloader.GetMediaType(url);
         if (mediaTypeResult.IsFailed)
         {
-            printer.Error($"Error parsing URL {url}: {mediaTypeResult.Errors.First().Message}");
-            return NextAction.Continue;
+            var errorMsg = $"URL parse error: {mediaTypeResult.Errors.First().Message}";
+            printer.Error(errorMsg);
+            return Result.Fail(errorMsg);
         }
         var mediaType = mediaTypeResult.Value;
 
@@ -167,7 +173,9 @@ internal class Orchestrator
 
         if (downloadResult.IsFailed)
         {
-            return NextAction.Continue;
+            var errorMsg = $"Download error: {downloadResult.Errors.First().Message}";
+            printer.Error(errorMsg);
+            return Result.Fail(errorMsg);
         }
 
         PostProcessor.Run(settings, mediaType, printer);
