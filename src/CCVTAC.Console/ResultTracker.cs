@@ -23,21 +23,11 @@ internal sealed class ResultTracker<T>
             return;
         }
 
-        if (_failures.ContainsKey(input))
+        var errors = CombinedErrors(result);
+        if (!_failures.TryAdd(input, errors))
         {
-            // Keep only the latest error for a specific input.
-            _failures[input] = CombinedErrors(result);
-        }
-    }
-
-    /// <summary>
-    /// Prints any failures for the current batch.
-    /// </summary>
-    internal void PrintBatchFailures()
-    {
-        if (_failures.Count == 0)
-        {
-            _failures.Add(input, CombinedErrors(result));
+            // Keep the latest error for a specific input.
+            _failures[input] = errors;
         }
     }
 
