@@ -31,7 +31,7 @@ public static class ExtensionMethods
             return false;
         }
 
-        return text.HasText();
+        return text.HasText(allowWhiteSpace);
     }
 
     /// <summary>
