@@ -6,6 +6,9 @@ internal sealed class ResultTracker<T>
     private readonly Dictionary<string, string> _failures = [];
     private readonly Printer _printer;
 
+    private static string CombinedErrors(Result<T> result) =>
+        string.Join(" / ", result.Errors.Select(e => e.Message));
+
     public ResultTracker(Printer printer)
     {
         ArgumentNullException.ThrowIfNull(printer);
@@ -23,11 +26,11 @@ internal sealed class ResultTracker<T>
         if (_failures.ContainsKey(input))
         {
             // Keep only the latest error for a specific input.
-            _failures[input] = string.Join(" / ", result.Errors.Select(e => e.Message));
+            _failures[input] = CombinedErrors(result);
         }
         else
         {
-            _failures.Add(input, string.Join(" / ", result.Errors.Select(e => e.Message)));
+            _failures.Add(input, CombinedErrors(result));
         }
     }
 
