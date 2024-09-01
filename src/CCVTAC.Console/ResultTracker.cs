@@ -13,7 +13,7 @@ internal sealed class ResultTracker<T>
     private static string CombineErrors(Result<T> result) =>
         string.Join(" / ", result.Errors.Select(e => e.Message));
 
-    public ResultTracker(Printer printer)
+    internal ResultTracker(Printer printer)
     {
         ArgumentNullException.ThrowIfNull(printer);
         _printer = printer;
@@ -22,7 +22,7 @@ internal sealed class ResultTracker<T>
     /// <summary>
     /// Logs the result for a specific corresponding input.
     /// </summary>
-    public void RegisterResult(string input, Result<T> result)
+    internal void RegisterResult(string input, Result<T> result)
     {
         if (result.IsSuccess)
         {
@@ -41,7 +41,7 @@ internal sealed class ResultTracker<T>
     /// <summary>
     /// Prints any failures for the current batch.
     /// </summary>
-    public void PrintBatchFailures()
+    internal void PrintBatchFailures()
     {
         if (_failures.Count == 0)
         {
@@ -63,7 +63,7 @@ internal sealed class ResultTracker<T>
     /// Prints the output for the current application session.
     /// Expected to be used upon quitting.
     /// </summary>
-    public void PrintSessionSummary()
+    internal void PrintSessionSummary()
     {
         var successLabel = _successCount == 1 ? "success" : "successes";
         var failureLabel = _failures.Count == 1 ? "failure" : "failures";
