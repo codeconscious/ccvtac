@@ -3,7 +3,7 @@ namespace CCVTAC.Console.Settings;
 public sealed class TagFormat
 {
     /// <summary>
-    /// Subversions of ID3 version 2 (such as 2.3 or 2.4).
+    /// Subversions of ID3 version 2.
     /// </summary>
     public enum Id3v2Version : byte
     {

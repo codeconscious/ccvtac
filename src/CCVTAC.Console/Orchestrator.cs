@@ -47,6 +47,8 @@ internal class Orchestrator
             }
         }
 
+        TagFormat.SetId3v2Version(TagFormat.Id3v2Version.TwoPoint3, forceAsDefault: true);
+
         var resultTracker = new ResultTracker<string>(printer);
         var history = new History(settings.HistoryFile, settings.HistoryDisplayCount);
         var nextAction = NextAction.Continue;
