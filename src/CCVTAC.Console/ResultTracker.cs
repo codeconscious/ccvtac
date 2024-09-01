@@ -1,12 +1,16 @@
 namespace CCVTAC.Console;
 
+/// <summary>
+/// Tracks the successes and failures of various operations.
+/// Successes are only counted; failure error messages are tracked.
+/// </summary>
 internal sealed class ResultTracker<T>
 {
     private nuint _successCount;
     private readonly Dictionary<string, string> _failures = [];
     private readonly Printer _printer;
 
-    private static string CombinedErrors(Result<T> result) =>
+    private static string CombineErrors(Result<T> result) =>
         string.Join(" / ", result.Errors.Select(e => e.Message));
 
     public ResultTracker(Printer printer)
@@ -15,6 +19,9 @@ internal sealed class ResultTracker<T>
         _printer = printer;
     }
 
+    /// <summary>
+    /// Logs the result for a specific corresponding input.
+    /// </summary>
     public void RegisterResult(string input, Result<T> result)
     {
         if (result.IsSuccess)
@@ -23,14 +30,17 @@ internal sealed class ResultTracker<T>
             return;
         }
 
-        var errors = CombinedErrors(result);
+        string errors = CombineErrors(result);
         if (!_failures.TryAdd(input, errors))
         {
-            // Keep the latest error for a specific input.
+            // Keep only the latest error for each input.
             _failures[input] = errors;
         }
     }
 
+    /// <summary>
+    /// Prints any failures for the current batch.
+    /// </summary>
     public void PrintBatchFailures()
     {
         if (_failures.Count == 0)
@@ -49,6 +59,10 @@ internal sealed class ResultTracker<T>
         }
     }
 
+    /// <summary>
+    /// Prints the output for the current application session.
+    /// Expected to be used upon quitting.
+    /// </summary>
     public void PrintSessionSummary()
     {
         var successLabel = _successCount == 1 ? "success" : "successes";
