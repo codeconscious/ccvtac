@@ -48,7 +48,7 @@ internal class Orchestrator
             }
         }
 
-        var resultTracker = new ResultTracker<string>(printer);
+        var results = new ResultTracker<string>(printer);
         var history = new History(settings.HistoryFile, settings.HistoryDisplayCount);
         var nextAction = NextAction.Continue;
 
@@ -68,12 +68,10 @@ internal class Orchestrator
 
             SummarizeInput(categorizedInputs, categoryCounts, printer);
 
-            nextAction = ProcessBatch(
-                categorizedInputs, categoryCounts, ref settings,
-                resultTracker, history, printer);
+            nextAction = ProcessBatch(categorizedInputs, categoryCounts, ref settings, results, history, printer);
         }
 
-        resultTracker.PrintSessionSummary();
+        results.PrintSessionSummary();
     }
 
     /// <summary>
@@ -92,17 +90,17 @@ internal class Orchestrator
         var nextAction = NextAction.Continue;
         Watch watch = new();
 
-        int currentBatch = 0;
-        ResultTracker<NextAction> batchResultTracker = new(printer);
+        var batchResults = new ResultTracker<NextAction>(printer);
+        int inputIndex = 0;
 
         foreach (CategorizedInput input in categorizedInputs)
         {
             var result = input.Category is InputCategory.Command
                 ? ProcessCommand(input.Text, ref settings, history, printer)
                 : ProcessUrl(input.Text, settings, resultTracker, history, inputTime,
-                             categoryCounts[InputCategory.Url], ++currentBatch, printer);
+                             categoryCounts[InputCategory.Url], ++inputIndex, printer);
 
-            batchResultTracker.RegisterResult(input.Text, result);
+            batchResults.RegisterResult(input.Text, result);
 
             if (result.IsFailed)
             {
@@ -119,8 +117,8 @@ internal class Orchestrator
 
         if (categoryCounts[InputCategory.Url] > 1)
         {
-            printer.Info($"{Environment.NewLine}Finished with {categoryCounts[InputCategory.Url]} batches in {watch.ElapsedFriendly}.");
-            batchResultTracker.PrintBatchFailures();
+            printer.Info($"{Environment.NewLine}Finished with batch of {categoryCounts[InputCategory.Url]} URLs in {watch.ElapsedFriendly}.");
+            batchResults.PrintBatchFailures();
         }
 
         return nextAction;
@@ -133,7 +131,7 @@ internal class Orchestrator
         History history,
         DateTime urlInputTime,
         int batchSize,
-        int currentBatch,
+        int urlIndex,
         Printer printer)
     {
         var emptyDirResult = IoUtilties.Directories.WarnIfAnyFiles(settings.WorkingDirectory, 10);
@@ -143,15 +141,15 @@ internal class Orchestrator
             return NextAction.QuitDueToErrors; // TODO: Perhaps determine a better way.
         }
 
-        if (currentBatch > 1) // Don't sleep for the very first URL.
+        if (urlIndex > 1) // Don't sleep for the very first URL.
         {
-            Sleep(settings.SleepSecondsBetweenBatches);
-            printer.Info($"Slept for {settings.SleepSecondsBetweenBatches} second(s).", appendLines: 1);
+            Sleep(settings.SleepSecondsBetweenURLs);
+            printer.Info($"Slept for {settings.SleepSecondsBetweenURLs} second(s).", appendLines: 1);
         }
 
         if (batchSize > 1)
         {
-            printer.Info($"Processing batch {currentBatch} of {batchSize}...");
+            printer.Info($"Processing group {urlIndex} of {batchSize}...");
         }
 
         Watch jobWatch = new();
@@ -180,11 +178,11 @@ internal class Orchestrator
 
         PostProcessor.Run(settings, mediaType, printer);
 
-        string batchClause = batchSize > 1
-            ? $" (batch {currentBatch} of {batchSize})"
+        string groupClause = batchSize > 1
+            ? $" (group {urlIndex} of {batchSize})"
             : string.Empty;
 
-        printer.Info($"Processed '{url}'{batchClause} in {jobWatch.ElapsedFriendly}.");
+        printer.Info($"Processed '{url}'{groupClause} in {jobWatch.ElapsedFriendly}.");
         return NextAction.Continue;
     }
 

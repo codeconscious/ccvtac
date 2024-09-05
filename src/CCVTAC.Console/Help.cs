@@ -48,7 +48,7 @@ public static class Help
         directory to which the final audio files should be moved, and (3) a path to
         your history file. The other settings have sensible defaults.
 
-        I added the `sleepSecondsBetweenDownloads` and `sleepSecondsBetweenBatches`
+        I added the `sleepSecondsBetweenDownloads` and `sleepSecondsBetweenURLs`
         settings to help reduce concentrated loads on YouTube servers. Please avoid
         lowering these values too much and slamming their servers with enormous,
         long-running downloads (even if you feel their servers can take it).

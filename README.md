@@ -81,10 +81,10 @@ You can copy and paste the sample settings file below to a JSON file named `sett
   // with several downloads in quick succession.
   "sleepSecondsBetweenDownloads": 10,
 
-  // Delay in seconds between batches (i.e., each URL entered).
+  // Delay in seconds between each URL entered in a batch.
   // Use to avoid burdening YouTube servers with several downloads
   // in quick succession.
-  "sleepSecondsBetweenBatches": 20,
+  "sleepSecondsBetweenURLs": 20,
 
   # Whether to use quiet mode (true) or not (false).
   # Fewer details are shown in quiet mode.
