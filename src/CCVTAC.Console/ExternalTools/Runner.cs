@@ -26,8 +26,7 @@ internal static class Runner
 
         if (process is null)
         {
-            return Result.Fail($"Could not start {settings.Program.Name}. " +
-                               $"Please install it from {settings.Program.Url}.");
+            return Result.Fail($"Could not locate {settings.Program.Name}. If it's not installed, please install from {settings.Program.Url}.");
         }
 
         process.WaitForExit();

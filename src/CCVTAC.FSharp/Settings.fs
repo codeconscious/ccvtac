@@ -38,7 +38,7 @@ module Settings =
         [<JsonPropertyName("audioQuality")>]                  AudioQuality: byte
         [<JsonPropertyName("splitChapters")>]                 SplitChapters: bool
         [<JsonPropertyName("sleepSecondsBetweenDownloads")>]  SleepSecondsBetweenDownloads: uint16
-        [<JsonPropertyName("sleepSecondsBetweenBatches")>]    SleepSecondsBetweenBatches: uint16
+        [<JsonPropertyName("sleepSecondsBetweenURLs")>]       SleepSecondsBetweenURLs: uint16
         [<JsonPropertyName("quietMode")>]                     QuietMode: bool
         [<JsonPropertyName("embedImages")>]                   EmbedImages: bool
         [<JsonPropertyName("doNotEmbedImageUploaders")>]      DoNotEmbedImageUploaders: string array
@@ -74,7 +74,7 @@ module Settings =
             ("Quiet mode", onOrOff settings.QuietMode)
             ("Audio format", settings.AudioFormat)
             ("Audio quality (10 up to 0)", settings.AudioQuality |> sprintf "%B")
-            ("Sleep between batches", settings.SleepSecondsBetweenBatches |> int |> pluralize "second")
+            ("Sleep between URLs", settings.SleepSecondsBetweenURLs |> int |> pluralize "second")
             ("Sleep between downloads", settings.SleepSecondsBetweenDownloads |> int |> pluralize "second")
             ("Ignore-upload-year channels", settings.IgnoreUploadYearUploaders.Length |> pluralize "channel")
             ("Do-not-embed-image channels", settings.DoNotEmbedImageUploaders.Length |> pluralize "channel")
@@ -173,7 +173,7 @@ module Settings =
                   HistoryDisplayCount = 25uy // byte
                   SplitChapters = true
                   SleepSecondsBetweenDownloads = 10us
-                  SleepSecondsBetweenBatches = 15us
+                  SleepSecondsBetweenURLs = 15us
                   AudioFormat = String.Empty
                   AudioQuality = 0uy
                   QuietMode = false

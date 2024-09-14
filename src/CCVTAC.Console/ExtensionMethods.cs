@@ -6,10 +6,10 @@ namespace CCVTAC.Console;
 public static class ExtensionMethods
 {
     /// <summary>
-    /// Determines whether a string is populated, containing any text.
+    /// Determines whether a string contains any text.
     /// </summary>
     /// <param name="maybeText"></param>
-    /// <param name="allowWhiteSpace">Specifies whether whitespace characters are allowed.</param>
+    /// <param name="allowWhiteSpace">Specifies whether whitespace characters should be considered as text.</param>
     /// <returns>Returns true if the string contains text; otherwise, false.</returns>
     public static bool HasText(this string? maybeText, bool allowWhiteSpace = false)
     {

@@ -19,7 +19,7 @@ internal static class Downloader
     internal static Dictionary<int, string> ExitCodes = new()
     {
         { 0, "Success" },
-        { 1, "Unspecified error" },
+        { 1, "General error" }, // Actually "unspecified error"
         { 2, "Error in provided options" },
         { 100, "yt-dlp must restart for update to complete" },
         { 101, "Download cancelled by --max-downloads, etc." },
@@ -36,26 +36,27 @@ internal static class Downloader
         return Result.Ok(mediaTypeOrError.ResultValue);
     }
 
-    internal static Result<string> Run(string url, MediaType mediaType, UserSettings settings, Printer printer)
+    internal static Result Run(MediaType mediaType, UserSettings settings, Printer printer)
     {
         Watch watch = new();
 
-        if (!mediaType.IsVideo)
+        if (!mediaType.IsVideo && !mediaType.IsPlaylistVideo)
         {
             printer.Info("Please wait for the multiple videos to be downloaded...");
         }
 
         var urls = FSharp.Downloading.downloadUrls(mediaType);
 
-        string args = GenerateDownloadArgs(settings, mediaType, urls[0]);
-        var downloadSettings =
-            new ToolSettings(ExternalTool, args, settings.WorkingDirectory!, ExitCodes);
+        string combinedArgs = GenerateDownloadArgs(settings, mediaType, urls[0]);
+        var downloadSettings = new ToolSettings(ExternalTool, combinedArgs, settings.WorkingDirectory!, ExitCodes);
+
         var downloadResult = Runner.Run(downloadSettings, printer);
+        Result<int> supplementaryDownloadResult = new();
 
         if (downloadResult.IsFailed)
         {
             downloadResult.Errors.ForEach(e => printer.Error(e.Message));
-            printer.Warning("However, post-processing will still be attempted."); // For any partial downloads
+            printer.Info("Post-processing will still be attempted."); // For any partial downloads
         }
         else if (urls.Length > 1) // Meaning there's a supplementary URL for downloading playlist metadata.
         {
@@ -67,8 +68,7 @@ internal static class Downloader
                 settings.WorkingDirectory!,
                 ExitCodes);
 
-            Result<int> supplementaryDownloadResult =
-                Runner.Run(supplementaryDownloadSettings, printer);
+            supplementaryDownloadResult = Runner.Run(supplementaryDownloadSettings, printer);
 
             if (supplementaryDownloadResult.IsSuccess)
             {
@@ -81,7 +81,15 @@ internal static class Downloader
             }
         }
 
-        return Result.Ok();
+        var errors = downloadResult.Errors
+            .Select(e => e.Message)
+            .Concat(supplementaryDownloadResult.Errors.Select(e => e.Message));
+
+        var combinedErrors = string.Join(" / ", errors);
+
+        return combinedErrors.Length > 0
+            ? Result.Fail($"Completed with errors: {combinedErrors}")
+            : Result.Ok();
     }
 
     /// <summary>
@@ -99,6 +107,10 @@ internal static class Downloader
         const string writeJson = "--write-info-json";
         const string trimFileNames = "--trim-filenames 250";
 
+        // yt-dlp warning: "-f best" selects the best pre-merged format which is often not the best option.
+        // To let yt-dlp download and merge the best available formats, simply do not pass any format selection."
+        var formatArg = settings.AudioFormat == "best" ? string.Empty : $"-f {settings.AudioFormat}";
+
         HashSet<string> args = mediaType switch
         {
             // For metadata-only downloads
@@ -107,7 +119,7 @@ internal static class Downloader
             // For video(s) with their respective metadata files (JSON and artwork).
             _ => [
                     "--extract-audio",
-                    $"-f {settings.AudioFormat}",
+                    formatArg,
                     $"--audio-quality {settings.AudioQuality}",
                     "--write-thumbnail --convert-thumbnails jpg", // For album art
                     writeJson, // Contains metadata

@@ -48,7 +48,7 @@ internal class Orchestrator
             }
         }
 
-        var resultTracker = new ResultTracker(printer);
+        var results = new ResultTracker<string>(printer);
         var history = new History(settings.HistoryFile, settings.HistoryDisplayCount);
         var nextAction = NextAction.Continue;
 
@@ -68,12 +68,10 @@ internal class Orchestrator
 
             SummarizeInput(categorizedInputs, categoryCounts, printer);
 
-            nextAction = ProcessBatch(
-                categorizedInputs, categoryCounts, ref settings,
-                resultTracker, history, printer);
+            nextAction = ProcessBatch(categorizedInputs, categoryCounts, ref settings, results, history, printer);
         }
 
-        resultTracker.PrintSummary();
+        results.PrintSessionSummary();
     }
 
     /// <summary>
@@ -84,69 +82,74 @@ internal class Orchestrator
         ImmutableArray<CategorizedInput> categorizedInputs,
         CategoryCounts categoryCounts,
         ref UserSettings settings,
-        ResultTracker resultTracker,
+        ResultTracker<string> resultTracker,
         History history,
         Printer printer)
     {
         var inputTime = DateTime.Now;
+        var nextAction = NextAction.Continue;
         Watch watch = new();
 
-        nuint currentBatch = 0;
+        var batchResults = new ResultTracker<NextAction>(printer);
+        int inputIndex = 0;
 
         foreach (CategorizedInput input in categorizedInputs)
         {
             var result = input.Category is InputCategory.Command
                 ? ProcessCommand(input.Text, ref settings, history, printer)
                 : ProcessUrl(input.Text, settings, resultTracker, history, inputTime,
-                             categoryCounts[InputCategory.Url], ++currentBatch, printer);
+                             categoryCounts[InputCategory.Url], ++inputIndex, printer);
+
+            batchResults.RegisterResult(input.Text, result);
 
             if (result.IsFailed)
             {
-                printer.FirstError(result);
                 continue;
             }
 
-            NextAction next = result.Value;
-            if (next is NextAction.QuitAtUserRequest)
+            nextAction = result.Value;
+
+            if (nextAction is not NextAction.Continue)
             {
-                return next;
+                break;
             }
         }
 
         if (categoryCounts[InputCategory.Url] > 1)
         {
-            printer.Info($"{Environment.NewLine}Finished with {categoryCounts[InputCategory.Url]} batches in {watch.ElapsedFriendly}.");
+            printer.Info($"{Environment.NewLine}Finished with batch of {categoryCounts[InputCategory.Url]} URLs in {watch.ElapsedFriendly}.");
+            batchResults.PrintBatchFailures();
         }
 
-        return NextAction.Continue;
+        return nextAction;
     }
 
-    private static NextAction ProcessUrl(
+    private static Result<NextAction> ProcessUrl(
         string url,
         UserSettings settings,
-        ResultTracker resultTracker,
+        ResultTracker<string> resultTracker,
         History history,
         DateTime urlInputTime,
-        int urlCount,
-        nuint currentBatch,
+        int batchSize,
+        int urlIndex,
         Printer printer)
     {
         var emptyDirResult = IoUtilties.Directories.WarnIfAnyFiles(settings.WorkingDirectory, 10);
         if (emptyDirResult.IsFailed)
         {
             printer.FirstError(emptyDirResult);
-            return NextAction.QuitDueToErrors;
+            return NextAction.QuitDueToErrors; // TODO: Perhaps determine a better way.
         }
 
-        if (currentBatch > 1) // Don't sleep for the very first URL.
+        if (urlIndex > 1) // Don't sleep for the very first URL.
         {
-            Sleep(settings.SleepSecondsBetweenBatches);
-            printer.Info($"Slept for {settings.SleepSecondsBetweenBatches} second(s).", appendLines: 1);
+            Sleep(settings.SleepSecondsBetweenURLs);
+            printer.Info($"Slept for {settings.SleepSecondsBetweenURLs} second(s).", appendLines: 1);
         }
 
-        if (urlCount > 1)
+        if (batchSize > 1)
         {
-            printer.Info($"Processing batch {currentBatch} of {urlCount}...");
+            printer.Info($"Processing group {urlIndex} of {batchSize}...");
         }
 
         Watch jobWatch = new();
@@ -154,28 +157,32 @@ internal class Orchestrator
         var mediaTypeResult = Downloader.GetMediaType(url);
         if (mediaTypeResult.IsFailed)
         {
-            printer.Error($"Error parsing URL {url}: {mediaTypeResult.Errors.First().Message}");
-            return NextAction.Continue;
+            var errorMsg = $"URL parse error: {mediaTypeResult.Errors.First().Message}";
+            printer.Error(errorMsg);
+            return Result.Fail(errorMsg);
         }
         var mediaType = mediaTypeResult.Value;
-        printer.Info($"{mediaType.GetType().Name} URL '{url}' detected.");
 
+        printer.Info($"{mediaType.GetType().Name} URL '{url}' detected.");
         history.Append(url, urlInputTime, printer);
 
-        var downloadResult = Downloader.Run(url, mediaType, settings, printer);
-        resultTracker.RegisterResult(downloadResult);
+        var downloadResult = Downloader.Run(mediaType, settings, printer);
+        resultTracker.RegisterResult(url, downloadResult);
+
         if (downloadResult.IsFailed)
         {
-            return NextAction.Continue;
+            var errorMsg = $"Download error: {downloadResult.Errors.First().Message}";
+            printer.Error(errorMsg);
+            return Result.Fail(errorMsg);
         }
 
         PostProcessor.Run(settings, mediaType, printer);
 
-        string batchClause = urlCount > 1
-            ? $" (batch {currentBatch} of {urlCount})"
+        string groupClause = batchSize > 1
+            ? $" (group {urlIndex} of {batchSize})"
             : string.Empty;
 
-        printer.Info($"Processed '{url}'{batchClause} in {jobWatch.ElapsedFriendly}.");
+        printer.Info($"Processed '{url}'{groupClause} in {jobWatch.ElapsedFriendly}.");
         return NextAction.Continue;
     }
 
