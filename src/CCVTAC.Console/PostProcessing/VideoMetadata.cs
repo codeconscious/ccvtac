@@ -151,12 +151,6 @@ public readonly record struct Fragment(
     [property: JsonPropertyName("duration")] double? Duration
 );
 
-public readonly record struct Heatmap(
-    [property: JsonPropertyName("start_time")] double? Start_time,
-    [property: JsonPropertyName("end_time")] double? End_time,
-    [property: JsonPropertyName("value")] double? value
-);
-
 public readonly record struct HttpHeaders(
     [property: JsonPropertyName("User-Agent")] string UserAgent,
     [property: JsonPropertyName("Accept")] string Accept,
