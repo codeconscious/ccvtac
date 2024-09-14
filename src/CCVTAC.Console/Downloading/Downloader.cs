@@ -107,6 +107,10 @@ internal static class Downloader
         const string writeJson = "--write-info-json";
         const string trimFileNames = "--trim-filenames 250";
 
+        // yt-dlp warning: "-f best" selects the best pre-merged format which is often not the best option.
+        // To let yt-dlp download and merge the best available formats, simply do not pass any format selection."
+        var formatArg = settings.AudioFormat == "best" ? string.Empty : $"-f {settings.AudioFormat}";
+
         HashSet<string> args = mediaType switch
         {
             // For metadata-only downloads
@@ -115,7 +119,7 @@ internal static class Downloader
             // For video(s) with their respective metadata files (JSON and artwork).
             _ => [
                     "--extract-audio",
-                    $"-f {settings.AudioFormat}",
+                    formatArg,
                     $"--audio-quality {settings.AudioQuality}",
                     "--write-thumbnail --convert-thumbnails jpg", // For album art
                     writeJson, // Contains metadata
