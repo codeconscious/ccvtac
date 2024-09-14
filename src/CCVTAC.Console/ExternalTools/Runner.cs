@@ -17,7 +17,7 @@ internal static class Runner
             Arguments = settings.Args,
             UseShellExecute = false,
             RedirectStandardOutput = false,
-            RedirectStandardError = false,
+            RedirectStandardError = true,
             CreateNoWindow = true,
             WorkingDirectory = settings.WorkingDirectory
         };
@@ -29,6 +29,8 @@ internal static class Runner
             return Result.Fail($"Could not locate {settings.Program.Name}. If it's not installed, please install from {settings.Program.Url}.");
         }
 
+
+        string error = process.StandardError.ReadToEnd(); // Must precede `WaitForExit()`.
         process.WaitForExit();
 
         printer.Info($"Completed {settings.Program.Purpose} in {watch.ElapsedFriendly}.");
@@ -39,12 +41,6 @@ internal static class Runner
             return Result.Ok();
         }
 
-        if (settings.ExitCodes is not null &&
-            settings.ExitCodes.ContainsKey(exitCode))
-        {
-            return Result.Fail($"External program \"{settings.Program.Name}\" reported error {exitCode}: {settings.ExitCodes[exitCode]}.");
-        }
-
-        return Result.Fail($"External program \"{settings.Program.Name}\" reported an error ({exitCode}).");
+        return Result.Fail($"[{settings.Program.Name}] {error.Replace(Environment.NewLine, string.Empty)}.");
     }
 }
