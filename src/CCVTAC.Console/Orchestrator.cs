@@ -102,8 +102,6 @@ internal class Orchestrator
 
             batchResults.RegisterResult(input.Text, result);
 
-            batchResultTracker.RegisterResult(input.Text, result);
-
             if (result.IsFailed)
             {
                 continue;
