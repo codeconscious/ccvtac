@@ -14,13 +14,11 @@ internal static class Downloader
 
     internal static Result<MediaType> GetMediaType(string url)
     {
-        var mediaTypeOrError = FSharp.Downloading.mediaTypeWithIds(url);
-        if (mediaTypeOrError.IsError)
-        {
-            return Result.Fail(mediaTypeOrError.ErrorValue);
-        }
+        var result = FSharp.Downloading.mediaTypeWithIds(url);
 
-        return Result.Ok(mediaTypeOrError.ResultValue);
+        return result.IsOk
+            ? Result.Ok(result.ResultValue)
+            : Result.Fail(result.ErrorValue);
     }
 
     /// <summary>
