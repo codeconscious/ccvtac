@@ -23,8 +23,7 @@ internal class Orchestrator
         if (Downloader.ExternalTool.ProgramExists() is { IsFailed: true })
         {
             printer.Error(
-                $"To use this program, please first install {Downloader.ExternalTool.Name} " +
-                $"({Downloader.ExternalTool.Url}) on this system.");
+                $"To use this application, please first install {Downloader.ExternalTool.Name} ({Downloader.ExternalTool.Url}).");
             printer.Info("Pass '--help' for more information.");
             return;
         }
