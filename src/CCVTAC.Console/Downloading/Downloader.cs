@@ -36,8 +36,8 @@ internal static class Downloader
 
         var urls = FSharp.Downloading.downloadUrls(mediaType);
 
-        Result downloadResult = new();
-        string? successfulFormat = null;
+        string combinedArgs = GenerateDownloadArgs(settings, mediaType, urls[0]);
+        var downloadSettings = new ToolSettings(ExternalTool, combinedArgs, settings.WorkingDirectory!);
 
         foreach (string format in settings.AudioFormats)
         {
@@ -92,7 +92,7 @@ internal static class Downloader
 
         return combinedErrors.Length > 0
             ? Result.Fail(combinedErrors)
-            : Result.Ok(successfulFormat);
+            : Result.Ok();
     }
 
     /// <summary>
