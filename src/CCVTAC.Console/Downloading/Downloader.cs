@@ -6,6 +6,8 @@ namespace CCVTAC.Console.Downloading;
 
 internal static class Downloader
 {
+    private record Urls(string Primary, string? Supplementary);
+
     internal static ExternalTool ExternalTool = new(
         "yt-dlp",
         "https://github.com/yt-dlp/yt-dlp/",
@@ -34,14 +36,15 @@ internal static class Downloader
             printer.Info("Please wait for the multiple videos to be downloaded...");
         }
 
-        var urls = FSharp.Downloading.downloadUrls(mediaType);
+        var rawUrls = FSharp.Downloading.downloadUrls(mediaType);
+        var urls = new Urls(rawUrls[0], rawUrls.Length == 2 ? rawUrls[1] : null);
 
         Result downloadResult = new();
         string? successfulFormat = null;
 
         foreach (string format in settings.AudioFormats)
         {
-            string combinedArgs = GenerateDownloadArgs(format, settings, mediaType, urls[0]);
+            string combinedArgs = GenerateDownloadArgs(format, settings, mediaType, urls.Primary);
             var downloadSettings = new ToolSettings(ExternalTool, combinedArgs, settings.WorkingDirectory!);
 
             downloadResult = Runner.Run(downloadSettings, printer);
@@ -61,10 +64,10 @@ internal static class Downloader
             downloadResult.Errors.ForEach(e => printer.Error(e.Message));
             printer.Info("Post-processing will still be attempted."); // For any partial downloads
         }
-        else if (urls.Length > 1) // Meaning there's a supplementary URL for downloading playlist metadata.
+        else if (urls.Supplementary is not null) // Meaning there's a supplementary URL for downloading playlist metadata.
         {
             // Since only metadata is downloaded, the format is irrelevant, so "best" is used as a placeholder.
-            string supplementaryArgs = GenerateDownloadArgs("best", settings, null, urls[1]);
+            string supplementaryArgs = GenerateDownloadArgs("best", settings, null, urls.Supplementary);
 
             var supplementaryDownloadSettings = new ToolSettings(
                 ExternalTool,
@@ -92,7 +95,7 @@ internal static class Downloader
 
         return combinedErrors.Length > 0
             ? Result.Fail(combinedErrors)
-            : Result.Ok();
+            : Result.Ok(successfulFormat);
     }
 
     /// <summary>
