@@ -23,7 +23,11 @@ internal static class Downloader
         return Result.Ok(mediaTypeOrError.ResultValue);
     }
 
-    internal static Result Run(MediaType mediaType, UserSettings settings, Printer printer)
+    /// <summary>
+    /// Completes the actual download process.
+    /// </summary>
+    /// <returns>A `Result` that, if successful, contains the name of the successfully downloaded format.</returns>
+    internal static Result<string?> Run(MediaType mediaType, UserSettings settings, Printer printer)
     {
         Watch watch = new();
 
@@ -34,12 +38,26 @@ internal static class Downloader
 
         var urls = FSharp.Downloading.downloadUrls(mediaType);
 
-        string combinedArgs = GenerateDownloadArgs(settings, mediaType, urls[0]);
-        var downloadSettings = new ToolSettings(ExternalTool, combinedArgs, settings.WorkingDirectory!);
+        Result downloadResult = new();
+        string? successfulFormat = null;
 
-        var downloadResult = Runner.Run(downloadSettings, printer);
+        foreach (string format in settings.AudioFormats)
+        {
+            string combinedArgs = GenerateDownloadArgs(format, settings, mediaType, urls[0]);
+            var downloadSettings = new ToolSettings(ExternalTool, combinedArgs, settings.WorkingDirectory!);
+
+            downloadResult = Runner.Run(downloadSettings, printer);
+
+            if (downloadResult.IsSuccess)
+            {
+                successfulFormat = format;
+                break;
+            }
+
+            printer.Debug($"Failure downloading \"{format}\" format.");
+        }
+
         Result<int> supplementaryDownloadResult = new();
-
         if (downloadResult.IsFailed)
         {
             downloadResult.Errors.ForEach(e => printer.Error(e.Message));
@@ -47,7 +65,8 @@ internal static class Downloader
         }
         else if (urls.Length > 1) // Meaning there's a supplementary URL for downloading playlist metadata.
         {
-            string supplementaryArgs = GenerateDownloadArgs(settings, null, urls[1]);
+            // Since only metadata is downloaded, the format is irrelevant, so "best" is used as a placeholder.
+            string supplementaryArgs = GenerateDownloadArgs("best", settings, null, urls[1]);
 
             var supplementaryDownloadSettings = new ToolSettings(
                 ExternalTool,
@@ -75,7 +94,7 @@ internal static class Downloader
 
         return combinedErrors.Length > 0
             ? Result.Fail(combinedErrors)
-            : Result.Ok();
+            : Result.Ok(successfulFormat);
     }
 
     /// <summary>
@@ -86,6 +105,7 @@ internal static class Downloader
     /// <param name="additionalArgs"></param>
     /// <returns>A string of arguments that can be passed directly to the download tool.</returns>
     private static string GenerateDownloadArgs(
+        string audioFormat,
         UserSettings settings,
         MediaType? mediaType,
         params string[]? additionalArgs)
@@ -95,7 +115,7 @@ internal static class Downloader
 
         // yt-dlp warning: "-f best" selects the best pre-merged format which is often not the best option.
         // To let yt-dlp download and merge the best available formats, simply do not pass any format selection."
-        var formatArg = settings.AudioFormat == "best" ? string.Empty : $"-f {settings.AudioFormat}";
+        var formatArg = audioFormat == "best" ? string.Empty : $"-f {audioFormat}";
 
         HashSet<string> args = mediaType switch
         {

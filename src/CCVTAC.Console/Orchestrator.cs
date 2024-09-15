@@ -48,7 +48,7 @@ internal class Orchestrator
             }
         }
 
-        var results = new ResultTracker<string>(printer);
+        var results = new ResultTracker<string?>(printer);
         var history = new History(settings.HistoryFile, settings.HistoryDisplayCount);
         var nextAction = NextAction.Continue;
 
@@ -82,7 +82,7 @@ internal class Orchestrator
         ImmutableArray<CategorizedInput> categorizedInputs,
         CategoryCounts categoryCounts,
         ref UserSettings settings,
-        ResultTracker<string> resultTracker,
+        ResultTracker<string?> resultTracker,
         History history,
         Printer printer)
     {
@@ -127,7 +127,7 @@ internal class Orchestrator
     private static Result<NextAction> ProcessUrl(
         string url,
         UserSettings settings,
-        ResultTracker<string> resultTracker,
+        ResultTracker<string?> resultTracker,
         History history,
         DateTime urlInputTime,
         int batchSize,
@@ -175,6 +175,8 @@ internal class Orchestrator
             printer.Error(errorMsg);
             return Result.Fail(errorMsg);
         }
+
+        printer.Debug($"Successfully downloaded \"{downloadResult.Value}\" format.");
 
         PostProcessor.Run(settings, mediaType, printer);
 
@@ -260,7 +262,7 @@ internal class Orchestrator
 
             if (format == string.Empty)
             {
-                return Result.Fail($"You must append a supported audio format (e.g., \"best\" or \"m4a\").");
+                return Result.Fail($"You must append one or more supported audio format separated by commas (e.g., \"m4a,opus,best\").");
             }
 
             var updateResult = SettingsAdapter.UpdateAudioFormat(settings, format);
@@ -270,7 +272,7 @@ internal class Orchestrator
             }
 
             settings = updateResult.ResultValue;
-            printer.Info(SummarizeUpdate("Audio Format", settings.AudioFormat));
+            printer.Info(SummarizeUpdate("Audio Formats", string.Join(", ", settings.AudioFormats)));
             return Result.Ok(NextAction.Continue);
         }
 
