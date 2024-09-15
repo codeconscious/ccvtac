@@ -9,5 +9,4 @@ namespace CCVTAC.Console.ExternalTools;
 internal sealed record ToolSettings(
     ExternalTool Program,
     string Args,
-    string WorkingDirectory,
-    Dictionary<int, string>? ExitCodes = null);
+    string WorkingDirectory);

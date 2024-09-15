@@ -12,19 +12,6 @@ internal static class Downloader
         "YouTube downloads and audio extraction"
     );
 
-    /// <summary>
-    /// All known error codes returned by yt-dlp with their meanings.
-    /// </summary>
-    /// <remarks>Source: https://github.com/yt-dlp/yt-dlp/issues/4262#issuecomment-1173133105</remarks>
-    internal static Dictionary<int, string> ExitCodes = new()
-    {
-        { 0, "Success" },
-        { 1, "General error" }, // Actually "unspecified error"
-        { 2, "Error in provided options" },
-        { 100, "yt-dlp must restart for update to complete" },
-        { 101, "Download cancelled by --max-downloads, etc." },
-    };
-
     internal static Result<MediaType> GetMediaType(string url)
     {
         var mediaTypeOrError = FSharp.Downloading.mediaTypeWithIds(url);
@@ -48,7 +35,7 @@ internal static class Downloader
         var urls = FSharp.Downloading.downloadUrls(mediaType);
 
         string combinedArgs = GenerateDownloadArgs(settings, mediaType, urls[0]);
-        var downloadSettings = new ToolSettings(ExternalTool, combinedArgs, settings.WorkingDirectory!, ExitCodes);
+        var downloadSettings = new ToolSettings(ExternalTool, combinedArgs, settings.WorkingDirectory!);
 
         var downloadResult = Runner.Run(downloadSettings, printer);
         Result<int> supplementaryDownloadResult = new();
@@ -65,8 +52,7 @@ internal static class Downloader
             var supplementaryDownloadSettings = new ToolSettings(
                 ExternalTool,
                 supplementaryArgs,
-                settings.WorkingDirectory!,
-                ExitCodes);
+                settings.WorkingDirectory!);
 
             supplementaryDownloadResult = Runner.Run(supplementaryDownloadSettings, printer);
 
@@ -88,7 +74,7 @@ internal static class Downloader
         var combinedErrors = string.Join(" / ", errors);
 
         return combinedErrors.Length > 0
-            ? Result.Fail($"Completed with errors: {combinedErrors}")
+            ? Result.Fail(combinedErrors)
             : Result.Ok();
     }
 
