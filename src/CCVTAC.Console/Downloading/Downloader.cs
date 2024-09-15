@@ -36,8 +36,8 @@ internal static class Downloader
 
         var urls = FSharp.Downloading.downloadUrls(mediaType);
 
-        string combinedArgs = GenerateDownloadArgs(settings, mediaType, urls[0]);
-        var downloadSettings = new ToolSettings(ExternalTool, combinedArgs, settings.WorkingDirectory!);
+        Result downloadResult = new();
+        string? successfulFormat = null;
 
         foreach (string format in settings.AudioFormats)
         {
