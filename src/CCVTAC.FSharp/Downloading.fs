@@ -4,35 +4,34 @@ module public Downloading =
     open System.Text.RegularExpressions
 
     type MediaType =
-        | Video of id : string
-        | PlaylistVideo of videoId : string * playlistId : string
-        | StandardPlaylist of id : string
-        | ReleasePlaylist of id : string
-        | Channel of id : string
+        | Video of id: string
+        | PlaylistVideo of videoId: string * playlistId: string
+        | StandardPlaylist of id: string
+        | ReleasePlaylist of id: string
+        | Channel of id: string
 
     let private (|Regex|_|) pattern input =
-        let m = Regex.Match(input, pattern)
-        match m with
-            | m when m.Success -> Some(List.tail [ for g in m.Groups -> g.Value ])
-            | _ -> None
+        match Regex.Match(input, pattern) with
+        | m when m.Success -> Some (List.tail [for g in m.Groups -> g.Value])
+        | _ -> None
 
     [<CompiledName("MediaTypeWithIds")>]
-    let mediaTypeWithIds (url:string) =
+    let mediaTypeWithIds (url: string) =
         match url with
-        | Regex @"(?<=v=|v\=)([\w-]{11})(?:&list=([\w_-]+))" [ videoId ; playlistId ]
-            -> Ok (PlaylistVideo (videoId, playlistId))
-        | Regex @"^([\w-]{11})$" [ id ]
-            -> Ok (Video id)
-        | Regex @"(?<=v=|v\\=)([\w-]{11})" [ id ]
-            -> Ok (Video id)
-        | Regex @"(?<=youtu\.be/)(.{11})" [ id ]
-            -> Ok (Video id)
-        | Regex @"(?<=list=)(P[\w\-]+)" [ id ]
-            -> Ok (StandardPlaylist id)
-        | Regex @"(?<=list=)(O[\w\-]+)" [ id ]
-            -> Ok (ReleasePlaylist id)
-        | Regex @"((?:www\.)?youtube\.com\/(?:channel\/|c\/|user\/|@)(?:[\w\-]+))" [ id ]
-            -> Ok (Channel id)
+        | Regex @"(?<=v=|v\=)([\w-]{11})(?:&list=([\w_-]+))" [videoId; playlistId] ->
+            Ok (PlaylistVideo (videoId, playlistId))
+        | Regex @"^([\w-]{11})$" [id] ->
+            Ok (Video id)
+        | Regex @"(?<=v=|v\\=)([\w-]{11})" [id] ->
+            Ok (Video id)
+        | Regex @"(?<=youtu\.be/)(.{11})" [id] ->
+            Ok (Video id)
+        | Regex @"(?<=list=)(P[\w\-]+)" [id] ->
+            Ok (StandardPlaylist id)
+        | Regex @"(?<=list=)(O[\w\-]+)" [id] ->
+            Ok (ReleasePlaylist id)
+        | Regex @"((?:www\.)?youtube\.com\/(?:channel\/|c\/|user\/|@)(?:[\w\-]+))" [ id ] ->
+            Ok (Channel id)
         | _ ->
             Error "Unable to determine the media type of the URL."
 

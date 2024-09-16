@@ -58,7 +58,7 @@ module Settings =
             then $"{count} {label}"
             else $"{count} {label}s"
 
-        let tagDetectionPatternCount (patterns:TagDetectionPatterns) =
+        let tagDetectionPatternCount (patterns: TagDetectionPatterns) =
             patterns.Title.Length +
             patterns.Artist.Length +
             patterns.Album.Length +
@@ -87,7 +87,7 @@ module Settings =
 
         let validate settings =
             let isEmpty str = str |> String.IsNullOrWhiteSpace
-            let dirMissing str = not <| (Directory.Exists str)
+            let dirMissing str = not (Directory.Exists str)
 
             // Source: https://github.com/yt-dlp/yt-dlp/?tab=readme-ov-file#post-processing-options
             let supportedAudioFormats = [|"best"; "aac"; "alac"; "flac"; "m4a"; "mp3"; "opus"; "vorbis"; "wav"|]
@@ -121,7 +121,7 @@ module Settings =
         open System.Text.Encodings.Web
         open Validation
 
-        let deserialize<'a> (json:string) =
+        let deserialize<'a> (json: string) =
             let options = new JsonSerializerOptions()
             options.AllowTrailingCommas <- true
             options.ReadCommentHandling <- JsonCommentHandling.Skip
@@ -198,17 +198,17 @@ module Settings =
 
         [<CompiledName("ToggleSplitChapters")>]
         let toggleSplitChapters settings =
-            let toggledSetting = not <| settings.SplitChapters
+            let toggledSetting = not settings.SplitChapters
             { settings with SplitChapters = toggledSetting }
 
         [<CompiledName("ToggleEmbedImages")>]
         let toggleEmbedImages settings =
-            let toggledSetting = not <| settings.EmbedImages
+            let toggledSetting = not settings.EmbedImages
             { settings with EmbedImages = toggledSetting }
 
         [<CompiledName("ToggleQuietMode")>]
         let toggleQuietMode settings =
-            let toggledSetting = not <| settings.QuietMode
+            let toggledSetting = not settings.QuietMode
             { settings with QuietMode = toggledSetting }
 
         [<CompiledName("UpdateAudioFormat")>]
