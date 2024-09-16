@@ -16,7 +16,7 @@ internal static class Downloader
 
     internal static Result<MediaType> GetMediaType(string url)
     {
-        var result = FSharp.Downloading.mediaTypeWithIds(url);
+        var result = FSharp.Downloading.MediaTypeWithIds(url);
 
         return result.IsOk
             ? Result.Ok(result.ResultValue)
@@ -36,7 +36,7 @@ internal static class Downloader
             printer.Info("Please wait for the multiple videos to be downloaded...");
         }
 
-        var rawUrls = FSharp.Downloading.downloadUrls(mediaType);
+        var rawUrls = FSharp.Downloading.ExtractDownloadUrls(mediaType);
         var urls = new Urls(rawUrls[0], rawUrls.Length == 2 ? rawUrls[1] : null);
 
         Result downloadResult = new();
