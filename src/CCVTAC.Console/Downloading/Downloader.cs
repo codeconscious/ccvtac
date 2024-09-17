@@ -1,5 +1,5 @@
 using CCVTAC.Console.ExternalTools;
-using MediaType = CCVTAC.FSharp.Downloading.MediaType;
+using MediaTypeWithUrls = CCVTAC.FSharp.Downloading.MediaType;
 using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 
 namespace CCVTAC.Console.Downloading;
@@ -14,7 +14,7 @@ internal static class Downloader
         "YouTube downloads and audio extraction"
     );
 
-    internal static Result<MediaType> GetMediaType(string url)
+    internal static Result<MediaTypeWithUrls> GetMediaType(string url)
     {
         var result = FSharp.Downloading.MediaTypeWithIds(url);
 
@@ -27,7 +27,7 @@ internal static class Downloader
     /// Completes the actual download process.
     /// </summary>
     /// <returns>A `Result` that, if successful, contains the name of the successfully downloaded format.</returns>
-    internal static Result<string?> Run(MediaType mediaType, UserSettings settings, Printer printer)
+    internal static Result<string?> Run(MediaTypeWithUrls mediaType, UserSettings settings, Printer printer)
     {
         Watch watch = new();
 
@@ -110,7 +110,7 @@ internal static class Downloader
     private static string GenerateDownloadArgs(
         string? audioFormat,
         UserSettings settings,
-        MediaType? mediaType,
+        MediaTypeWithUrls? mediaType,
         params string[]? additionalArgs)
     {
         const string writeJson = "--write-info-json";
