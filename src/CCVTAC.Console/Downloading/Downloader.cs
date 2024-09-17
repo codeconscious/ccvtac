@@ -44,8 +44,8 @@ internal static class Downloader
 
         foreach (string format in settings.AudioFormats)
         {
-            string combinedArgs = GenerateDownloadArgs(format, settings, mediaType, urls.Primary);
-            var downloadSettings = new ToolSettings(ExternalTool, combinedArgs, settings.WorkingDirectory!);
+            string args = GenerateDownloadArgs(format, settings, mediaType, urls.Primary);
+            var downloadSettings = new ToolSettings(ExternalTool, args, settings.WorkingDirectory!);
 
             downloadResult = Runner.Run(downloadSettings, printer);
 
@@ -58,7 +58,7 @@ internal static class Downloader
             printer.Debug($"Failure downloading \"{format}\" format.");
         }
 
-        Result<int> supplementaryDownloadResult = new();
+        var errors = downloadResult.Errors.Select(e => e.Message).ToList();
 
         if (downloadResult.IsFailed)
         {
@@ -67,7 +67,6 @@ internal static class Downloader
         }
         else if (urls.Supplementary is not null)
         {
-            // Since only metadata is downloaded, the format is irrelevant, so "best" is used as a placeholder.
             string supplementaryArgs = GenerateDownloadArgs(null, settings, null, urls.Supplementary);
 
             var supplementaryDownloadSettings =
@@ -76,7 +75,7 @@ internal static class Downloader
                     supplementaryArgs,
                     settings.WorkingDirectory!);
 
-            supplementaryDownloadResult = Runner.Run(supplementaryDownloadSettings, printer);
+            var supplementaryDownloadResult = Runner.Run(supplementaryDownloadSettings, printer);
 
             if (supplementaryDownloadResult.IsSuccess)
             {
@@ -85,18 +84,12 @@ internal static class Downloader
             else
             {
                 printer.Error("Supplementary download failed.");
-                supplementaryDownloadResult.Errors.ForEach(e => printer.Error(e.Message));
+                errors.AddRange(supplementaryDownloadResult.Errors.Select(e => e.Message));
             }
         }
 
-        var errors = downloadResult.Errors
-            .Select(e => e.Message)
-            .Concat(supplementaryDownloadResult.Errors.Select(e => e.Message));
-
-        var combinedErrors = string.Join(" / ", errors);
-
-        return combinedErrors.Length > 0
-            ? Result.Fail(combinedErrors)
+        return errors.Count > 0
+            ? Result.Fail(string.Join(" / ", errors))
             : Result.Ok(successfulFormat);
     }
 
