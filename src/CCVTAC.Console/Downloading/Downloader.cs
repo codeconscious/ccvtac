@@ -64,7 +64,7 @@ internal static class Downloader
             downloadResult.Errors.ForEach(e => printer.Error(e.Message));
             printer.Info("Post-processing will still be attempted."); // For any partial downloads
         }
-        else if (urls.Supplementary is not null) // Meaning there's a supplementary URL for downloading playlist metadata.
+        else if (urls.Supplementary is not null)
         {
             // Since only metadata is downloaded, the format is irrelevant, so "best" is used as a placeholder.
             string supplementaryArgs = GenerateDownloadArgs("best", settings, null, urls.Supplementary);
