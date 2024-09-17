@@ -111,11 +111,9 @@ internal static class Downloader
 
         // yt-dlp warning: "-f best" selects the best pre-merged format which is often not the best option.
         // To let yt-dlp download and merge the best available formats, simply do not pass any format selection."
-        var formatArg = !audioFormat.HasText()
+        var formatArg = !audioFormat.HasText() || audioFormat == "best"
             ? string.Empty
-            : audioFormat == "best"
-                ? string.Empty
-                : $"-f {audioFormat}";
+            : $"-f {audioFormat}";
 
         HashSet<string> args = mediaType switch
         {
