@@ -59,6 +59,7 @@ internal static class Downloader
         }
 
         Result<int> supplementaryDownloadResult = new();
+
         if (downloadResult.IsFailed)
         {
             downloadResult.Errors.ForEach(e => printer.Error(e.Message));
@@ -67,12 +68,13 @@ internal static class Downloader
         else if (urls.Supplementary is not null)
         {
             // Since only metadata is downloaded, the format is irrelevant, so "best" is used as a placeholder.
-            string supplementaryArgs = GenerateDownloadArgs("best", settings, null, urls.Supplementary);
+            string supplementaryArgs = GenerateDownloadArgs(null, settings, null, urls.Supplementary);
 
-            var supplementaryDownloadSettings = new ToolSettings(
-                ExternalTool,
-                supplementaryArgs,
-                settings.WorkingDirectory!);
+            var supplementaryDownloadSettings =
+                new ToolSettings(
+                    ExternalTool,
+                    supplementaryArgs,
+                    settings.WorkingDirectory!);
 
             supplementaryDownloadResult = Runner.Run(supplementaryDownloadSettings, printer);
 
@@ -106,7 +108,7 @@ internal static class Downloader
     /// <param name="additionalArgs"></param>
     /// <returns>A string of arguments that can be passed directly to the download tool.</returns>
     private static string GenerateDownloadArgs(
-        string audioFormat,
+        string? audioFormat,
         UserSettings settings,
         MediaType? mediaType,
         params string[]? additionalArgs)
@@ -116,7 +118,11 @@ internal static class Downloader
 
         // yt-dlp warning: "-f best" selects the best pre-merged format which is often not the best option.
         // To let yt-dlp download and merge the best available formats, simply do not pass any format selection."
-        var formatArg = audioFormat == "best" ? string.Empty : $"-f {audioFormat}";
+        var formatArg = !audioFormat.HasText()
+            ? string.Empty
+            : audioFormat == "best"
+                ? string.Empty
+                : $"-f {audioFormat}";
 
         HashSet<string> args = mediaType switch
         {
