@@ -14,7 +14,7 @@ internal static class Downloader
         "YouTube downloads and audio extraction"
     );
 
-    internal static Result<MediaTypeWithUrls> GetMediaType(string url)
+    internal static Result<MediaTypeWithUrls> WrapUrlInMediaType(string url)
     {
         var result = FSharp.Downloading.MediaTypeWithIds(url);
 

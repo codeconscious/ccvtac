@@ -153,7 +153,7 @@ internal class Orchestrator
 
         Watch jobWatch = new();
 
-        var mediaTypeResult = Downloader.GetMediaType(url);
+        var mediaTypeResult = Downloader.WrapUrlInMediaType(url);
         if (mediaTypeResult.IsFailed)
         {
             var errorMsg = $"URL parse error: {mediaTypeResult.Errors.First().Message}";
