@@ -30,7 +30,7 @@ module public Downloading =
             Ok (StandardPlaylist id)
         | Regex @"(?<=list=)(O[\w\-]+)" [id] ->
             Ok (ReleasePlaylist id)
-        | Regex @"((?:www\.)?youtube\.com\/(?:channel\/|c\/|user\/|@)(?:[\w\-]+))" [ id ] ->
+        | Regex @"((?:www\.)?youtube\.com\/(?:channel\/|c\/|user\/|@)(?:[A-Za-z0-9\-@%\/]+))" [ id ] ->
             Ok (Channel id)
         | _ ->
             Error "Unable to determine the media type of the URL."
