@@ -34,7 +34,7 @@ module Settings =
         [<JsonPropertyName("moveToDirectory")>]               MoveToDirectory: string
         [<JsonPropertyName("historyFile")>]                   HistoryFile: string
         [<JsonPropertyName("historyDisplayCount")>]           HistoryDisplayCount: byte
-        [<JsonPropertyName("audioFormat")>]                   AudioFormat: string
+        [<JsonPropertyName("audioFormats")>]                  AudioFormats: string array
         [<JsonPropertyName("audioQuality")>]                  AudioQuality: byte
         [<JsonPropertyName("splitChapters")>]                 SplitChapters: bool
         [<JsonPropertyName("sleepSecondsBetweenDownloads")>]  SleepSecondsBetweenDownloads: uint16
@@ -58,7 +58,7 @@ module Settings =
             then $"{count} {label}"
             else $"{count} {label}s"
 
-        let tagDetectionPatternCount (patterns:TagDetectionPatterns) =
+        let tagDetectionPatternCount (patterns: TagDetectionPatterns) =
             patterns.Title.Length +
             patterns.Artist.Length +
             patterns.Album.Length +
@@ -72,7 +72,7 @@ module Settings =
             ("Split video chapters", onOrOff settings.SplitChapters)
             ("Embed images", onOrOff settings.EmbedImages)
             ("Quiet mode", onOrOff settings.QuietMode)
-            ("Audio format", settings.AudioFormat)
+            ("Audio formats", String.Join(", ", settings.AudioFormats))
             ("Audio quality (10 up to 0)", settings.AudioQuality |> sprintf "%B")
             ("Sleep between URLs", settings.SleepSecondsBetweenURLs |> int |> pluralize "second")
             ("Sleep between downloads", settings.SleepSecondsBetweenDownloads |> int |> pluralize "second")
@@ -87,7 +87,7 @@ module Settings =
 
         let validate settings =
             let isEmpty str = str |> String.IsNullOrWhiteSpace
-            let dirMissing str = not <| (Directory.Exists str)
+            let dirMissing str = not (Directory.Exists str)
 
             // Source: https://github.com/yt-dlp/yt-dlp/?tab=readme-ov-file#post-processing-options
             let supportedAudioFormats = [|"best"; "aac"; "alac"; "flac"; "m4a"; "mp3"; "opus"; "vorbis"; "wav"|]
@@ -106,9 +106,11 @@ module Settings =
                 Error $"Move-to directory \"{d}\" is missing."
             | { AudioQuality = q } when q > 10uy ->
                 Error $"Audio quality must be in the range 10 (lowest) and 0 (highest)."
-            | { AudioFormat = fmt } when not (fmt |> validAudioFormat) ->
+            | { AudioFormats = fmt } when not (fmt |> Array.forall (fun f -> f |> validAudioFormat)) ->
+                let formats = String.Join(", ", fmt)
                 let approved = supportedAudioFormats |> String.concat ", "
-                Error $"\"{fmt}\" is an invalid audio format. Use \"default\" or one of the following: {approved}."
+                let nl = Environment.NewLine
+                Error $"Audio formats (\"%s{formats}\") include an unsupported audio format.{nl}Only the following supported formats: {approved}."
             | _ ->
                 Ok settings
 
@@ -119,7 +121,7 @@ module Settings =
         open System.Text.Encodings.Web
         open Validation
 
-        let deserialize<'a> (json:string) =
+        let deserialize<'a> (json: string) =
             let options = new JsonSerializerOptions()
             options.AllowTrailingCommas <- true
             options.ReadCommentHandling <- JsonCommentHandling.Skip
@@ -174,7 +176,7 @@ module Settings =
                   SplitChapters = true
                   SleepSecondsBetweenDownloads = 10us
                   SleepSecondsBetweenURLs = 15us
-                  AudioFormat = String.Empty
+                  AudioFormats = [||]
                   AudioQuality = 0uy
                   QuietMode = false
                   EmbedImages = true
@@ -196,22 +198,22 @@ module Settings =
 
         [<CompiledName("ToggleSplitChapters")>]
         let toggleSplitChapters settings =
-            let toggledSetting = not <| settings.SplitChapters
+            let toggledSetting = not settings.SplitChapters
             { settings with SplitChapters = toggledSetting }
 
         [<CompiledName("ToggleEmbedImages")>]
         let toggleEmbedImages settings =
-            let toggledSetting = not <| settings.EmbedImages
+            let toggledSetting = not settings.EmbedImages
             { settings with EmbedImages = toggledSetting }
 
         [<CompiledName("ToggleQuietMode")>]
         let toggleQuietMode settings =
-            let toggledSetting = not <| settings.QuietMode
+            let toggledSetting = not settings.QuietMode
             { settings with QuietMode = toggledSetting }
 
         [<CompiledName("UpdateAudioFormat")>]
         let updateAudioFormat settings newFormat =
-            let updatedSettings = { settings with AudioFormat = newFormat}
+            let updatedSettings = { settings with AudioFormats = newFormat}
             validate updatedSettings
 
         [<CompiledName("UpdateAudioQuality")>]

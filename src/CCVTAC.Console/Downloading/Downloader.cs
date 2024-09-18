@@ -1,29 +1,33 @@
 using CCVTAC.Console.ExternalTools;
-using MediaType = CCVTAC.FSharp.Downloading.MediaType;
+using MediaTypeWithUrls = CCVTAC.FSharp.Downloading.MediaType;
 using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 
 namespace CCVTAC.Console.Downloading;
 
 internal static class Downloader
 {
+    private record Urls(string Primary, string? Supplementary);
+
     internal static ExternalTool ExternalTool = new(
         "yt-dlp",
         "https://github.com/yt-dlp/yt-dlp/",
         "YouTube downloads and audio extraction"
     );
 
-    internal static Result<MediaType> GetMediaType(string url)
+    internal static Result<MediaTypeWithUrls> WrapUrlInMediaType(string url)
     {
-        var mediaTypeOrError = FSharp.Downloading.mediaTypeWithIds(url);
-        if (mediaTypeOrError.IsError)
-        {
-            return Result.Fail(mediaTypeOrError.ErrorValue);
-        }
+        var result = FSharp.Downloading.MediaTypeWithIds(url);
 
-        return Result.Ok(mediaTypeOrError.ResultValue);
+        return result.IsOk
+            ? Result.Ok(result.ResultValue)
+            : Result.Fail(result.ErrorValue);
     }
 
-    internal static Result Run(MediaType mediaType, UserSettings settings, Printer printer)
+    /// <summary>
+    /// Completes the actual download process.
+    /// </summary>
+    /// <returns>A `Result` that, if successful, contains the name of the successfully downloaded format.</returns>
+    internal static Result<string?> Run(MediaTypeWithUrls mediaType, UserSettings settings, Printer printer)
     {
         Watch watch = new();
 
@@ -32,29 +36,46 @@ internal static class Downloader
             printer.Info("Please wait for the multiple videos to be downloaded...");
         }
 
-        var urls = FSharp.Downloading.downloadUrls(mediaType);
+        var rawUrls = FSharp.Downloading.ExtractDownloadUrls(mediaType);
+        var urls = new Urls(rawUrls[0], rawUrls.Length == 2 ? rawUrls[1] : null);
 
-        string combinedArgs = GenerateDownloadArgs(settings, mediaType, urls[0]);
-        var downloadSettings = new ToolSettings(ExternalTool, combinedArgs, settings.WorkingDirectory!);
+        Result downloadResult = new();
+        string? successfulFormat = null;
 
-        var downloadResult = Runner.Run(downloadSettings, printer);
-        Result<int> supplementaryDownloadResult = new();
+        foreach (string format in settings.AudioFormats)
+        {
+            string args = GenerateDownloadArgs(format, settings, mediaType, urls.Primary);
+            var downloadSettings = new ToolSettings(ExternalTool, args, settings.WorkingDirectory!);
+
+            downloadResult = Runner.Run(downloadSettings, printer);
+
+            if (downloadResult.IsSuccess)
+            {
+                successfulFormat = format;
+                break;
+            }
+
+            printer.Debug($"Failure downloading \"{format}\" format.");
+        }
+
+        var errors = downloadResult.Errors.Select(e => e.Message).ToList();
 
         if (downloadResult.IsFailed)
         {
             downloadResult.Errors.ForEach(e => printer.Error(e.Message));
             printer.Info("Post-processing will still be attempted."); // For any partial downloads
         }
-        else if (urls.Length > 1) // Meaning there's a supplementary URL for downloading playlist metadata.
+        else if (urls.Supplementary is not null)
         {
-            string supplementaryArgs = GenerateDownloadArgs(settings, null, urls[1]);
+            string supplementaryArgs = GenerateDownloadArgs(null, settings, null, urls.Supplementary);
 
-            var supplementaryDownloadSettings = new ToolSettings(
-                ExternalTool,
-                supplementaryArgs,
-                settings.WorkingDirectory!);
+            var supplementaryDownloadSettings =
+                new ToolSettings(
+                    ExternalTool,
+                    supplementaryArgs,
+                    settings.WorkingDirectory!);
 
-            supplementaryDownloadResult = Runner.Run(supplementaryDownloadSettings, printer);
+            var supplementaryDownloadResult = Runner.Run(supplementaryDownloadSettings, printer);
 
             if (supplementaryDownloadResult.IsSuccess)
             {
@@ -63,19 +84,13 @@ internal static class Downloader
             else
             {
                 printer.Error("Supplementary download failed.");
-                supplementaryDownloadResult.Errors.ForEach(e => printer.Error(e.Message));
+                errors.AddRange(supplementaryDownloadResult.Errors.Select(e => e.Message));
             }
         }
 
-        var errors = downloadResult.Errors
-            .Select(e => e.Message)
-            .Concat(supplementaryDownloadResult.Errors.Select(e => e.Message));
-
-        var combinedErrors = string.Join(" / ", errors);
-
-        return combinedErrors.Length > 0
-            ? Result.Fail(combinedErrors)
-            : Result.Ok();
+        return errors.Count > 0
+            ? Result.Fail(string.Join(" / ", errors))
+            : Result.Ok(successfulFormat);
     }
 
     /// <summary>
@@ -86,8 +101,9 @@ internal static class Downloader
     /// <param name="additionalArgs"></param>
     /// <returns>A string of arguments that can be passed directly to the download tool.</returns>
     private static string GenerateDownloadArgs(
+        string? audioFormat,
         UserSettings settings,
-        MediaType? mediaType,
+        MediaTypeWithUrls? mediaType,
         params string[]? additionalArgs)
     {
         const string writeJson = "--write-info-json";
@@ -95,7 +111,9 @@ internal static class Downloader
 
         // yt-dlp warning: "-f best" selects the best pre-merged format which is often not the best option.
         // To let yt-dlp download and merge the best available formats, simply do not pass any format selection."
-        var formatArg = settings.AudioFormat == "best" ? string.Empty : $"-f {settings.AudioFormat}";
+        var formatArg = !audioFormat.HasText() || audioFormat == "best"
+            ? string.Empty
+            : $"-f {audioFormat}";
 
         HashSet<string> args = mediaType switch
         {

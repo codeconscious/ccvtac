@@ -1,9 +1,5 @@
 ﻿using CCVTAC.Console.Settings;
-using CCVTAC.Console.Downloading;
-using System.Threading;
-using System.Diagnostics.CodeAnalysis;
 using Spectre.Console;
-using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 using CCVTAC.Console.IoUtilties;
 
 namespace CCVTAC.Console;
