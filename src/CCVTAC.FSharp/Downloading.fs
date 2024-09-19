@@ -33,7 +33,7 @@ module public Downloading =
         | Regex @"((?:www\.)?youtube\.com\/(?:channel\/|c\/|user\/|@)(?:[A-Za-z0-9\-@%\/]+))" [ id ] ->
             Ok (Channel id)
         | _ ->
-            Error "Unable to determine the media type of the URL."
+            Error "Unable to determine the URL media type. (Might it contain invalid non-alphanumeric characters?)"
 
     [<CompiledName("ExtractDownloadUrls")>]
     let extractDownloadUrls mediaType =
