@@ -180,31 +180,30 @@ internal static class Mover
         }
     }
 
-    private static string GetSafeSubDirectoryName(CollectionMetadata? maybeCollectionData, TaggingSet taggingSet)
+    private static string GetSafeSubDirectoryName(CollectionMetadata? collectionData, TaggingSet taggingSet)
     {
-        const string topicSuffix = " - Topic"; // Official channels append this to artist names.
         string workingName;
 
-        if (maybeCollectionData is CollectionMetadata collectionData &&
-            collectionData.Uploader.HasText() &&
-            collectionData.Title.HasText())
+        if (collectionData is CollectionMetadata metadata &&
+            metadata.Uploader.HasText() &&
+            metadata.Title.HasText())
         {
-            workingName = collectionData.Uploader.EndsWith(topicSuffix)
-                ? collectionData.Uploader.Replace(topicSuffix, string.Empty)
-                : collectionData.Uploader;
+            workingName = metadata.Uploader;
         }
         else
         {
             var jsonResult = GetParsedVideoJson(taggingSet);
 
-            workingName = jsonResult.IsFailed
-                ? string.Empty
-                : jsonResult.Value.Uploader.EndsWith(topicSuffix)
-                    ? jsonResult.Value.Uploader.Replace(topicSuffix, string.Empty)
-                    : jsonResult.Value.Uploader;
+            workingName = jsonResult.IsSuccess
+                ? jsonResult.Value.Uploader
+                : string.Empty;
         }
 
-        return workingName.ReplaceInvalidPathChars().Trim();
+        const string topicSuffix = " - Topic"; // Official channels append this to artist names.
+        var safeName = workingName.ReplaceInvalidPathChars().Trim();
+        return safeName.EndsWith(topicSuffix)
+            ? safeName.Replace(topicSuffix, string.Empty)
+            : safeName;
     }
 
     private static Result<VideoMetadata> GetParsedVideoJson(TaggingSet taggingSet)
