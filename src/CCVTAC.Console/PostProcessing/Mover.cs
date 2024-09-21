@@ -182,21 +182,26 @@ internal static class Mover
 
     private static string GetSafeSubDirectoryName(CollectionMetadata? maybeCollectionData, TaggingSet taggingSet)
     {
+        const string topicSuffix = " - Topic"; // Official channels append this to artist names.
         string workingName;
 
         if (maybeCollectionData is CollectionMetadata collectionData &&
             collectionData.Uploader.HasText() &&
             collectionData.Title.HasText())
         {
-            workingName = $"{collectionData.Uploader}";
+            workingName = collectionData.Uploader.EndsWith(topicSuffix)
+                ? collectionData.Uploader.Replace(topicSuffix, string.Empty)
+                : collectionData.Uploader;
         }
         else
         {
             var jsonResult = GetParsedVideoJson(taggingSet);
 
-            workingName = jsonResult.IsSuccess
-                ? jsonResult.Value.Uploader
-                : string.Empty;
+            workingName = jsonResult.IsFailed
+                ? string.Empty
+                : jsonResult.Value.Uploader.EndsWith(topicSuffix)
+                    ? jsonResult.Value.Uploader.Replace(topicSuffix, string.Empty)
+                    : jsonResult.Value.Uploader;
         }
 
         return workingName.ReplaceInvalidPathChars().Trim();
