@@ -180,15 +180,15 @@ internal static class Mover
         }
     }
 
-    private static string GetSafeSubDirectoryName(CollectionMetadata? maybeCollectionData, TaggingSet taggingSet)
+    private static string GetSafeSubDirectoryName(CollectionMetadata? collectionData, TaggingSet taggingSet)
     {
         string workingName;
 
-        if (maybeCollectionData is CollectionMetadata collectionData &&
-            collectionData.Uploader.HasText() &&
-            collectionData.Title.HasText())
+        if (collectionData is CollectionMetadata metadata &&
+            metadata.Uploader.HasText() &&
+            metadata.Title.HasText())
         {
-            workingName = $"{collectionData.Uploader}";
+            workingName = metadata.Uploader;
         }
         else
         {
@@ -199,7 +199,12 @@ internal static class Mover
                 : string.Empty;
         }
 
-        return workingName.ReplaceInvalidPathChars().Trim();
+        var safeName = workingName.ReplaceInvalidPathChars().Trim();
+
+        const string topicSuffix = " - Topic"; // Official channels append this to uploader names.
+        return safeName.EndsWith(topicSuffix)
+            ? safeName.Replace(topicSuffix, string.Empty)
+            : safeName;
     }
 
     private static Result<VideoMetadata> GetParsedVideoJson(TaggingSet taggingSet)
