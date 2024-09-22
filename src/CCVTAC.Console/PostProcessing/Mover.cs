@@ -199,8 +199,9 @@ internal static class Mover
                 : string.Empty;
         }
 
-        const string topicSuffix = " - Topic"; // Official channels append this to artist names.
         var safeName = workingName.ReplaceInvalidPathChars().Trim();
+
+        const string topicSuffix = " - Topic"; // Official channels append this to uploader names.
         return safeName.EndsWith(topicSuffix)
             ? safeName.Replace(topicSuffix, string.Empty)
             : safeName;
