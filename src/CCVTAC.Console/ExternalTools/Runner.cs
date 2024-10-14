@@ -42,7 +42,7 @@ internal static class Runner
         printer.Info($"Completed {settings.Program.Purpose} in {watch.ElapsedFriendly}.");
 
         return extraSuccessExitCodes.Append(0).Contains(process.ExitCode)
-            ? Result.Ok((process.ExitCode, errors.TrimEnd(Environment.NewLine.ToCharArray())))
-            : Result.Fail($"[{settings.Program.Name}] Exit code {process.ExitCode}. {errors.TrimEnd(Environment.NewLine.ToCharArray())}.");
+            ? Result.Ok((process.ExitCode, errors.TrimTerminalLineBreak()))
+            : Result.Fail($"[{settings.Program.Name}] Exit code {process.ExitCode}. {errors.TrimTerminalLineBreak()}.");
     }
 }
