@@ -1,5 +1,6 @@
 using System.IO;
 using System.Text;
+using CCVTAC.Console.PostProcessing;
 
 namespace CCVTAC.Console.IoUtilties;
 
@@ -7,6 +8,13 @@ internal static class Directories
 {
     private static readonly string AllFilesSearchPattern = "*";
     private static readonly EnumerationOptions EnumerationOptions = new();
+
+    internal static int AudioFileCount(string directory)
+    {
+        return new DirectoryInfo(directory)
+            .EnumerateFiles()
+            .Count(f => PostProcessor.AudioExtensions.CaseInsensitiveContains(f.Extension));
+    }
 
     internal static Result WarnIfAnyFiles(string directory, int showMax)
     {
