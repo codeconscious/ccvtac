@@ -8,10 +8,10 @@ internal static class Runner
     /// Calls an external application.
     /// </summary>
     /// <param name="settings"></param>
-    /// <param name="allowSuccessExitCodes">Additional exit codes, other than 0, that can be treated as non-failures.</param>
+    /// <param name="extraSuccessExitCodes">Additional exit codes, other than 0, that can be treated as non-failures.</param>
     /// <param name="printer"></param>
     /// <returns>A `Result` containing the exit code, if successful, or else an error message.</returns>
-    internal static Result<(int ExitCode, string Warnings)> Run(ToolSettings settings, HashSet<int> allowSuccessExitCodes, Printer printer)
+    internal static Result<(int ExitCode, string Warnings)> Run(ToolSettings settings, HashSet<int> extraSuccessExitCodes, Printer printer)
     {
         Watch watch = new();
 
@@ -41,7 +41,7 @@ internal static class Runner
 
         printer.Info($"Completed {settings.Program.Purpose} in {watch.ElapsedFriendly}.");
 
-        return allowSuccessExitCodes.Append(0).Contains(process.ExitCode)
+        return extraSuccessExitCodes.Append(0).Contains(process.ExitCode)
             ? Result.Ok((process.ExitCode, errors.TrimEnd(Environment.NewLine.ToCharArray())))
             : Result.Fail($"[{settings.Program.Name}] Exit code {process.ExitCode}. {errors.TrimEnd(Environment.NewLine.ToCharArray())}.");
     }

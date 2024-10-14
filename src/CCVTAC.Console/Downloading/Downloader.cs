@@ -33,13 +33,13 @@ internal static class Downloader
 
         if (!mediaType.IsVideo && !mediaType.IsPlaylistVideo)
         {
-            printer.Info("Please wait for the multiple videos to be downloaded...");
+            printer.Info("Please wait for multiple videos to be downloaded...");
         }
 
         var rawUrls = FSharp.Downloading.ExtractDownloadUrls(mediaType);
         var urls = new Urls(rawUrls[0], rawUrls.Length == 2 ? rawUrls[1] : null);
 
-        Result<(int, string)> downloadResult = new();
+        var downloadResult = new Result<(int, string)> ();
         string? successfulFormat = null;
 
         foreach (string format in settings.AudioFormats)
@@ -47,16 +47,16 @@ internal static class Downloader
             string args = GenerateDownloadArgs(format, settings, mediaType, urls.Primary);
             var downloadSettings = new ToolSettings(ExternalTool, args, settings.WorkingDirectory!);
 
-            downloadResult = Runner.Run(downloadSettings, allowSuccessExitCodes: [1], printer);
+            downloadResult = Runner.Run(downloadSettings, extraSuccessExitCodes: [1], printer);
 
             if (downloadResult.IsSuccess)
             {
                 successfulFormat = format;
-                var (exitCode, warnings) = downloadResult.Value;
 
+                var (exitCode, warnings) = downloadResult.Value;
                 if (exitCode != 0)
                 {
-                    printer.Warning($"Downloading completed, but there were minor issues.");
+                    printer.Warning($"Downloading completed with minor issues.");
                     if (warnings.HasText())
                     {
                         printer.Warning(warnings);
@@ -98,7 +98,7 @@ internal static class Downloader
             var supplementaryDownloadResult =
                 Runner.Run(
                     supplementaryDownloadSettings,
-                    allowSuccessExitCodes: [1],
+                    extraSuccessExitCodes: [1],
                     printer);
 
             if (supplementaryDownloadResult.IsSuccess)
