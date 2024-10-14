@@ -39,7 +39,7 @@ internal static class Downloader
         var rawUrls = FSharp.Downloading.ExtractDownloadUrls(mediaType);
         var urls = new Urls(rawUrls[0], rawUrls.Length == 2 ? rawUrls[1] : null);
 
-        Result downloadResult = new();
+        Result<(int, string)> downloadResult = new();
         string? successfulFormat = null;
 
         foreach (string format in settings.AudioFormats)
@@ -47,11 +47,22 @@ internal static class Downloader
             string args = GenerateDownloadArgs(format, settings, mediaType, urls.Primary);
             var downloadSettings = new ToolSettings(ExternalTool, args, settings.WorkingDirectory!);
 
-            downloadResult = Runner.Run(downloadSettings, printer);
+            downloadResult = Runner.Run(downloadSettings, allowSuccessExitCodes: [1], printer);
 
             if (downloadResult.IsSuccess)
             {
                 successfulFormat = format;
+                var (exitCode, warnings) = downloadResult.Value;
+
+                if (exitCode != 0)
+                {
+                    printer.Warning($"Downloading completed, but there were minor issues.");
+                    if (warnings.HasText())
+                    {
+                        printer.Warning(warnings);
+                    }
+                }
+
                 break;
             }
 
@@ -60,7 +71,16 @@ internal static class Downloader
 
         var errors = downloadResult.Errors.Select(e => e.Message).ToList();
 
-        if (downloadResult.IsFailed)
+        int audioFileCount = IoUtilties.Directories.AudioFileCount(settings.WorkingDirectory);
+        if (audioFileCount == 0)
+        {
+            return Result.Fail(string.Join(
+                Environment.NewLine,
+                ["No audio files were downloaded.", ..errors])
+            );
+        }
+
+        if (errors.Count != 0)
         {
             downloadResult.Errors.ForEach(e => printer.Error(e.Message));
             printer.Info("Post-processing will still be attempted."); // For any partial downloads
@@ -75,7 +95,11 @@ internal static class Downloader
                     supplementaryArgs,
                     settings.WorkingDirectory!);
 
-            var supplementaryDownloadResult = Runner.Run(supplementaryDownloadSettings, printer);
+            var supplementaryDownloadResult =
+                Runner.Run(
+                    supplementaryDownloadSettings,
+                    allowSuccessExitCodes: [1],
+                    printer);
 
             if (supplementaryDownloadResult.IsSuccess)
             {
