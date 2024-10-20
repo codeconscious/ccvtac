@@ -50,7 +50,7 @@ internal static class Runner
 
         var trimmedErrors = errors.TrimTerminalLineBreak();
         return IsSuccessExitCode(otherSuccessExitCodes ?? [], process.ExitCode)
-            ? Result.Ok((process.ExitCode, trimmedErrors))
+            ? Result.Ok((process.ExitCode, trimmedErrors)) // Errors will be considered warnings.
             : Result.Fail($"[{settings.Program.Name}] Exit code {process.ExitCode}: {trimmedErrors}.");
     }
 }
