@@ -47,7 +47,7 @@ internal static class Downloader
             string args = GenerateDownloadArgs(format, settings, mediaType, urls.Primary);
             var downloadSettings = new ToolSettings(ExternalTool, args, settings.WorkingDirectory!);
 
-            downloadResult = Runner.Run(downloadSettings, extraSuccessExitCodes: [1], printer);
+            downloadResult = Runner.Run(downloadSettings, otherSuccessExitCodes: [1], printer);
 
             if (downloadResult.IsSuccess)
             {
@@ -98,7 +98,7 @@ internal static class Downloader
             var supplementaryDownloadResult =
                 Runner.Run(
                     supplementaryDownloadSettings,
-                    extraSuccessExitCodes: [1],
+                    otherSuccessExitCodes: [1],
                     printer);
 
             if (supplementaryDownloadResult.IsSuccess)

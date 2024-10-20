@@ -4,16 +4,21 @@ namespace CCVTAC.Console.ExternalTools;
 
 internal static class Runner
 {
+    private const int AuthenticSuccessExitCode = 0;
+
+    private static bool IsSuccessExitCode(HashSet<int> otherSuccessExitCodes, int exitCode) =>
+        otherSuccessExitCodes.Append(AuthenticSuccessExitCode).Contains(exitCode);
+
     /// <summary>
     /// Calls an external application.
     /// </summary>
     /// <param name="settings"></param>
-    /// <param name="extraSuccessExitCodes">Additional exit codes, other than 0, that can be treated as non-failures.</param>
+    /// <param name="otherSuccessExitCodes">Additional exit codes, other than 0, that can be treated as non-failures.</param>
     /// <param name="printer"></param>
     /// <returns>A `Result` containing the exit code, if successful, or else an error message.</returns>
-    internal static Result<(int ExitCode, string Warnings)> Run(
+    internal static Result<(int SuccessExitCode, string Warnings)> Run(
         ToolSettings settings,
-        HashSet<int> extraSuccessExitCodes,
+        HashSet<int> otherSuccessExitCodes,
         Printer printer)
     {
         Watch watch = new();
@@ -41,11 +46,10 @@ internal static class Runner
 
         string errors = process.StandardError.ReadToEnd(); // Must precede `WaitForExit()`
         process.WaitForExit();
-
         printer.Info($"Completed {settings.Program.Purpose} in {watch.ElapsedFriendly}.");
 
         var trimmedErrors = errors.TrimTerminalLineBreak();
-        return extraSuccessExitCodes.Append(0).Contains(process.ExitCode)
+        return IsSuccessExitCode(otherSuccessExitCodes ?? [], process.ExitCode)
             ? Result.Ok((process.ExitCode, trimmedErrors))
             : Result.Fail($"[{settings.Program.Name}] Exit code {process.ExitCode}: {trimmedErrors}.");
     }
