@@ -4,7 +4,22 @@ namespace CCVTAC.Console.ExternalTools;
 
 internal static class Runner
 {
-    internal static Result Run(ToolSettings settings, Printer printer)
+    private const int AuthenticSuccessExitCode = 0;
+
+    private static bool IsSuccessExitCode(HashSet<int> otherSuccessExitCodes, int exitCode) =>
+        otherSuccessExitCodes.Append(AuthenticSuccessExitCode).Contains(exitCode);
+
+    /// <summary>
+    /// Calls an external application.
+    /// </summary>
+    /// <param name="settings"></param>
+    /// <param name="otherSuccessExitCodes">Additional exit codes, other than 0, that can be treated as non-failures.</param>
+    /// <param name="printer"></param>
+    /// <returns>A `Result` containing the exit code, if successful, or else an error message.</returns>
+    internal static Result<(int SuccessExitCode, string Warnings)> Run(
+        ToolSettings settings,
+        HashSet<int> otherSuccessExitCodes,
+        Printer printer)
     {
         Watch watch = new();
 
@@ -29,18 +44,13 @@ internal static class Runner
             return Result.Fail($"Could not locate {settings.Program.Name}. If it's not installed, please install from {settings.Program.Url}.");
         }
 
-
-        string error = process.StandardError.ReadToEnd(); // Must precede `WaitForExit()`.
+        string errors = process.StandardError.ReadToEnd(); // Must precede `WaitForExit()`
         process.WaitForExit();
-
         printer.Info($"Completed {settings.Program.Purpose} in {watch.ElapsedFriendly}.");
 
-        int exitCode = process.ExitCode;
-        if (exitCode == 0)
-        {
-            return Result.Ok();
-        }
-
-        return Result.Fail($"[{settings.Program.Name}] {error.Replace(Environment.NewLine, string.Empty)}.");
+        var trimmedErrors = errors.TrimTerminalLineBreak();
+        return IsSuccessExitCode(otherSuccessExitCodes ?? [], process.ExitCode)
+            ? Result.Ok((process.ExitCode, trimmedErrors)) // Errors will be considered warnings.
+            : Result.Fail($"[{settings.Program.Name}] Exit code {process.ExitCode}: {trimmedErrors}.");
     }
 }

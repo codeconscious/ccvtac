@@ -66,4 +66,8 @@ public static class ExtensionMethods
         );
     }
 
+    public static string TrimTerminalLineBreak(this string text) =>
+        text.HasText()
+            ? text.TrimEnd(Environment.NewLine.ToCharArray())
+            : text;
 }
