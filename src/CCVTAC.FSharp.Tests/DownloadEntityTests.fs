@@ -154,7 +154,7 @@ module DownloadUrlsTests =
         Assert.Equal(result.Length, 2)
         Assert.Equal(expectedUrls.Length, result.Length)
         Assert.Equal(expectedUrls.Head, result.Head)
-        Assert.Equal(expectedUrls.[1], result.[1])
+        Assert.Equal(expectedUrls[1], result[1])
 
     [<Fact>]
     let ``Generates expected URL for standard playlist`` () =

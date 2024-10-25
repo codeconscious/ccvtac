@@ -122,7 +122,7 @@ module Settings =
         open Validation
 
         let deserialize<'a> (json: string) =
-            let options = new JsonSerializerOptions()
+            let options = JsonSerializerOptions()
             options.AllowTrailingCommas <- true
             options.ReadCommentHandling <- JsonCommentHandling.Skip
 
