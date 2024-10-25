@@ -2,7 +2,7 @@ namespace CCVTAC.Console;
 
 internal static class Commands
 {
-    internal static readonly char Prefix = '\\';
+    internal const char Prefix = '\\';
 
     internal static string[] QuitOptions { get; } =
         [MakeCommand("quit"), MakeCommand("q"), MakeCommand("exit")];
@@ -37,7 +37,7 @@ internal static class Commands
         { $"{QuitOptions[0]} or {QuitOptions[1]}", "Quit the application" },
     };
 
-    internal static string MakeCommand(string text)
+    private static string MakeCommand(string text)
     {
         if (string.IsNullOrWhiteSpace(text))
             throw new ArgumentException("The text cannot be null or white space.", nameof(text));

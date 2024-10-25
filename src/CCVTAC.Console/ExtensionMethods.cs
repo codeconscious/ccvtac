@@ -35,7 +35,7 @@ public static class ExtensionMethods
 
     /// <summary>
     /// Returns a new string in which all invalid path characters for the current OS
-    /// have been replaced by specifed replacement character.
+    /// have been replaced by specified replacement character.
     /// Throws if the replacement character is an invalid path character.
     /// </summary>
     /// <param name="sourceText"></param>

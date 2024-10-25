@@ -89,7 +89,7 @@ internal static class Tagger
 
         printer.Debug($"Current audio file: \"{audioFileName}\"");
 
-        using TaggedFile taggedFile = TaggedFile.Create(audioFilePath);
+        using var taggedFile = TaggedFile.Create(audioFilePath);
         TagDetector tagDetector = new(settings.TagDetectionPatterns);
 
         if (videoData.Track is string metadataTitle)
@@ -175,6 +175,7 @@ internal static class Tagger
 
         taggedFile.Save();
         printer.Debug($"Wrote tags to \"{audioFileName}\".");
+        return;
 
         /// <summary>
         /// If the supplied video uploader is specified in the settings, returns the video's upload year.
@@ -206,10 +207,9 @@ internal static class Tagger
             return Result.Fail($"Error reading JSON file \"{taggingSet.JsonFilePath}\": {ex.Message}.");
         }
 
-        VideoMetadata videoData;
         try
         {
-            videoData = JsonSerializer.Deserialize<VideoMetadata>(json);
+            var videoData = JsonSerializer.Deserialize<VideoMetadata>(json);
             return Result.Ok(videoData);
         }
         catch (JsonException ex)
@@ -287,7 +287,6 @@ internal static class Tagger
         catch (Exception ex)
         {
             printer.Error($"Error writing image to the audio file: {ex.Message}");
-            return;
         }
     }
 }

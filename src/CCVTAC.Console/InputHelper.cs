@@ -4,7 +4,7 @@ namespace CCVTAC.Console;
 
 public static partial class InputHelper
 {
-    internal static string Prompt =
+    internal static readonly string Prompt =
         $"Enter one or more YouTube media URLs or commands (or \"{Commands.SummaryCommand}\"):\n▶︎";
 
     /// <summary>
@@ -84,10 +84,7 @@ public static partial class InputHelper
             _counts = counts;
         }
 
-        public int this[InputCategory category]
-        {
-            get => _counts.TryGetValue(category, out var count) ? count : 0;
-        }
+        public int this[InputCategory category] => _counts.GetValueOrDefault(category, 0);
     }
 
     internal static CategoryCounts CountCategories(ICollection<CategorizedInput> inputs)

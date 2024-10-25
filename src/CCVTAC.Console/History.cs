@@ -55,11 +55,10 @@ public class History
             table.AddColumns("Time", "URL");
             table.Columns[0].PadRight(3);
 
-            string formattedTime, urls;
             foreach (IGrouping<DateTime, string> thisDate in historyData)
             {
-                formattedTime = $"{thisDate.Key:yyyy-MM-dd HH:mm:ss}";
-                urls = string.Join(Environment.NewLine, thisDate);
+                var formattedTime = $"{thisDate.Key:yyyy-MM-dd HH:mm:ss}";
+                var urls = string.Join(Environment.NewLine, thisDate);
                 table.AddRow(formattedTime, urls);
             }
 
