@@ -49,7 +49,7 @@ internal static class Runner
         printer.Info($"Completed {settings.Program.Purpose} in {watch.ElapsedFriendly}.");
 
         var trimmedErrors = errors.TrimTerminalLineBreak();
-        return IsSuccessExitCode(otherSuccessExitCodes ?? [], process.ExitCode)
+        return IsSuccessExitCode(otherSuccessExitCodes, process.ExitCode)
             ? Result.Ok((process.ExitCode, trimmedErrors)) // Errors will be considered warnings.
             : Result.Fail($"[{settings.Program.Name}] Exit code {process.ExitCode}: {trimmedErrors}.");
     }

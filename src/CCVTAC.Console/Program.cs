@@ -1,6 +1,6 @@
 ﻿using CCVTAC.Console.Settings;
 using Spectre.Console;
-using CCVTAC.Console.IoUtilties;
+using CCVTAC.Console.IoUtilities;
 
 namespace CCVTAC.Console;
 
@@ -46,7 +46,7 @@ internal static class Program
         {
             printer.Warning("\nQuitting at user's request.");
 
-            var warnResult = IoUtilties.Directories.WarnIfAnyFiles(settings.WorkingDirectory, 10);
+            var warnResult = IoUtilities.Directories.WarnIfAnyFiles(settings.WorkingDirectory, 10);
 
             if (warnResult.IsSuccess)
             {

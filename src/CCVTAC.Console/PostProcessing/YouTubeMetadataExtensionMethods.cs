@@ -5,7 +5,7 @@ public static class YouTubeMetadataExtensionMethods
     /// <summary>
     /// Returns a string summarizing video uploader information.
     /// </summary>
-    public static string UploaderSummary(this VideoMetadata videoData)
+    private static string UploaderSummary(this VideoMetadata videoData)
     {
         string uploaderLinkOrIdOrEmpty = videoData.UploaderUrl.HasText()
             ? videoData.UploaderUrl
@@ -23,7 +23,7 @@ public static class YouTubeMetadataExtensionMethods
     /// Returns a formatted MM/DD/YYYY version of the upload date (e.g., "08/27/2023") from the
     /// plain YYYYMMDD version (e.g., "20230827") within the parsed JSON file data.
     /// </summary>
-    public static string FormattedUploadDate(this VideoMetadata videoData)
+    private static string FormattedUploadDate(this VideoMetadata videoData)
     {
         return $"{videoData.UploadDate[4..6]}/{videoData.UploadDate[6..8]}/{videoData.UploadDate[0..4]}";
     }

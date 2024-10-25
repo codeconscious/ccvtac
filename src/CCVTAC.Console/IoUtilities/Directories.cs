@@ -2,7 +2,7 @@ using System.IO;
 using System.Text;
 using CCVTAC.Console.PostProcessing;
 
-namespace CCVTAC.Console.IoUtilties;
+namespace CCVTAC.Console.IoUtilities;
 
 internal static class Directories
 {
@@ -42,7 +42,7 @@ internal static class Directories
         return Result.Fail(report.ToString());
     }
 
-    internal static Result<int> DeleteAllFiles(string workingDirectory, int showMaxErrors)
+    private static Result<int> DeleteAllFiles(string workingDirectory, int showMaxErrors)
     {
         var fileNames = GetDirectoryFileNames(workingDirectory);
 
@@ -105,8 +105,7 @@ internal static class Directories
             [
                 ..Directory
                     .GetFiles(directoryName, AllFilesSearchPattern, EnumerationOptions)
-                    .Where(filePath =>
-                        ignoreFiles.None(ignoreFile => filePath.EndsWith(ignoreFile)))
+                    .Where(filePath => ignoreFiles.None(filePath.EndsWith))
             ];
     }
 }

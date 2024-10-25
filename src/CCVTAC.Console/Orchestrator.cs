@@ -1,6 +1,6 @@
 using CCVTAC.Console.Settings;
 using CCVTAC.Console.Downloading;
-using CCVTAC.Console.IoUtilties;
+using CCVTAC.Console.IoUtilities;
 using CCVTAC.Console.PostProcessing;
 using Spectre.Console;
 using System.Threading;
@@ -29,7 +29,7 @@ internal class Orchestrator
         }
 
         // The working directory should start empty. Give the user a chance to empty it.
-        var emptyDirResult = IoUtilties.Directories.WarnIfAnyFiles(settings.WorkingDirectory, 10);
+        var emptyDirResult = IoUtilities.Directories.WarnIfAnyFiles(settings.WorkingDirectory, 10);
         if (emptyDirResult.IsFailed)
         {
             printer.FirstError(emptyDirResult);
@@ -133,7 +133,7 @@ internal class Orchestrator
         int urlIndex,
         Printer printer)
     {
-        var emptyDirResult = IoUtilties.Directories.WarnIfAnyFiles(settings.WorkingDirectory, 10);
+        var emptyDirResult = IoUtilities.Directories.WarnIfAnyFiles(settings.WorkingDirectory, 10);
         if (emptyDirResult.IsFailed)
         {
             printer.FirstError(emptyDirResult);

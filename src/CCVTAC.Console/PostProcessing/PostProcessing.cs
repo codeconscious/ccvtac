@@ -57,7 +57,7 @@ internal static partial class PostProcessor
             var taggingSetFileNames = taggingSets.SelectMany(set => set.AllFiles).ToList();
             Deleter.Run(taggingSetFileNames, collectionJson, workingDirectory, printer);
 
-            IoUtilties.Directories.WarnIfAnyFiles(workingDirectory, 10);
+            IoUtilities.Directories.WarnIfAnyFiles(workingDirectory, 10);
         }
         else
         {
