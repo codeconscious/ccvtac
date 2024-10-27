@@ -8,8 +8,8 @@ public sealed class ExtensionMethodTests
 {
     public sealed class ReplaceInvalidPathCharsTests
     {
-        private const string ValidBaseFileName = @"filename123あいうえお漢字!@#$%^()_+ ";
-        private const char DefaultReplaceWithChar = '_';
+        private const string _validBaseFileName = @"filename123あいうえお漢字!@#$%^()_+ ";
+        private const char _defaultReplaceWithChar = '_';
 
         private static readonly char[] PathInvalidChars = [
             Path.PathSeparator,
@@ -21,17 +21,17 @@ public sealed class ExtensionMethodTests
         [Fact]
         public void ReplaceInvalidPathChars_StringContainsInvalidPathChars_Fixes()
         {
-            string badFileName = ValidBaseFileName + new string(PathInvalidChars);
-            string fixedPathName = badFileName.ReplaceInvalidPathChars(DefaultReplaceWithChar);
-            string expected = ValidBaseFileName + new string(DefaultReplaceWithChar, PathInvalidChars.Length);
+            string badFileName = _validBaseFileName + new string(PathInvalidChars);
+            string fixedPathName = badFileName.ReplaceInvalidPathChars(_defaultReplaceWithChar);
+            string expected = _validBaseFileName + new string(_defaultReplaceWithChar, PathInvalidChars.Length);
             Assert.Equal(expected, fixedPathName);
         }
 
         [Fact]
         public void ReplaceInvalidPathChars_StringContainsNoInvalidPathChars_DoesNotChange()
         {
-            string goodFileName = ValidBaseFileName;
-            string result = goodFileName.ReplaceInvalidPathChars(DefaultReplaceWithChar);
+            string goodFileName = _validBaseFileName;
+            string result = goodFileName.ReplaceInvalidPathChars(_defaultReplaceWithChar);
             Assert.Equal(goodFileName, result);
         }
 
@@ -39,9 +39,9 @@ public sealed class ExtensionMethodTests
         public void ReplaceInvalidPathCharsIncludingCustom_StringContainsInvalidPathChars_Fixes()
         {
             char[] customInvalidChars = ['&', '＆'];
-            string badFileName = ValidBaseFileName + new string(customInvalidChars);
-            string fixedPathName = badFileName.ReplaceInvalidPathChars(DefaultReplaceWithChar, customInvalidChars);
-            string expected = ValidBaseFileName + new string(DefaultReplaceWithChar, customInvalidChars.Length);
+            string badFileName = _validBaseFileName + new string(customInvalidChars);
+            string fixedPathName = badFileName.ReplaceInvalidPathChars(_defaultReplaceWithChar, customInvalidChars);
+            string expected = _validBaseFileName + new string(_defaultReplaceWithChar, customInvalidChars.Length);
             Assert.Equal(expected, fixedPathName);
         }
 
@@ -49,8 +49,8 @@ public sealed class ExtensionMethodTests
         public void ReplaceInvalidPathCharsIncludingCustom_StringContainsNoInvalidPathChars_DoesNotChange()
         {
             char[] customInvalidChars = ['&', '＆'];
-            string goodFileName = ValidBaseFileName + "++";
-            string result = goodFileName.ReplaceInvalidPathChars(DefaultReplaceWithChar, customInvalidChars);
+            string goodFileName = _validBaseFileName + "++";
+            string result = goodFileName.ReplaceInvalidPathChars(_defaultReplaceWithChar, customInvalidChars);
             Assert.Equal(goodFileName, result);
         }
 
@@ -58,7 +58,7 @@ public sealed class ExtensionMethodTests
         public void ReplaceInvalidPathChars_InvalidReplaceChar_ThrowsException()
         {
             const char knownInvalidChar = '/';
-            Assert.Throws<ArgumentException>(() => ValidBaseFileName.ReplaceInvalidPathChars(knownInvalidChar));
+            Assert.Throws<ArgumentException>(() => _validBaseFileName.ReplaceInvalidPathChars(knownInvalidChar));
         }
     }
 

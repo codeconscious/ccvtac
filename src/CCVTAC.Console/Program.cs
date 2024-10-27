@@ -6,24 +6,24 @@ namespace CCVTAC.Console;
 
 internal static class Program
 {
-    private static readonly string[] HelpFlags = ["-h", "--help"];
-    private static readonly string[] SettingsFileFlags = ["-s", "--settings"];
-    private const string DefaultSettingsFileName = "settings.json";
+    private static readonly string[] _helpFlags = ["-h", "--help"];
+    private static readonly string[] _settingsFileFlags = ["-s", "--settings"];
+    private const string _defaultSettingsFileName = "settings.json";
 
     private static void Main(string[] args)
     {
         Printer printer = new(showDebug: true);
 
-        if (args.Length > 0 && HelpFlags.CaseInsensitiveContains(args[0]))
+        if (args.Length > 0 && _helpFlags.CaseInsensitiveContains(args[0]))
         {
             Help.Print(printer);
             return;
         }
 
         string maybeSettingsPath = args.Length >= 2 &&
-                                   SettingsFileFlags.CaseInsensitiveContains(args[0])
+                                   _settingsFileFlags.CaseInsensitiveContains(args[0])
                 ? args[1] // Expected to be a settings file path.
-                : DefaultSettingsFileName;
+                : _defaultSettingsFileName;
 
         var settingsResult = SettingsAdapter.ProcessSettings(maybeSettingsPath, printer);
         if (settingsResult.IsFailed)
