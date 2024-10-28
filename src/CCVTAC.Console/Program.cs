@@ -31,7 +31,7 @@ internal static class Program
             printer.Errors(settingsResult.Errors.Select(e => e.Message).ToList());
             return;
         }
-        if (settingsResult.Value is null) // If a new settings files was created.
+        if (settingsResult.Value is null) // If a new settings file was created.
         {
             return;
         }
