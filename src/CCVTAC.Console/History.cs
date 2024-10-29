@@ -10,7 +10,7 @@ namespace CCVTAC.Console;
 /// </summary>
 public class History
 {
-    private static readonly char Separator = ';';
+    private const char Separator = ';';
     private string FilePath { get; init; }
     private byte DisplayCount { get; init; }
 

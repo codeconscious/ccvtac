@@ -11,7 +11,7 @@ public sealed class ExtensionMethodTests
         private const string _validBaseFileName = @"filename123あいうえお漢字!@#$%^()_+ ";
         private const char _defaultReplaceWithChar = '_';
 
-        private static readonly char[] PathInvalidChars = [
+        private static readonly char[] _pathInvalidChars = [
             Path.PathSeparator,
             Path.DirectorySeparatorChar,
             Path.AltDirectorySeparatorChar,
@@ -21,9 +21,9 @@ public sealed class ExtensionMethodTests
         [Fact]
         public void ReplaceInvalidPathChars_StringContainsInvalidPathChars_Fixes()
         {
-            string badFileName = _validBaseFileName + new string(PathInvalidChars);
+            string badFileName = _validBaseFileName + new string(_pathInvalidChars);
             string fixedPathName = badFileName.ReplaceInvalidPathChars(_defaultReplaceWithChar);
-            string expected = _validBaseFileName + new string(_defaultReplaceWithChar, PathInvalidChars.Length);
+            string expected = _validBaseFileName + new string(_defaultReplaceWithChar, _pathInvalidChars.Length);
             Assert.Equal(expected, fixedPathName);
         }
 
@@ -49,7 +49,7 @@ public sealed class ExtensionMethodTests
         public void ReplaceInvalidPathCharsIncludingCustom_StringContainsNoInvalidPathChars_DoesNotChange()
         {
             char[] customInvalidChars = ['&', '＆'];
-            string goodFileName = _validBaseFileName + "++";
+            const string goodFileName = _validBaseFileName + "++";
             string result = goodFileName.ReplaceInvalidPathChars(_defaultReplaceWithChar, customInvalidChars);
             Assert.Equal(goodFileName, result);
         }
@@ -117,35 +117,35 @@ public sealed class ExtensionMethodTests
         [Fact]
         public void HasText_SingleByteWhiteSpaceOnlyWhenDisallowed_ReturnsFalse()
         {
-            var whiteSpace = "   ";
+            const string whiteSpace = "   ";
             Assert.False(whiteSpace.HasText(false));
         }
 
         [Fact]
         public void HasText_SingleByteWhiteSpaceOnlyWhenAllowed_ReturnsTrue()
         {
-            var whiteSpace = "   ";
+            const string whiteSpace = "   ";
             Assert.True(whiteSpace.HasText(true));
         }
 
         [Fact]
         public void HasText_DoubleByteWhiteSpaceOnlyWhenDisallowed_ReturnsFalse()
         {
-            var whiteSpace = "　　　";
+            const string whiteSpace = "　　　";
             Assert.False(whiteSpace.HasText(false));
         }
 
         [Fact]
         public void HasText_DoubleByteWhiteSpaceOnlyWhenAllowed_ReturnsTrue()
         {
-            var whiteSpace = "　　　";
+            const string whiteSpace = "　　　";
             Assert.True(whiteSpace.HasText(true));
         }
 
         [Fact]
         public void HasText_WithText_ReturnsTrue()
         {
-            var text = "こんにちは！";
+            const string text = "こんにちは！";
             Assert.True(text.HasText(false));
             Assert.True(text.HasText(true));
         }
@@ -153,7 +153,8 @@ public sealed class ExtensionMethodTests
 
     public sealed class CaseInsensitiveContainsTests
     {
-        private static readonly List<string> CelestialBodies = ["Moon", "Mercury", "Mars", "Jupiter", "Venus"];
+        private static readonly List<string> _celestialBodies =
+            ["Moon", "Mercury", "Mars", "Jupiter", "Venus"];
 
         [Fact]
         public void CaseInsensitiveContains_EmptyCollection_ReturnsFalse()
@@ -166,7 +167,7 @@ public sealed class ExtensionMethodTests
         [Fact]
         public void CaseInsensitiveContains_SearchAllCapsInPopulatedCollection_ReturnsTrue()
         {
-            List<string> collection = CelestialBodies;
+            List<string> collection = _celestialBodies;
             var actual = collection.CaseInsensitiveContains("MOON");
             Assert.True(actual);
         }
@@ -174,7 +175,7 @@ public sealed class ExtensionMethodTests
         [Fact]
         public void CaseInsensitiveContains_SearchAllLowercaseInPopulatedCollection_ReturnsTrue()
         {
-            List<string> collection = CelestialBodies;
+            List<string> collection = _celestialBodies;
             var actual = collection.CaseInsensitiveContains("moon");
             Assert.True(actual);
         }
@@ -182,7 +183,7 @@ public sealed class ExtensionMethodTests
         [Fact]
         public void CaseInsensitiveContains_SearchExactInPopulatedCollection_ReturnsTrue()
         {
-            List<string> collection = CelestialBodies;
+            List<string> collection = _celestialBodies;
             var actual = collection.CaseInsensitiveContains("Moon");
             Assert.True(actual);
         }
@@ -190,7 +191,7 @@ public sealed class ExtensionMethodTests
         [Fact]
         public void CaseInsensitiveContains_SearchPartialInPopulatedCollection_ReturnsFalse()
         {
-            List<string> collection = CelestialBodies;
+            List<string> collection = _celestialBodies;
             var actual = collection.CaseInsensitiveContains("Mo");
             Assert.False(actual);
         }
@@ -198,7 +199,7 @@ public sealed class ExtensionMethodTests
         [Fact]
         public void CaseInsensitiveContains_SearchExactButDoubleWidthInPopulatedCollection_ReturnsFalse()
         {
-            List<string> collection = CelestialBodies;
+            List<string> collection = _celestialBodies;
             var actual = collection.CaseInsensitiveContains("Ｍｏｏｎ");
             Assert.False(actual);
         }

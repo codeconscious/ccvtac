@@ -6,7 +6,7 @@ namespace CCVTAC.Console.IoUtilities;
 
 internal static class Directories
 {
-    private static readonly string AllFilesSearchPattern = "*";
+    private const string AllFilesSearchPattern = "*";
     private static readonly EnumerationOptions EnumerationOptions = new();
 
     internal static int AudioFileCount(string directory)
