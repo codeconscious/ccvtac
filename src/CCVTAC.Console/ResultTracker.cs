@@ -50,7 +50,6 @@ internal sealed class ResultTracker<T>
         }
 
         var failureLabel = _failures.Count == 1 ? "failure" : "failures";
-
         _printer.Info($"{_failures.Count} {failureLabel} in this batch:");
 
         foreach (var (url, error) in _failures)

@@ -19,7 +19,7 @@ internal static class Directories
     internal static Result WarnIfAnyFiles(string directory, int showMax)
     {
         var fileNames = GetDirectoryFileNames(directory);
-        int fileCount = fileNames.Length;
+        var fileCount = fileNames.Length;
 
         if (fileNames.IsEmpty)
         {
