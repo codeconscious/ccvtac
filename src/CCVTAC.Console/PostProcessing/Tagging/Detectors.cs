@@ -30,7 +30,7 @@ internal static class Detectors
                 continue;
             }
 
-            string? matchedText = match.Groups[pattern.MatchGroup].Value.Trim();
+            string matchedText = match.Groups[pattern.MatchGroup].Value.Trim();
             return Cast(matchedText, defaultValue);
         }
 
@@ -39,7 +39,7 @@ internal static class Detectors
 
     /// <summary>
     /// Finds and returns all instances of text matching a given detection scheme pattern,
-    /// concatentating them into a single string (using a custom separator), then casting
+    /// concatenating them into a single string (using a custom separator), then casting
     /// to type T if necessary.
     /// </summary>
     /// <returns>A match of type T if there were any matches; otherwise, the default value provided.</returns>
@@ -47,7 +47,7 @@ internal static class Detectors
         VideoMetadata data,
         IEnumerable<TagDetectionPattern> patterns,
         T? defaultValue,
-        string separator = "; ")
+        string separator)
     {
         HashSet<string> matchedValues = [];
 

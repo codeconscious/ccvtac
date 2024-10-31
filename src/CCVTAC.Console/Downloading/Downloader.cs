@@ -8,7 +8,7 @@ internal static class Downloader
 {
     private record Urls(string Primary, string? Supplementary);
 
-    internal static ExternalTool ExternalTool = new(
+    internal static readonly ExternalTool ExternalTool = new(
         "yt-dlp",
         "https://github.com/yt-dlp/yt-dlp/",
         "YouTube downloads and audio extraction"
@@ -29,9 +29,7 @@ internal static class Downloader
     /// <returns>A `Result` that, if successful, contains the name of the successfully downloaded format.</returns>
     internal static Result<string?> Run(MediaTypeWithUrls mediaType, UserSettings settings, Printer printer)
     {
-        Watch watch = new();
-
-        if (!mediaType.IsVideo && !mediaType.IsPlaylistVideo)
+        if (mediaType is { IsVideo: false, IsPlaylistVideo: false })
         {
             printer.Info("Please wait for multiple videos to be downloaded...");
         }
@@ -71,7 +69,7 @@ internal static class Downloader
 
         var errors = downloadResult.Errors.Select(e => e.Message).ToList();
 
-        int audioFileCount = IoUtilties.Directories.AudioFileCount(settings.WorkingDirectory);
+        int audioFileCount = IoUtilities.Directories.AudioFileCount(settings.WorkingDirectory);
         if (audioFileCount == 0)
         {
             return Result.Fail(string.Join(
@@ -120,6 +118,7 @@ internal static class Downloader
     /// <summary>
     /// Generate the entire argument string for the download tool.
     /// </summary>
+    /// <param name="audioFormat">One of the supported audio format codes.</param>
     /// <param name="settings"></param>
     /// <param name="mediaType">A `MediaType` or null (which indicates a metadata-only supplementary download).</param>
     /// <param name="additionalArgs"></param>
@@ -167,7 +166,7 @@ internal static class Downloader
                 args.Add("--split-chapters");
             }
 
-            if (!mediaType.IsVideo && !mediaType.IsPlaylistVideo)
+            if (mediaType is { IsVideo: false, IsPlaylistVideo: false })
             {
                 args.Add($"--sleep-interval {settings.SleepSecondsBetweenDownloads}");
             }

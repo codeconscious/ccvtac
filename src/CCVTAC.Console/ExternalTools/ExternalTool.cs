@@ -44,7 +44,7 @@ internal record ExternalTool
     {
         ProcessStartInfo processStartInfo = new()
         {
-            FileName = this.Name,
+            FileName = Name,
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,

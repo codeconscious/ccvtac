@@ -1,6 +1,6 @@
 ﻿using CCVTAC.Console.Settings;
 using Spectre.Console;
-using CCVTAC.Console.IoUtilties;
+using CCVTAC.Console.IoUtilities;
 
 namespace CCVTAC.Console;
 
@@ -10,7 +10,7 @@ internal static class Program
     private static readonly string[] _settingsFileFlags = ["-s", "--settings"];
     private const string _defaultSettingsFileName = "settings.json";
 
-    static void Main(string[] args)
+    private static void Main(string[] args)
     {
         Printer printer = new(showDebug: true);
 
@@ -20,21 +20,22 @@ internal static class Program
             return;
         }
 
-        string? maybeSettingsPath = args.Length >= 2 &&
-                                    _settingsFileFlags.CaseInsensitiveContains(args[0])
+        string maybeSettingsPath = args.Length >= 2 &&
+                                   _settingsFileFlags.CaseInsensitiveContains(args[0])
                 ? args[1] // Expected to be a settings file path.
                 : _defaultSettingsFileName;
 
         var settingsResult = SettingsAdapter.ProcessSettings(maybeSettingsPath, printer);
         if (settingsResult.IsFailed)
         {
-            printer.Errors(settingsResult.Errors.Select(e => e.Message));
+            printer.Errors(settingsResult.Errors.Select(e => e.Message).ToList());
             return;
         }
-        else if (settingsResult.Value is null) // If a new settings files was created.
+        if (settingsResult.Value is null) // If a new settings file was created.
         {
             return;
         }
+        
         var settings = settingsResult.Value;
         SettingsAdapter.PrintSummary(settings, printer, header: "Settings loaded OK.");
 
@@ -45,7 +46,7 @@ internal static class Program
         {
             printer.Warning("\nQuitting at user's request.");
 
-            var warnResult = IoUtilties.Directories.WarnIfAnyFiles(settings.WorkingDirectory, 10);
+            var warnResult = IoUtilities.Directories.WarnIfAnyFiles(settings.WorkingDirectory, 10);
 
             if (warnResult.IsSuccess)
             {
@@ -63,8 +64,6 @@ internal static class Program
             {
                 printer.FirstError(deleteResult);
             }
-
-            return;
         };
 
         // Top-level `try` block to catch and pretty-print unexpected exceptions.

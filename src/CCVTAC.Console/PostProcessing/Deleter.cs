@@ -40,7 +40,7 @@ internal static class Deleter
         printer.Info("Deleted temporary files.");
     }
 
-    internal static Result<ImmutableList<string>> GetCollectionFiles(
+    private static Result<ImmutableList<string>> GetCollectionFiles(
         CollectionMetadata? collectionMetadata,
         string workingDirectory)
     {

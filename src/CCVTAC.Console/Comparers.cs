@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace CCVTAC.Console;
 
 internal class Comparers
@@ -16,7 +14,7 @@ internal class Comparers
             };
         }
 
-        public int GetHashCode([DisallowNull] string obj)
+        public int GetHashCode(string obj)
         {
             return obj.ToLower().GetHashCode();
         }

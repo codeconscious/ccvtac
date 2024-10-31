@@ -57,7 +57,7 @@ internal static partial class PostProcessor
             var taggingSetFileNames = taggingSets.SelectMany(set => set.AllFiles).ToList();
             Deleter.Run(taggingSetFileNames, collectionJson, workingDirectory, printer);
 
-            IoUtilties.Directories.WarnIfAnyFiles(workingDirectory, 10);
+            IoUtilities.Directories.WarnIfAnyFiles(workingDirectory, 10);
         }
         else
         {
@@ -67,7 +67,7 @@ internal static partial class PostProcessor
         printer.Info($"Post-processing done in {watch.ElapsedFriendly}.");
     }
 
-    internal static Result<CollectionMetadata> GetCollectionJson(string workingDirectory)
+    private static Result<CollectionMetadata> GetCollectionJson(string workingDirectory)
     {
         try
         {
@@ -104,7 +104,7 @@ internal static partial class PostProcessor
             string[] files = Directory.GetFiles(directory);
             var taggingSets = TaggingSet.CreateSets(files);
 
-            return taggingSets?.Any() == true
+            return taggingSets.Any()
                 ? Result.Ok(taggingSets)
                 : Result.Fail($"No tagging sets were created using working directory \"{directory}\".");
         }

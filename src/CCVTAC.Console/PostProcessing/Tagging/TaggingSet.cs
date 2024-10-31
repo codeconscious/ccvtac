@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 namespace CCVTAC.Console.PostProcessing.Tagging;
 
 /// <summary>
-/// Contains all of the data necessary for tagging a related set of files.
+/// Contains all the data necessary for tagging a related set of files.
 /// </summary>
 /// <remarks>
 /// Files are "related" if they share the same resource ID. Generally, only a single downloaded video
@@ -15,7 +15,7 @@ internal readonly record struct TaggingSet
 {
     /// <summary>
     /// The ID of a single video and perhaps its child videos (if "split chapters" was used).
-    /// Used to locate all of the related files (whose filenames will contain the same ID).
+    /// Used to locate all the related files (whose filenames will contain the same ID).
     /// </summary>
     internal string ResourceId { get; init; }
 
@@ -41,11 +41,11 @@ internal readonly record struct TaggingSet
     /// A regex that finds all files whose filename includes a video ID.
     /// Group 1 contains the video ID itself.
     /// </summary>
-    internal static Regex FileNamesWithVideoIdsRegex = new(@".+\[([\w_\-]{11})\](?:.*)?\.(\w+)");
+    private static readonly Regex FileNamesWithVideoIdsRegex = new(@".+\[([\w_\-]{11})\](?:.*)?\.(\w+)");
 
-    internal TaggingSet(
+    private TaggingSet(
         string resourceId,
-        IEnumerable<string> audioFilePaths,
+        ICollection<string> audioFilePaths,
         string jsonFilePath,
         string imageFilePath)
     {
@@ -55,7 +55,7 @@ internal readonly record struct TaggingSet
             throw new ArgumentException("The JSON file path must be provided.");
         if (string.IsNullOrWhiteSpace(imageFilePath))
             throw new ArgumentException("The image file path must be provided.");
-        if (audioFilePaths?.Any() != true)
+        if (audioFilePaths.Count == 0)
             throw new ArgumentException("At least one audio file path must be provided.", nameof(audioFilePaths));
 
         ResourceId = resourceId.Trim();
@@ -74,9 +74,9 @@ internal readonly record struct TaggingSet
     ///     1 JSON file, and 1 image file for each distinct video ID.
     /// </param>
     /// <remarks>Does not include collection (playlist or channel) metadata files.</remarks>
-    internal static ImmutableList<TaggingSet> CreateSets(IEnumerable<string> filePaths)
+    internal static ImmutableList<TaggingSet> CreateSets(ICollection<string> filePaths)
     {
-        if (filePaths is null || filePaths.None())
+        if (filePaths.None())
         {
             return Enumerable.Empty<TaggingSet>().ToImmutableList();
         }
@@ -105,9 +105,9 @@ internal readonly record struct TaggingSet
                     .Select(gr => {
                         return new TaggingSet(
                             gr.Key, // Video ID
-                            gr.Where(f => PostProcessor.AudioExtensions.CaseInsensitiveContains(Path.GetExtension(f))),
-                            gr.Where(f => f.EndsWith(jsonFileExt)).Single(),
-                            gr.Where(f => f.EndsWith(imageFileExt)).Single()
+                            gr.Where(f => PostProcessor.AudioExtensions.CaseInsensitiveContains(Path.GetExtension(f))).ToList(),
+                            gr.Single(f => f.EndsWith(jsonFileExt)),
+                            gr.Single(f => f.EndsWith(imageFileExt))
                         );
                     })
                     .ToImmutableList();

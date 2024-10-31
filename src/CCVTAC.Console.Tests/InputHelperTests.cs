@@ -7,7 +7,7 @@ public sealed class InputHelperTests
     [Fact]
     public void MultipleUrlsEntered_CorrectlyParsed()
     {
-        string combinedInput = "https://youtu.be/5OpuZHsPBhQhttps://youtu.be/NT22EGxTuNw";
+        const string combinedInput = "https://youtu.be/5OpuZHsPBhQhttps://youtu.be/NT22EGxTuNw";
         List<string> expected = ["https://youtu.be/5OpuZHsPBhQ", "https://youtu.be/NT22EGxTuNw"];
         var actual = InputHelper.SplitInput(combinedInput);
         Assert.Equal(expected.Count, actual.Length);
@@ -18,7 +18,7 @@ public sealed class InputHelperTests
     [Fact]
     public void MultipleUrlsEnteredWithSpaces_CorrectlyParsed()
     {
-        string combinedInput = "  https://youtu.be/5OpuZHsPBhQ  https://youtu.be/NT22EGxTuNw  ";
+        const string combinedInput = "  https://youtu.be/5OpuZHsPBhQ  https://youtu.be/NT22EGxTuNw  ";
         List<string> expected = ["https://youtu.be/5OpuZHsPBhQ", "https://youtu.be/NT22EGxTuNw"];
         var actual = InputHelper.SplitInput(combinedInput);
         Assert.Equal(expected.Count, actual.Length);
@@ -29,7 +29,7 @@ public sealed class InputHelperTests
     [Fact]
     public void MultipleDuplicateUrlsEntered_CorrectlyParsed()
     {
-        string combinedInput = "https://youtu.be/5OpuZHsPBhQhttps://youtu.be/NT22EGxTuNwhttps://youtu.be/5OpuZHsPBhQ";
+        const string combinedInput = "https://youtu.be/5OpuZHsPBhQhttps://youtu.be/NT22EGxTuNwhttps://youtu.be/5OpuZHsPBhQ";
         List<string> expected = ["https://youtu.be/5OpuZHsPBhQ", "https://youtu.be/NT22EGxTuNw"];
         var actual = InputHelper.SplitInput(combinedInput);
         Assert.Equal(expected.Count, actual.Length);
@@ -40,7 +40,7 @@ public sealed class InputHelperTests
     [Fact]
     public void SingleCommandEntered_CorrectlyParsed()
     {
-        string combinedInput = "\\images";
+        const string combinedInput = "\\images";
         List<string> expected = ["\\images"];
         var actual = InputHelper.SplitInput(combinedInput);
         Assert.Equal(expected.Count, actual.Length);
@@ -50,7 +50,7 @@ public sealed class InputHelperTests
     [Fact]
     public void MultipleDuplicateCommandsAndUrlsEntered_CorrectlyParsed()
     {
-        string combinedInput = "\\imageshttps://youtu.be/5OpuZHsPBhQ https://youtu.be/NT22EGxTuNw\\images  https://youtu.be/5OpuZHsPBhQ";
+        const string combinedInput = "\\imageshttps://youtu.be/5OpuZHsPBhQ https://youtu.be/NT22EGxTuNw\\images  https://youtu.be/5OpuZHsPBhQ";
         List<string> expected = ["\\images", "https://youtu.be/5OpuZHsPBhQ", "https://youtu.be/NT22EGxTuNw"];
         var actual = InputHelper.SplitInput(combinedInput);
         Assert.Equal(expected.Count, actual.Length);
@@ -71,7 +71,7 @@ public sealed class InputHelperTests
     [Fact]
     public void InvalidInput_CorrectlyParsed()
     {
-        string combinedInput = "invalid";
+        const string combinedInput = "invalid";
         List<string> expected = [];
         var actual = InputHelper.SplitInput(combinedInput);
         Assert.Equal(expected.Count, actual.Length);

@@ -4,9 +4,9 @@ namespace CCVTAC.Console;
 
 public sealed class Printer
 {
-    public enum Level { Critical, Error, Warning, Info, Debug }
+    private enum Level { Critical, Error, Warning, Info, Debug }
 
-    public record ColorFormat(string? Foreground, string? Background, bool Bold = false);
+    private record ColorFormat(string? Foreground, string? Background, bool Bold = false);
 
     /// <summary>
     /// Color reference: https://spectreconsole.net/appendix/colors
@@ -53,7 +53,7 @@ public sealed class Printer
         }
 
         var bold = colors.Bold ? "bold " : string.Empty;
-        var fg = colors.Foreground is null ? "default" : colors.Foreground;
+        var fg = colors.Foreground ?? "default";
         var bg = colors.Background is null ? string.Empty : $" on {colors.Background}";
         var markUp = $"{bold}{fg}{bg}";
 
@@ -130,9 +130,9 @@ public sealed class Printer
         Print(Level.Error, message, appendLineBreak, prependLines, appendLines, processMarkup);
     }
 
-    public void Errors(IEnumerable<string> errors, byte appendLines = 0)
+    public void Errors(ICollection<string> errors, byte appendLines = 0)
     {
-        if (errors?.Any() != true)
+        if (errors.Count == 0)
             throw new ArgumentException("No errors were provided!", nameof(errors));
 
         foreach (var error in errors.Where(e => e.HasText()))
@@ -143,14 +143,14 @@ public sealed class Printer
         EmptyLines(appendLines);
     }
 
-    public void Errors(string headerMessage, IEnumerable<string> errors)
+    private void Errors(string headerMessage, IEnumerable<string> errors)
     {
-        Errors([headerMessage!, ..errors]);
+        Errors([headerMessage, ..errors]);
     }
 
     public void Errors<T>(Result<T> failResult, byte appendLines = 0)
     {
-        Errors(failResult.Errors.Select(e => e.Message), appendLines);
+        Errors(failResult.Errors.Select(e => e.Message).ToList(), appendLines);
     }
 
     public void Errors<T>(string headerMessage, Result<T> failingResult)
@@ -161,7 +161,7 @@ public sealed class Printer
     public void FirstError(IResultBase failResult, string? prepend = null)
     {
         string pre = prepend is null ? string.Empty : $"{prepend} ";
-        string message = failResult?.Errors?.FirstOrDefault()?.Message ?? string.Empty;
+        string message = failResult.Errors?.FirstOrDefault()?.Message ?? string.Empty;
 
         Error($"{pre}{message}");
     }
@@ -219,7 +219,7 @@ public sealed class Printer
         return AnsiConsole.Ask<string>($"[skyblue1]{prompt}[/]");
     }
 
-    public string Ask(string title, string[] options)
+    private string Ask(string title, string[] options)
     {
         return AnsiConsole.Prompt(
             new SelectionPrompt<string>()

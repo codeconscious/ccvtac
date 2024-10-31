@@ -9,7 +9,6 @@ namespace CCVTAC.Console.PostProcessing;
 internal static class Mover
 {
     private static readonly Regex _playlistImageRegex = new(@"\[[OP]L[\w\d_-]{12,}\]");
-
     private const string _imageFileWildcard = "*.jp*";
 
     internal static void Run(
@@ -165,14 +164,16 @@ internal static class Mover
                 ? subFolderName
                 : $"{subFolderName} - {maybeCollectionName.ReplaceInvalidPathChars()}";
 
-            if (GetCoverImage(workingDirInfo, audioFileCount) is FileInfo image)
+            if (GetCoverImage(workingDirInfo, audioFileCount) is not FileInfo image)
             {
-                image.MoveTo(
-                    Path.Combine(moveToDir, $"{baseFileName.Trim()}.jpg"),
-                    overwrite: overwrite);
-
-                printer.Info("Moved image file.");
+                return;
             }
+            
+            image.MoveTo(
+                Path.Combine(moveToDir, $"{baseFileName.Trim()}.jpg"),
+                overwrite: overwrite);
+
+            printer.Info("Moved image file.");
         }
         catch (Exception ex)
         {
