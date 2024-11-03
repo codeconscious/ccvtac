@@ -92,7 +92,7 @@ internal static class Tagger
         using var taggedFile = TaggedFile.Create(audioFilePath);
         TagDetector tagDetector = new(settings.TagDetectionPatterns);
 
-        if (videoData.Track is string metadataTitle)
+        if (videoData.Track is { } metadataTitle)
         {
             printer.Debug($"• Using metadata title \"{metadataTitle}\"");
             taggedFile.Tag.Title = metadataTitle;
@@ -104,7 +104,7 @@ internal static class Tagger
             taggedFile.Tag.Title = title;
         }
 
-        if (videoData.Artist is string metadataArtists)
+        if (videoData.Artist is { } metadataArtists)
         {
             var firstArtist = metadataArtists.Split(", ").First();
             var diffSummary = firstArtist == metadataArtists
@@ -114,36 +114,36 @@ internal static class Tagger
 
             printer.Debug($"• Using metadata artist \"{firstArtist}\"{diffSummary}");
         }
-        else if (tagDetector.DetectArtist(videoData) is string artist)
+        else if (tagDetector.DetectArtist(videoData) is { } artist)
         {
             printer.Debug($"• Found artist \"{artist}\"");
             taggedFile.Tag.Performers = [artist];
         }
 
-        if (videoData.Album is string metadataAlbum)
+        if (videoData.Album is { } metadataAlbum)
         {
             printer.Debug($"• Using metadata album \"{metadataAlbum}\"");
             taggedFile.Tag.Album = metadataAlbum;
         }
-        else if (tagDetector.DetectAlbum(videoData, collectionData?.Title) is string album)
+        else if (tagDetector.DetectAlbum(videoData, collectionData?.Title) is { } album)
         {
             printer.Debug($"• Found album \"{album}\"");
             taggedFile.Tag.Album = album;
         }
 
-        if (tagDetector.DetectComposers(videoData) is string composers)
+        if (tagDetector.DetectComposers(videoData) is { } composers)
         {
             printer.Debug($"• Found composer(s) \"{composers}\"");
             taggedFile.Tag.Composers = [composers];
         }
 
-        if (videoData.PlaylistIndex is uint trackNo)
+        if (videoData.PlaylistIndex is { } trackNo)
         {
             printer.Debug($"• Using playlist index of {trackNo} for track number");
             taggedFile.Tag.Track = trackNo;
         }
 
-        if (videoData.ReleaseYear is uint releaseYear)
+        if (videoData.ReleaseYear is { } releaseYear)
         {
             printer.Debug($"• Using metadata release year \"{releaseYear}\"");
             taggedFile.Tag.Year = releaseYear;
@@ -152,7 +152,7 @@ internal static class Tagger
         {
             ushort? maybeDefaultYear = GetAppropriateReleaseDateIfAny(settings, videoData);
 
-            if (tagDetector.DetectReleaseYear(videoData, maybeDefaultYear) is ushort year)
+            if (tagDetector.DetectReleaseYear(videoData, maybeDefaultYear) is { } year)
             {
                 printer.Debug($"• Found year \"{year}\"");
                 taggedFile.Tag.Year = year;
