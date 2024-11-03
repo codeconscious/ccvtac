@@ -22,7 +22,7 @@ internal static class Tagger
         bool embedImages = settings.EmbedImages &&
                            mediaType.IsVideo || mediaType.IsPlaylistVideo;
 
-        foreach (TaggingSet taggingSet in taggingSets)
+        foreach (var taggingSet in taggingSets)
         {
             ProcessSingleTaggingSet(settings, taggingSet, collectionJson, embedImages, printer);
         }
@@ -189,15 +189,16 @@ internal static class Tagger
                 return null;
             }
 
-            return ushort.TryParse(videoData.UploadDate[0..4], out ushort parsedYear)
+            return ushort.TryParse(videoData.UploadDate[..4], out var parsedYear)
                 ? parsedYear
                 : null;
         }
     }
 
-    static Result<VideoMetadata> ParseVideoJson(TaggingSet taggingSet)
+    private static Result<VideoMetadata> ParseVideoJson(TaggingSet taggingSet)
     {
         string json;
+        
         try
         {
             json = File.ReadAllText(taggingSet.JsonFilePath);
@@ -231,17 +232,9 @@ internal static class Tagger
         {
             return taggingSet;
         }
-
-        // If a video is split, it must have at least 2 chapters, so the minimum possible
-        // audio file count is 3. (Returning the taggingSet as-is might be viable, though.)
-        if (taggingSet.AudioFilePaths.Count == 2)
-        {
-            throw new InvalidOperationException(
-                $"Two audio files were found for media ID \"{taggingSet.ResourceId}\", but this should be impossible, so cannot continue.");
-        }
-
+        
         // The largest audio file must be the source file.
-        FileInfo largestFileInfo =
+        var largestFileInfo =
             taggingSet.AudioFilePaths
                 .Select(fileName => new FileInfo(fileName))
                 .OrderByDescending(fi => fi.Length)
