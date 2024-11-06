@@ -53,20 +53,20 @@ public static class YouTubeMetadataExtensionMethods
         {
             sb.AppendLine($"■ Album: {videoData.Album}");
         }
-        if (videoData.Title.HasText())
+        if (videoData.Title.HasText() && videoData.Title != videoData.Fulltitle)
         {
-            sb.AppendLine($"■ Title: {videoData.Title}");
+            sb.AppendLine($"■ Track Title: {videoData.Title}");
         }
         sb.AppendLine($"■ Uploaded: {videoData.FormattedUploadDate()}");
         var description = string.IsNullOrWhiteSpace(videoData.Description) ? "None." : videoData.Description;
         sb.AppendLine($"■ Video description: {description}");
 
-        if (maybeCollectionData is CollectionMetadata collectionData)
+        if (maybeCollectionData is { } collectionData)
         {
             sb.AppendLine();
             sb.AppendLine($"■ Playlist name: {collectionData.Title}");
             sb.AppendLine($"■ Playlist URL: {collectionData.WebpageUrl}");
-            if (videoData.PlaylistIndex is uint index)
+            if (videoData.PlaylistIndex is { } index)
             {
                 sb.AppendLine($"■ Playlist index: {index}");
             }
