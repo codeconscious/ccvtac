@@ -1,8 +1,8 @@
 namespace CCVTAC.FSharp
 
 module Settings =
-    open System.Text.Json.Serialization
     open System
+    open System.Text.Json.Serialization
 
     let newLine = Environment.NewLine
 
@@ -56,7 +56,7 @@ module Settings =
         let pluralize (label: string) count =
             if count = 1
             then $"{count} {label}"
-            else $"{count} {label}s"
+            else $"{count} {label}s" // Intentionally naive implementation
 
         let tagDetectionPatternCount (patterns: TagDetectionPatterns) =
             patterns.Title.Length +
@@ -125,14 +125,13 @@ module Settings =
             let options = JsonSerializerOptions()
             options.AllowTrailingCommas <- true
             options.ReadCommentHandling <- JsonCommentHandling.Skip
-
             JsonSerializer.Deserialize<'a>(json, options)
 
         [<CompiledName("FileExists")>]
-        let fileExists (FilePath file) =
-            match file |> File.Exists with
+        let fileExists (FilePath path) =
+            match path |> File.Exists with
             | true -> Ok()
-            | false -> Error $"The file \"path\" does not exist."
+            | false -> Error $"File \"{path}\" does not exist."
 
         [<CompiledName("Read")>]
         let read (FilePath path) =
@@ -147,19 +146,19 @@ module Settings =
                 | e -> Error $"Unexpected error reading from \"{path}\": {e.Message}"
 
         [<CompiledName("WriteFile")>]
-        let private writeFile settings (FilePath file) =
-            let unicodeEncoder = UnicodeRanges.All |> JavaScriptEncoder.Create
+        let private writeFile (FilePath file) settings =
+            let unicodeEncoder = JavaScriptEncoder.Create UnicodeRanges.All
             let writeIndented = true
             let options = JsonSerializerOptions(WriteIndented = writeIndented, Encoder = unicodeEncoder)
 
             try
                 let json = JsonSerializer.Serialize(settings, options)
                 (file, json) |> File.WriteAllText
-                Ok $"A new default settings file was created at \"{file}\".{newLine}Please populate it with your desired settings."
+                Ok $"A new settings file was saved to \"{file}\". Please populate it with your desired settings."
             with
-                | :? FileNotFoundException -> Error $"\"{file}\" was not found."
+                | :? FileNotFoundException -> Error $"File \"{file}\" was not found."
                 | :? JsonException -> Error $"Failure parsing user settings to JSON."
-                | e -> Error $"Failure writing to \"{file}\": {e.Message}"
+                | e -> Error $"Failure writing \"{file}\": {e.Message}"
 
         [<CompiledName("WriteDefaultFile")>]
         let writeDefaultFile (filePath: FilePath option) defaultFileName =
@@ -191,7 +190,7 @@ module Settings =
                   }
                   RenamePatterns = [||] }
 
-            writeFile defaultSettings confirmedPath
+            defaultSettings |> writeFile confirmedPath
 
     module LiveUpdating =
         open Validation
