@@ -77,7 +77,7 @@ internal static class Tagger
         }
     }
 
-    static void TagSingleFile(
+    private static void TagSingleFile(
         UserSettings settings,
         VideoMetadata videoData,
         string audioFilePath,
@@ -85,7 +85,7 @@ internal static class Tagger
         CollectionMetadata? collectionData,
         Printer printer)
     {
-        string audioFileName = Path.GetFileName(audioFilePath);
+        var audioFileName = Path.GetFileName(audioFilePath);
 
         printer.Debug($"Current audio file: \"{audioFileName}\"");
 

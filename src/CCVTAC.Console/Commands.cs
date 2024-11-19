@@ -34,7 +34,7 @@ internal static class Commands
         { QuietModeToggles[0], "Toggles quiet mode for the current session only" },
         { UpdateAudioFormatPrefix, $"Followed by a supported audio format (e.g., {UpdateAudioFormatPrefix}m4a), changes the audio format for the current session only" },
         { UpdateAudioQualityPrefix, $"Followed by a supported audio quality (e.g., {UpdateAudioQualityPrefix}0), changes the audio quality for the current session only" },
-        { $"{QuitOptions[0]} or {QuitOptions[1]}", "Quit the application" },
+        { $"{QuitOptions[0]} or {QuitOptions[1]}", "Quit the application" }
     };
 
     private static string MakeCommand(string text)

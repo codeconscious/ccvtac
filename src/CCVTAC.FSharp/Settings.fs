@@ -97,15 +97,15 @@ module Settings =
 
             match settings with
             | { WorkingDirectory = d } when d |> isEmpty ->
-                Error $"No working directory was specified."
+                Error "No working directory was specified."
             | { WorkingDirectory = d } when d |> dirMissing ->
                 Error $"Working directory \"{d}\" is missing."
             | { MoveToDirectory = d } when d |> isEmpty ->
-                Error $"No move-to directory was specified."
+                Error "No move-to directory was specified."
             | { MoveToDirectory = d } when d |> dirMissing ->
                 Error $"Move-to directory \"{d}\" is missing."
             | { AudioQuality = q } when q > 10uy ->
-                Error $"Audio quality must be in the range 10 (lowest) and 0 (highest)."
+                Error "Audio quality must be in the range 10 (lowest) and 0 (highest)."
             | { AudioFormats = fmt } when not (fmt |> Array.forall (fun f -> f |> validAudioFormat)) ->
                 let formats = String.Join(", ", fmt)
                 let approved = supportedAudioFormats |> String.concat ", "
@@ -157,7 +157,7 @@ module Settings =
                 Ok $"A new settings file was saved to \"{file}\". Please populate it with your desired settings."
             with
                 | :? FileNotFoundException -> Error $"File \"{file}\" was not found."
-                | :? JsonException -> Error $"Failure parsing user settings to JSON."
+                | :? JsonException -> Error "Failure parsing user settings to JSON."
                 | e -> Error $"Failure writing \"{file}\": {e.Message}"
 
         [<CompiledName("WriteDefaultFile")>]

@@ -8,8 +8,8 @@ namespace CCVTAC.Console.PostProcessing;
 
 internal static class Mover
 {
-    private static readonly Regex _playlistImageRegex = new(@"\[[OP]L[\w\d_-]{12,}\]");
-    private const string _imageFileWildcard = "*.jp*";
+    private static readonly Regex PlaylistImageRegex = new(@"\[[OP]L[\w\d_-]{12,}\]");
+    private const string ImageFileWildcard = "*.jp*";
 
     internal static void Run(
         IEnumerable<TaggingSet> taggingSets,
@@ -69,12 +69,12 @@ internal static class Mover
 
     private static bool IsPlaylistImage(string fileName)
     {
-        return _playlistImageRegex.IsMatch(fileName);
+        return PlaylistImageRegex.IsMatch(fileName);
     }
 
     private static FileInfo? GetCoverImage(DirectoryInfo workingDirInfo, int audioFileCount)
     {
-        var images = workingDirInfo.EnumerateFiles(_imageFileWildcard).ToImmutableArray();
+        var images = workingDirInfo.EnumerateFiles(ImageFileWildcard).ToImmutableArray();
         if (images.IsEmpty)
         {
             return null;

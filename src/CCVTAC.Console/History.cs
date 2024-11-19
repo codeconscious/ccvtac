@@ -11,8 +11,8 @@ namespace CCVTAC.Console;
 public class History
 {
     private const char Separator = ';';
-    private string FilePath { get; init; }
-    private byte DisplayCount { get; init; }
+    private string FilePath { get; }
+    private byte DisplayCount { get; }
 
     public History(string filePath, byte displayCount)
     {
@@ -34,7 +34,7 @@ public class History
         }
         catch (Exception ex)
         {
-            printer.Error($"Could not append URL(s) to history log: " + ex.Message);
+            printer.Error("Could not append URL(s) to history log: " + ex.Message);
         }
     }
 
@@ -62,7 +62,7 @@ public class History
                 table.AddRow(formattedTime, urls);
             }
 
-            printer.PrintTable(table);
+            Printer.PrintTable(table);
         }
         catch (Exception ex)
         {

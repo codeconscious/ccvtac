@@ -42,7 +42,7 @@ internal class Orchestrator
             else
             {
                 printer.FirstError(deleteResult);
-                printer.Info($"Aborting...");
+                printer.Info("Aborting...");
                 return;
             }
         }
@@ -206,7 +206,7 @@ internal class Orchestrator
                 table.AddRow(cmd, description);
             }
 
-            printer.PrintTable(table);
+            Printer.PrintTable(table);
             return Result.Ok(NextAction.Continue);
         }
 
@@ -334,7 +334,7 @@ internal class Orchestrator
             {
                 printer.Info($" • {input.Text}");
             }
-            printer.EmptyLines(1);
+            Printer.EmptyLines(1);
         }
     }
 
@@ -375,6 +375,6 @@ internal class Orchestrator
         /// <summary>
         /// Program execution should end due to an inability to continue.
         /// </summary>
-        QuitDueToErrors,
+        QuitDueToErrors
     }
 }

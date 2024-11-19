@@ -25,7 +25,7 @@ public static class YouTubeMetadataExtensionMethods
     /// </summary>
     private static string FormattedUploadDate(this VideoMetadata videoData)
     {
-        return $"{videoData.UploadDate[4..6]}/{videoData.UploadDate[6..8]}/{videoData.UploadDate[0..4]}";
+        return $"{videoData.UploadDate[4..6]}/{videoData.UploadDate[6..8]}/{videoData.UploadDate[..4]}";
     }
 
     /// <summary>

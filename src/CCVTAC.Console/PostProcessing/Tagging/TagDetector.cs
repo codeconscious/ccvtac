@@ -7,7 +7,7 @@ namespace CCVTAC.Console.PostProcessing.Tagging;
 /// </summary>
 internal sealed class TagDetector
 {
-    private TagDetectionPatterns Patterns { get; init;}
+    private TagDetectionPatterns Patterns { get; }
 
     internal TagDetector(TagDetectionPatterns tagDetectionPatterns)
     {

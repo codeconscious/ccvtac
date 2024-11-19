@@ -48,12 +48,12 @@ internal record ExternalTool
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
-            CreateNoWindow = true,
+            CreateNoWindow = true
         };
 
         try
         {
-            using Process? process = Process.Start(processStartInfo);
+            using var process = Process.Start(processStartInfo);
 
             if (process is null)
             {
