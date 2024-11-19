@@ -63,17 +63,15 @@ public sealed class InputHelperTests
     public void EmptyInput_CorrectlyParsed()
     {
         var combinedInput = string.Empty;
-        const int expectedCount = 0;
         var actual = InputHelper.SplitInput(combinedInput);
-        Assert.Equal(expectedCount, actual.Length);
+        Assert.Empty(actual);
     }
 
     [Fact]
     public void InvalidInput_CorrectlyParsed()
     {
         const string combinedInput = "invalid";
-        const int expectedCount = 0;
         var actual = InputHelper.SplitInput(combinedInput);
-        Assert.Equal(expectedCount, actual.Length);
+        Assert.Empty(actual);
     }
 }
