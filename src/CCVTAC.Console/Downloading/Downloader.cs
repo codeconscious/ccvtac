@@ -54,7 +54,7 @@ internal static class Downloader
                 var (exitCode, warnings) = downloadResult.Value;
                 if (exitCode != 0)
                 {
-                    printer.Warning($"Downloading completed with minor issues.");
+                    printer.Warning("Downloading completed with minor issues.");
                     if (warnings.HasText())
                     {
                         printer.Warning(warnings);
@@ -153,7 +153,7 @@ internal static class Downloader
                     "--write-thumbnail --convert-thumbnails jpg", // For album art
                     writeJson, // Contains metadata
                     trimFileNames,
-                    "--retries 2", // Default is 10, which seems like overkill
+                    "--retries 2" // Default is 10, which seems like overkill
                  ]
         };
 

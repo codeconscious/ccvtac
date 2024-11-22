@@ -39,12 +39,10 @@ public static class SettingsAdapter
             try
             {
                 var result = FSharp.Settings.IO.Read(path);
-                if (result is { IsError: true })
-                {
-                    return Result.Fail($"Settings validation error: {result.ErrorValue}");
-                }
-
-                return Result.Ok(result.ResultValue);
+                
+                return result is { IsError: true } 
+                    ? Result.Fail($"Settings validation error: {result.ErrorValue}") 
+                    : Result.Ok(result.ResultValue);
             }
             catch (Exception ex)
             {
@@ -134,6 +132,6 @@ public static class SettingsAdapter
             table.AddRow(pair.Item1, pair.Item2);
         }
 
-        printer.PrintTable(table);
+        Printer.PrintTable(table);
     }
 }

@@ -103,7 +103,7 @@ public sealed class Printer
         EmptyLines(appendLines);
     }
 
-    public void PrintTable(Table table)
+    public static void PrintTable(Table table)
     {
         AnsiConsole.Write(table);
     }
@@ -203,7 +203,7 @@ public sealed class Printer
     /// Prints the requested number of blank lines.
     /// </summary>
     /// <param name="count"></param>
-    public void EmptyLines(byte count)
+    public static void EmptyLines(byte count)
     {
         if (count == 0)
             return;
@@ -219,7 +219,7 @@ public sealed class Printer
         return AnsiConsole.Ask<string>($"[skyblue1]{prompt}[/]");
     }
 
-    private string Ask(string title, string[] options)
+    private static string Ask(string title, string[] options)
     {
         return AnsiConsole.Prompt(
             new SelectionPrompt<string>()

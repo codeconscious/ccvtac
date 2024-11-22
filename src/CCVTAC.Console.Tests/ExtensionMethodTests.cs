@@ -8,10 +8,10 @@ public sealed class ExtensionMethodTests
 {
     public sealed class ReplaceInvalidPathCharsTests
     {
-        private const string _validBaseFileName = @"filename123あいうえお漢字!@#$%^()_+ ";
-        private const char _defaultReplaceWithChar = '_';
+        private const string ValidBaseFileName = "filename123あいうえお漢字!@#$%^()_+ ";
+        private const char DefaultReplaceWithChar = '_';
 
-        private static readonly char[] _pathInvalidChars = [
+        private static readonly char[] PathInvalidChars = [
             Path.PathSeparator,
             Path.DirectorySeparatorChar,
             Path.AltDirectorySeparatorChar,
@@ -21,36 +21,35 @@ public sealed class ExtensionMethodTests
         [Fact]
         public void ReplaceInvalidPathChars_StringContainsInvalidPathChars_Fixes()
         {
-            string badFileName = _validBaseFileName + new string(_pathInvalidChars);
-            string fixedPathName = badFileName.ReplaceInvalidPathChars(_defaultReplaceWithChar);
-            string expected = _validBaseFileName + new string(_defaultReplaceWithChar, _pathInvalidChars.Length);
+            string badFileName = ValidBaseFileName + new string(PathInvalidChars);
+            string fixedPathName = badFileName.ReplaceInvalidPathChars(DefaultReplaceWithChar);
+            string expected = ValidBaseFileName + new string(DefaultReplaceWithChar, PathInvalidChars.Length);
             Assert.Equal(expected, fixedPathName);
         }
 
         [Fact]
         public void ReplaceInvalidPathChars_StringContainsNoInvalidPathChars_DoesNotChange()
         {
-            string goodFileName = _validBaseFileName;
-            string result = goodFileName.ReplaceInvalidPathChars(_defaultReplaceWithChar);
-            Assert.Equal(goodFileName, result);
+            string result = ValidBaseFileName.ReplaceInvalidPathChars(DefaultReplaceWithChar);
+            Assert.Equal(ValidBaseFileName, result);
         }
 
         [Fact]
         public void ReplaceInvalidPathCharsIncludingCustom_StringContainsInvalidPathChars_Fixes()
         {
             char[] customInvalidChars = ['&', '＆'];
-            string badFileName = _validBaseFileName + new string(customInvalidChars);
-            string fixedPathName = badFileName.ReplaceInvalidPathChars(_defaultReplaceWithChar, customInvalidChars);
-            string expected = _validBaseFileName + new string(_defaultReplaceWithChar, customInvalidChars.Length);
-            Assert.Equal(expected, fixedPathName);
+            var badFileName = ValidBaseFileName + new string(customInvalidChars);
+            var fixedPathName = badFileName.ReplaceInvalidPathChars(DefaultReplaceWithChar, customInvalidChars);
+            var expectedName = ValidBaseFileName + new string(DefaultReplaceWithChar, customInvalidChars.Length);
+            Assert.Equal(expectedName, fixedPathName);
         }
 
         [Fact]
         public void ReplaceInvalidPathCharsIncludingCustom_StringContainsNoInvalidPathChars_DoesNotChange()
         {
             char[] customInvalidChars = ['&', '＆'];
-            const string goodFileName = _validBaseFileName + "++";
-            string result = goodFileName.ReplaceInvalidPathChars(_defaultReplaceWithChar, customInvalidChars);
+            const string goodFileName = ValidBaseFileName + "++";
+            string result = goodFileName.ReplaceInvalidPathChars(DefaultReplaceWithChar, customInvalidChars);
             Assert.Equal(goodFileName, result);
         }
 
@@ -58,7 +57,7 @@ public sealed class ExtensionMethodTests
         public void ReplaceInvalidPathChars_InvalidReplaceChar_ThrowsException()
         {
             const char knownInvalidChar = '/';
-            Assert.Throws<ArgumentException>(() => _validBaseFileName.ReplaceInvalidPathChars(knownInvalidChar));
+            Assert.Throws<ArgumentException>(() => ValidBaseFileName.ReplaceInvalidPathChars(knownInvalidChar));
         }
     }
 
@@ -153,7 +152,7 @@ public sealed class ExtensionMethodTests
 
     public sealed class CaseInsensitiveContainsTests
     {
-        private static readonly List<string> _celestialBodies =
+        private static readonly List<string> CelestialBodies =
             ["Moon", "Mercury", "Mars", "Jupiter", "Venus"];
 
         [Fact]
@@ -167,7 +166,7 @@ public sealed class ExtensionMethodTests
         [Fact]
         public void CaseInsensitiveContains_SearchAllCapsInPopulatedCollection_ReturnsTrue()
         {
-            List<string> collection = _celestialBodies;
+            List<string> collection = CelestialBodies;
             var actual = collection.CaseInsensitiveContains("MOON");
             Assert.True(actual);
         }
@@ -175,7 +174,7 @@ public sealed class ExtensionMethodTests
         [Fact]
         public void CaseInsensitiveContains_SearchAllLowercaseInPopulatedCollection_ReturnsTrue()
         {
-            List<string> collection = _celestialBodies;
+            List<string> collection = CelestialBodies;
             var actual = collection.CaseInsensitiveContains("moon");
             Assert.True(actual);
         }
@@ -183,7 +182,7 @@ public sealed class ExtensionMethodTests
         [Fact]
         public void CaseInsensitiveContains_SearchExactInPopulatedCollection_ReturnsTrue()
         {
-            List<string> collection = _celestialBodies;
+            List<string> collection = CelestialBodies;
             var actual = collection.CaseInsensitiveContains("Moon");
             Assert.True(actual);
         }
@@ -191,7 +190,7 @@ public sealed class ExtensionMethodTests
         [Fact]
         public void CaseInsensitiveContains_SearchPartialInPopulatedCollection_ReturnsFalse()
         {
-            List<string> collection = _celestialBodies;
+            List<string> collection = CelestialBodies;
             var actual = collection.CaseInsensitiveContains("Mo");
             Assert.False(actual);
         }
@@ -199,7 +198,7 @@ public sealed class ExtensionMethodTests
         [Fact]
         public void CaseInsensitiveContains_SearchExactButDoubleWidthInPopulatedCollection_ReturnsFalse()
         {
-            List<string> collection = _celestialBodies;
+            List<string> collection = CelestialBodies;
             var actual = collection.CaseInsensitiveContains("Ｍｏｏｎ");
             Assert.False(actual);
         }

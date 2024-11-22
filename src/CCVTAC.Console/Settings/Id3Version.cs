@@ -9,7 +9,7 @@ public sealed class TagFormat
     {
         TwoPoint2 = 2,
         TwoPoint3 = 3,
-        TwoPoint4 = 4,
+        TwoPoint4 = 4
     }
 
     /// <summary>

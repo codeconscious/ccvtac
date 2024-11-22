@@ -17,7 +17,7 @@ internal readonly record struct TaggingSet
     /// The ID of a single video and perhaps its child videos (if "split chapters" was used).
     /// Used to locate all the related files (whose filenames will contain the same ID).
     /// </summary>
-    internal string ResourceId { get; init; }
+    internal string ResourceId { get; }
 
     /// <summary>
     /// All audio files for the associated resource ID. Several files with identical IDs indicates
@@ -28,12 +28,12 @@ internal readonly record struct TaggingSet
     /// <summary>
     /// The path to the JSON file containing metadata related to the source video.
     /// </summary>
-    internal string JsonFilePath { get; init; }
+    internal string JsonFilePath { get; }
 
     /// <summary>
     /// The path to the image file containing the thumbnail related to the source video.
     /// </summary>
-    internal string ImageFilePath { get; init; }
+    internal string ImageFilePath { get; }
 
     internal IReadOnlyList<string> AllFiles => [..AudioFilePaths, JsonFilePath, ImageFilePath];
 

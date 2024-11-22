@@ -48,11 +48,12 @@ public static class ExtensionMethods
     {
         var invalidChars = Path.GetInvalidFileNameChars()
                                .Concat(Path.GetInvalidPathChars())
-                               .Concat(new [] {
+                               .Concat([
                                     Path.PathSeparator,
                                     Path.DirectorySeparatorChar,
                                     Path.AltDirectorySeparatorChar,
-                                    Path.VolumeSeparatorChar })
+                                    Path.VolumeSeparatorChar
+                               ])
                                .Concat(customInvalidChars ?? Enumerable.Empty<char>())
                                .ToFrozenSet();
 
@@ -62,7 +63,7 @@ public static class ExtensionMethods
         return invalidChars.Aggregate(
             new StringBuilder(sourceText),
             (workingText, ch) => workingText.Replace(ch, replaceWith),
-            (workingText)     => workingText.ToString()
+            workingText       => workingText.ToString()
         );
     }
 
