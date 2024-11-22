@@ -72,9 +72,11 @@ internal static class Downloader
         int audioFileCount = IoUtilities.Directories.AudioFileCount(settings.WorkingDirectory);
         if (audioFileCount == 0)
         {
-            return Result.Fail(string.Join(
-                Environment.NewLine,
-                ["No audio files were downloaded.", ..errors])
+            return Result.Fail(
+                string.Join(
+                    Environment.NewLine,
+                    errors.Prepend("No audio files were downloaded.")
+                )
             );
         }
 
