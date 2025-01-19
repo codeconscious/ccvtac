@@ -4,11 +4,11 @@ module public Downloading =
     open System.Text.RegularExpressions
 
     type MediaType =
-        | Video of id: string
-        | PlaylistVideo of videoId: string * playlistId: string
-        | StandardPlaylist of id: string
-        | ReleasePlaylist of id: string
-        | Channel of id: string
+        | Video of Id: string
+        | PlaylistVideo of VideoId: string * PlaylistId: string
+        | StandardPlaylist of Id: string
+        | ReleasePlaylist of Id: string
+        | Channel of Id: string
 
     let private (|Regex|_|) pattern input =
         match Regex.Match(input, pattern) with
@@ -16,14 +16,12 @@ module public Downloading =
         | _ -> None
 
     [<CompiledName("MediaTypeWithIds")>]
-    let mediaTypeWithIds (url: string) =
+    let mediaTypeWithIds url =
         match url with
         | Regex @"(?<=v=|v\=)([\w-]{11})(?:&list=([\w_-]+))" [videoId; playlistId] ->
             Ok (PlaylistVideo (videoId, playlistId))
-        | Regex @"^([\w-]{11})$" [id] ->
-            Ok (Video id)
-        | Regex @"(?<=v=|v\\=)([\w-]{11})" [id] ->
-            Ok (Video id)
+        | Regex @"^([\w-]{11})$" [id]
+        | Regex @"(?<=v=|v\\=)([\w-]{11})" [id]
         | Regex @"(?<=youtu\.be/)(.{11})" [id] ->
             Ok (Video id)
         | Regex @"(?<=list=)(P[\w\-]+)" [id] ->
@@ -33,14 +31,14 @@ module public Downloading =
         | Regex @"((?:www\.)?youtube\.com\/(?:channel\/|c\/|user\/|@)(?:[A-Za-z0-9\-@%\/]+))" [ id ] ->
             Ok (Channel id)
         | _ ->
-            Error "Unable to determine the URL media type. (Might it contain invalid non-alphanumeric characters?)"
+            Error $"Unable to determine media type of URL \"{url}\". (Might it contain invalid characters?)"
 
     [<CompiledName("ExtractDownloadUrls")>]
     let extractDownloadUrls mediaType =
         let fullUrl urlBase id = urlBase + id
         let videoUrl = fullUrl "https://www.youtube.com/watch?v="
         let playlistUrl = fullUrl "https://www.youtube.com/playlist?list="
-        let channelUrl = fullUrl "https://" // For channels, the entire domain is also matched.
+        let channelUrl = fullUrl "https://" // For channels, the domain portion is also matched.
 
         match mediaType with
         | Video id -> [videoUrl id]
