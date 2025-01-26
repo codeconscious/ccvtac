@@ -92,7 +92,7 @@ internal class Orchestrator
         var batchResults = new ResultTracker<NextAction>(printer);
         int inputIndex = 0;
 
-        foreach (CategorizedInput input in categorizedInputs)
+        foreach (var input in categorizedInputs)
         {
             var result = input.Category is InputCategory.Command
                 ? ProcessCommand(input.Text, ref settings, history, printer)
@@ -103,6 +103,7 @@ internal class Orchestrator
 
             if (result.IsFailed)
             {
+                printer.Error(result.Errors.First().Message);
                 continue;
             }
 
@@ -300,7 +301,7 @@ internal class Orchestrator
             return Result.Ok(NextAction.Continue);
         }
 
-        return Result.Fail($"\"{command}\" is not a valid command.");
+        return Result.Fail($"\"{command}\" is not a valid command. Enter \"\\commands\" to see a list of commands.");
     }
 
     private static void SummarizeInput(
