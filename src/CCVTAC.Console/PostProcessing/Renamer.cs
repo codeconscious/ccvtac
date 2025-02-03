@@ -100,7 +100,7 @@ internal static class Renamer
             {
                 File.Move(
                     file.FullName,
-                    Path.Combine(workingDirectory, newFileName));
+                    Path.Combine(workingDirectory, newFileName).Normalize(NormalizationForm.FormC));
 
                 printer.Debug($"• From: \"{file.Name}\"");
                 printer.Debug($"    To: \"{newFileName}\"");
