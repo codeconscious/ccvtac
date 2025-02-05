@@ -25,9 +25,9 @@ internal static class Deleter
             printer.Warning(getFileResult.Errors.First().Message);
         }
 
-        var allFileNames = taggingSetFileNames.Concat(collectionFileNames).ToImmutableList();
+        var allFileNames = taggingSetFileNames.Concat(collectionFileNames).ToList();
 
-        if (allFileNames.IsEmpty)
+        if (allFileNames.Count == 0)
         {
             printer.Warning("No files to delete were found.");
             return;

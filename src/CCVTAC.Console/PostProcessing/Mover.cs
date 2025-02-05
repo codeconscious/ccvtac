@@ -54,7 +54,7 @@ internal static class Mover
             workingDirInfo,
             fullMoveToDir,
             audioFileNames.Count,
-            overwrite: false,
+            overwrite,
             printer);
 
         var fileLabel = successCount == 1 ? "file" : "files";
@@ -168,7 +168,7 @@ internal static class Mover
             {
                 return;
             }
-            
+
             image.MoveTo(
                 Path.Combine(moveToDir, $"{baseFileName.Trim()}.jpg"),
                 overwrite: overwrite);
