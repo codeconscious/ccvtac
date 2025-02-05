@@ -109,9 +109,9 @@ module Settings =
                 Error $"Move-to directory \"{d}\" is missing."
             | { AudioQuality = q } when q > 10uy ->
                 Error "Audio quality must be in the range 10 (lowest) and 0 (highest)."
-            | { NormalizationForm = nf } when not(Array.contains (nf.ToUpperInvariant()) supportedNormalizationForms) ->
-                let formats = String.Join(", ", supportedNormalizationForms)
-                Error $"\"{nf}\" is an invalid normalization form. Use one of the following: {formats}."
+            | { NormalizationForm = nf } when not(supportedNormalizationForms |> Array.contains (nf.ToUpperInvariant())) ->
+                let okFormats = String.Join(", ", supportedNormalizationForms)
+                Error $"\"{nf}\" is an invalid normalization form. Use one of the following: {okFormats}."
             | { AudioFormats = fmt } when not (fmt |> Array.forall (fun f -> f |> validAudioFormat)) ->
                 let formats = String.Join(", ", fmt)
                 let approved = supportedAudioFormats |> String.concat ", "
