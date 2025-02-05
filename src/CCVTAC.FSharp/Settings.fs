@@ -195,7 +195,7 @@ module Settings =
                     Year = [||]
                   }
                   RenamePatterns = [||]
-                  NormalizationForm = "C" }
+                  NormalizationForm = "C" } // Recommended for compatibility between Linux and macOS.
 
             defaultSettings |> writeFile confirmedPath
 
