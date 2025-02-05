@@ -93,6 +93,14 @@ You can copy and paste the sample settings file below to a JSON file named `sett
   // Embed video thumbnails into file tags?
   "embedImages": true,
 
+  // The Unicode normalization form to use for filenames.
+  // Valid values are `C`, `D`, `KC`, and `KD`.
+  // `C` is used by default if no valid value is provided.
+  //
+  // Reference: https://unicode.org/reports/tr15/
+  // Reference: https://en.wikipedia.org/wiki/Unicode_equivalence
+  "normalizationForm": "C",
+
   // Channel names for which the video thumbnail should
   // never be embedded in the audio file.
   "doNotEmbedImageUploaders": [
