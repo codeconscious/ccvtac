@@ -100,7 +100,8 @@ internal static class Renamer
             {
                 File.Move(
                     file.FullName,
-                    Path.Combine(workingDirectory, newFileName));
+                    Path.Combine(workingDirectory, newFileName)
+                        .Normalize(GetNormalizationForm(settings.NormalizationForm)));
 
                 printer.Debug($"• From: \"{file.Name}\"");
                 printer.Debug($"    To: \"{newFileName}\"");
@@ -113,4 +114,13 @@ internal static class Renamer
 
         printer.Info($"Renaming done in {watch.ElapsedFriendly}.");
     }
+
+    private static NormalizationForm GetNormalizationForm(string form) =>
+        form.Trim().ToUpperInvariant() switch
+        {
+            "D" => NormalizationForm.FormD,
+            "KD" => NormalizationForm.FormKD,
+            "KC" => NormalizationForm.FormKC,
+            _ => NormalizationForm.FormC
+        };
 }

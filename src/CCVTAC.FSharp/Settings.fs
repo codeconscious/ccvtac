@@ -45,6 +45,8 @@ module Settings =
         [<JsonPropertyName("ignoreUploadYearUploaders")>]     IgnoreUploadYearUploaders: string array
         [<JsonPropertyName("tagDetectionPatterns")>]          TagDetectionPatterns: TagDetectionPatterns
         [<JsonPropertyName("renamePatterns")>]                RenamePatterns: RenamePattern array
+        [<JsonPropertyName("normalizationForm")>]             NormalizationForm : string
+
     }
 
     [<CompiledName("Summarize")>]
@@ -90,7 +92,8 @@ module Settings =
             let dirMissing str = not (Directory.Exists str)
 
             // Source: https://github.com/yt-dlp/yt-dlp/?tab=readme-ov-file#post-processing-options
-            let supportedAudioFormats = [|"best"; "aac"; "alac"; "flac"; "m4a"; "mp3"; "opus"; "vorbis"; "wav"|]
+            let supportedAudioFormats = [| "best"; "aac"; "alac"; "flac"; "m4a"; "mp3"; "opus"; "vorbis"; "wav" |]
+            let supportedNormalizationForms = [| "C"; "D"; "KC"; "KD" |]
 
             let validAudioFormat fmt =
                 supportedAudioFormats |> Array.contains fmt
@@ -106,6 +109,9 @@ module Settings =
                 Error $"Move-to directory \"{d}\" is missing."
             | { AudioQuality = q } when q > 10uy ->
                 Error "Audio quality must be in the range 10 (lowest) and 0 (highest)."
+            | { NormalizationForm = nf } when not(supportedNormalizationForms |> Array.contains (nf.ToUpperInvariant())) ->
+                let okFormats = String.Join(", ", supportedNormalizationForms)
+                Error $"\"{nf}\" is an invalid normalization form. Use one of the following: {okFormats}."
             | { AudioFormats = fmt } when not (fmt |> Array.forall (fun f -> f |> validAudioFormat)) ->
                 let formats = String.Join(", ", fmt)
                 let approved = supportedAudioFormats |> String.concat ", "
@@ -188,7 +194,8 @@ module Settings =
                     Composer = [||]
                     Year = [||]
                   }
-                  RenamePatterns = [||] }
+                  RenamePatterns = [||]
+                  NormalizationForm = "C" } // Recommended for compatibility between Linux and macOS.
 
             defaultSettings |> writeFile confirmedPath
 
