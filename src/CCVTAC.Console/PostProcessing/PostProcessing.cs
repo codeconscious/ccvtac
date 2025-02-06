@@ -1,10 +1,10 @@
 using System.IO;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using CCVTAC.Console.IoUtilities;
 using CCVTAC.Console.PostProcessing.Tagging;
 using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 using static CCVTAC.FSharp.Downloading;
-using CCVTAC.Console.IoUtilities;
 
 namespace CCVTAC.Console.PostProcessing;
 
@@ -58,10 +58,10 @@ internal static partial class PostProcessor
             var taggingSetFileNames = taggingSets.SelectMany(set => set.AllFiles).ToList();
             Deleter.Run(taggingSetFileNames, collectionJson, workingDirectory, printer);
 
-            var remainingFilesResult = Directories.WarnIfAnyFiles(workingDirectory, 10);
-            if (remainingFilesResult.IsFailed)
+            var leftoverFilesResult = Directories.WarnIfAnyFiles(workingDirectory, 20);
+            if (leftoverFilesResult.IsFailed)
             {
-                printer.FirstError(remainingFilesResult);
+                printer.FirstError(leftoverFilesResult);
 
                 printer.Info("Will delete the remaining files...");
                 var deleteResult = Directories.DeleteAllFiles(workingDirectory, 20);
