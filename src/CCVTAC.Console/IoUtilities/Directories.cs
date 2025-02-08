@@ -27,7 +27,7 @@ internal static class Directories
         }
 
         var fileLabel = fileCount == 1 ? "file" : "files";
-        var report = new StringBuilder($"Found {fileCount} {fileLabel} in working directory \"{directory}\":{Environment.NewLine}");
+        var report = new StringBuilder($"Unexpectedly found {fileCount} {fileLabel} in working directory \"{directory}\":{Environment.NewLine}");
 
         foreach (string fileName in fileNames.Take(showMax))
         {
@@ -42,7 +42,7 @@ internal static class Directories
         return Result.Fail(report.ToString());
     }
 
-    private static Result<int> DeleteAllFiles(string workingDirectory, int showMaxErrors)
+    internal static Result<int> DeleteAllFiles(string workingDirectory, int showMaxErrors)
     {
         var fileNames = GetDirectoryFileNames(workingDirectory);
 
