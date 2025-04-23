@@ -3,15 +3,25 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using CCVTAC.Console.IoUtilities;
 using CCVTAC.Console.PostProcessing.Tagging;
-using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 using static CCVTAC.FSharp.Downloading;
+using UserSettings = CCVTAC.FSharp.Settings.UserSettings;
 
 namespace CCVTAC.Console.PostProcessing;
 
 internal static partial class PostProcessor
 {
     internal static readonly string[] AudioExtensions =
-        [".aac", ".alac", ".flac", ".m4a", ".mp3", ".ogg", ".vorbis", ".opus", ".wav"];
+    [
+        ".aac",
+        ".alac",
+        ".flac",
+        ".m4a",
+        ".mp3",
+        ".ogg",
+        ".vorbis",
+        ".opus",
+        ".wav",
+    ];
 
     internal static void Run(UserSettings settings, MediaType mediaType, Printer printer)
     {
@@ -32,7 +42,9 @@ internal static partial class PostProcessor
         CollectionMetadata? collectionJson;
         if (collectionJsonResult.IsFailed)
         {
-            printer.Debug($"No playlist or channel metadata found: {collectionJsonResult.Errors.First().Message}");
+            printer.Debug(
+                $"No playlist or channel metadata found: {collectionJsonResult.Errors.First().Message}"
+            );
             collectionJson = null;
         }
         else
@@ -87,9 +99,10 @@ internal static partial class PostProcessor
     {
         try
         {
-            var fileNames = Directory.GetFiles(workingDirectory)
-                                     .Where(f => CollectionMetadataRegex().IsMatch(f))
-                                     .ToImmutableHashSet();
+            var fileNames = Directory
+                .GetFiles(workingDirectory)
+                .Where(f => CollectionMetadataRegex().IsMatch(f))
+                .ToImmutableHashSet();
 
             if (fileNames.Count == 0)
             {
@@ -98,7 +111,9 @@ internal static partial class PostProcessor
 
             if (fileNames.Count > 1)
             {
-                return Result.Fail("Unexpectedly found more than one relevant file, so none will be processed.");
+                return Result.Fail(
+                    "Unexpectedly found more than one relevant file, so none will be processed."
+                );
             }
 
             string fileName = fileNames.Single();
@@ -122,7 +137,9 @@ internal static partial class PostProcessor
 
             return taggingSets.Any()
                 ? Result.Ok(taggingSets)
-                : Result.Fail($"No tagging sets were created using working directory \"{directory}\".");
+                : Result.Fail(
+                    $"No tagging sets were created using working directory \"{directory}\"."
+                );
         }
         catch (DirectoryNotFoundException)
         {

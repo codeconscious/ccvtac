@@ -19,7 +19,8 @@ internal static class Runner
     internal static Result<(int SuccessExitCode, string Warnings)> Run(
         ToolSettings settings,
         HashSet<int> otherSuccessExitCodes,
-        Printer printer)
+        Printer printer
+    )
     {
         Watch watch = new();
 
@@ -34,14 +35,16 @@ internal static class Runner
             RedirectStandardOutput = false,
             RedirectStandardError = true,
             CreateNoWindow = true,
-            WorkingDirectory = settings.WorkingDirectory
+            WorkingDirectory = settings.WorkingDirectory,
         };
 
         using Process? process = Process.Start(processStartInfo);
 
         if (process is null)
         {
-            return Result.Fail($"Could not locate {settings.Program.Name}. If it's not installed, please install from {settings.Program.Url}.");
+            return Result.Fail(
+                $"Could not locate {settings.Program.Name}. If it's not installed, please install from {settings.Program.Url}."
+            );
         }
 
         string errors = process.StandardError.ReadToEnd(); // Must precede `WaitForExit()`
@@ -51,6 +54,8 @@ internal static class Runner
         var trimmedErrors = errors.TrimTerminalLineBreak();
         return IsSuccessExitCode(otherSuccessExitCodes, process.ExitCode)
             ? Result.Ok((process.ExitCode, trimmedErrors)) // Errors will be considered warnings.
-            : Result.Fail($"[{settings.Program.Name}] Exit code {process.ExitCode}: {trimmedErrors}.");
+            : Result.Fail(
+                $"[{settings.Program.Name}] Exit code {process.ExitCode}: {trimmedErrors}."
+            );
     }
 }
