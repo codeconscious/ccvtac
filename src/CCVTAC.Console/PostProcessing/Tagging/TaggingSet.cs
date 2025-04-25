@@ -98,8 +98,8 @@ internal readonly record struct TaggingSet
             // Then, group those files as key-value pairs using the video ID as the key.
             .GroupBy(
                 m => m.Groups[1].Value, // Video ID
-                m => m.Groups[0].Value
-            ) // Full filenames (1 or more for each video ID)
+                m => m.Groups[0].Value // Full filenames (1 or more for each video ID)
+            )
             // Next, ensure the correct count of image and JSON files, ignoring those that don't match.
             // (For thought: It might be an option to track and report the invalid ones as well.)
             .Where(gr =>
