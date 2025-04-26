@@ -1,0 +1,25 @@
+{
+  "workingDirectory": "",
+  "moveToDirectory": "",
+  "historyFile": "",
+  "logDirectory": "",
+  "sleepSecondsBetweenDownloads": 7,
+  "sleepSecondsBetweenURLs": 15,
+  "audioFormats": ["m4a", "best"],
+  "audioQuality": 0,
+  "historyDisplayCount": 25,
+  "splitChapters": true,
+  "embedImages": true,
+  "quietMode": false,
+  "normalizationForm": "C",
+  "doNotEmbedImageUploaders": [],
+  "ignoreUploadYearUploaders": [],
+  "tagDetectionPatterns": {
+    "title": [],
+    "artist": [],
+    "album": [],
+    "composer": [],
+    "year": []
+  },
+  "renamePatterns": []
+}
