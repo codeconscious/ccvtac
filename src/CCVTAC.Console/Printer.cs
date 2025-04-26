@@ -4,22 +4,28 @@ namespace CCVTAC.Console;
 
 public sealed class Printer
 {
-    private enum Level { Critical, Error, Warning, Info, Debug }
+    private enum Level
+    {
+        Critical,
+        Error,
+        Warning,
+        Info,
+        Debug,
+    }
 
     private record ColorFormat(string? Foreground, string? Background, bool Bold = false);
 
     /// <summary>
     /// Color reference: https://spectreconsole.net/appendix/colors
     /// </summary>
-    private static readonly Dictionary<Level, ColorFormat> Colors =
-        new()
-            {
-                { Level.Critical, new("white", "red3", true) },
-                { Level.Error, new("red", null) },
-                { Level.Warning, new("yellow", null) },
-                { Level.Info, new(null, null) },
-                { Level.Debug, new("grey70", null) },
-            };
+    private static readonly Dictionary<Level, ColorFormat> Colors = new()
+    {
+        { Level.Critical, new("white", "red3", true) },
+        { Level.Error, new("red", null) },
+        { Level.Warning, new("yellow", null) },
+        { Level.Info, new(null, null) },
+        { Level.Debug, new("grey70", null) },
+    };
 
     private Level MinimumLogLevel { get; set; }
 
@@ -37,17 +43,11 @@ public sealed class Printer
     ///
     /// </summary>
     private static string EscapeText(string text) =>
-        text
-            .Replace("{", "{{")
-            .Replace("}", "}}")
-            .Replace("[", "[[")
-            .Replace("]", "]]");
+        text.Replace("{", "{{").Replace("}", "}}").Replace("[", "[[").Replace("]", "]]");
 
     private static string AddMarkup(string message, ColorFormat colors)
     {
-        if (colors.Foreground is null &&
-            colors.Background is null &&
-            !colors.Bold)
+        if (colors.Foreground is null && colors.Background is null && !colors.Bold)
         {
             return message;
         }
@@ -66,7 +66,8 @@ public sealed class Printer
         bool appendLineBreak = true,
         byte prependLines = 0,
         byte appendLines = 0,
-        bool processMarkup = true)
+        bool processMarkup = true
+    )
     {
         if (logLevel > MinimumLogLevel)
         {
@@ -83,7 +84,6 @@ public sealed class Printer
         var escapedMessage = EscapeText(message);
         if (processMarkup)
         {
-
             var markedUpMessage = AddMarkup(escapedMessage, Colors[logLevel]);
             AnsiConsole.Markup(markedUpMessage);
         }
@@ -145,7 +145,7 @@ public sealed class Printer
 
     private void Errors(string headerMessage, IEnumerable<string> errors)
     {
-        Errors([headerMessage, ..errors]);
+        Errors([headerMessage, .. errors]);
     }
 
     public void Errors<T>(Result<T> failResult, byte appendLines = 0)
@@ -208,9 +208,7 @@ public sealed class Printer
         if (count == 0)
             return;
 
-        AnsiConsole.WriteLine(
-            string.Concat(
-                Enumerable.Repeat(Environment.NewLine, count - 1)));
+        AnsiConsole.WriteLine(string.Concat(Enumerable.Repeat(Environment.NewLine, count - 1)));
     }
 
     public string GetInput(string prompt)
@@ -221,10 +219,7 @@ public sealed class Printer
 
     private static string Ask(string title, string[] options)
     {
-        return AnsiConsole.Prompt(
-            new SelectionPrompt<string>()
-                .Title(title)
-                .AddChoices(options));
+        return AnsiConsole.Prompt(new SelectionPrompt<string>().Title(title).AddChoices(options));
     }
 
     public bool AskToBool(string title, string trueAnswer, string falseAnswer) =>

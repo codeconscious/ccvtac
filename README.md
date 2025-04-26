@@ -18,7 +18,7 @@ While I maintain it for my own use, feel free to use it yourself! However, pleas
 
 ## Prerequisites
 
-- [.NET 8 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+- [.NET 9 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp)
 - [ffmpeg](https://ffmpeg.org/) (for yt-dlp artwork extraction)
 - Optional: [mogrify](https://imagemagick.org/script/mogrify.php) (for auto-trimming album art)
@@ -62,13 +62,16 @@ You can copy and paste the sample settings file below to a JSON file named `sett
   // Mandatory. A local file containing the history of all URLs entered.
   "historyFile": "/Users/me/Downloads/history.log",
 
-  // Count of entries to show for `history` command
+  // Count of entries to show for `history` command.
   "historyDisplayCount": 20,
 
-  // The audio format (codec) to extract audio to.
-  // Options: best, aac, alac, flac, m4a, mp3, opus, vorbis, wav
+  // The directory to which the log file should be saved.
+  "logDirectory": "/Users/me/Downloads",
+
+  // The audio formats (codec) audio should be extracted to.
+  // Options: best, aac, alac, flac, m4a, mp3, opus, vorbis, wav.
   // Not all options are available for all videos.
-  "audioFormat": "best",
+  "audioFormats": ["best"],
 
   // The audio quality to use, with 10 being the lowest and 0 being the highest.
   "audioQuality": 0,
@@ -76,22 +79,21 @@ You can copy and paste the sample settings file below to a JSON file named `sett
   // Split videos with chapters into separate files?
   "splitChapters": true,
 
+  // Embed video thumbnails into file tags?
+  "embedImages": true,
+
+  // Whether to use quiet mode (true) or not (false).
+  // Fewer details are shown in quiet mode.
+  "quietMode": false,
+
   // Delay in seconds between individual video downloads for
   // playlists and channels. Use to avoid burdening YouTube servers
-  // with several downloads in quick succession.
+  // and getting rate-limited.
   "sleepSecondsBetweenDownloads": 10,
 
   // Delay in seconds between each URL entered in a batch.
-  // Use to avoid burdening YouTube servers with several downloads
-  // in quick succession.
+  // Use to avoid burdening YouTube servers and getting rate-limited.
   "sleepSecondsBetweenURLs": 20,
-
-  # Whether to use quiet mode (true) or not (false).
-  # Fewer details are shown in quiet mode.
-  "quietMode": false,
-
-  // Embed video thumbnails into file tags?
-  "embedImages": true,
 
   // The Unicode normalization form to use for filenames.
   // Valid values are `C`, `D`, `KC`, and `KD`.

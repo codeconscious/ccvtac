@@ -48,7 +48,7 @@ internal record ExternalTool
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
-            CreateNoWindow = true
+            CreateNoWindow = true,
         };
 
         try
@@ -57,7 +57,9 @@ internal record ExternalTool
 
             if (process is null)
             {
-                return Result.Fail($"The program \"{Name}\" was not found. (The process was null.)");
+                return Result.Fail(
+                    $"The program \"{Name}\" was not found. (The process was null.)"
+                );
             }
 
             process.WaitForExit();
