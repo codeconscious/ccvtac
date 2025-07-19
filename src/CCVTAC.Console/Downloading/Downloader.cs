@@ -8,12 +8,6 @@ internal static class Downloader
 {
     private record Urls(string Primary, string? Supplementary);
 
-    internal static readonly ExternalTool ExternalTool = new(
-        "yt-dlp",
-        "https://github.com/yt-dlp/yt-dlp/",
-        "YouTube downloads and audio extraction"
-    );
-
     internal static Result<MediaTypeWithUrls> WrapUrlInMediaType(string url)
     {
         var result = FSharp.Downloading.MediaTypeWithIds(url);
@@ -45,7 +39,8 @@ internal static class Downloader
         foreach (string format in settings.AudioFormats)
         {
             string args = GenerateDownloadArgs(format, settings, mediaType, urls.Primary);
-            var downloadSettings = new ToolSettings(ExternalTool, args, settings.WorkingDirectory!);
+            string commandWithArgs = $"{settings.DownloaderTool} {args}";
+            var downloadSettings = new ToolSettings(commandWithArgs, settings.WorkingDirectory!);
 
             downloadResult = Runner.Run(downloadSettings, otherSuccessExitCodes: [1], printer);
 
@@ -93,11 +88,10 @@ internal static class Downloader
                 urls.Supplementary
             );
 
-            var supplementaryDownloadSettings = new ToolSettings(
-                ExternalTool,
-                supplementaryArgs,
-                settings.WorkingDirectory!
-            );
+
+            string commandWithArgs = $"{settings.DownloaderTool} {supplementaryArgs}";
+
+            var supplementaryDownloadSettings = new ToolSettings(commandWithArgs, settings.WorkingDirectory!);
 
             var supplementaryDownloadResult = Runner.Run(
                 supplementaryDownloadSettings,

@@ -20,10 +20,10 @@ internal class Orchestrator
     internal static void Start(UserSettings settings, Printer printer)
     {
         // Verify the external program for downloading is installed on the system.
-        if (Downloader.ExternalTool.ProgramExists() is { IsFailed: true })
+        if (string.IsNullOrEmpty(settings.DownloaderTool))
         {
             printer.Error(
-                $"To use this application, please first install {Downloader.ExternalTool.Name} ({Downloader.ExternalTool.Url})."
+                $"To use this application, first register a download program in the settings."
             );
             printer.Info("Pass '--help' for more information.");
             return;
@@ -99,6 +99,8 @@ internal class Orchestrator
         var inputTime = DateTime.Now;
         var nextAction = NextAction.Continue;
         Watch watch = new();
+
+        Updater.Run(settings, printer);
 
         var batchResults = new ResultTracker<NextAction>(printer);
         int inputIndex = 0;
