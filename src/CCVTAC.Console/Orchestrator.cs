@@ -100,8 +100,6 @@ internal class Orchestrator
         var nextAction = NextAction.Continue;
         Watch watch = new();
 
-        Updater.Run(settings, printer);
-
         var batchResults = new ResultTracker<NextAction>(printer);
         int inputIndex = 0;
 
@@ -249,11 +247,17 @@ internal class Orchestrator
             return Result.Ok(NextAction.Continue);
         }
 
-        if (Commands.SettingsSummary.CaseInsensitiveContains(command))
+        if (Commands.UpdateDownloader.CaseInsensitiveContains(command))
         {
-            SettingsAdapter.PrintSummary(settings, printer);
+            Updater.Run(settings, printer);
             return Result.Ok(NextAction.Continue);
         }
+
+        if (Commands.SettingsSummary.CaseInsensitiveContains(command))
+            {
+                SettingsAdapter.PrintSummary(settings, printer);
+                return Result.Ok(NextAction.Continue);
+            }
 
         static string SummarizeToggle(string settingName, bool setting) =>
             $"{settingName} was toggled to {(setting ? "ON" : "OFF")} for this session.";

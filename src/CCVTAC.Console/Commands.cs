@@ -12,6 +12,7 @@ internal static class Commands
     internal static string[] SettingsSummary { get; } = [MakeCommand("settings")];
 
     internal static string[] History { get; } = [MakeCommand("history")];
+    internal static string[] UpdateDownloader { get; } = [MakeCommand("update-downloader"), MakeCommand("update-dl")];
 
     internal static string[] SplitChapterToggles { get; } =
         [MakeCommand("split"), MakeCommand("toggle-split")];
@@ -33,6 +34,7 @@ internal static class Commands
             { SplitChapterToggles[0], "Toggles chapter splitting for the current session only" },
             { EmbedImagesToggles[0], "Toggles image embedding for the current session only" },
             { QuietModeToggles[0], "Toggles quiet mode for the current session only" },
+            { UpdateDownloader[0], "Updates the downloader using the command specified in the settings" },
             {
                 UpdateAudioFormatPrefix,
                 $"Followed by a supported audio format (e.g., {UpdateAudioFormatPrefix}m4a), changes the audio format for the current session only"
