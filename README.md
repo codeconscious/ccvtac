@@ -53,7 +53,7 @@ You can copy and paste the sample settings file below to a JSON file named `sett
 ```js
 {
   // Mandatory. The working directory for temporary files.
-  // It is cleared after processing each URL.
+  // It is emptied after processing each URL.
   "workingDirectory": "/Users/me/temp",
 
   // Mandatory. The directory in which final audio files should be saved.
@@ -105,8 +105,7 @@ You can copy and paste the sample settings file below to a JSON file named `sett
 
   // Information about your downloader tool.
   "downloader": {
-    // The name of the command -- i.e., the command you would enter on your command line.
-    // Defaults to "yt-dlp".
+    // The name of the program -- i.e., the name you would enter on your command line.
     "name": "yt-dlp",
 
     // The full command you use to update your downloader.
@@ -197,6 +196,7 @@ When the application is running, simply enter at least one YouTube media URL (vi
 You can also enter the following commands:
 - `\quit` or `\q` to quit
 - `\history` to see the URLs you most recently entered
+- `\update-downloader` to update the downloader using the command in your settings
 - Modify the current session only (without updating the settings file):
   - `\split` toggles chapter splitting
   - `\images` toggles image embedding
