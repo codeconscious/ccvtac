@@ -13,13 +13,13 @@ internal static class Updater
     /// <returns>A `Result` that, if successful, contains the name of the successfully downloaded format.</returns>
     internal static Result<string?> Run(UserSettings settings, Printer printer)
     {
-        if (string.IsNullOrWhiteSpace(settings.DownloaderUpdateCommand))
+        if (string.IsNullOrWhiteSpace(settings.Downloader.UpdateCommand))
         {
             printer.Info("No downloader update command provided, so will skip.");
             return Result.Ok();
         }
 
-        var args = new ToolSettings(settings.DownloaderUpdateCommand, settings.WorkingDirectory!);
+        var args = new ToolSettings(settings.Downloader.UpdateCommand, settings.WorkingDirectory!);
 
         var result = Runner.Run(args, otherSuccessExitCodes: [], printer);
 

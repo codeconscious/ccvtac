@@ -39,7 +39,7 @@ internal static class Downloader
         foreach (string format in settings.AudioFormats)
         {
             string args = GenerateDownloadArgs(format, settings, mediaType, urls.Primary);
-            string commandWithArgs = $"{settings.DownloaderTool} {args}";
+            string commandWithArgs = $"{settings.Downloader.Name} {args}";
             var downloadSettings = new ToolSettings(commandWithArgs, settings.WorkingDirectory!);
 
             downloadResult = Runner.Run(downloadSettings, otherSuccessExitCodes: [1], printer);
@@ -89,7 +89,7 @@ internal static class Downloader
             );
 
 
-            string commandWithArgs = $"{settings.DownloaderTool} {supplementaryArgs}";
+            string commandWithArgs = $"{settings.Downloader.Name} {supplementaryArgs}";
 
             var supplementaryDownloadSettings = new ToolSettings(commandWithArgs, settings.WorkingDirectory!);
 

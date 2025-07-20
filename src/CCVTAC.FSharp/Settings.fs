@@ -29,6 +29,11 @@ module Settings =
         [<JsonPropertyName("year")>]      Year : TagDetectionPattern array
     }
 
+    type Downloader = {
+        [<JsonPropertyName("name")>]            Name : string
+        [<JsonPropertyName("updateCommand")>]   UpdateCommand : string
+    }
+
     type UserSettings = {
         [<JsonPropertyName("workingDirectory")>]              WorkingDirectory: string
         [<JsonPropertyName("moveToDirectory")>]               MoveToDirectory: string
@@ -46,9 +51,7 @@ module Settings =
         [<JsonPropertyName("tagDetectionPatterns")>]          TagDetectionPatterns: TagDetectionPatterns
         [<JsonPropertyName("renamePatterns")>]                RenamePatterns: RenamePattern array
         [<JsonPropertyName("normalizationForm")>]             NormalizationForm : string
-        [<JsonPropertyName("downloadToolName")>]              DownloaderTool : string
-        [<JsonPropertyName("downloaderUpdateCommand")>]       DownloaderUpdateCommand : string
-
+        [<JsonPropertyName("downloader")>]                    Downloader : Downloader
     }
 
     [<CompiledName("Summarize")>]
@@ -198,12 +201,14 @@ module Settings =
                         Year = [||]
                     }
                     RenamePatterns = [||]
-                    NormalizationForm = "C"
-                    DownloaderTool = "yt-dlp"
-                    DownloaderUpdateCommand = String.Empty
-                } // Recommended for compatibility between Linux and macOS.
+                    NormalizationForm = "C" // Recommended for compatibility between Linux and macOS.
+                    Downloader = {
+                        Name = "yt-dlp"
+                        UpdateCommand = String.Empty
+                    }
+                }
 
-            defaultSettings |> writeFile confirmedPath
+            writeFile confirmedPath defaultSettings
 
     module LiveUpdating =
         open Validation

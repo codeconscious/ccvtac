@@ -20,7 +20,7 @@ internal class Orchestrator
     internal static void Start(UserSettings settings, Printer printer)
     {
         // Verify the external program for downloading is installed on the system.
-        if (string.IsNullOrEmpty(settings.DownloaderTool))
+        if (string.IsNullOrEmpty(settings.Downloader.Name))
         {
             printer.Error(
                 $"To use this application, first register a download program in the settings."

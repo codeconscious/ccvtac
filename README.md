@@ -103,6 +103,16 @@ You can copy and paste the sample settings file below to a JSON file named `sett
   // Reference: https://en.wikipedia.org/wiki/Unicode_equivalence
   "normalizationForm": "C",
 
+  // Information about your downloader tool.
+  "downloader": {
+    // The name of the command -- i.e., the command you would enter on your command line.
+    // Defaults to "yt-dlp".
+    "name": "yt-dlp",
+
+    // The full command you use to update your downloader.
+    // This is available as an internal command when running the tool.
+    "updateCommand": "pip install --upgrade yt-dlp"
+  },
   // Channel names for which the video thumbnail should
   // never be embedded in the audio file.
   "doNotEmbedImageUploaders": [
