@@ -1,6 +1,6 @@
 # CCVTAC
 
-CCVTAC (CodeConscious Video-to-Audio Converter) is a small .NET-powered CLI tool that acts as a wrapper around [yt-dlp](https://github.com/yt-dlp/yt-dlp) to enable easier download and extractions of audio from YouTube videos, playlists, and channels, plus do some automatic post-processing (tagging, renaming, and moving).
+CCVTAC (CodeConscious Video-to-Audio Converter) is a small .NET-powered CLI tool that acts as a wrapper around [yt-dlp](https://github.com/yt-dlp/yt-dlp) or similar tools to enable easier download and extractions of audio from YouTube videos, playlists, and channels, plus do some automatic post-processing (tagging, renaming, and moving).
 
 While I maintain it for my own use, feel free to use it yourself! However, please note it's geared to my own personal use cases and that no warranties or guarantees are provided.
 
@@ -19,7 +19,7 @@ While I maintain it for my own use, feel free to use it yourself! However, pleas
 ## Prerequisites
 
 - [.NET 9 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
-- [yt-dlp](https://github.com/yt-dlp/yt-dlp)
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp) (highly recommended) or a similar tool
 - [ffmpeg](https://ffmpeg.org/) (for yt-dlp artwork extraction)
 - Optional: [mogrify](https://imagemagick.org/script/mogrify.php) (for auto-trimming album art)
 
@@ -196,7 +196,7 @@ When the application is running, simply enter at least one YouTube media URL (vi
 You can also enter the following commands:
 - `\quit` or `\q` to quit
 - `\history` to see the URLs you most recently entered
-- `\update-downloader` to update the downloader using the command in your settings
+- `\update-downloader` to update the downloader using the command in your settings (If you start experiencing constant download errors, try this command)
 - Modify the current session only (without updating the settings file):
   - `\split` toggles chapter splitting
   - `\images` toggles image embedding
@@ -206,10 +206,6 @@ You can also enter the following commands:
 
 Enter `\commands` to see this summary in the application.
 
-## Upgrading yt-dlp
-
-Periodically ensure you are running the latest version of yt-dlp, especially if you start experiencing download errors. See the [yt-dlp GitHub page](https://github.com/yt-dlp/yt-dlp#update) for more. (Likely commands are `sudo yt-dlp -U` or `pip install --upgrade yt-dlp`.)
-
 ## Reporting issues
 
-If you run into any issues, please create an issue on GitHub with as much information as possible (e.g., entered URLs, OS, .NET version, yt-dlp version, etc.).
+If you run into any issues, feel free to create an issue on GitHub. Please provide as much information as possible (e.g., entered URLs, system information, downloader name and version).
