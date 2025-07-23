@@ -219,20 +219,14 @@ internal class Orchestrator
         Printer printer
     )
     {
-        if (Commands.SummaryCommand.Equals(command, StringComparison.InvariantCultureIgnoreCase))
+        if (Commands.SummaryCommands.Contains(command, StringComparer.InvariantCultureIgnoreCase))
         {
-            Table table = new();
-            table.Border(TableBorder.Simple);
-            table.AddColumns("Command", "Description");
-            table.HideHeaders();
-            table.Columns[0].PadRight(3);
-
             foreach (var (cmd, description) in Commands.Summary)
             {
-                table.AddRow(cmd, description);
+                printer.Info(cmd);
+                printer.Info($"    {description}");
             }
 
-            Printer.PrintTable(table);
             return Result.Ok(NextAction.Continue);
         }
 
