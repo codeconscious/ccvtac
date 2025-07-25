@@ -183,11 +183,12 @@ You can copy and paste the sample settings file below to a JSON file named `sett
 
 ### Using the application
 
-Once your settings file is ready, run the application with `dotnet run`. Optionally, pass `-h` or `--help` for instructions (e.g., `dotnet run -- --help`).
+Once your settings file is ready, run the application with `dotnet run` within the `CCVTAC.Console` directory. Alternatively, you can pass `-h` or `--help` for instructions (e.g., `dotnet run -- --help`).
 
-When the application is running, simply enter at least one YouTube media URL (video, playlist, or channel) at the prompt and press the Enter key. You can omit spaces between the URLs.
+When the application is running, simply enter at least one YouTube media URL (video, playlist, or channel) or command at the prompt and press Enter. No spaces are necessary.
 
 You can also enter the following commands:
+- `\help` to see the full list of commands
 - `\quit` or `\q` to quit
 - `\history` to see the URLs you most recently entered
 - `\update-downloader` or `\update-dl` to update yt-dlp using the command in your settings (If you start experiencing constant download errors, try this command)
@@ -197,8 +198,6 @@ You can also enter the following commands:
   - `\quiet` toggles quiet mode
   - `\format-` followed by a supported audio format (e.g., `\format-m4a`) changes the format
   - `\quality-` followed by a supported audio quality (e.g., `\quality-0`) changes the audio quality
-
-Enter `\commands` to see this summary in the application.
 
 ## Reporting issues
 
