@@ -19,16 +19,6 @@ internal class Orchestrator
     /// </summary>
     internal static void Start(UserSettings settings, Printer printer)
     {
-        // Verify the external program for downloading is installed on the system.
-        if (string.IsNullOrEmpty(settings.Downloader.Name))
-        {
-            printer.Error(
-                $"To use this application, first register a download program in the settings."
-            );
-            printer.Info("Pass '--help' for more information.");
-            return;
-        }
-
         // The working directory should start empty. Give the user a chance to empty it.
         var emptyDirResult = IoUtilities.Directories.WarnIfAnyFiles(settings.WorkingDirectory, 10);
         if (emptyDirResult.IsFailed)

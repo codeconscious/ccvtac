@@ -7,9 +7,9 @@ public static class Help
         const string helpText = """
             CCVTAC (CodeConscious Video-to-Audio Converter) is a small .NET-powered CLI
             tool that acts as a wrapper around yt-dlp (https://github.com/yt-dlp/yt-dlp)
-            or similar tools to enable easier downloads of audio from YouTube videos,
-            playlists, and channels, plus do some automatic post-processing (tagging,
-            renaming, and moving) too.
+            to enable easier downloads of audio from YouTube videos, playlists, and
+            channels, plus do some automatic post-processing (tagging, renaming, and
+            moving) too.
 
             While I maintain it primarily for my own use, feel free to use it yourself.
             No warranties or guarantees are provided.
@@ -27,7 +27,7 @@ public static class Help
             PREREQUISITES
 
             • .NET 9 runtime (https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
-            • yt-dlp (https://github.com/yt-dlp/yt-dlp) (highly recommended) or a similar tool
+            • yt-dlp (https://github.com/yt-dlp/yt-dlp)
             • [ffmpeg](https://ffmpeg.org/) (for yt-dlp artwork extraction)
             • Optional: mogrify https://imagemagick.org/script/mogrify.php
                         (for auto-trimming album art)
@@ -68,7 +68,7 @@ public static class Help
             You can also enter the following commands:
             - "\quit" or "\q" to quit
             - "\history" to see the last few URLs you entered
-            - "\update-downloader" to update the downloader using the command in your settings
+            - "\update-downloader" or "\update-dl" to update yt-dlp using the command in your settings
               (If you start experiencing constant download errors, try this command)
             - Modify the current session only (without updating the settings file):
                 - `\split` toggles chapter splitting

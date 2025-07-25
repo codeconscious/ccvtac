@@ -6,6 +6,8 @@ namespace CCVTAC.Console.Downloading;
 
 internal static class Downloader
 {
+    public static readonly string ProgramName = "yt-dlp";
+
     private record Urls(string Primary, string? Supplementary);
 
     internal static Result<MediaTypeWithUrls> WrapUrlInMediaType(string url)
@@ -39,7 +41,7 @@ internal static class Downloader
         foreach (string format in settings.AudioFormats)
         {
             string args = GenerateDownloadArgs(format, settings, mediaType, urls.Primary);
-            string commandWithArgs = $"{settings.Downloader.Name} {args}";
+            string commandWithArgs = $"{ProgramName} {args}";
             var downloadSettings = new ToolSettings(commandWithArgs, settings.WorkingDirectory!);
 
             downloadResult = Runner.Run(downloadSettings, otherSuccessExitCodes: [1], printer);
@@ -89,7 +91,7 @@ internal static class Downloader
             );
 
 
-            string commandWithArgs = $"{settings.Downloader.Name} {supplementaryArgs}";
+            string commandWithArgs = $"{ProgramName} {supplementaryArgs}";
 
             var supplementaryDownloadSettings = new ToolSettings(commandWithArgs, settings.WorkingDirectory!);
 
