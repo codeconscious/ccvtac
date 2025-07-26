@@ -7,7 +7,7 @@ internal static class Commands
     internal static string[] QuitOptions { get; } =
         [MakeCommand("quit"), MakeCommand("q"), MakeCommand("exit")];
 
-    internal static string[] SummaryCommands { get; } = [MakeCommand("help"), MakeCommand("commands")];
+    internal static string HelpCommand { get; } = MakeCommand("help");
 
     internal static string[] SettingsSummary { get; } = [MakeCommand("settings")];
 
@@ -30,7 +30,7 @@ internal static class Commands
     internal static Dictionary<string, string> Summary { get; } =
         new()
         {
-            { string.Join(" or ", SummaryCommands), "See this message" },
+            { string.Join(" or ", HelpCommand), "See this message" },
             { string.Join(" or ", History), "See the most recently entered URLs" },
             { string.Join(" or ", SplitChapterToggles), "Toggles chapter splitting for the current session only" },
             { string.Join(" or ", EmbedImagesToggles), "Toggles image embedding for the current session only" },

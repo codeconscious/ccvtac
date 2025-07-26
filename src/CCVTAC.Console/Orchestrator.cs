@@ -209,7 +209,7 @@ internal class Orchestrator
         Printer printer
     )
     {
-        if (Commands.SummaryCommands.Contains(command, StringComparer.InvariantCultureIgnoreCase))
+        if (Commands.HelpCommand.Equals(command, StringComparison.InvariantCultureIgnoreCase))
         {
             foreach (var (cmd, description) in Commands.Summary)
             {

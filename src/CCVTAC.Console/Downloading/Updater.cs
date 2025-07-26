@@ -26,9 +26,11 @@ internal static class Updater
         if (result.IsSuccess)
         {
             var (exitCode, warnings) = result.Value;
+
             if (exitCode != 0)
             {
                 printer.Warning("Update completed with minor issues.");
+
                 if (warnings.HasText())
                 {
                     printer.Warning(warnings);
