@@ -59,13 +59,15 @@ public static class Help
             Using the application:
 
             Once your settings are ready, run the application with `dotnet run`.
-            Optionally, pass `-h` or `--help` for instructions (e.g., `dotnet run -- --help`).
+            Alternatively, pass `-h` or `--help` for instructions (e.g.,
+            `dotnet run -- --help`).
 
-            When the application is running, simply enter at least one YouTube media URL
-            (video, playlist, or channel) at the prompt and press the Enter key.
-            You can optionally omit spaces between the URLs.
+            When the application is running, enter at least one YouTube media URL (video,
+            playlist, or channel) at the prompt and press Enter. No spaces between
+            items are necessary.
 
             You can also enter the following commands:
+            - "\help" to see this list of commands
             - "\quit" or "\q" to quit
             - "\history" to see the last few URLs you entered
             - "\update-downloader" or "\update-dl" to update yt-dlp using the command in your settings
