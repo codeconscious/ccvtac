@@ -4,7 +4,7 @@ internal static class Commands
 {
     internal const char Prefix = '\\';
 
-    internal static string[] QuitOptions { get; } =
+    internal static string[] QuitCommands { get; } =
         [MakeCommand("quit"), MakeCommand("q"), MakeCommand("exit")];
 
     internal static string HelpCommand { get; } = MakeCommand("help");
@@ -44,7 +44,7 @@ internal static class Commands
                 UpdateAudioQualityPrefix,
                 $"Followed by a supported audio quality (e.g., {UpdateAudioQualityPrefix}0), changes the audio quality for the current session only"
             },
-            { string.Join(" or ", QuitOptions), "Quit the application" },
+            { string.Join(" or ", QuitCommands), "Quit the application" },
         };
 
     private static string MakeCommand(string text)

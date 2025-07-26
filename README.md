@@ -104,6 +104,7 @@ You can copy and paste the sample settings file below to a JSON file named `sett
   "normalizationForm": "C",
 
   // The full command you use to update your local yt-dlp installation.
+  // This is a sample entry.
   "downloaderUpdateCommand": "pip install --upgrade yt-dlp",
 
   // Channel names for which the video thumbnail should

@@ -41,7 +41,7 @@ internal static class Downloader
         foreach (string format in settings.AudioFormats)
         {
             string args = GenerateDownloadArgs(format, settings, mediaType, urls.Primary);
-            string commandWithArgs = $"{ProgramName} {args}";
+            var commandWithArgs = $"{ProgramName} {args}";
             var downloadSettings = new ToolSettings(commandWithArgs, settings.WorkingDirectory!);
 
             downloadResult = Runner.Run(downloadSettings, otherSuccessExitCodes: [1], printer);

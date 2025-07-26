@@ -52,7 +52,7 @@ public static class Help
             settings to help reduce concentrated loads on YouTube servers. Please avoid
             lowering these values too much and slamming their servers with enormous,
             long-running downloads (even if you feel their servers can take it). Such behavior
-            might get you rate-limited.
+            might get you rate-limited by YouTube.
 
             See the README file on the GitHub repo for more about settings.
 
@@ -84,7 +84,7 @@ public static class Help
             Reporting issues:
 
             If you run into any issues, feel free to create an issue on GitHub. Please provide as much
-            information as possible (e.g., entered URLs, system information, downloader name and version).
+            information as possible (e.g., entered URLs, system information, yt-dlp version).
             """;
 
         printer.Info(helpText, processMarkup: false);

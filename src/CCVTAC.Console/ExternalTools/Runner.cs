@@ -54,7 +54,7 @@ internal static class Runner
         return IsSuccessExitCode(otherSuccessExitCodes, process.ExitCode)
             ? Result.Ok((process.ExitCode, trimmedErrors)) // Errors will be considered warnings.
             : Result.Fail(
-                $"[{splitCommandWithArgs[0]}] Exit code {process.ExitCode}: {trimmedErrors}."
+                $"{splitCommandWithArgs[0]} exited with code {process.ExitCode}: {trimmedErrors}."
             );
     }
 }
