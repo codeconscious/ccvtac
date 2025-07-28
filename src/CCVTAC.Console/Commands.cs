@@ -30,7 +30,6 @@ internal static class Commands
     internal static Dictionary<string, string> Summary { get; } =
         new()
         {
-            { string.Join(" or ", HelpCommand), "See this message" },
             { string.Join(" or ", History), "See the most recently entered URLs" },
             { string.Join(" or ", SplitChapterToggles), "Toggles chapter splitting for the current session only" },
             { string.Join(" or ", EmbedImagesToggles), "Toggles image embedding for the current session only" },
@@ -45,6 +44,7 @@ internal static class Commands
                 $"Followed by a supported audio quality (e.g., {UpdateAudioQualityPrefix}0), changes the audio quality for the current session only"
             },
             { string.Join(" or ", QuitCommands), "Quit the application" },
+            { string.Join(" or ", HelpCommand), "See this help message" },
         };
 
     private static string MakeCommand(string text)
