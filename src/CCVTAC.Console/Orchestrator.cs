@@ -19,16 +19,6 @@ internal class Orchestrator
     /// </summary>
     internal static void Start(UserSettings settings, Printer printer)
     {
-        // Verify the external program for downloading is installed on the system.
-        if (Downloader.ExternalTool.ProgramExists() is { IsFailed: true })
-        {
-            printer.Error(
-                $"To use this application, please first install {Downloader.ExternalTool.Name} ({Downloader.ExternalTool.Url})."
-            );
-            printer.Info("Pass '--help' for more information.");
-            return;
-        }
-
         // The working directory should start empty. Give the user a chance to empty it.
         var emptyDirResult = IoUtilities.Directories.WarnIfAnyFiles(settings.WorkingDirectory, 10);
         if (emptyDirResult.IsFailed)
@@ -219,24 +209,18 @@ internal class Orchestrator
         Printer printer
     )
     {
-        if (Commands.SummaryCommand.Equals(command, StringComparison.InvariantCultureIgnoreCase))
+        if (Commands.HelpCommand.Equals(command, StringComparison.InvariantCultureIgnoreCase))
         {
-            Table table = new();
-            table.Border(TableBorder.Simple);
-            table.AddColumns("Command", "Description");
-            table.HideHeaders();
-            table.Columns[0].PadRight(3);
-
             foreach (var (cmd, description) in Commands.Summary)
             {
-                table.AddRow(cmd, description);
+                printer.Info(cmd);
+                printer.Info($"    {description}");
             }
 
-            Printer.PrintTable(table);
             return Result.Ok(NextAction.Continue);
         }
 
-        if (Commands.QuitOptions.CaseInsensitiveContains(command))
+        if (Commands.QuitCommands.CaseInsensitiveContains(command))
         {
             return Result.Ok(NextAction.QuitAtUserRequest);
         }
@@ -247,11 +231,17 @@ internal class Orchestrator
             return Result.Ok(NextAction.Continue);
         }
 
-        if (Commands.SettingsSummary.CaseInsensitiveContains(command))
+        if (Commands.UpdateDownloader.CaseInsensitiveContains(command))
         {
-            SettingsAdapter.PrintSummary(settings, printer);
+            Updater.Run(settings, printer);
             return Result.Ok(NextAction.Continue);
         }
+
+        if (Commands.SettingsSummary.CaseInsensitiveContains(command))
+            {
+                SettingsAdapter.PrintSummary(settings, printer);
+                return Result.Ok(NextAction.Continue);
+            }
 
         static string SummarizeToggle(string settingName, bool setting) =>
             $"{settingName} was toggled to {(setting ? "ON" : "OFF")} for this session.";

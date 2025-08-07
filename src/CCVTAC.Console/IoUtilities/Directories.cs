@@ -41,6 +41,8 @@ internal static class Directories
             report.AppendLine($"... plus {fileCount - showMax} more.");
         }
 
+        report.AppendLine("This generally occurs due to the same video appearing twice in playlists.");
+
         return Result.Fail(report.ToString());
     }
 

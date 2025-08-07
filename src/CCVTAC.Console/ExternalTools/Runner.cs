@@ -24,13 +24,14 @@ internal static class Runner
     {
         Watch watch = new();
 
-        printer.Info($"Starting {settings.Program.Name} for {settings.Program.Purpose}...");
-        printer.Debug($"Running command: {settings.Program.Name} {settings.Args}");
+        printer.Info($"Running {settings.CommandWithArgs}...");
+
+        var splitCommandWithArgs = settings.CommandWithArgs.Split([' '], 2);
 
         ProcessStartInfo processStartInfo = new()
         {
-            FileName = settings.Program.Name,
-            Arguments = settings.Args,
+            FileName = splitCommandWithArgs[0],
+            Arguments = splitCommandWithArgs.Length > 1 ? splitCommandWithArgs[1] : string.Empty,
             UseShellExecute = false,
             RedirectStandardOutput = false,
             RedirectStandardError = true,
@@ -42,20 +43,18 @@ internal static class Runner
 
         if (process is null)
         {
-            return Result.Fail(
-                $"Could not locate {settings.Program.Name}. If it's not installed, please install from {settings.Program.Url}."
-            );
+            return Result.Fail($"Could not locate {splitCommandWithArgs[0]}.");
         }
 
         string errors = process.StandardError.ReadToEnd(); // Must precede `WaitForExit()`
         process.WaitForExit();
-        printer.Info($"Completed {settings.Program.Purpose} in {watch.ElapsedFriendly}.");
+        printer.Info($"{splitCommandWithArgs[0]} finished in {watch.ElapsedFriendly}.");
 
         var trimmedErrors = errors.TrimTerminalLineBreak();
         return IsSuccessExitCode(otherSuccessExitCodes, process.ExitCode)
             ? Result.Ok((process.ExitCode, trimmedErrors)) // Errors will be considered warnings.
             : Result.Fail(
-                $"[{settings.Program.Name}] Exit code {process.ExitCode}: {trimmedErrors}."
+                $"{splitCommandWithArgs[0]} exited with code {process.ExitCode}: {trimmedErrors}."
             );
     }
 }

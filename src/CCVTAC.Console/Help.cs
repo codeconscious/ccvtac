@@ -27,7 +27,7 @@ public static class Help
             PREREQUISITES
 
             • .NET 9 runtime (https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
-            • yt-dlp https://github.com/yt-dlp/yt-dlp
+            • yt-dlp (https://github.com/yt-dlp/yt-dlp)
             • [ffmpeg](https://ffmpeg.org/) (for yt-dlp artwork extraction)
             • Optional: mogrify https://imagemagick.org/script/mogrify.php
                         (for auto-trimming album art)
@@ -51,22 +51,27 @@ public static class Help
             I added the `sleepSecondsBetweenDownloads` and `sleepSecondsBetweenURLs`
             settings to help reduce concentrated loads on YouTube servers. Please avoid
             lowering these values too much and slamming their servers with enormous,
-            long-running downloads (even if you feel their servers can take it).
+            long-running downloads (even if you feel their servers can take it). Such behavior
+            might get you rate-limited by YouTube.
 
             See the README file on the GitHub repo for more about settings.
 
             Using the application:
 
             Once your settings are ready, run the application with `dotnet run`.
-            Optionally, pass `-h` or `--help` for instructions (e.g., `dotnet run -- --help`).
+            Alternatively, pass `-h` or `--help` for instructions (e.g.,
+            `dotnet run -- --help`).
 
-            When the application is running, simply enter at least one YouTube media URL
-            (video, playlist, or channel) at the prompt and press the Enter key.
-            You can optionally omit spaces between the URLs.
+            When the application is running, enter at least one YouTube media URL (video,
+            playlist, or channel) at the prompt and press Enter. No spaces between
+            items are necessary.
 
             You can also enter the following commands:
+            - "\help" to see this list of commands
             - "\quit" or "\q" to quit
             - "\history" to see the last few URLs you entered
+            - "\update-downloader" or "\update-dl" to update yt-dlp using the command in your settings
+              (If you start experiencing constant download errors, try this command)
             - Modify the current session only (without updating the settings file):
                 - `\split` toggles chapter splitting
                 - `\images` toggles image embedding
@@ -76,16 +81,9 @@ public static class Help
 
             Enter `\commands` to see this summary in the application.
 
-            Upgrading yt-dlp:
-
-            Periodically ensure you are running the latest version of yt-dlp, especially
-            if you start experiencing download errors. See the yt-dlp GitHub page
-            https://github.com/yt-dlp/yt-dlp#update for more. (Likely commands are `sudo
-            yt-dlp -U` or `pip install --upgrade yt-dlp`.)
-
             Reporting issues:
 
-            If you run into any issues, feel free to create an issue on GitHub with as much
+            If you run into any issues, feel free to create an issue on GitHub. Please provide as much
             information as possible (e.g., entered URLs, system information, yt-dlp version).
             """;
 

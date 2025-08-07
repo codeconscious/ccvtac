@@ -46,7 +46,7 @@ module Settings =
         [<JsonPropertyName("tagDetectionPatterns")>]          TagDetectionPatterns: TagDetectionPatterns
         [<JsonPropertyName("renamePatterns")>]                RenamePatterns: RenamePattern array
         [<JsonPropertyName("normalizationForm")>]             NormalizationForm : string
-
+        [<JsonPropertyName("downloaderUpdateCommand")>]       DownloaderUpdateCommand : string
     }
 
     [<CompiledName("Summarize")>]
@@ -174,30 +174,33 @@ module Settings =
                 | None -> FilePath <| Path.Combine(AppContext.BaseDirectory, defaultFileName);
 
             let defaultSettings =
-                { WorkingDirectory = String.Empty
-                  MoveToDirectory = String.Empty
-                  HistoryFile = String.Empty
-                  HistoryDisplayCount = 25uy // byte
-                  SplitChapters = true
-                  SleepSecondsBetweenDownloads = 10us
-                  SleepSecondsBetweenURLs = 15us
-                  AudioFormats = [||]
-                  AudioQuality = 0uy
-                  QuietMode = false
-                  EmbedImages = true
-                  DoNotEmbedImageUploaders = [||]
-                  IgnoreUploadYearUploaders = [||]
-                  TagDetectionPatterns = {
-                    Title = [||]
-                    Artist = [||]
-                    Album = [||]
-                    Composer = [||]
-                    Year = [||]
-                  }
-                  RenamePatterns = [||]
-                  NormalizationForm = "C" } // Recommended for compatibility between Linux and macOS.
+                {
+                    WorkingDirectory = String.Empty
+                    MoveToDirectory = String.Empty
+                    HistoryFile = String.Empty
+                    HistoryDisplayCount = 25uy // byte
+                    SplitChapters = true
+                    SleepSecondsBetweenDownloads = 10us
+                    SleepSecondsBetweenURLs = 15us
+                    AudioFormats = [||]
+                    AudioQuality = 0uy
+                    QuietMode = false
+                    EmbedImages = true
+                    DoNotEmbedImageUploaders = [||]
+                    IgnoreUploadYearUploaders = [||]
+                    TagDetectionPatterns = {
+                        Title = [||]
+                        Artist = [||]
+                        Album = [||]
+                        Composer = [||]
+                        Year = [||]
+                    }
+                    RenamePatterns = [||]
+                    NormalizationForm = "C" // Recommended for compatibility between Linux and macOS.
+                    DownloaderUpdateCommand = String.Empty
+                }
 
-            defaultSettings |> writeFile confirmedPath
+            writeFile confirmedPath defaultSettings
 
     module LiveUpdating =
         open Validation

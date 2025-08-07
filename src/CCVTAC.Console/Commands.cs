@@ -4,14 +4,15 @@ internal static class Commands
 {
     internal const char Prefix = '\\';
 
-    internal static string[] QuitOptions { get; } =
+    internal static string[] QuitCommands { get; } =
         [MakeCommand("quit"), MakeCommand("q"), MakeCommand("exit")];
 
-    internal static string SummaryCommand { get; } = MakeCommand("commands");
+    internal static string HelpCommand { get; } = MakeCommand("help");
 
     internal static string[] SettingsSummary { get; } = [MakeCommand("settings")];
 
     internal static string[] History { get; } = [MakeCommand("history")];
+    internal static string[] UpdateDownloader { get; } = [MakeCommand("update-downloader"), MakeCommand("update-dl")];
 
     internal static string[] SplitChapterToggles { get; } =
         [MakeCommand("split"), MakeCommand("toggle-split")];
@@ -29,10 +30,11 @@ internal static class Commands
     internal static Dictionary<string, string> Summary { get; } =
         new()
         {
-            { History[0], "See the most recently entered URLs" },
-            { SplitChapterToggles[0], "Toggles chapter splitting for the current session only" },
-            { EmbedImagesToggles[0], "Toggles image embedding for the current session only" },
-            { QuietModeToggles[0], "Toggles quiet mode for the current session only" },
+            { string.Join(" or ", History), "See the most recently entered URLs" },
+            { string.Join(" or ", SplitChapterToggles), "Toggles chapter splitting for the current session only" },
+            { string.Join(" or ", EmbedImagesToggles), "Toggles image embedding for the current session only" },
+            { string.Join(" or ", QuietModeToggles), "Toggles quiet mode for the current session only" },
+            { string.Join(" or ", UpdateDownloader), "Updates the downloader using the command specified in the settings" },
             {
                 UpdateAudioFormatPrefix,
                 $"Followed by a supported audio format (e.g., {UpdateAudioFormatPrefix}m4a), changes the audio format for the current session only"
@@ -41,7 +43,8 @@ internal static class Commands
                 UpdateAudioQualityPrefix,
                 $"Followed by a supported audio quality (e.g., {UpdateAudioQualityPrefix}0), changes the audio quality for the current session only"
             },
-            { $"{QuitOptions[0]} or {QuitOptions[1]}", "Quit the application" },
+            { string.Join(" or ", QuitCommands), "Quit the application" },
+            { string.Join(" or ", HelpCommand), "See this help message" },
         };
 
     private static string MakeCommand(string text)

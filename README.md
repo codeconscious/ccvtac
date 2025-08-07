@@ -53,7 +53,7 @@ You can copy and paste the sample settings file below to a JSON file named `sett
 ```js
 {
   // Mandatory. The working directory for temporary files.
-  // It is cleared after processing each URL.
+  // It is emptied after processing each URL.
   "workingDirectory": "/Users/me/temp",
 
   // Mandatory. The directory in which final audio files should be saved.
@@ -102,6 +102,10 @@ You can copy and paste the sample settings file below to a JSON file named `sett
   // Reference: https://unicode.org/reports/tr15/
   // Reference: https://en.wikipedia.org/wiki/Unicode_equivalence
   "normalizationForm": "C",
+
+  // The full command you use to update your local yt-dlp installation.
+  // This is a sample entry.
+  "downloaderUpdateCommand": "pip install --upgrade yt-dlp",
 
   // Channel names for which the video thumbnail should
   // never be embedded in the audio file.
@@ -180,13 +184,15 @@ You can copy and paste the sample settings file below to a JSON file named `sett
 
 ### Using the application
 
-Once your settings file is ready, run the application with `dotnet run`. Optionally, pass `-h` or `--help` for instructions (e.g., `dotnet run -- --help`).
+Once your settings file is ready, run the application with `dotnet run` within the `CCVTAC.Console` directory. Alternatively, pass `-h` or `--help` for instructions (e.g., `dotnet run -- --help`).
 
-When the application is running, simply enter at least one YouTube media URL (video, playlist, or channel) at the prompt and press the Enter key. You can omit spaces between the URLs.
+When the application is running, enter at least one YouTube media URL (video, playlist, or channel) or command at the prompt and press Enter. No spaces between items are necessary.
 
-You can also enter the following commands:
+List of commands:
+- `\help` to see this list of commands
 - `\quit` or `\q` to quit
 - `\history` to see the URLs you most recently entered
+- `\update-downloader` or `\update-dl` to update yt-dlp using the command in your settings (If you start experiencing constant download errors, try this command)
 - Modify the current session only (without updating the settings file):
   - `\split` toggles chapter splitting
   - `\images` toggles image embedding
@@ -194,12 +200,6 @@ You can also enter the following commands:
   - `\format-` followed by a supported audio format (e.g., `\format-m4a`) changes the format
   - `\quality-` followed by a supported audio quality (e.g., `\quality-0`) changes the audio quality
 
-Enter `\commands` to see this summary in the application.
-
-## Upgrading yt-dlp
-
-Periodically ensure you are running the latest version of yt-dlp, especially if you start experiencing download errors. See the [yt-dlp GitHub page](https://github.com/yt-dlp/yt-dlp#update) for more. (Likely commands are `sudo yt-dlp -U` or `pip install --upgrade yt-dlp`.)
-
 ## Reporting issues
 
-If you run into any issues, please create an issue on GitHub with as much information as possible (e.g., entered URLs, OS, .NET version, yt-dlp version, etc.).
+If you run into any issues, feel free to create an issue on GitHub. Please provide as much information as possible (i.e., entered URLs, system information, yt-dlp version, etc.).
