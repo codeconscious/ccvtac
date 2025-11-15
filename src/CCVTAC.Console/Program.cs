@@ -46,7 +46,7 @@ internal static class Program
         {
             printer.Warning("\nQuitting at user's request.");
 
-            var warnResult = IoUtilities.Directories.WarnIfAnyFiles(settings.WorkingDirectory, 10);
+            var warnResult = Directories.WarnIfAnyFiles(settings.WorkingDirectory, 10);
 
             if (warnResult.IsSuccess)
             {

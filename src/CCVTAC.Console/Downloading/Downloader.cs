@@ -6,7 +6,7 @@ namespace CCVTAC.Console.Downloading;
 
 internal static class Downloader
 {
-    internal static readonly string ProgramName = "yt-dlp";
+    private static readonly string ProgramName = "yt-dlp";
 
     private record Urls(string Primary, string? Supplementary);
 

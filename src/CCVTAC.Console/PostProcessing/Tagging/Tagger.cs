@@ -186,10 +186,8 @@ internal static class Tagger
         printer.Debug($"Wrote tags to \"{audioFileName}\".");
         return;
 
-        /// <summary>
-        /// If the supplied video uploader is specified in the settings, returns the video's upload year.
-        /// Otherwise, returns null.
-        /// </summary>
+        // If the supplied video uploader is specified in the settings, returns the video's upload year.
+        // Otherwise, returns null.
         static ushort? GetAppropriateReleaseDateIfAny(
             UserSettings settings,
             VideoMetadata videoData
