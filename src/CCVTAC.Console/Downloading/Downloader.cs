@@ -78,7 +78,7 @@ internal static class Downloader
 
         if (errors.Count != 0)
         {
-            downloadResult.Errors.ForEach(e => printer.Error(e.Message));
+            downloadResult.Errors.ToList().ForEach(e => printer.Error(e.Message));
             printer.Info("Post-processing will still be attempted."); // For any partial downloads
         }
         else if (urls.Supplementary is not null)
