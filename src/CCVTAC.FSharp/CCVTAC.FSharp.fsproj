@@ -36,4 +36,9 @@
     <Compile Include="Program.fs" />
     <Compile Include="ResultTracker.fs" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="CodeConscious.Startwatch" Version="1.0.0" />
+    <PackageReference Include="Spectre.Console" Version="0.54.0" />
+    <PackageReference Include="TagLibSharp" Version="2.3.0" />
+  </ItemGroup>
 </Project>
