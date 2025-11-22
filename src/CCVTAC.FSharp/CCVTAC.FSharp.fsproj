@@ -5,7 +5,35 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Settings.fs" />
-    <Compile Include="Downloading.fs" />
+    <Compile Include="Downloading\Downloader.fs" />
+    <Compile Include="Downloading\Uploader.fs" />
+    <Compile Include="Downloading\Downloading.fs" />
+    <Compile Include="ExternalTools\ExternalTool.fs" />
+    <Compile Include="ExternalTools\Runner.fs" />
+    <Compile Include="ExternalTools\ToolSettings.fs" />
+    <Compile Include="IoUtilities\Directories.fs" />
+    <Compile Include="PostProcessing\Tagging\Detectors.fs" />
+    <Compile Include="PostProcessing\Tagging\TagDetector.fs" />
+    <Compile Include="PostProcessing\Tagging\Tagger.fs" />
+    <Compile Include="PostProcessing\Tagging\TaggingSet.fs" />
+    <Compile Include="PostProcessing\CollectionMetadata.fs" />
+    <Compile Include="PostProcessing\Deleter.fs" />
+    <Compile Include="PostProcessing\ImageProcessor.fs" />
+    <Compile Include="PostProcessing\Mover.fs" />
+    <Compile Include="PostProcessing\PostProcessing.fs" />
+    <Compile Include="PostProcessing\Renamer.fs" />
+    <Compile Include="PostProcessing\VideoMetadata.fs" />
+    <Compile Include="PostProcessing\YouTubeMetadataExtensionMethods.fs" />
+    <Compile Include="Settings\Id3Version.fs" />
+    <Compile Include="Settings\Settings.fs" />
+    <Compile Include="Commands.fs" />
+    <Compile Include="ExtensionMethods.fs" />
+    <Compile Include="Help.fs" />
+    <Compile Include="History.fs" />
+    <Compile Include="InputHelper.fs" />
+    <Compile Include="Orchestrator.fs" />
+    <Compile Include="Printer.fs" />
+    <Compile Include="Program.fs" />
+    <Compile Include="ResultTracker.fs" />
   </ItemGroup>
 </Project>
