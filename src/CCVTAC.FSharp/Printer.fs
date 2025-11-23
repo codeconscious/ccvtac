@@ -4,6 +4,7 @@ open System
 open System.Collections.Generic
 open System.Linq
 open Spectre.Console
+open ExtensionMethods
 
 type private Level =
     | Critical = 0
@@ -32,13 +33,19 @@ type Printer(showDebug: bool) =
     let mutable minimumLogLevel =
         if showDebug then Level.Debug else Level.Info
 
+    let extractedErrors result =
+        match result with
+        | Ok _ -> [||]
+        | Error errors -> errors
+        :> ICollection<string>
+
     /// Show or hide debug messages.
     member this.ShowDebug(show: bool) =
         minimumLogLevel <- (if show then Level.Debug else Level.Info)
 
     /// Escape text so Spectre markup and format strings are safe.
     static member private EscapeText(text: string) : string =
-        text.Replace("{", "{{"}).Replace("}", "}}").Replace("[", "[[").Replace("]", "]]")
+        text.Replace("{", "{{").Replace("}", "}}").Replace("[", "[[").Replace("]", "]]")
 
     static member private AddMarkup(message: string, colors: ColorFormat) : string =
         match colors.Foreground, colors.Background, colors.Bold with
@@ -66,7 +73,7 @@ type Printer(showDebug: bool) =
         let processMarkup = defaultArg processMarkup true
 
         if int logLevel > int minimumLogLevel then
-            () // nothing to do
+            () // TODO: Can we remove altogether?
         else
             if String.IsNullOrWhiteSpace message then
                 raise (ArgumentNullException("message", "Message cannot be empty."))
@@ -76,7 +83,7 @@ type Printer(showDebug: bool) =
             let escapedMessage = Printer.EscapeText(message)
 
             if processMarkup then
-                let markedUp = Printer.AddMarkup(escapedMessage, colors.[logLevel])
+                let markedUp = Printer.AddMarkup(escapedMessage, colors[logLevel])
                 AnsiConsole.Markup(markedUp)
             else
                 // AnsiConsole.Write uses format strings internally; escapedMessage already duplicates braces
@@ -97,7 +104,7 @@ type Printer(showDebug: bool) =
 
     member this.Errors(errors: ICollection<string>, ?appendLines: byte) =
         if errors.Count = 0 then raise (ArgumentException("No errors were provided!", "errors"))
-        for err in errors.Where(fun e -> e.HasText()) do
+        for err in (errors |> Seq.filter (fun x -> hasText x false)) do
             this.Error(err)
         Printer.EmptyLines(defaultArg appendLines 0uy)
 
@@ -106,16 +113,17 @@ type Printer(showDebug: bool) =
         let items = seq { yield headerMessage; yield! errors } |> Seq.toArray
         this.Errors(items, 0uy)
 
-    member this.Errors<'T>(failResult: Result<'T>, ?appendLines: byte) =
-        this.Errors(failResult.Errors.Select(fun e -> e.Message).ToList(), ?appendLines = appendLines)
+    member this.Errors<'a>(failResult: Result<'a, string[]>, ?appendLines: byte) =
+        this.Errors(extractedErrors failResult, ?appendLines = appendLines)
 
-    member this.Errors<'T>(headerMessage: string, failingResult: Result<'T>) =
-        this.Errors(headerMessage, failingResult.Errors.Select(fun e -> e.Message))
+    member this.Errors<'a>(headerMessage: string, failingResult: Result<'a, string[]>) =
+        this.Errors(headerMessage, extractedErrors failingResult)
 
-    member this.FirstError(failResult: IResultBase, ?prepend: string) =
+    member this.FirstError(failResult: Result<'a, string[]>, ?prepend: string) =
         let pre = defaultArg prepend null
         let prefix = if isNull pre then String.Empty else $"{pre} "
-        let message = (if isNull failResult.Errors then String.Empty else (failResult.Errors.FirstOrDefault()?.Message ?? String.Empty))
+        // let message = (if isNull failResult.Errors then String.Empty else (failResult.Errors.FirstOrDefault()?.Message ?? String.Empty))
+        let message = extractedErrors failResult |> Seq.head
         this.Error($"{prefix}{message}")
 
     member this.Warning(message: string, ?appendLineBreak: bool, ?prependLines: byte, ?appendLines: byte, ?processMarkup: bool) =
@@ -132,7 +140,8 @@ type Printer(showDebug: bool) =
         if count = 0uy then () else
         // Write count blank lines. The original wrote (count - 1) extra NewLines inside WriteLine call.
         let repeats = int count - 1
-        if repeats <= 0 then AnsiConsole.WriteLine() else AnsiConsole.WriteLine(String.Concat(Enumerable.Repeat(Environment.NewLine, repeats)))
+        if repeats <= 0
+        then AnsiConsole.WriteLine() else AnsiConsole.WriteLine(String.Concat(Enumerable.Repeat(Environment.NewLine, repeats)))
 
     member this.GetInput(prompt: string) : string =
         Printer.EmptyLines(1uy)
