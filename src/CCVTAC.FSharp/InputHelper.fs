@@ -48,29 +48,33 @@ module InputHelper =
 
     type CategorizedInput = { Text: string; Category: InputCategory }
 
-    let CategorizeInputs (inputs: ICollection<string>) : ImmutableArray<CategorizedInput> =
+    let CategorizeInputs (inputs: ICollection<string>) : CategorizedInput list =
         inputs
         |> Seq.cast<string>
         |> Seq.map (fun input ->
-            let category = if input.StartsWith(string Commands.Prefix) then InputCategory.Command else InputCategory.Url
+            let category =
+                if input.StartsWith(string Commands.Prefix)
+                then InputCategory.Command
+                else InputCategory.Url
             { Text = input; Category = category })
-        |> ImmutableArray.CreateRange
+        |> List.ofSeq
 
-    type CategoryCounts(counts: Dictionary<InputCategory,int>) =
+    type CategoryCounts(counts: Map<InputCategory,int>) =
         member _.Item
             with get (category: InputCategory) =
                 match counts.TryGetValue(category) with
                 | true, v -> v
                 | _ -> 0
 
-    let CountCategories (inputs: ICollection<CategorizedInput>) : CategoryCounts =
+    let CountCategories (inputs: CategorizedInput seq) : CategoryCounts =
         let counts =
             inputs
             |> Seq.cast<CategorizedInput>
             |> Seq.groupBy (fun i -> i.Category)
             |> Seq.map (fun (k, grp) -> k, grp |> Seq.length)
-            |> dict
-            :?> IDictionary<InputCategory,int>
-            |> fun d -> Dictionary<InputCategory,int>(d)
+            // |> dict
+            // :?> IDictionary<InputCategory,int>
+            // |> fun d -> Dictionary<InputCategory,int>(d)
+            |> Map.ofSeq
 
         CategoryCounts(counts)

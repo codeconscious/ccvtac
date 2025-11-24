@@ -2,8 +2,41 @@ namespace CCVTAC.Console.PostProcessing
 
 open System
 open System.IO
+open CCVTAC.Console
 
 module Deleter =
+    /// Retrieves collection files based on collection metadata
+    let private getCollectionFiles
+        (collectionMetadata: CollectionMetadata option)
+        (workingDirectory: string)
+        : Result<string[], string> =
+
+        match collectionMetadata with
+        | None -> Ok [||]
+        | Some metadata ->
+            try
+                let files =
+                    Directory.GetFiles(workingDirectory, $"*{metadata.Id}*")
+
+                Ok files
+            with
+            | ex -> Error $"Error collecting filenames: {ex.Message}"
+
+    /// Deletes all specified files
+    let private deleteAll
+        (fileNames: string[])
+        (printer: Printer)
+        : unit =
+
+        fileNames
+        |> Array.iter (fun fileName ->
+            try
+                File.Delete(fileName)
+                printer.Debug($"• Deleted \"{fileName}\"")
+            with
+            | ex -> printer.Error($"• Deletion error: {ex.Message}")
+        )
+
     /// Runs the deletion process for temporary files
     let internal run
         (taggingSetFileNames: string seq)
@@ -34,35 +67,3 @@ module Deleter =
             printer.Debug($"Deleting {allFileNames.Length} temporary files...")
             deleteAll allFileNames printer
             printer.Info("Deleted temporary files.")
-
-    /// Retrieves collection files based on collection metadata
-    and private getCollectionFiles
-        (collectionMetadata: CollectionMetadata option)
-        (workingDirectory: string)
-        : Result<string[]> =
-
-        match collectionMetadata with
-        | None -> Ok [||]
-        | Some metadata ->
-            try
-                let files =
-                    Directory.GetFiles(workingDirectory, $"*{metadata.Id}*")
-
-                Ok files
-            with
-            | ex -> Error $"Error collecting filenames: {ex.Message}"
-
-    /// Deletes all specified files
-    and private deleteAll
-        (fileNames: string[])
-        (printer: Printer)
-        : unit =
-
-        fileNames
-        |> Array.iter (fun fileName ->
-            try
-                File.Delete(fileName)
-                printer.Debug($"• Deleted \"{fileName}\"")
-            with
-            | ex -> printer.Error($"• Deletion error: {ex.Message}")
-        )

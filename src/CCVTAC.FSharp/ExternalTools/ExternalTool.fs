@@ -44,8 +44,8 @@ type ExternalTool = {
             match process' with
             | null ->
                 Error $"The program \"{this.Name}\" was not found. (The process was null.)"
-            | _ ->
-                process'.WaitForExit()
+            | process'' ->
+                process''.WaitForExit()
                 Ok()
         with
         | _ ->

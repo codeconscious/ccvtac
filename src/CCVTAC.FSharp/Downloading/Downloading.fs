@@ -1,4 +1,4 @@
-﻿namespace CCVTAC.FSharp
+﻿namespace CCVTAC.Console.Downloading
 
 module public Downloading =
     open System.Text.RegularExpressions

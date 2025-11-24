@@ -1,7 +1,5 @@
 namespace CCVTAC.Console.Settings
 
-open System
-
 module TagFormat =
 
     /// Point versions of ID3 version 2 (such as 2.3 or 2.4).

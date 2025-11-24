@@ -1,6 +1,9 @@
 namespace CCVTAC.Console.ExternalTools
 
 open System.Diagnostics
+open System
+open CCVTAC.Console
+open Startwatch.Library
 
 module Runner =
     /// Authentic success exit code
@@ -19,7 +22,8 @@ module Runner =
     let internal run
         (settings: ToolSettings)
         (otherSuccessExitCodes: int[])
-        (printer: Printer) =
+        (printer: Printer)
+        : Result<int * string, string> =
 
         let watch = Watch()
 
@@ -31,38 +35,32 @@ module Runner =
             settings.CommandWithArgs.Split([|' '|], 2)
 
         // Prepare process start info
-        let processStartInfo = ProcessStartInfo(
-            FileName = splitCommandWithArgs.[0],
-            Arguments = if splitCommandWithArgs.Length > 1 then splitCommandWithArgs.[1] else "",
-            UseShellExecute = false,
-            RedirectStandardOutput = false,
-            RedirectStandardError = true,
-            CreateNoWindow = true,
-            WorkingDirectory = settings.WorkingDirectory
-        )
+        let processStartInfo = ProcessStartInfo splitCommandWithArgs[0]
+        // processStartInfo.FileName <- splitCommandWithArgs.[0]
+        processStartInfo.Arguments <- if splitCommandWithArgs.Length > 1 then splitCommandWithArgs.[1] else ""
+        processStartInfo.UseShellExecute <- false
+        processStartInfo.RedirectStandardOutput <- false
+        processStartInfo.RedirectStandardError <- true
+        processStartInfo.CreateNoWindow <- true
+        processStartInfo.WorkingDirectory <- settings.WorkingDirectory
 
         // Start the process
         match Process.Start(processStartInfo) with
         | null ->
             // Process failed to start
             Error $"Could not locate {splitCommandWithArgs.[0]}."
-        | process ->
+        | process' ->
             // Read errors before waiting for exit
-            let errors = process.StandardError.ReadToEnd()
+            let error = process'.StandardError.ReadToEnd()
 
             // Wait for process to complete
-            process.WaitForExit()
+            process'.WaitForExit()
 
-            // Log completion time
             printer.Info($"{splitCommandWithArgs.[0]} finished in {watch.ElapsedFriendly}.")
 
-            // Trim terminal line break from errors
-            let trimmedErrors = errors.TrimTerminalLineBreak()
+            let trimmedErrors = error // TODO: Trim terminal line break?
 
-            // Determine result based on exit code
-            if isSuccessExitCode otherSuccessExitCodes process.ExitCode then
-                // Successful execution (with potential warnings)
-                Ok (process.ExitCode, trimmedErrors)
+            if isSuccessExitCode otherSuccessExitCodes process'.ExitCode then
+                Ok (process'.ExitCode, trimmedErrors)
             else
-                // Failed execution
-                Error $"{splitCommandWithArgs.[0]} exited with code {process.ExitCode}: {trimmedErrors}."
+                Error $"{splitCommandWithArgs.[0]} exited with code {process'.ExitCode}: {trimmedErrors}."

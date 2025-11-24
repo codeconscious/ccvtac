@@ -3,7 +3,7 @@ namespace CCVTAC.Console.IoUtilities
 open System
 open System.IO
 open System.Text
-open CCVTAC.Console.PostProcessing
+open CCVTAC.Console
 
 module Directories =
     [<Literal>]
@@ -15,9 +15,12 @@ module Directories =
     let internal audioFileCount (directory: string) =
         Directory.GetFiles(directory)
         |> Array.filter (fun f ->
-            PostProcessor.AudioExtensions
+            AudioExtensions
             |> Array.exists (fun ext ->
-                Path.GetExtension(f).Equals(ext, StringComparison.OrdinalIgnoreCase)
+                // let f' = match Path.GetExtension (f: string) with Null -> "" | NonNull (x: string) -> x // TODO: Improve.
+                // let ext' = match Path.GetExtension (ext: string) with Null -> "" | NonNull (x: string) -> x // TODO: Improve.
+                // Path.GetExtension(f).Equals(ext, StringComparison.OrdinalIgnoreCase) // Error occurs here.
+                StringComparer.OrdinalIgnoreCase.Equals(Path.GetExtension(f), ext)
             )
         )
         |> Array.length
@@ -89,10 +92,9 @@ module Directories =
     let internal askToDeleteAllFiles (workingDirectory: string) (printer: Printer) =
         let doDelete = printer.AskToBool("Delete all temporary files?", "Yes", "No")
 
-        if doDelete then
-            deleteAllFiles workingDirectory 10
-        else
-            Error "Will not delete the files."
+        if doDelete
+        then deleteAllFiles workingDirectory 10
+        else Error "Will not delete the files."
 
     /// Returns the filenames in a given directory, optionally ignoring specific filenames
     let private getDirectoryFileNames
@@ -106,7 +108,5 @@ module Directories =
             |> Seq.toArray
 
         Directory.GetFiles(directoryName, AllFilesSearchPattern, enumerationOptions)
-        |> Array.filter (fun filePath ->
-            not (ignoreFiles |> Array.exists (fun ignore -> filePath.EndsWith(ignore)))
-        )
-        |> Array
+        |> Array.filter (fun filePath -> not (ignoreFiles |> Array.exists filePath.EndsWith))
+

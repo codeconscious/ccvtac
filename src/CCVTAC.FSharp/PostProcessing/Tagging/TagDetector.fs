@@ -1,6 +1,9 @@
 namespace CCVTAC.Console.PostProcessing.Tagging
 
-open CCVTAC.FSharp.Settings
+open System
+open CCVTAC.Console.Settings
+open CCVTAC.Console.Settings.Settings
+open CCVTAC.Console.PostProcessing
 
 /// Provides methods to search for specific tag field data (artist, album, etc.) within video metadata.
 type TagDetector(tagDetectionPatterns: TagDetectionPatterns) =
@@ -28,7 +31,7 @@ type TagDetector(tagDetectionPatterns: TagDetectionPatterns) =
         | None, None -> None
 
     /// Detects the album from video metadata
-    member this.DetectAlbum(videoData: VideoMetadata, ?defaultAlbum: string) : string option =
+    member this.DetectAlbum(videoData: VideoMetadata, defaultAlbum: string option) : string option =
         let detectedAlbum =
             Detectors.detectSingle<string> videoData this.Patterns.Album None
 
@@ -39,12 +42,12 @@ type TagDetector(tagDetectionPatterns: TagDetectionPatterns) =
 
     /// Detects composers from video metadata
     member this.DetectComposers(videoData: VideoMetadata) : string option =
-        Detectors.detectMultiple<string> videoData this.Patterns.Composer None "; "
+        Detectors.detectMultiple<string> videoData this.Patterns.Composer (String.Empty) "; " |> Some
 
     /// Detects the release year from video metadata
-    member this.DetectReleaseYear(videoData: VideoMetadata, ?defaultYear: uint16) : uint16 option =
+    member this.DetectReleaseYear(videoData: VideoMetadata, defaultYear: uint32 option) : uint32 option =
         let detectedYear =
-            Detectors.detectSingle<uint16> videoData this.Patterns.Year None
+            Detectors.detectSingle<uint32> videoData this.Patterns.Year None
 
         match detectedYear, defaultYear with
         | Some year, _ -> Some year

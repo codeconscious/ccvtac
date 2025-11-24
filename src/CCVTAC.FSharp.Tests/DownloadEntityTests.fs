@@ -1,7 +1,8 @@
 module DownloadEntityTests
 
 open Xunit
-open CCVTAC.FSharp.Downloading
+open CCVTAC.Console.Downloading
+open CCVTAC.Console.Downloading.Downloading
 
 module MediaTypeWithIdsTests =
     let incorrectMediaType = "Incorrect media type"

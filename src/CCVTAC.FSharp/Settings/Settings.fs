@@ -1,8 +1,10 @@
-namespace CCVTAC.FSharp
+namespace CCVTAC.Console.Settings
 
 module Settings =
     open System
     open System.Text.Json.Serialization
+    open CCVTAC.Console
+    open ExtensionMethods
 
     let newLine = Environment.NewLine
 
@@ -16,7 +18,7 @@ module Settings =
 
     type TagDetectionPattern = {
         [<JsonPropertyName("regex")>]        RegexPattern : string
-        [<JsonPropertyName("matchGroup")>]   MatchGroup : byte
+        [<JsonPropertyName("matchGroup")>]   MatchGroup : int // byte
         [<JsonPropertyName("searchField")>]  SearchField : string
         [<JsonPropertyName("summary")>]      Summary : string option
     }
@@ -84,19 +86,44 @@ module Settings =
             ("Rename patterns", settings.RenamePatterns.Length |> pluralize "pattern")
         ]
 
+    open System
+    open Spectre.Console
+
+    /// Prints a summary of the given settings.
+    let PrintSummary (settings: UserSettings) (printer: Printer) (header: string option) : unit =
+        match header with
+        | Some h when hasText h false ->
+            printer.Info(h)
+        | _ -> ()
+
+        let table = Table()
+        table.Expand() |> ignore
+        table.Border <- TableBorder.HeavyEdge
+        table.BorderColor(Color.Grey27) |> ignore
+        table.AddColumns("Name", "Value") |> ignore
+        table.HideHeaders() |> ignore
+        table.Columns.[1].Width <- 100 // Ensure maximum width.
+
+        let settingPairs = summarize(settings)
+        for pair in settingPairs do
+            table.AddRow(fst pair, snd pair) |> ignore
+
+        Printer.PrintTable(table)
+
+
     module Validation =
         open System.IO
 
         let validate settings =
-            let isEmpty str = str |> String.IsNullOrWhiteSpace
+            let isEmpty str = String.IsNullOrWhiteSpace str
             let dirMissing str = not (Directory.Exists str)
 
             // Source: https://github.com/yt-dlp/yt-dlp/?tab=readme-ov-file#post-processing-options
+            // TODO: Check similar item in Shared module.
             let supportedAudioFormats = [| "best"; "aac"; "alac"; "flac"; "m4a"; "mp3"; "opus"; "vorbis"; "wav" |]
             let supportedNormalizationForms = [| "C"; "D"; "KC"; "KD" |]
 
-            let validAudioFormat fmt =
-                supportedAudioFormats |> Array.contains fmt
+            let validAudioFormat fmt = supportedAudioFormats |> Array.contains fmt
 
             match settings with
             | { WorkingDirectory = d } when d |> isEmpty ->
@@ -127,11 +154,13 @@ module Settings =
         open System.Text.Encodings.Web
         open Validation
 
-        let deserialize<'a> (json: string) =
+        let deserialize<'a> (json: string) : Result<'a, string> =
             let options = JsonSerializerOptions()
             options.AllowTrailingCommas <- true
             options.ReadCommentHandling <- JsonCommentHandling.Skip
-            JsonSerializer.Deserialize<'a>(json, options)
+            match JsonSerializer.Deserialize<'a>(json, options) with // TODO: Add exception handling.
+            | null -> Error "Could not deserialize the JSON"
+            | s -> Ok s
 
         [<CompiledName("FileExists")>]
         let fileExists (FilePath path) =
@@ -145,7 +174,7 @@ module Settings =
                 path
                 |> File.ReadAllText
                 |> deserialize<UserSettings>
-                |> validate
+                |> Result.bind validate
             with
                 | :? FileNotFoundException -> Error $"File \"{path}\" was not found."
                 | :? JsonException as e -> Error $"Parse error in \"{path}\": {e.Message}"
@@ -221,8 +250,8 @@ module Settings =
             { settings with QuietMode = toggledSetting }
 
         [<CompiledName("UpdateAudioFormat")>]
-        let updateAudioFormat settings newFormat =
-            let updatedSettings = { settings with AudioFormats = newFormat}
+        let updateAudioFormat settings (newFormat: string) =
+            let updatedSettings = { settings with AudioFormats = newFormat.Split(',')}
             validate updatedSettings
 
         [<CompiledName("UpdateAudioQuality")>]

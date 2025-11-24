@@ -2,13 +2,13 @@ namespace CCVTAC.Console
 
 open System
 open System.IO
-open System.Linq
 open System.Text.Json
 open Spectre.Console
 
 type History(filePath: string, displayCount: byte) =
 
     let separator = ';'
+
     member private _.FilePath = filePath
     member private _.DisplayCount = displayCount
 
@@ -34,16 +34,16 @@ type History(filePath: string, displayCount: byte) =
 
             let historyData =
                 lines
-                |> Seq.map (fun line -> line.Split(separator))
+                |> Seq.map _.Split(separator)
                 |> Seq.filter (fun parts -> parts.Length = 2)
-                |> Seq.map (fun parts -> DateTime.Parse(parts.[0]), parts.[1])
+                |> Seq.map (fun parts -> DateTime.Parse(parts[0]), parts[1])
                 |> Seq.groupBy fst
                 |> Seq.map (fun (dt, pairs) -> dt, pairs |> Seq.map snd |> Seq.toList)
 
             let table = Table()
             table.Border <- TableBorder.None
             table.AddColumns("Time", "URL") |> ignore
-            table.Columns.[0].PadRight <- 3
+            table.Columns[0].PadRight(3) |> ignore
 
             for (dateTime, urls) in historyData do
                 let formattedTime = sprintf "%s" (dateTime.ToString("yyyy-MM-dd HH:mm:ss"))

@@ -4,9 +4,11 @@ open System
 open System.IO
 open System.Text
 open System.Text.RegularExpressions
-open System.Linq
-open System.Collections.Immutable
-open CCVTAC.FSharp.Settings
+open CCVTAC.Console
+open CCVTAC.Console.Settings
+open CCVTAC.Console.Settings.Settings
+open Startwatch.Library
+open ExtensionMethods
 
 module Renamer =
 
@@ -24,13 +26,13 @@ module Renamer =
 
         let audioFiles =
             workingDirInfo.EnumerateFiles()
-            |> Seq.filter (fun f -> PostProcessor.AudioExtensions.CaseInsensitiveContains(f.Extension))
-            |> Seq.toImmutableList
+            |> Seq.filter (fun f -> caseInsensitiveContains AudioExtensions f.Extension)
+            |> List.ofSeq
 
-        if audioFiles.None() then
+        if audioFiles.Length = 0 then
             printer.Warning "No audio files to rename were found."
         else
-            printer.Debug (sprintf "Renaming %d audio file(s)..." audioFiles.Count)
+            printer.Debug $"Renaming %d{audioFiles.Length} audio file(s)..."
 
             for file in audioFiles do
                 let newFileName =
@@ -46,16 +48,16 @@ module Renamer =
                                 |> Seq.rev
                                 |> Seq.toList
 
-                            if matches.Count = 0 then sb
+                            if matches.Length = 0 then sb
                             else
                                 if not settings.QuietMode then
                                     let matchedPatternSummary =
-                                        if isNull renamePattern.Summary then
+                                        // if isNull renamePattern.Summary then // TODO: Check on this.
                                             sprintf "`%s` (no description)" renamePattern.RegexPattern
-                                        else
-                                            sprintf "\"%s\"" renamePattern.Summary
+                                        // else
+                                        //     sprintf "\"%s\"" renamePattern.Summary
 
-                                    printer.Debug (sprintf "Rename pattern %s matched × %d." matchedPatternSummary matches.Count)
+                                    printer.Debug (sprintf "Rename pattern %s matched × %d." matchedPatternSummary matches.Length)
 
                                 for m in matches do
                                     // remove matched substring
@@ -85,7 +87,7 @@ module Renamer =
                 try
                     let dest =
                         Path.Combine(workingDirectory, newFileName)
-                        |> fun p -> p.Normalize(getNormalizationForm settings.NormalizationForm)
+                        |> _.Normalize(getNormalizationForm settings.NormalizationForm)
 
                     File.Move(file.FullName, dest)
                     printer.Debug (sprintf "• From: \"%s\"" file.Name)

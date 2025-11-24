@@ -119,11 +119,9 @@ type Printer(showDebug: bool) =
     member this.Errors<'a>(headerMessage: string, failingResult: Result<'a, string[]>) =
         this.Errors(headerMessage, extractedErrors failingResult)
 
-    member this.FirstError(failResult: Result<'a, string[]>, ?prepend: string) =
-        let pre = defaultArg prepend null
-        let prefix = if isNull pre then String.Empty else $"{pre} "
-        // let message = (if isNull failResult.Errors then String.Empty else (failResult.Errors.FirstOrDefault()?.Message ?? String.Empty))
-        let message = extractedErrors failResult |> Seq.head
+    // member this.FirstError(failResult: Result<'a, string[]>, ?prepend: string) =
+    member this.FirstError(message: string, ?prepend: string) =
+        let prefix = match prepend with Some x -> x | None -> String.Empty
         this.Error($"{prefix}{message}")
 
     member this.Warning(message: string, ?appendLineBreak: bool, ?prependLines: byte, ?appendLines: byte, ?processMarkup: bool) =

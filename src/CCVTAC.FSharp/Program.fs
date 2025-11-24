@@ -5,6 +5,13 @@ open System.Linq
 open Spectre.Console
 open CCVTAC.Console.IoUtilities
 open CCVTAC.Console.Settings
+open CCVTAC.Console.Settings.Settings
+open ExtensionMethods
+open CCVTAC.Console
+open CCVTAC.Console.Settings
+open CCVTAC.Console.Settings.Settings.IO
+open CCVTAC.Console.Settings.Settings.LiveUpdating
+open CCVTAC.Console.Settings.Settings.Validation
 
 module Program =
 
@@ -16,48 +23,49 @@ module Program =
     let main (args: string[]) : int =
         let printer = Printer(showDebug = true)
 
-        if args.Length > 0 && ExtensionMethods.CaseInsensitiveContains(helpFlags, args.[0]) then
+        if args.Length > 0 && caseInsensitiveContains helpFlags args[0] then
             Help.Print(printer)
             0
         else
             let maybeSettingsPath =
-                if args.Length >= 2 && ExtensionMethods.CaseInsensitiveContains(settingsFileFlags, args.[0]) then
+                if args.Length >= 2 && caseInsensitiveContains settingsFileFlags args[0] then
                     args.[1] // expected to be a settings file path
                 else
                     defaultSettingsFileName
 
-            match SettingsAdapter.ProcessSettings(maybeSettingsPath, printer) with
-            | Error errs ->
-                // Errors prints the messages and exits
-                printer.Errors(errs.Select(fun e -> e.Message).ToList())
+            // match SettingsAdapter.ProcessSettings(maybeSettingsPath, printer) with
+            let readResult = Settings.IO.read (FilePath maybeSettingsPath)
+            match readResult with
+            | Error e ->
+                printer.Error(e)
                 1
-            | Ok None ->
-                // A new settings file was created; nothing more to do
-                0
-            | Ok (Some settings) ->
-                SettingsAdapter.PrintSummary(settings, printer, header = "Settings loaded OK.")
+            // | Ok None ->
+            //     // A new settings file was created; nothing more to do
+            //     0
+            | Ok settings ->
+                Settings.PrintSummary settings printer (Some "Settings loaded OK.")
                 printer.ShowDebug(not settings.QuietMode)
 
                 // Catch Ctrl-C (SIGINT)
                 Console.CancelKeyPress.Add(fun args ->
                     printer.Warning("\nQuitting at user's request.")
 
-                    match Directories.WarnIfAnyFiles(settings.WorkingDirectory, 10) with
+                    match Directories.warnIfAnyFiles settings.WorkingDirectory 10 with
                     | Ok () -> ()
                     | Error warnResult ->
                         printer.FirstError(warnResult)
-                        match Directories.AskToDeleteAllFiles(settings.WorkingDirectory, printer) with
-                        | Ok deletedCount -> printer.Info(sprintf "%d file(s) deleted." deletedCount)
+                        match Directories.askToDeleteAllFiles settings.WorkingDirectory printer with
+                        | Ok deletedCount -> printer.Info $"%d{deletedCount} file(s) deleted."
                         | Error delErr -> printer.FirstError(delErr)
                     // Do not set args.Cancel here; let default behavior terminate the process
                 )
 
                 // Top-level try to catch unexpected exceptions and report them
                 try
-                    Orchestrator.Start(settings, printer)
+                    Orchestrator.start settings printer
                     0
                 with ex ->
-                    printer.Critical(sprintf "Fatal error: %s" ex.Message)
+                    printer.Critical $"Fatal error: %s{ex.Message}"
                     AnsiConsole.WriteException(ex)
                     printer.Info(
                         "Please help improve this tool by reporting this error and any relevant URLs at https://github.com/codeconscious/ccvtac/issues."

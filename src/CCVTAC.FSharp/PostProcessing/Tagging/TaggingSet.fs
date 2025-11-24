@@ -5,12 +5,14 @@ open System.IO
 open System.Text.RegularExpressions
 open System.Collections.Generic
 open System.Collections.Immutable
+open CCVTAC.Console
+open ExtensionMethods
 
 /// Contains all the data necessary for tagging a related set of files.
 [<Struct>]
 type TaggingSet =
     { ResourceId: string
-      AudioFilePaths: ImmutableHashSet<string>
+      AudioFilePaths: string list
       JsonFilePath: string
       ImageFilePath: string }
     /// Expose all related files as a read-only list
@@ -35,15 +37,16 @@ type TaggingSet =
         let imageTrimmed = imageFilePath.Trim()
         let audioSet = ImmutableHashSet.CreateRange(StringComparer.OrdinalIgnoreCase, audioFilePaths)
         { ResourceId = resourceIdTrimmed
-          AudioFilePaths = audioSet
+          AudioFilePaths = audioSet |> Seq.toList
           JsonFilePath = jsonTrimmed
           ImageFilePath = imageTrimmed }
 
     /// Create a collection of TaggingSets from a collection of file paths related to several video IDs.
     /// Files that don't match the requirements will be ignored.
-    static member CreateSets (filePaths: ICollection<string>) : ImmutableList<TaggingSet> =
-        if isNull filePaths || filePaths.Count = 0 then
-            ImmutableList<TaggingSet>.Empty
+    // static member CreateSets (filePaths: ICollection<string>) : TaggingSet list =
+    static member CreateSets (filePaths: ICollection<string>) : TaggingSet list =
+        if Seq.isEmpty filePaths then
+            []
         else
             let jsonFileExt = ".json"
             let imageFileExt = ".jpg"
@@ -53,29 +56,36 @@ type TaggingSet =
                 Regex(@".+\[([\w_\-]{11})\](?:.*)?\.(\w+)", RegexOptions.Compiled)
 
             filePaths
-            |> Seq.map (fun f -> fileNamesWithVideoIdsRegex.Match(f))
-            |> Seq.filter (fun m -> m.Success)
-            |> Seq.map (fun m -> m.Groups.[0].Value, m.Groups.[1].Value) // (fullFilename, videoId)
-            |> Seq.groupBy snd // group by videoId -> seq of (fullFilename, videoId)
-            |> Seq.map (fun (videoId, seqFiles) -> videoId, seqFiles |> Seq.map fst)
-            |> Seq.filter (fun (_videoId, files) ->
-                let filesList = files |> Seq.toList
-                // contains at least one audio file
-                filesList
-                |> Seq.exists (fun f -> PostProcessor.AudioExtensions.CaseInsensitiveContains(Path.GetExtension(f)))
-                // exactly one json and exactly one image
-                && (filesList |> Seq.filter (fun f -> f.EndsWith(jsonFileExt, StringComparison.OrdinalIgnoreCase)) |> Seq.length = 1)
-                && (filesList |> Seq.filter (fun f -> f.EndsWith(imageFileExt, StringComparison.OrdinalIgnoreCase)) |> Seq.length = 1)
-            )
-            |> Seq.map (fun (videoId, files) ->
-                let filesList = files |> Seq.toList
+            |> Seq.map fileNamesWithVideoIdsRegex.Match
+            |> Seq.filter _.Success
+            |> Seq.map (fun m -> m.Captures |> Seq.cast<Match> |> Seq.head)
+            |> Seq.groupBy (fun m -> m.Groups[1].Value) //(fun m -> m.Groups.[0].Value)
+            |> Seq.map (fun (videoId, matches) -> videoId, matches |> Seq.map _.Groups[0].Value)
+            |> Seq.filter (fun (_, files) ->
+                let filesSeq = files |> Seq.toArray
+                let isSupportedExtension =
+                    filesSeq
+                    |> Seq.exists (fun f ->
+                        let f' = match Path.GetExtension (f: string) with Null -> "" | NonNull (x: string) -> x // TODO: Improve.
+                        caseInsensitiveContains AudioExtensions f')
+                let jsonCount =
+                    filesSeq |> Seq.filter (fun f -> f.EndsWith(jsonFileExt, StringComparison.OrdinalIgnoreCase)) |> Seq.length
+                let imageCount =
+                    filesSeq |> Seq.filter (fun f -> f.EndsWith(imageFileExt, StringComparison.OrdinalIgnoreCase)) |> Seq.length
+                isSupportedExtension && jsonCount = 1 && imageCount = 1)
+            |> Seq.map (fun (key, files) ->
+                let filesArr = files |> Seq.toArray
                 let audioFiles =
-                    filesList
-                    |> Seq.filter (fun f -> PostProcessor.AudioExtensions.CaseInsensitiveContains(Path.GetExtension(f)))
+                    filesArr
+                    |> Seq.filter (fun f ->
+                        let f' = match Path.GetExtension (f: string) with Null -> "" | NonNull (x: string) -> x // TODO: Improve.
+                        caseInsensitiveContains AudioExtensions f')
                     |> Seq.toList
-                    :> ICollection<string>
-                let jsonFile = filesList |> Seq.find (fun f -> f.EndsWith(jsonFileExt, StringComparison.OrdinalIgnoreCase))
-                let imageFile = filesList |> Seq.find (fun f -> f.EndsWith(imageFileExt, StringComparison.OrdinalIgnoreCase))
-                TaggingSet.CreateValidated(videoId, audioFiles, jsonFile, imageFile)
-            )
-            |> ImmutableList.CreateRange
+                let jsonFile = filesArr |> Seq.find (fun f -> f.EndsWith(jsonFileExt, StringComparison.OrdinalIgnoreCase))
+                let imageFile = filesArr |> Seq.find (fun f -> f.EndsWith(imageFileExt, StringComparison.OrdinalIgnoreCase))
+
+                { ResourceId = key
+                  AudioFilePaths = audioFiles
+                  JsonFilePath = jsonFile
+                  ImageFilePath = imageFile })
+            |> List.ofSeq

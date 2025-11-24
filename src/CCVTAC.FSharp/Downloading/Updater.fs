@@ -1,11 +1,11 @@
-// module CCVTAC.FSharp.Downloading.Uploader
-namespace CCVTAC.Console
+namespace CCVTAC.Console.Downloading
 
 open CCVTAC.Console.ExternalTools
+open CCVTAC.Console
 open CCVTAC.Console.Settings
 open CCVTAC.Console.Settings.Settings
-open CCVTAC.Console.ExternalTools
 
+/// Manages downloader updates
 module Updater =
     /// Represents download URLs
     type private Urls = {
@@ -16,18 +16,20 @@ module Updater =
     /// Completes the actual download process.
     /// <returns>A `Result` that, if successful, contains the name of the successfully downloaded format.</returns>
     let internal run (settings: UserSettings) (printer: Printer) =
-        // Early return if no update command
+        // Check if update command is provided
         if System.String.IsNullOrWhiteSpace(settings.DownloaderUpdateCommand) then
             printer.Info("No downloader update command provided, so will skip.")
             Ok()
         else
-            // Prepare tool settings
-            let args = ToolSettings.create settings.DownloaderUpdateCommand settings.WorkingDirectory
+            let args : ToolSettings = {
+                CommandWithArgs = settings.DownloaderUpdateCommand
+                WorkingDirectory = settings.WorkingDirectory
+            }
 
             // Run the update process
             match Runner.run args [||] printer with
             | Ok (exitCode, warnings) ->
-                // Handle non-zero exit code with potential warnings
+                // Handle successful run with potential warnings
                 if exitCode <> 0 then
                     printer.Warning("Update completed with minor issues.")
 
@@ -37,6 +39,7 @@ module Updater =
                 Ok()
 
             | Error error ->
-                // Handle and log errors
-                printer.Error($"Failure updating: %s{error}")
+                printer.Error($"Failure updating: {error}")
                 Error error
+
+
