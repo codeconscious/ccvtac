@@ -11,13 +11,14 @@ module Downloader =
     [<Literal>]
     let private ProgramName = "yt-dlp"
 
-    type Urls = { Primary: string; Supplementary: string option }
+    type Urls = { Primary: string
+                  Supplementary: string option }
 
     /// Generate the entire argument string for the download tool.
     /// audioFormat: one of the supported audio format codes (or null for none)
     /// mediaType: Some MediaType for normal downloads, None for metadata-only supplementary downloads
     /// additionalArgs: optional extra args (e.g., the URL)
-    let GenerateDownloadArgs
+    let generateDownloadArgs
         (audioFormat: string option)
         (settings: UserSettings)
         (mediaType: MediaType option)
@@ -30,8 +31,8 @@ module Downloader =
         let formatArg =
             match audioFormat with
             | None -> String.Empty
-            | Some format when format = "best" -> String.Empty
-            | Some format -> $"-f {format}"
+            | Some f when f = "best" -> String.Empty
+            | Some f -> $"-f {f}"
 
         let args =
             match mediaType with
@@ -67,12 +68,12 @@ module Downloader =
         let extras = defaultArg additionalArgs [||] |> Set.ofArray
         String.Join(" ", args |> Set.union extras)
 
-    let internal WrapUrlInMediaType (url: string) : Result<MediaType, string> =
+    let internal wrapUrlInMediaType (url: string) : Result<MediaType, string> =
         mediaTypeWithIds url
 
     /// Completes the actual download process.
     /// Returns a Result that, if successful, contains the name of the successfully downloaded format.
-    let internal Run
+    let internal run
         (mediaType: MediaType)
         (settings: UserSettings)
         (printer: Printer)
@@ -93,7 +94,7 @@ module Downloader =
 
         for format in settings.AudioFormats do
             if not stopped then
-                let args = GenerateDownloadArgs (Some format) settings (Some mediaType) (Some [| urls.Primary |])
+                let args = generateDownloadArgs (Some format) settings (Some mediaType) (Some [| urls.Primary |])
                 let commandWithArgs = $"{ProgramName} {args}"
                 let downloadSettings = ToolSettings.create commandWithArgs settings.WorkingDirectory
 
@@ -130,7 +131,7 @@ module Downloader =
                 // Attempt a metadata-only supplementary download.
                 match urls.Supplementary with
                 | Some supplementaryUrl ->
-                    let args = GenerateDownloadArgs None settings None (Some [| supplementaryUrl |])
+                    let args = generateDownloadArgs None settings None (Some [| supplementaryUrl |])
                     let commandWithArgs = $"{ProgramName} {args}"
                     let downloadSettings = ToolSettings.create commandWithArgs settings.WorkingDirectory
 

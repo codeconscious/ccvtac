@@ -110,7 +110,7 @@ module Orchestrator =
                 printer.Info(sprintf "%s URL '%s' detected." (mediaType.GetType().Name) url)
                 history.Append(url, urlInputTime, printer)
 
-                let downloadResult = Downloader.Run mediaType settings printer
+                let downloadResult = Downloader.run mediaType settings printer
                 resultTracker.RegisterResult(url, downloadResult)
 
                 match downloadResult with
