@@ -23,21 +23,20 @@ type Printer(showDebug: bool) =
     static let colors : Dictionary<Level, ColorFormat> =
         Dictionary()
         |> fun d ->
-            d.Add(Level.Critical, { Foreground = Some "white"; Background = Some "red3"; Bold = true })
-            d.Add(Level.Error, { Foreground = Some "red"; Background = None; Bold = false })
-            d.Add(Level.Warning, { Foreground = Some "yellow"; Background = None; Bold = false })
-            d.Add(Level.Info, { Foreground = None; Background = None; Bold = false })
-            d.Add(Level.Debug, { Foreground = Some "grey70"; Background = None; Bold = false })
+            d.Add(Level.Critical, { Foreground = Some "white";  Background = Some "red3"; Bold = true })
+            d.Add(Level.Error,    { Foreground = Some "red";    Background = None;        Bold = false })
+            d.Add(Level.Warning,  { Foreground = Some "yellow"; Background = None;        Bold = false })
+            d.Add(Level.Info,     { Foreground = None;          Background = None;        Bold = false })
+            d.Add(Level.Debug,    { Foreground = Some "grey70"; Background = None;        Bold = false })
             d
 
     let mutable minimumLogLevel =
         if showDebug then Level.Debug else Level.Info
 
-    let extractedErrors result =
+    let extractedErrors (result: Result<'a,'b list>) : 'b list =
         match result with
-        | Ok _ -> [||]
+        | Ok _ -> []
         | Error errors -> errors
-        :> ICollection<string>
 
     /// Show or hide debug messages.
     member this.ShowDebug(show: bool) =
@@ -102,21 +101,21 @@ type Printer(showDebug: bool) =
     member this.Error(message: string, ?appendLineBreak: bool, ?prependLines: byte, ?appendLines: byte, ?processMarkup: bool) =
         this.Print(Level.Error, message, ?appendLineBreak = appendLineBreak, ?prependLines = prependLines, ?appendLines = appendLines, ?processMarkup = processMarkup)
 
-    member this.Errors(errors: ICollection<string>, ?appendLines: byte) =
-        if errors.Count = 0 then raise (ArgumentException("No errors were provided!", "errors"))
+    member this.Errors(errors: string seq, ?appendLines: byte) =
+        if Seq.isEmpty errors then raise (ArgumentException("No errors were provided!", "errors"))
         for err in (errors |> Seq.filter (fun x -> hasText x false)) do
             this.Error(err)
         Printer.EmptyLines(defaultArg appendLines 0uy)
 
-    member private this.Errors(headerMessage: string, errors: IEnumerable<string>) =
+    member private this.Errors(headerMessage: string, errors: string seq) =
         // Create an array with headerMessage followed by the items in errors
         let items = seq { yield headerMessage; yield! errors } |> Seq.toArray
         this.Errors(items, 0uy)
 
-    member this.Errors<'a>(failResult: Result<'a, string[]>, ?appendLines: byte) =
+    member this.Errors<'a>(failResult: Result<'a, string list>, ?appendLines: byte) =
         this.Errors(extractedErrors failResult, ?appendLines = appendLines)
 
-    member this.Errors<'a>(headerMessage: string, failingResult: Result<'a, string[]>) =
+    member this.Errors<'a>(headerMessage: string, failingResult: Result<'a, string list>) =
         this.Errors(headerMessage, extractedErrors failingResult)
 
     // member this.FirstError(failResult: Result<'a, string[]>, ?prepend: string) =
@@ -145,8 +144,8 @@ type Printer(showDebug: bool) =
         Printer.EmptyLines(1uy)
         AnsiConsole.Ask<string>($"[skyblue1]{prompt}[/]")
 
-    static member private Ask(title: string, options: string[]) : string =
+    static member private Ask(title: string, options: string list) : string =
         AnsiConsole.Prompt(SelectionPrompt<string>().Title(title).AddChoices(options))
 
     member this.AskToBool(title: string, trueAnswer: string, falseAnswer: string) : bool =
-        Printer.Ask(title, [| trueAnswer; falseAnswer |]) = trueAnswer
+        Printer.Ask(title, [ trueAnswer; falseAnswer ]) = trueAnswer
