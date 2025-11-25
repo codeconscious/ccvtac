@@ -25,7 +25,7 @@ module Updater =
             let args = ToolSettings.create settings.DownloaderUpdateCommand settings.WorkingDirectory
 
             // Run the update process
-            match Runner.run args [||] printer with
+            match Runner.run args [] printer with
             | Ok (exitCode, warnings) ->
                 // Handle non-zero exit code with potential warnings
                 if exitCode <> 0 then

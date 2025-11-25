@@ -27,7 +27,7 @@ module Updater =
             }
 
             // Run the update process
-            match Runner.run args [||] printer with
+            match Runner.run args [] printer with
             | Ok (exitCode, warnings) ->
                 // Handle successful run with potential warnings
                 if exitCode <> 0 then

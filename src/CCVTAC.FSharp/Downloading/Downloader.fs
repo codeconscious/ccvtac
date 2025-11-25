@@ -98,7 +98,7 @@ module Downloader =
                 let commandWithArgs = $"{ProgramName} {args}"
                 let downloadSettings = ToolSettings.create commandWithArgs settings.WorkingDirectory
 
-                downloadResult <- Runner.run downloadSettings [| 1 |] printer
+                downloadResult <- Runner.run downloadSettings [1] printer
 
                 match downloadResult with
                 | Ok (exitCode, warning) ->
@@ -135,14 +135,14 @@ module Downloader =
                     let commandWithArgs = $"{ProgramName} {args}"
                     let downloadSettings = ToolSettings.create commandWithArgs settings.WorkingDirectory
 
-                    let supplementaryDownloadResult = Runner.run downloadSettings [| 1 |] printer
+                    let supplementaryDownloadResult = Runner.run downloadSettings [1] printer
 
                     match supplementaryDownloadResult with
                     | Ok _ ->
                         printer.Info("Supplementary download completed OK.")
                     | Error err ->
                         printer.Error("Supplementary download failed.")
-                        errors <- errors |> List.append [err]
+                        errors <- List.append [err] errors
                 | None -> ()
 
             if List.isEmpty errors then
