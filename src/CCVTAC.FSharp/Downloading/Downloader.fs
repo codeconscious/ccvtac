@@ -136,6 +136,7 @@ module Downloader =
                 |> String.concat Environment.NewLine
             Error combined
         else
+            errors <- errors |> List.filter (fun x -> not (String.IsNullOrWhiteSpace x)) // TODO: Figure out why needed.
             // If there were errors from the primary download attempts, print them and continue to post-processing.
             if errors.Length <> 0 then
                 errors |> List.iter printer.Error
