@@ -1,16 +1,12 @@
 namespace CCVTAC.Console.Downloading
 
 open CCVTAC.Console
-open CCVTAC.Console.Settings
-open CCVTAC.Console.Settings.Settings
-open CCVTAC.Console.ExternalTools
-open System
-open System.Collections.Generic
-open System.Linq
-open CCVTAC.Console.ExternalTools
 open CCVTAC.Console.Downloading.Downloading
-// open CCVTAC.FSharp.Downloading
-// open CCVTAC.Console.Settings.UserSettings
+open CCVTAC.Console.ExternalTools
+open CCVTAC.Console.Settings.Settings
+open System
+open System.Linq
+open System.Collections.Generic
 
 module Downloader =
 
@@ -34,10 +30,6 @@ module Downloader =
         let trimFileNames = "--trim-filenames 250"
 
         let formatArg =
-            // if String.IsNullOrWhiteSpace audioFormat || audioFormat = "best" then
-            //     String.Empty
-            // else
-            //     $"-f {audioFormat}"
             match audioFormat with
             | None -> String.Empty
             | Some format when format = "best" -> String.Empty
@@ -60,8 +52,7 @@ module Downloader =
                     ]
                 )
 
-        // quiet vs verbose
-        args.Add(if settings.QuietMode then "--quiet --no-warnings" else String.Empty) |> ignore
+        if settings.QuietMode then args.Add "--quiet --no-warnings" |> ignore
 
         match mediaType with
         | Some mt ->
@@ -116,15 +107,14 @@ module Downloader =
                     successfulFormat <- format
 
                     if exitCode <> 0 then
-                        printer.Warning("Downloading completed with minor issues.")
+                        printer.Warning "Downloading completed with minor issues."
                         if not (String.IsNullOrWhiteSpace warning) then
-                            printer.Warning(warning)
+                            printer.Warning warning
 
                     stopped <- true
                 | Error e ->
                     printer.Debug $"Failure downloading \"%s{format}\" format: %s{e}"
 
-        // Collect error messages from the last download attempt
         errors <- match downloadResult with Error e -> [e] | Ok _ -> []
 
         let audioFileCount = IoUtilities.Directories.audioFileCount settings.WorkingDirectory
@@ -135,7 +125,7 @@ module Downloader =
                 |> String.concat Environment.NewLine
             Error combinedErrors
         else
-            // If there were errors, print them and continue to post-processing.
+            // Continue to post-processing if errors.
             if not (List.isEmpty errors) then
                 errors |> List.iter printer.Error
                 printer.Info("Post-processing will still be attempted.")
