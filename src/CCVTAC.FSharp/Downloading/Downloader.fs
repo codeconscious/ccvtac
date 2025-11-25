@@ -81,7 +81,6 @@ module Downloader =
 
     let internal WrapUrlInMediaType (url: string) : Result<MediaType, string> =
         mediaTypeWithIds url
-        // if result.IsOk then Result.Ok result.ResultValue else Result.Fail result.ErrorValue
 
     /// Completes the actual download process.
     /// Returns a Result that, if successful, contains the name of the successfully downloaded format.
@@ -96,21 +95,21 @@ module Downloader =
 
         let rawUrls = extractDownloadUrls(mediaType)
         let urls =
-            { Primary = rawUrls.[0]
-              Supplementary = if rawUrls.Length = 2 then Some rawUrls.[1] else None }
+            { Primary = rawUrls[0]
+              Supplementary = if rawUrls.Length = 2 then Some rawUrls[1] else None }
 
-        // Placeholder for the download result; we'll overwrite as we try formats.
         let mutable downloadResult : Result<int * string, string> = Error ""
         let mutable successfulFormat : string = ""
-
         let mutable stopped = false
+        let mutable errors : string list = []
+
         for format in settings.AudioFormats do
             if not stopped then
                 let args = GenerateDownloadArgs (Some format) settings (Some mediaType) (Some [| urls.Primary |])
                 let commandWithArgs = $"{ProgramName} {args}"
                 let downloadSettings = ToolSettings.create commandWithArgs settings.WorkingDirectory
 
-                let downloadResult = Runner.run downloadSettings [| 1 |] printer
+                downloadResult <- Runner.run downloadSettings [| 1 |] printer
 
                 match downloadResult with
                 | Ok (exitCode, warning) ->
@@ -123,52 +122,45 @@ module Downloader =
 
                     stopped <- true
                 | Error e ->
-                    printer.Debug(sprintf "Failure downloading \"%s\" format." format)
+                    printer.Debug $"Failure downloading \"%s{format}\" format: %s{e}"
 
         // Collect error messages from the last download attempt
-        let mutable errors = match downloadResult with Error e -> [e] | Ok _ -> []
+        errors <- match downloadResult with Error e -> [e] | Ok _ -> []
 
         let audioFileCount = IoUtilities.Directories.audioFileCount settings.WorkingDirectory
         if audioFileCount = 0 then
-            let combined =
+            let combinedErrors =
                 errors
-                |> Seq.append (seq { yield "No audio files were downloaded." })
+                |> List.append ["No audio files were downloaded."]
                 |> String.concat Environment.NewLine
-            Error combined
+            Error combinedErrors
         else
-            errors <- errors |> List.filter (fun x -> not (String.IsNullOrWhiteSpace x)) // TODO: Figure out why needed.
-            // If there were errors from the primary download attempts, print them and continue to post-processing.
-            if errors.Length <> 0 then
+            // If there were errors, print them and continue to post-processing.
+            if not (List.isEmpty errors) then
                 errors |> List.iter printer.Error
                 printer.Info("Post-processing will still be attempted.")
             else
-                // If no errors and there is a supplementary URL, attempt a metadata-only supplementary download.
+                // Attempt a metadata-only supplementary download.
                 match urls.Supplementary with
-                | Some supp ->
-                    let supplementaryArgs = GenerateDownloadArgs None settings None (Some [| supp |])
-                    let commandWithArgs = $"{ProgramName} {supplementaryArgs}"
-                    let supplementaryDownloadSettings = ToolSettings.create commandWithArgs settings.WorkingDirectory
+                | Some supplementaryUrl ->
+                    let args = GenerateDownloadArgs None settings None (Some [| supplementaryUrl |])
+                    let commandWithArgs = $"{ProgramName} {args}"
+                    let downloadSettings = ToolSettings.create commandWithArgs settings.WorkingDirectory
 
-                    let supplementaryDownloadResult =
-                        Runner.run supplementaryDownloadSettings [| 1 |] printer
+                    let supplementaryDownloadResult = Runner.run downloadSettings [| 1 |] printer
 
-                    // if supplementaryDownloadResult.IsSuccess then
-                    //     printer.Info("Supplementary download completed OK.")
-                    // else
-                    //     printer.Error("Supplementary download failed.")
-                    //     errors.AddRange(supplementaryDownloadResult.Errors.Select(fun e -> e.Message))
                     match supplementaryDownloadResult with
                     | Ok _ ->
                         printer.Info("Supplementary download completed OK.")
-                    | Error e ->
+                    | Error err ->
                         printer.Error("Supplementary download failed.")
-                        errors <- errors |> List.append [e]
+                        errors <- errors |> List.append [err]
                 | None -> ()
 
-            if errors.Length > 0 then
-                Error (String.Join(" / ", errors))
-            else
+            if List.isEmpty errors then
                 Ok successfulFormat
+            else
+                Error (String.Join(" / ", errors))
 
 
 
