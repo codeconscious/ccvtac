@@ -15,7 +15,7 @@ module public Downloading =
         | m when m.Success -> Some (List.tail [for g in m.Groups -> g.Value])
         | _ -> None
 
-    [<CompiledName("MediaTypeWithIds")>]
+
     let mediaTypeWithIds url =
         match url with
         | Regex @"(?<=v=|v\=)([\w-]{11})(?:&list=([\w_-]+))" [videoId; playlistId] ->
@@ -33,7 +33,6 @@ module public Downloading =
         | _ ->
             Error $"Unable to determine media type of URL \"{url}\". (Might it contain invalid characters?)"
 
-    [<CompiledName("ExtractDownloadUrls")>]
     let extractDownloadUrls mediaType =
         let fullUrl urlBase id = urlBase + id
         let videoUrl = fullUrl "https://www.youtube.com/watch?v="

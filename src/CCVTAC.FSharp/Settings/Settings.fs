@@ -1,10 +1,12 @@
 namespace CCVTAC.Console.Settings
 
+open System
+open System.Text.Json.Serialization
+open CCVTAC.Console
+open ExtensionMethods
+open Spectre.Console
+
 module Settings =
-    open System
-    open System.Text.Json.Serialization
-    open CCVTAC.Console
-    open ExtensionMethods
 
     let newLine = Environment.NewLine
 
@@ -18,7 +20,7 @@ module Settings =
 
     type TagDetectionPattern = {
         [<JsonPropertyName("regex")>]        RegexPattern : string
-        [<JsonPropertyName("matchGroup")>]   MatchGroup : int // byte
+        [<JsonPropertyName("matchGroup")>]   MatchGroup : int
         [<JsonPropertyName("searchField")>]  SearchField : string
         [<JsonPropertyName("summary")>]      Summary : string option
     }
@@ -51,7 +53,6 @@ module Settings =
         [<JsonPropertyName("downloaderUpdateCommand")>]       DownloaderUpdateCommand : string
     }
 
-    [<CompiledName("Summarize")>]
     let summarize settings =
         let onOrOff = function
             | true -> "ON"
@@ -86,9 +87,6 @@ module Settings =
             ("Rename patterns", settings.RenamePatterns.Length |> pluralize "pattern")
         ]
 
-    open System
-    open Spectre.Console
-
     /// Prints a summary of the given settings.
     let PrintSummary (settings: UserSettings) (printer: Printer) (header: string option) : unit =
         match header with
@@ -109,7 +107,6 @@ module Settings =
             table.AddRow(fst pair, snd pair) |> ignore
 
         Printer.PrintTable(table)
-
 
     module Validation =
         open System.IO
@@ -162,13 +159,11 @@ module Settings =
             | null -> Error "Could not deserialize the JSON"
             | s -> Ok s
 
-        [<CompiledName("FileExists")>]
         let fileExists (FilePath path) =
             match path |> File.Exists with
             | true -> Ok()
             | false -> Error $"File \"{path}\" does not exist."
 
-        [<CompiledName("Read")>]
         let read (FilePath path) =
             try
                 path
@@ -180,7 +175,6 @@ module Settings =
                 | :? JsonException as e -> Error $"Parse error in \"{path}\": {e.Message}"
                 | e -> Error $"Unexpected error reading from \"{path}\": {e.Message}"
 
-        [<CompiledName("WriteFile")>]
         let private writeFile (FilePath file) settings =
             let unicodeEncoder = JavaScriptEncoder.Create UnicodeRanges.All
             let writeIndented = true
@@ -195,7 +189,6 @@ module Settings =
                 | :? JsonException -> Error "Failure parsing user settings to JSON."
                 | e -> Error $"Failure writing \"{file}\": {e.Message}"
 
-        [<CompiledName("WriteDefaultFile")>]
         let writeDefaultFile (filePath: FilePath option) defaultFileName =
             let confirmedPath =
                 match filePath with
@@ -234,27 +227,22 @@ module Settings =
     module LiveUpdating =
         open Validation
 
-        [<CompiledName("ToggleSplitChapters")>]
         let toggleSplitChapters settings =
             let toggledSetting = not settings.SplitChapters
             { settings with SplitChapters = toggledSetting }
 
-        [<CompiledName("ToggleEmbedImages")>]
         let toggleEmbedImages settings =
             let toggledSetting = not settings.EmbedImages
             { settings with EmbedImages = toggledSetting }
 
-        [<CompiledName("ToggleQuietMode")>]
         let toggleQuietMode settings =
             let toggledSetting = not settings.QuietMode
             { settings with QuietMode = toggledSetting }
 
-        [<CompiledName("UpdateAudioFormat")>]
         let updateAudioFormat settings (newFormat: string) =
             let updatedSettings = { settings with AudioFormats = newFormat.Split(',')}
             validate updatedSettings
 
-        [<CompiledName("UpdateAudioQuality")>]
         let updateAudioQuality settings newQuality =
             let updatedSettings = { settings with AudioQuality = newQuality}
             validate updatedSettings
