@@ -72,21 +72,21 @@ type Printer(showDebug: bool) =
         let processMarkup = defaultArg processMarkup true
 
         if int logLevel > int minimumLogLevel then
-            () // TODO: Can we remove altogether?
+            ()
         else
             if String.IsNullOrWhiteSpace message then
                 raise (ArgumentNullException("message", "Message cannot be empty."))
 
             Printer.EmptyLines(prependLines)
 
-            let escapedMessage = Printer.EscapeText(message)
+            let escapedMessage = Printer.EscapeText message
 
             if processMarkup then
                 let markedUp = Printer.AddMarkup(escapedMessage, colors[logLevel])
-                AnsiConsole.Markup(markedUp)
+                AnsiConsole.Markup markedUp
             else
                 // AnsiConsole.Write uses format strings internally; escapedMessage already duplicates braces
-                AnsiConsole.Write(escapedMessage)
+                AnsiConsole.Write escapedMessage
 
             if appendLineBreak then AnsiConsole.WriteLine()
 
@@ -96,10 +96,12 @@ type Printer(showDebug: bool) =
         AnsiConsole.Write(table)
 
     member this.Critical(message: string, ?appendLineBreak: bool, ?prependLines: byte, ?appendLines: byte, ?processMarkup: bool) =
-        this.Print(Level.Critical, message, ?appendLineBreak = appendLineBreak, ?prependLines = prependLines, ?appendLines = appendLines, ?processMarkup = processMarkup)
+        this.Print(Level.Critical, message, ?appendLineBreak = appendLineBreak, ?prependLines = prependLines,
+                   ?appendLines = appendLines, ?processMarkup = processMarkup)
 
     member this.Error(message: string, ?appendLineBreak: bool, ?prependLines: byte, ?appendLines: byte, ?processMarkup: bool) =
-        this.Print(Level.Error, message, ?appendLineBreak = appendLineBreak, ?prependLines = prependLines, ?appendLines = appendLines, ?processMarkup = processMarkup)
+        this.Print(Level.Error, message, ?appendLineBreak = appendLineBreak, ?prependLines = prependLines,
+                   ?appendLines = appendLines, ?processMarkup = processMarkup)
 
     member this.Errors(errors: string seq, ?appendLines: byte) =
         if Seq.isEmpty errors then raise (ArgumentException("No errors were provided!", "errors"))
@@ -118,27 +120,32 @@ type Printer(showDebug: bool) =
     member this.Errors<'a>(headerMessage: string, failingResult: Result<'a, string list>) =
         this.Errors(headerMessage, extractedErrors failingResult)
 
-    // member this.FirstError(failResult: Result<'a, string[]>, ?prepend: string) =
     member this.FirstError(message: string, ?prepend: string) =
         let prefix = match prepend with Some x -> x | None -> String.Empty
         this.Error($"{prefix}{message}")
 
     member this.Warning(message: string, ?appendLineBreak: bool, ?prependLines: byte, ?appendLines: byte, ?processMarkup: bool) =
-        this.Print(Level.Warning, message, ?appendLineBreak = appendLineBreak, ?prependLines = prependLines, ?appendLines = appendLines, ?processMarkup = processMarkup)
+        this.Print(Level.Warning, message, ?appendLineBreak = appendLineBreak, ?prependLines = prependLines,
+                   ?appendLines = appendLines, ?processMarkup = processMarkup)
 
     member this.Info(message: string, ?appendLineBreak: bool, ?prependLines: byte, ?appendLines: byte, ?processMarkup: bool) =
-        this.Print(Level.Info, message, ?appendLineBreak = appendLineBreak, ?prependLines = prependLines, ?appendLines = appendLines, ?processMarkup = processMarkup)
+        this.Print(Level.Info, message, ?appendLineBreak = appendLineBreak, ?prependLines = prependLines,
+                   ?appendLines = appendLines, ?processMarkup = processMarkup)
 
     member this.Debug(message: string, ?appendLineBreak: bool, ?prependLines: byte, ?appendLines: byte, ?processMarkup: bool) =
-        this.Print(Level.Debug, message, ?appendLineBreak = appendLineBreak, ?prependLines = prependLines, ?appendLines = appendLines, ?processMarkup = processMarkup)
+        this.Print(Level.Debug, message, ?appendLineBreak = appendLineBreak, ?prependLines = prependLines,
+                   ?appendLines = appendLines, ?processMarkup = processMarkup)
 
     /// Prints the requested number of blank lines.
     static member EmptyLines(count: byte) =
-        if count = 0uy then () else
-        // Write count blank lines. The original wrote (count - 1) extra NewLines inside WriteLine call.
-        let repeats = int count - 1
-        if repeats <= 0
-        then AnsiConsole.WriteLine() else AnsiConsole.WriteLine(String.Concat(Enumerable.Repeat(Environment.NewLine, repeats)))
+        if count = 0uy
+        then ()
+        else
+            // Write count blank lines. The original wrote (count - 1) extra NewLines inside WriteLine call.
+            let repeats = int count - 1
+            if repeats <= 0
+            then AnsiConsole.WriteLine()
+            else Enumerable.Repeat(Environment.NewLine, repeats) |> String.Concat |> AnsiConsole.WriteLine
 
     member this.GetInput(prompt: string) : string =
         Printer.EmptyLines(1uy)
