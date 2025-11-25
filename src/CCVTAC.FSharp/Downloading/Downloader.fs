@@ -5,8 +5,6 @@ open CCVTAC.Console.Downloading.Downloading
 open CCVTAC.Console.ExternalTools
 open CCVTAC.Console.Settings.Settings
 open System
-open System.Linq
-open System.Collections.Generic
 
 module Downloader =
 
@@ -38,25 +36,24 @@ module Downloader =
         let args =
             match mediaType with
             | None ->
-                HashSet<string>([ $"--flat-playlist {writeJson} {trimFileNames}" ])
+                [ $"--flat-playlist {writeJson} {trimFileNames}" ]
             | Some _ ->
-                HashSet<string>(
-                    [
-                        "--extract-audio"
-                        formatArg
-                        $"--audio-quality {settings.AudioQuality}"
-                        "--write-thumbnail --convert-thumbnails jpg"
-                        writeJson
-                        trimFileNames
-                        "--retries 2"
-                    ]
-                )
+                [ "--extract-audio"
+                  formatArg
+                  $"--audio-quality {settings.AudioQuality}"
+                  "--write-thumbnail --convert-thumbnails jpg"
+                  writeJson
+                  trimFileNames
+                  "--retries 2" ]
+            |> Set.ofList
 
-        if settings.QuietMode then args.Add "--quiet --no-warnings" |> ignore
+        if settings.QuietMode then
+            args.Add "--quiet --no-warnings" |> ignore
 
         match mediaType with
         | Some mt ->
-            if settings.SplitChapters then args.Add("--split-chapters") |> ignore
+            if settings.SplitChapters then
+                args.Add("--split-chapters") |> ignore
 
             if not mt.IsVideo && not mt.IsPlaylistVideo then
                 args.Add($"--sleep-interval {settings.SleepSecondsBetweenDownloads}") |> ignore
@@ -67,8 +64,8 @@ module Downloader =
                 ) |> ignore
         | None -> ()
 
-        let extras = defaultArg additionalArgs [||]
-        String.Join(" ", args.Concat(extras))
+        let extras = defaultArg additionalArgs [||] |> Set.ofArray
+        String.Join(" ", args |> Set.union extras)
 
     let internal WrapUrlInMediaType (url: string) : Result<MediaType, string> =
         mediaTypeWithIds url
