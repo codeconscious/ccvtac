@@ -53,7 +53,7 @@ module Settings =
         [<JsonPropertyName("downloaderUpdateCommand")>]       DownloaderUpdateCommand : string
     }
 
-    let summarize settings =
+    let summarize settings : (string * string) list =
         let onOrOff = function
             | true -> "ON"
             | false -> "OFF"
@@ -61,7 +61,7 @@ module Settings =
         let pluralize (label: string) count =
             if count = 1
             then $"{count} {label}"
-            else $"{count} {label}s" // Intentionally naive implementation
+            else $"{count} {label}s" // Intentionally naive implementation.
 
         let tagDetectionPatternCount (patterns: TagDetectionPatterns) =
             patterns.Title.Length +
@@ -87,10 +87,9 @@ module Settings =
             ("Rename patterns", settings.RenamePatterns.Length |> pluralize "pattern")
         ]
 
-    let printSummary (settings: UserSettings) (printer: Printer) (header: string option) : unit =
-        match header with
-        | Some h when hasText h false ->
-            printer.Info h
+    let printSummary settings (printer: Printer) headerOpt : unit =
+        match headerOpt with
+        | Some h when hasText h false -> printer.Info h
         | _ -> ()
 
         let table = Table()
@@ -101,9 +100,8 @@ module Settings =
         table.HideHeaders() |> ignore
         table.Columns[1].Width <- 100 // Ensure maximum width.
 
-        let settingPairs = summarize(settings)
-        for pair in settingPairs do
-            table.AddRow(fst pair, snd pair) |> ignore
+        for description, value in summarize settings do
+            table.AddRow(description, value) |> ignore
 
         Printer.PrintTable table
 
@@ -115,21 +113,20 @@ module Settings =
             let dirMissing str = not (Directory.Exists str)
 
             // Source: https://github.com/yt-dlp/yt-dlp/?tab=readme-ov-file#post-processing-options
-            // TODO: Check similar item in Shared module.
             let supportedAudioFormats = [ "best"; "aac"; "alac"; "flac"; "m4a"; "mp3"; "opus"; "vorbis"; "wav" ]
             let supportedNormalizationForms = [ "C"; "D"; "KC"; "KD" ]
 
             let validAudioFormat fmt = supportedAudioFormats |> List.contains fmt
 
             match settings with
-            | { WorkingDirectory = d } when d |> isEmpty ->
+            | { WorkingDirectory = dir } when isEmpty dir ->
                 Error "No working directory was specified."
-            | { WorkingDirectory = d } when d |> dirMissing ->
-                Error $"Working directory \"{d}\" is missing."
-            | { MoveToDirectory = d } when d |> isEmpty ->
+            | { WorkingDirectory = dir } when dirMissing dir ->
+                Error $"Working directory \"{dir}\" is missing."
+            | { MoveToDirectory = dir } when isEmpty dir ->
                 Error "No move-to directory was specified."
-            | { MoveToDirectory = d } when d |> dirMissing ->
-                Error $"Move-to directory \"{d}\" is missing."
+            | { MoveToDirectory = dir } when dirMissing dir ->
+                Error $"Move-to directory \"{dir}\" is missing."
             | { AudioQuality = q } when q > 10uy ->
                 Error "Audio quality must be in the range 10 (lowest) and 0 (highest)."
             | { NormalizationForm = nf } when not(supportedNormalizationForms |> List.contains (nf.ToUpperInvariant())) ->
