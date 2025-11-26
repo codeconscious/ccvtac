@@ -116,7 +116,7 @@ module Orchestrator =
                     Error errorMsg
                 | Ok s ->
                     printer.Debug $"Successfully downloaded \"%s{s}\" format."
-                    PostProcessor.Run settings mediaType printer
+                    PostProcessor.run settings mediaType printer
 
                     let groupClause =
                         if batchSize > 1

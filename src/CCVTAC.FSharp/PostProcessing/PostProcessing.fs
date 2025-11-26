@@ -4,20 +4,14 @@ open System.IO
 open System.Linq
 open System.Text.Json
 open System.Text.RegularExpressions
-open System.Collections.Immutable
-open CCVTAC.Console.IoUtilities
-open CCVTAC.Console.PostProcessing.Tagging
-open CCVTAC.Console.Settings
-open CCVTAC.Console.Settings.Settings
 open CCVTAC.Console
-open CCVTAC.Console.Downloading
+open CCVTAC.Console.IoUtilities
 open CCVTAC.Console.Downloading.Downloading
+open CCVTAC.Console.PostProcessing.Tagging
+open CCVTAC.Console.Settings.Settings
 open Startwatch.Library
 
 module PostProcessor =
-
-    // let internal AudioExtensions =
-    //     [| ".aac"; ".alac"; ".flac"; ".m4a"; ".mp3"; ".ogg"; ".vorbis"; ".opus"; ".wav" |]
 
     let private collectionMetadataRegex =
         Regex(@"(?<=
@@ -26,14 +20,14 @@ module PostProcessor =
 
 \.info.json)", RegexOptions.Compiled)
 
-    let private getCollectionMetadataMatches (path: string) =
+    let private isCollectionMetadataMatch (path: string) : bool =
         collectionMetadataRegex.IsMatch path
 
-    let private GetCollectionJson (workingDirectory: string) : Result<CollectionMetadata, string> =
+    let private getCollectionJson workingDirectoryName : Result<CollectionMetadata, string> =
         try
             let fileNames =
-                Directory.GetFiles workingDirectory
-                |> Seq.filter getCollectionMetadataMatches
+                Directory.GetFiles workingDirectoryName
+                |> Seq.filter isCollectionMetadataMatch
                 |> Set.ofSeq
 
             if fileNames.Count = 0 then
@@ -47,36 +41,36 @@ module PostProcessor =
                 let collectionData = JsonSerializer.Deserialize<CollectionMetadata>(json)
                 #warnon 3265
                 if isNull (box collectionData) then
-                    Error "Deserialized collection metadata was null."
+                    Error $"Deserialized collection metadata for \"%s{fileName}\" was null."
                 else
                     Ok collectionData
         with ex ->
             Error ex.Message
 
-    let private GenerateTaggingSets (directory: string) : Result<TaggingSet list, string> =
+    let private generateTaggingSets directoryName : Result<TaggingSet list, string> =
         try
-            let files = Directory.GetFiles directory
+            let files = Directory.GetFiles directoryName
             let taggingSets = TaggingSet.CreateSets files
-            if taggingSets.Any()
-            then Ok taggingSets
-            else Error (sprintf "No tagging sets were created using working directory \"%s\"." directory)
+            if List.isEmpty taggingSets
+            then Error $"No tagging sets were created using working directory \"%s{directoryName}\"."
+            else Ok taggingSets
         with
             | :? DirectoryNotFoundException ->
-                Error (sprintf "Directory \"%s\" does not exist." directory)
+                Error $"Directory \"%s{directoryName}\" does not exist."
             | ex ->
-                Error (sprintf "Error reading working directory files: %s" ex.Message)
+                Error $"Error reading working directory files: %s{ex.Message}"
 
-    let Run (settings: UserSettings) (mediaType: MediaType) (printer: Printer) : unit =
+    let run settings mediaType (printer: Printer) : unit =
         let watch = Watch()
         let workingDirectory = settings.WorkingDirectory
 
         printer.Info "Starting post-processing..."
 
-        match GenerateTaggingSets workingDirectory with
+        match generateTaggingSets workingDirectory with
         | Error _ ->
-            printer.Error "No tagging sets were generated, so tagging cannot be done."
+            printer.Error $"No tagging sets were generated for directory {workingDirectory}, so tagging cannot be done."
         | Ok taggingSets ->
-            let collectionJsonResult = GetCollectionJson workingDirectory
+            let collectionJsonResult = getCollectionJson workingDirectory
 
             let collectionJsonOpt =
                 match collectionJsonResult with

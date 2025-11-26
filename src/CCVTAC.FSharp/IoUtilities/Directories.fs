@@ -16,7 +16,7 @@ module Directories =
         Directory.GetFiles directory
         |> Array.filter (fun f ->
             AudioExtensions
-            |> Array.exists (fun ext ->
+            |> List.exists (fun ext ->
                 // let f' = match Path.GetExtension (f: string) with Null -> "" | NonNull (x: string) -> x // TODO: Improve.
                 // let ext' = match Path.GetExtension (ext: string) with Null -> "" | NonNull (x: string) -> x // TODO: Improve.
                 // Path.GetExtension(f).Equals(ext, StringComparison.OrdinalIgnoreCase) // Error occurs here.

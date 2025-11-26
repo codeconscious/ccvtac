@@ -4,4 +4,4 @@ namespace CCVTAC.Console
 module Shared =
 
     let AudioExtensions =
-        [| ".aac"; ".alac"; ".flac"; ".m4a"; ".mp3"; ".ogg"; ".vorbis"; ".opus"; ".wav" |]
+        [ ".aac"; ".alac"; ".flac"; ".m4a"; ".mp3"; ".ogg"; ".vorbis"; ".opus"; ".wav" ]
