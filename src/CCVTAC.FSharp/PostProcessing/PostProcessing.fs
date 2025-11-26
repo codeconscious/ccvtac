@@ -14,11 +14,7 @@ open Startwatch.Library
 module PostProcessor =
 
     let private collectionMetadataRegex =
-        Regex(@"(?<=
-
-\[)[\w\-]{17,}(?=\]
-
-\.info.json)", RegexOptions.Compiled)
+        Regex(@"(?<=\[)[\w\-]{17,}(?=\]\.info.json)", RegexOptions.Compiled)
 
     let private isCollectionMetadataMatch (path: string) : bool =
         collectionMetadataRegex.IsMatch path
@@ -89,7 +85,7 @@ module PostProcessor =
             | Ok msg ->
                 printer.Info msg
                 Renamer.Run settings workingDirectory printer
-                Mover.Run taggingSets collectionJsonOpt settings true printer
+                Mover.run taggingSets collectionJsonOpt settings true printer
 
                 let taggingSetFileNames =
                     taggingSets

@@ -16,59 +16,57 @@ open CCVTAC.Console.PostProcessing
 
 module Mover =
 
-    let private PlaylistImageRegex = Regex(@"
-
-\[[OP]L[\w\d_-]{12,}\]
-
-", RegexOptions.Compiled)
+    let private PlaylistImageRegex = Regex(@"\[[OP]L[\w\d_-]{12,}\]", RegexOptions.Compiled)
     let private ImageFileWildcard = "*.jp*"
 
-    let private IsPlaylistImage (fileName: string) =
+    let private isPlaylistImage (fileName: string) =
         PlaylistImageRegex.IsMatch fileName
 
-    let private GetCoverImage (workingDirInfo: DirectoryInfo) (audioFileCount: int) : FileInfo option =
+    let private getCoverImage (workingDirInfo: DirectoryInfo) audioFileCount : FileInfo option =
         let images = workingDirInfo.EnumerateFiles ImageFileWildcard |> Seq.toArray
         if images.Length = 0 then None
         else
-            let playlistImages = images |> Seq.filter (fun i -> IsPlaylistImage(i.FullName)) |> Seq.toList
+            let playlistImages = images |> Array.filter (fun i -> isPlaylistImage i.FullName) |> Array.toList
             if playlistImages.Any() then Some (playlistImages.First())
             else if audioFileCount > 1 && images.Length = 1 then Some images[0]
             else None
 
-    let private EnsureDirectoryExists (moveToDir: string) (printer: Printer) : Result<unit, string> =
+    let private ensureDirectoryExists (moveToDir: string) (printer: Printer) : Result<unit, string> =
         try
             if Directory.Exists moveToDir then
-                printer.Debug (sprintf "Found move-to directory \"%s\"." moveToDir)
+                printer.Debug $"Found move-to directory \"%s{moveToDir}\"."
                 Ok ()
             else
-                printer.Debug (sprintf "Creating move-to directory \"%s\" (based on playlist metadata)... " moveToDir, appendLineBreak = false)
+                printer.Debug ($"Creating move-to directory \"%s{moveToDir}\" (based on playlist metadata)... ", appendLineBreak = false)
                 Directory.CreateDirectory moveToDir |> ignore
                 printer.Debug "OK."
                 Ok ()
         with ex ->
-            printer.Error (sprintf "Error creating move-to directory \"%s\": %s" moveToDir ex.Message)
-            Error String.Empty
+            printer.Error $"Error creating move-to directory \"%s{moveToDir}\": %s{ex.Message}"
+            Error String.Empty // TODO: Update.
 
-    let private MoveAudioFiles
+    let private moveAudioFiles
         (audioFiles: FileInfo list)
         (moveToDir: string)
         (overwrite: bool)
         (printer: Printer)
-        : uint32 * uint32 =
+        : uint32 * uint32 = // TODO: Need a custom type for clarity.
 
         let mutable successCount = 0u
         let mutable failureCount = 0u
+
         for file in audioFiles do
             try
                 File.Move(file.FullName, Path.Combine(moveToDir, file.Name), overwrite)
                 successCount <- successCount + 1u
-                printer.Debug (sprintf "• Moved \"%s\"" file.Name)
+                printer.Debug $"• Moved \"%s{file.Name}\""
             with ex ->
                 failureCount <- failureCount + 1u
-                printer.Error (sprintf "• Error moving file \"%s\": %s" file.Name ex.Message)
+                printer.Error $"• Error moving file \"%s{file.Name}\": %s{ex.Message}"
+
         (successCount, failureCount)
 
-    let private MoveImageFile
+    let private moveImageFile
         (maybeCollectionName: string)
         (subFolderName: string)
         (workingDirInfo: DirectoryInfo)
@@ -77,74 +75,80 @@ module Mover =
         (overwrite: bool)
         (printer: Printer)
         : unit =
+
         try
             let baseFileName =
                 if String.IsNullOrWhiteSpace maybeCollectionName then
                     subFolderName
                 else
-                sprintf "%s - %s" subFolderName (replaceInvalidPathChars None None maybeCollectionName)
+                $"%s{subFolderName} - %s{replaceInvalidPathChars None None maybeCollectionName}"
 
-            match GetCoverImage workingDirInfo audioFileCount with
+            match getCoverImage workingDirInfo audioFileCount with
             | None -> ()
             | Some image ->
-                let dest = Path.Combine(moveToDir, sprintf "%s.jpg" (baseFileName.Trim()))
+                let dest = Path.Combine(moveToDir, $"%s{baseFileName.Trim()}.jpg")
                 image.MoveTo(dest, overwrite = overwrite)
                 printer.Info "Moved image file."
         with ex ->
-            printer.Warning (sprintf "Error copying the image file: %s" ex.Message)
+            printer.Warning $"Error copying the image file: %s{ex.Message}"
 
-    let private GetParsedVideoJson (taggingSet: TaggingSet) : Result<VideoMetadata, string> =
+    let private getParsedVideoJson (taggingSet: TaggingSet) : Result<VideoMetadata, string> =
         try
             let json = File.ReadAllText(taggingSet.JsonFilePath)
+
             try
                 #nowarn 3265
                 let videoData = JsonSerializer.Deserialize<VideoMetadata>(json)
                 #warnon 3265
 
-                if isNull (box videoData) then Error (sprintf "Deserialized JSON was null for \"%s\"" taggingSet.JsonFilePath)
+                if isNull (box videoData)
+                then Error $"Deserialized JSON was null for \"%s{taggingSet.JsonFilePath}\""
                 else Ok videoData
             with :? JsonException as ex ->
-                Error (sprintf "Error deserializing JSON from file \"%s\": %s" taggingSet.JsonFilePath ex.Message)
+                Error $"Error deserializing JSON from file \"%s{taggingSet.JsonFilePath}\": %s{ex.Message}"
         with ex ->
-            Error (sprintf "Error reading JSON file \"%s\": %s." taggingSet.JsonFilePath ex.Message)
+            Error $"Error reading JSON file \"%s{taggingSet.JsonFilePath}\": %s{ex.Message}."
 
-    let private GetSafeSubDirectoryName (collectionData: CollectionMetadata option) (taggingSet: TaggingSet) : string =
+    let private getSafeSubDirectoryName (collectionData: CollectionMetadata option) taggingSet : string =
         let workingName =
             match collectionData with
-            | Some metadata when hasNonWhitespaceText metadata.Uploader && hasNonWhitespaceText metadata.Title -> metadata.Uploader
+            | Some metadata when hasNonWhitespaceText metadata.Uploader &&
+                                 hasNonWhitespaceText metadata.Title -> metadata.Uploader
             | _ ->
-                match GetParsedVideoJson taggingSet with
+                match getParsedVideoJson taggingSet with
                 | Ok v -> v.Uploader
-                | Error _ -> String.Empty
+                | Error _ -> "COLLECTION_DATA_NOT_FOUND"
 
         let safeName = workingName |> replaceInvalidPathChars None None |> _.Trim()
         let topicSuffix = " - Topic"
-        if safeName.EndsWith topicSuffix then safeName.Replace(topicSuffix, String.Empty)
+        if safeName.EndsWith topicSuffix
+        then safeName.Replace(topicSuffix, String.Empty)
         else safeName
 
-    let Run
+    let run
         (taggingSets: seq<TaggingSet>)
         (maybeCollectionData: CollectionMetadata option)
         (settings: UserSettings)
         (overwrite: bool)
         (printer: Printer)
         : unit =
-        printer.Debug "Starting move..."
-        let watch = Watch() // assumes Watch type with ElapsedFriendly exists
 
-        let workingDirInfo = DirectoryInfo(settings.WorkingDirectory)
+        printer.Debug "Starting move..."
+        let watch = Watch()
+
+        let workingDirInfo = DirectoryInfo settings.WorkingDirectory
 
         let firstTaggingSet =
             taggingSets
             |> Seq.tryHead
-            |> Option.defaultWith (fun () -> failwith "No tagging sets provided")
+            |> Option.defaultWith (fun () -> failwith "No tagging sets provided") // TODO: Improve.
 
-        let subFolderName = GetSafeSubDirectoryName maybeCollectionData firstTaggingSet
-        let collectionName = maybeCollectionData |> Option.map (fun c -> c.Title) |> Option.defaultValue String.Empty
+        let subFolderName = getSafeSubDirectoryName maybeCollectionData firstTaggingSet
+        let collectionName = maybeCollectionData |> Option.map _.Title |> Option.defaultValue String.Empty
         let fullMoveToDir = Path.Combine(settings.MoveToDirectory, subFolderName, collectionName)
 
-        match EnsureDirectoryExists fullMoveToDir printer with
-        | Error _ -> () // error already printed
+        match ensureDirectoryExists fullMoveToDir printer with
+        | Error _ -> () // Error was already printed.
         | Ok () ->
             let audioFileNames =
                 workingDirInfo.EnumerateFiles()
@@ -157,9 +161,9 @@ module Mover =
                 printer.Debug $"Moving %d{audioFileNames.Length} audio file(s) to \"%s{fullMoveToDir}\"..."
 
                 let successCount, failureCount =
-                    MoveAudioFiles audioFileNames fullMoveToDir overwrite printer
+                    moveAudioFiles audioFileNames fullMoveToDir overwrite printer
 
-                MoveImageFile collectionName subFolderName workingDirInfo fullMoveToDir audioFileNames.Length overwrite printer
+                moveImageFile collectionName subFolderName workingDirInfo fullMoveToDir audioFileNames.Length overwrite printer
 
                 let fileLabel = if successCount = 1u then "file" else "files"
                 printer.Info $"Moved %d{successCount} audio %s{fileLabel} in %s{watch.ElapsedFriendly}."
