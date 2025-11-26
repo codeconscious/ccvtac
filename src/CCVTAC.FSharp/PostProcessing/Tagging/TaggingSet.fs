@@ -6,7 +6,6 @@ open System.Text.RegularExpressions
 open System.Collections.Generic
 open System.Collections.Immutable
 open CCVTAC.Console
-open ExtensionMethods
 
 /// Contains all the data necessary for tagging a related set of files.
 [<Struct>]

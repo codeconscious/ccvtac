@@ -5,6 +5,7 @@ open System.IO
 open System.Text
 open System.Collections.Generic
 
+[<AutoOpen>]
 module ExtensionMethods =
 
     /// Determines whether a string contains any text.

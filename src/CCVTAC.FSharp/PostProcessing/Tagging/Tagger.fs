@@ -5,12 +5,9 @@ open System.IO
 open System.Text.Json
 open System.Linq
 open CCVTAC.Console
-open CCVTAC.Console.Settings
 open CCVTAC.Console.Settings.Settings
 open CCVTAC.Console.PostProcessing
-open CCVTAC.Console.Downloading
 open CCVTAC.Console.Downloading.Downloading
-open ExtensionMethods
 
 type TaggedFile = TagLib.File
 

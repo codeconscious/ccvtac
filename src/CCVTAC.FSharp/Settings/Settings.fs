@@ -3,7 +3,6 @@ namespace CCVTAC.Console.Settings
 open System
 open System.Text.Json.Serialization
 open CCVTAC.Console
-open ExtensionMethods
 open Spectre.Console
 
 module Settings =

@@ -6,7 +6,6 @@ open CCVTAC.Console
 open CCVTAC.Console.IoUtilities
 open CCVTAC.Console.Settings
 open CCVTAC.Console.Settings.Settings
-open ExtensionMethods
 
 module Program =
 

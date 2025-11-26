@@ -5,10 +5,8 @@ open System.IO
 open System.Text
 open System.Text.RegularExpressions
 open CCVTAC.Console
-open CCVTAC.Console.Settings
 open CCVTAC.Console.Settings.Settings
 open Startwatch.Library
-open ExtensionMethods
 
 module Renamer =
 
