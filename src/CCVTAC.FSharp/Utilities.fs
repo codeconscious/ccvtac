@@ -3,7 +3,6 @@ namespace CCVTAC.Console
 open System
 open System.IO
 open System.Text
-open System.Collections.Generic
 
 [<AutoOpen>]
 module Utilities =
@@ -33,7 +32,7 @@ module Utilities =
         let replaceWith = defaultArg replaceWith '_'
         let custom = defaultArg customInvalidChars []
 
-        let invalidCharsSeq =
+        let invalidChars =
             seq {
                 yield! Path.GetInvalidFileNameChars()
                 yield! Path.GetInvalidPathChars()
@@ -43,18 +42,16 @@ module Utilities =
                 yield Path.VolumeSeparatorChar
                 yield! custom
             }
-            |> Seq.distinct
+            |> Set.ofSeq
 
-        let invalidSet = invalidCharsSeq |> Set.ofSeq
+        if invalidChars.Contains replaceWith then
+            invalidArg "replaceWith" $"The replacement char ('%c{replaceWith}') must be a valid path character."
 
-        if invalidSet.Contains replaceWith
-        then invalidArg "replaceWith" $"The replacement char ('%c{replaceWith}') must be a valid path character."
-
-        // Replace each invalid char in the string. // TODO: `fold`/`reduce` this up and return a Result!
-        let sb = StringBuilder text
-        for ch in invalidSet do
-            sb.Replace(ch, replaceWith) |> ignore
-        sb.ToString()
+        Set.fold
+            (fun (sb: StringBuilder) ch -> sb.Replace(ch, replaceWith))
+            (StringBuilder text)
+            invalidChars
+        |> _.ToString()
 
     let trimTerminalLineBreak (text: string) : string =
         if hasNonWhitespaceText text then
