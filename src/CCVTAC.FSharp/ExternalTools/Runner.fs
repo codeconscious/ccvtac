@@ -1,5 +1,6 @@
 namespace CCVTAC.Console.ExternalTools
 
+open System
 open CCVTAC.Console
 open Startwatch.Library
 open System.Diagnostics
@@ -33,8 +34,8 @@ module Runner =
 
         // Prepare process start info
         let processStartInfo = ProcessStartInfo splitCommandWithArgs[0]
-        // processStartInfo.FileName <- splitCommandWithArgs.[0]
-        processStartInfo.Arguments <- if splitCommandWithArgs.Length > 1 then splitCommandWithArgs.[1] else ""
+        // processStartInfo.FileName <- splitCommandWithArgs[0]
+        processStartInfo.Arguments <- if splitCommandWithArgs.Length > 1 then splitCommandWithArgs[1] else String.Empty
         processStartInfo.UseShellExecute <- false
         processStartInfo.RedirectStandardOutput <- false
         processStartInfo.RedirectStandardError <- true
@@ -45,7 +46,7 @@ module Runner =
         match Process.Start processStartInfo with
         | null ->
             // Process failed to start
-            Error $"Could not locate {splitCommandWithArgs.[0]}."
+            Error $"Could not locate {splitCommandWithArgs[0]}."
         | process' ->
             // Read errors before waiting for exit
             let error = process'.StandardError.ReadToEnd()
@@ -53,11 +54,11 @@ module Runner =
             // Wait for process to complete
             process'.WaitForExit()
 
-            printer.Info($"{splitCommandWithArgs.[0]} finished in {watch.ElapsedFriendly}.")
+            printer.Info($"{splitCommandWithArgs[0]} finished in {watch.ElapsedFriendly}.")
 
             let trimmedErrors = error // TODO: Trim terminal line break?
 
             if isSuccessExitCode otherSuccessExitCodes process'.ExitCode then
                 Ok (process'.ExitCode, trimmedErrors)
             else
-                Error $"{splitCommandWithArgs.[0]} exited with code {process'.ExitCode}: {trimmedErrors}."
+                Error $"{splitCommandWithArgs[0]} exited with code {process'.ExitCode}: {trimmedErrors}."

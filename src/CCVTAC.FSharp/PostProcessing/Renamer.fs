@@ -70,8 +70,8 @@ module Renamer =
                                         |> Seq.mapi (fun i g ->
                                             let searchFor = sprintf "%%<%d>s" (i + 1)
                                             let replaceWith =
-                                                // group 0 is the whole match; we want groups starting at 1
-                                                if i + 1 < m.Groups.Count then m.Groups.[i + 1].Value.Trim() else String.Empty
+                                                // Group 0 is the entire match, and we only want groups starting at 1.
+                                                if i + 1 < m.Groups.Count then m.Groups[i + 1].Value.Trim() else String.Empty
                                             (searchFor, replaceWith))
                                         |> Seq.fold (fun (sbRep: StringBuilder) (searchFor, replaceWith) ->
                                             sbRep.Replace(searchFor, replaceWith))

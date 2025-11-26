@@ -32,12 +32,12 @@ module InputHelper =
                 startIndices
                 |> Array.mapi (fun i startIndex ->
                     let endIndex =
-                        if i = startIndices.Length - 1 then input.Length else startIndices.[i + 1]
+                        if i = startIndices.Length - 1 then input.Length else startIndices[i + 1]
                     { Start = startIndex; End = endIndex })
 
             let splitInputs =
                 indexPairs
-                |> Array.map (fun p -> input.[p.Start..(p.End - 1)].Trim())
+                |> Array.map (fun p -> input[p.Start..(p.End - 1)].Trim())
                 |> Array.distinct
 
             ImmutableArray.CreateRange splitInputs

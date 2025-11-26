@@ -32,7 +32,7 @@ module Mover =
         else
             let playlistImages = images |> Seq.filter (fun i -> IsPlaylistImage(i.FullName)) |> Seq.toList
             if playlistImages.Any() then Some (playlistImages.First())
-            else if audioFileCount > 1 && images.Length = 1 then Some images.[0]
+            else if audioFileCount > 1 && images.Length = 1 then Some images[0]
             else None
 
     let private EnsureDirectoryExists (moveToDir: string) (printer: Printer) : Result<unit, string> =

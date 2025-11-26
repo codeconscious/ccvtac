@@ -59,7 +59,7 @@ type TaggingSet =
             |> Seq.map fileNamesWithVideoIdsRegex.Match
             |> Seq.filter _.Success
             |> Seq.map (fun m -> m.Captures |> Seq.cast<Match> |> Seq.head)
-            |> Seq.groupBy (fun m -> m.Groups[1].Value) //(fun m -> m.Groups.[0].Value)
+            |> Seq.groupBy _.Groups[1].Value
             |> Seq.map (fun (videoId, matches) -> videoId, matches |> Seq.map _.Groups[0].Value)
             |> Seq.filter (fun (_, files) ->
                 let filesSeq = files |> Seq.toArray

@@ -31,8 +31,8 @@ module Orchestrator =
         =
 
         if categorizedInputs.Length > 1 then
-            let urlCount = counts.[InputCategory.Url]
-            let cmdCount = counts.[InputCategory.Command]
+            let urlCount = counts[InputCategory.Url]
+            let cmdCount = counts[InputCategory.Command]
 
             let urlSummary =
                 match urlCount with
@@ -281,10 +281,10 @@ module Orchestrator =
                 if nextAction <> NextAction.Continue then
                     stop <- true
 
-        if categoryCounts.[InputCategory.Url] > 1 then
+        if categoryCounts[InputCategory.Url] > 1 then
             printer.Info(sprintf "%sFinished with batch of %d URLs in %s."
                             Environment.NewLine
-                            categoryCounts.[InputCategory.Url]
+                            categoryCounts[InputCategory.Url]
                             watch.ElapsedFriendly)
             batchResults.PrintBatchFailures()
 
