@@ -43,7 +43,7 @@ module Program =
             //     // A new settings file was created; nothing more to do
             //     0
             | Ok settings ->
-                Settings.PrintSummary settings printer (Some "Settings loaded OK.")
+                Settings.printSummary settings printer (Some "Settings loaded OK.")
                 printer.ShowDebug(not settings.QuietMode)
 
                 // Catch Ctrl-C (SIGINT)

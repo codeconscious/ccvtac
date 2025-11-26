@@ -171,7 +171,7 @@ module Orchestrator =
 
         // Settings summary
         elif seqContainsIgnoreCase Commands.SettingsSummary command then
-            Settings.PrintSummary settings printer None
+            Settings.printSummary settings printer None
             Ok NextAction.Continue
 
         // Toggle split chapters

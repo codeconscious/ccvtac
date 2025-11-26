@@ -87,8 +87,7 @@ module Settings =
             ("Rename patterns", settings.RenamePatterns.Length |> pluralize "pattern")
         ]
 
-    /// Prints a summary of the given settings.
-    let PrintSummary (settings: UserSettings) (printer: Printer) (header: string option) : unit =
+    let printSummary (settings: UserSettings) (printer: Printer) (header: string option) : unit =
         match header with
         | Some h when hasText h false ->
             printer.Info h
