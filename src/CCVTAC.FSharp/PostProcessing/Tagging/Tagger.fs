@@ -62,7 +62,7 @@ module Tagger =
         else
             try
                 let pics = Array.zeroCreate<TagLib.IPicture> 1
-                pics.[0] <- TagLib.Picture(imageFilePath)
+                pics.[0] <- TagLib.Picture imageFilePath
                 taggedFile.Tag.Pictures <- pics
                 printer.Debug "Image written to file tags OK."
             with ex ->
@@ -85,7 +85,7 @@ module Tagger =
                 None
             else
                 let yearStr = videoData.UploadDate.Substring(0, 4)
-                match UInt32.TryParse(yearStr) with
+                match UInt32.TryParse yearStr with
                 | true, parsed -> Some parsed
                 | _ -> None
 
@@ -100,7 +100,7 @@ module Tagger =
         let audioFileName = Path.GetFileName audioFilePath
         printer.Debug (sprintf "Current audio file: \"%s\"" audioFileName)
 
-        use taggedFile = TaggedFile.Create(audioFilePath)
+        use taggedFile = TaggedFile.Create audioFilePath
         let tagDetector = TagDetector(settings.TagDetectionPatterns)
 
         // Title
@@ -152,7 +152,7 @@ module Tagger =
                 taggedFile.Tag.Album <- album
 
         // Composers
-        match tagDetector.DetectComposers(videoData) with
+        match tagDetector.DetectComposers videoData with
         | None -> ()
         | Some composers ->
             printer.Debug (sprintf "• Found composer(s) \"%s\"" composers)

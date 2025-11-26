@@ -21,7 +21,7 @@ module Updater =
                 if exitCode <> 0 then
                     printer.Warning "Update completed with minor issues."
                     if not (String.IsNullOrEmpty warnings) then
-                        printer.Warning(warnings)
+                        printer.Warning warnings
                 Ok()
             | Error error ->
                 printer.Error($"Failure updating: %s{error}")

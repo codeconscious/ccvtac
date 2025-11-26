@@ -13,7 +13,7 @@ module Directories =
 
     /// Counts the number of audio files in a directory
     let internal audioFileCount (directory: string) =
-        Directory.GetFiles(directory)
+        Directory.GetFiles directory
         |> Array.filter (fun f ->
             AudioExtensions
             |> Array.exists (fun ext ->
@@ -64,7 +64,7 @@ module Directories =
 
         fileNames |> Array.iter (fun fileName ->
             try
-                File.Delete(fileName)
+                File.Delete fileName
                 successCount <- successCount + 1
             with
             | ex -> errors.Add(ex.Message)

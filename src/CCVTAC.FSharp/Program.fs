@@ -53,7 +53,7 @@ module Program =
                     match Directories.warnIfAnyFiles settings.WorkingDirectory 10 with
                     | Ok () -> ()
                     | Error warnResult ->
-                        printer.FirstError(warnResult)
+                        printer.FirstError warnResult
                         match Directories.askToDeleteAllFiles settings.WorkingDirectory printer with
                         | Ok deletedCount -> printer.Info $"%d{deletedCount} file(s) deleted."
                         | Error delErr -> printer.FirstError delErr
@@ -64,7 +64,7 @@ module Program =
                     int ExitCodes.Success
                 with ex ->
                     printer.Critical $"Fatal error: %s{ex.Message}"
-                    AnsiConsole.WriteException(ex)
+                    AnsiConsole.WriteException ex
                     printer.Info(
                         "Please help improve this tool by reporting this error and any relevant URLs at https://github.com/codeconscious/ccvtac/issues."
                     )

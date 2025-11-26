@@ -39,7 +39,7 @@ type ExternalTool = {
         )
 
         try
-            use process' = Process.Start(processStartInfo)
+            use process' = Process.Start processStartInfo
 
             match process' with
             | null ->

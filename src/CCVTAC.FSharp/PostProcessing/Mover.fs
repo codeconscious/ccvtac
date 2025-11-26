@@ -24,10 +24,10 @@ module Mover =
     let private ImageFileWildcard = "*.jp*"
 
     let private IsPlaylistImage (fileName: string) =
-        PlaylistImageRegex.IsMatch(fileName)
+        PlaylistImageRegex.IsMatch fileName
 
     let private GetCoverImage (workingDirInfo: DirectoryInfo) (audioFileCount: int) : FileInfo option =
-        let images = workingDirInfo.EnumerateFiles(ImageFileWildcard) |> Seq.toArray
+        let images = workingDirInfo.EnumerateFiles ImageFileWildcard |> Seq.toArray
         if images.Length = 0 then None
         else
             let playlistImages = images |> Seq.filter (fun i -> IsPlaylistImage(i.FullName)) |> Seq.toList
@@ -37,12 +37,12 @@ module Mover =
 
     let private EnsureDirectoryExists (moveToDir: string) (printer: Printer) : Result<unit, string> =
         try
-            if Directory.Exists(moveToDir) then
+            if Directory.Exists moveToDir then
                 printer.Debug (sprintf "Found move-to directory \"%s\"." moveToDir)
                 Ok ()
             else
                 printer.Debug (sprintf "Creating move-to directory \"%s\" (based on playlist metadata)... " moveToDir, appendLineBreak = false)
-                Directory.CreateDirectory(moveToDir) |> ignore
+                Directory.CreateDirectory moveToDir |> ignore
                 printer.Debug "OK."
                 Ok ()
         with ex ->
@@ -119,7 +119,7 @@ module Mover =
 
         let safeName = workingName.ReplaceInvalidPathChars().Trim()
         let topicSuffix = " - Topic"
-        if safeName.EndsWith(topicSuffix) then safeName.Replace(topicSuffix, String.Empty)
+        if safeName.EndsWith topicSuffix then safeName.Replace(topicSuffix, String.Empty)
         else safeName
 
     let Run

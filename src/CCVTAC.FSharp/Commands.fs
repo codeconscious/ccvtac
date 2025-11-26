@@ -8,11 +8,11 @@ module internal Commands =
     let Prefix : char = '\\'
 
     let private MakeCommand (text: string) : string =
-        if String.IsNullOrWhiteSpace(text) then
+        if String.IsNullOrWhiteSpace text then
             raise (ArgumentException("The text cannot be null or white space.", "text"))
-        if text.Contains(' ') then
+        if text.Contains ' ' then
             raise (ArgumentException("The text should not contain any white space.", "text"))
-        sprintf "%c%s" Prefix text
+        $"%c{Prefix}%s{text}"
 
     let QuitCommands : string[] =
         [| MakeCommand "quit"; MakeCommand "q"; MakeCommand "exit" |]

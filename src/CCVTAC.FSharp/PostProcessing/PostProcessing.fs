@@ -27,14 +27,13 @@ module PostProcessor =
 \.info.json)", RegexOptions.Compiled)
 
     let private getCollectionMetadataMatches (path: string) =
-        collectionMetadataRegex.IsMatch(path)
+        collectionMetadataRegex.IsMatch path
 
     let private GetCollectionJson (workingDirectory: string) : Result<CollectionMetadata, string> =
         try
             let fileNames =
-                Directory.GetFiles(workingDirectory)
+                Directory.GetFiles workingDirectory
                 |> Seq.filter getCollectionMetadataMatches
-                // |> Seq.toImmutableHashSet
                 |> Set.ofSeq
 
             if fileNames.Count = 0 then
@@ -43,7 +42,7 @@ module PostProcessor =
                 Error "Unexpectedly found more than one relevant file, so none will be processed."
             else
                 let fileName = fileNames.Single()
-                let json = File.ReadAllText(fileName)
+                let json = File.ReadAllText fileName
                 #nowarn 3265
                 let collectionData = JsonSerializer.Deserialize<CollectionMetadata>(json)
                 #warnon 3265
@@ -56,9 +55,10 @@ module PostProcessor =
 
     let private GenerateTaggingSets (directory: string) : Result<TaggingSet list, string> =
         try
-            let files = Directory.GetFiles(directory)
-            let taggingSets = TaggingSet.CreateSets(files)
-            if taggingSets.Any() then Ok taggingSets
+            let files = Directory.GetFiles directory
+            let taggingSets = TaggingSet.CreateSets files
+            if taggingSets.Any()
+            then Ok taggingSets
             else Error (sprintf "No tagging sets were created using working directory \"%s\"." directory)
         with
             | :? DirectoryNotFoundException ->
@@ -111,7 +111,7 @@ module PostProcessor =
                     printer.Info "Will delete the remaining files..."
                     match Directories.deleteAllFiles workingDirectory 20 with
                     | Ok deletedCount -> printer.Info $"%d{deletedCount} file(s) deleted."
-                    | Error e -> printer.FirstError(e)
+                    | Error e -> printer.FirstError e
             | Error e ->
                 printer.Error($"Tagging error(s) preventing further post-processing: {e}")
 

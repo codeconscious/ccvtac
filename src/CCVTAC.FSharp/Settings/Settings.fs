@@ -91,7 +91,7 @@ module Settings =
     let PrintSummary (settings: UserSettings) (printer: Printer) (header: string option) : unit =
         match header with
         | Some h when hasText h false ->
-            printer.Info(h)
+            printer.Info h
         | _ -> ()
 
         let table = Table()
@@ -106,7 +106,7 @@ module Settings =
         for pair in settingPairs do
             table.AddRow(fst pair, snd pair) |> ignore
 
-        Printer.PrintTable(table)
+        Printer.PrintTable table
 
     module Validation =
         open System.IO

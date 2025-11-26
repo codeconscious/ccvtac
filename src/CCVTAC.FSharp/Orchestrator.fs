@@ -54,7 +54,7 @@ module Orchestrator =
             for input in categorizedInputs do
                 printer.Info(sprintf " • %s" input.Text)
 
-            Printer.EmptyLines(1uy)
+            Printer.EmptyLines 1uy
 
     let sleep (sleepSeconds: uint16) : unit =
         // Use a mutable remainingSeconds to mirror the C# behavior
@@ -68,9 +68,9 @@ module Orchestrator =
                         ctx.SpinnerStyle(Style.Parse("blue")) |> ignore
 
                         while remainingSeconds > 0us do
-                            ctx.Status(sprintf "Sleeping for %d seconds..." remainingSeconds) |> ignore
+                            ctx.Status $"Sleeping for %d{remainingSeconds} seconds..." |> ignore
                             remainingSeconds <- remainingSeconds - 1us
-                            Thread.Sleep(1000)
+                            Thread.Sleep 1000
                    )
 
     let processUrl
@@ -87,7 +87,7 @@ module Orchestrator =
 
         match Directories.warnIfAnyFiles settings.WorkingDirectory 10 with
         | Error firstErr ->
-            printer.FirstError(firstErr)
+            printer.FirstError firstErr
             Ok NextAction.QuitDueToErrors
         | Ok () ->
             // Don't sleep for the very first URL.
@@ -104,7 +104,7 @@ module Orchestrator =
             match Downloading.mediaTypeWithIds url with
             | Error e ->
                 let errorMsg = $"URL parse error: %s{e}"
-                printer.Error(errorMsg)
+                printer.Error errorMsg
                 Error errorMsg
             | Ok mediaType ->
                 printer.Info(sprintf "%s URL '%s' detected." (mediaType.GetType().Name) url)
@@ -116,7 +116,7 @@ module Orchestrator =
                 match downloadResult with
                 | Error e ->
                     let errorMsg = $"Download error: %s{e}"
-                    printer.Error(errorMsg)
+                    printer.Error errorMsg
                     Error errorMsg
                 | Ok s ->
                     printer.Debug $"Successfully downloaded \"%s{s}\" format."
@@ -165,7 +165,7 @@ module Orchestrator =
 
         // History
         elif seqContainsIgnoreCase Commands.History command then
-            history.ShowRecent(printer)
+            history.ShowRecent printer
             Ok NextAction.Continue
 
         // Update downloader
@@ -222,8 +222,8 @@ module Orchestrator =
             if String.IsNullOrEmpty inputQuality then
                 Error "You must enter a number representing an audio quality."
             else
-                match Byte.TryParse(inputQuality) with
-                | (true, quality) ->
+                match Byte.TryParse inputQuality with
+                | true, quality ->
                     let updateResult = updateAudioQuality settings quality
                     match updateResult with
                     | Error e -> Error e
@@ -297,15 +297,14 @@ module Orchestrator =
         // The working directory should start empty. Give the user a chance to empty it.
         match Directories.warnIfAnyFiles settings.WorkingDirectory 10 with
         | Error firstErr ->
-            printer.FirstError(firstErr)
+            printer.FirstError firstErr
 
             match Directories.askToDeleteAllFiles settings.WorkingDirectory printer with
             | Ok deletedCount ->
                 printer.Info $"%d{deletedCount} file(s) deleted."
             | Error err ->
-                printer.FirstError(err)
+                printer.FirstError err
                 printer.Info "Aborting..."
-                // abort Start by returning
                 ()
         | Ok () ->
             let results = ResultTracker<string>(printer)
@@ -320,8 +319,8 @@ module Orchestrator =
                 if splitInputs.IsEmpty then
                     printer.Error (sprintf "Invalid input. Enter only URLs or commands beginning with \"%c\"." Commands.Prefix)
                 else
-                    let categorizedInputs = InputHelper.CategorizeInputs(splitInputs)
-                    let categoryCounts = InputHelper.CountCategories(categorizedInputs)
+                    let categorizedInputs = InputHelper.CategorizeInputs splitInputs
+                    let categoryCounts = InputHelper.CountCategories categorizedInputs
 
                     summarizeInput categorizedInputs categoryCounts printer
 

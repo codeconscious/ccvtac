@@ -77,7 +77,7 @@ type Printer(showDebug: bool) =
             if String.IsNullOrWhiteSpace message then
                 raise (ArgumentNullException("message", "Message cannot be empty."))
 
-            Printer.EmptyLines(prependLines)
+            Printer.EmptyLines prependLines
 
             let escapedMessage = Printer.EscapeText message
 
@@ -90,10 +90,10 @@ type Printer(showDebug: bool) =
 
             if appendLineBreak then AnsiConsole.WriteLine()
 
-            Printer.EmptyLines(appendLines)
+            Printer.EmptyLines appendLines
 
     static member PrintTable(table: Table) =
-        AnsiConsole.Write(table)
+        AnsiConsole.Write table
 
     member this.Critical(message: string, ?appendLineBreak: bool, ?prependLines: byte, ?appendLines: byte, ?processMarkup: bool) =
         this.Print(Level.Critical, message, ?appendLineBreak = appendLineBreak, ?prependLines = prependLines,
@@ -106,7 +106,7 @@ type Printer(showDebug: bool) =
     member this.Errors(errors: string seq, ?appendLines: byte) =
         if Seq.isEmpty errors then raise (ArgumentException("No errors were provided!", "errors"))
         for err in (errors |> Seq.filter (fun x -> hasText x false)) do
-            this.Error(err)
+            this.Error err
         Printer.EmptyLines(defaultArg appendLines 0uy)
 
     member private this.Errors(headerMessage: string, errors: string seq) =
@@ -148,7 +148,7 @@ type Printer(showDebug: bool) =
             else Enumerable.Repeat(Environment.NewLine, repeats) |> String.Concat |> AnsiConsole.WriteLine
 
     member this.GetInput(prompt: string) : string =
-        Printer.EmptyLines(1uy)
+        Printer.EmptyLines 1uy
         AnsiConsole.Ask<string>($"[skyblue1]{prompt}[/]")
 
     static member private Ask(title: string, options: string list) : string =

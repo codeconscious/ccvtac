@@ -31,7 +31,7 @@ module Deleter =
         fileNames
         |> Array.iter (fun fileName ->
             try
-                File.Delete(fileName)
+                File.Delete fileName
                 printer.Debug($"• Deleted \"{fileName}\"")
             with
             | ex -> printer.Error($"• Deletion error: {ex.Message}")
@@ -52,7 +52,7 @@ module Deleter =
                 printer.Debug($"Found {files.Length} collection files.")
                 files
             | Error err ->
-                printer.Warning(err)
+                printer.Warning err
                 [||]
 
         // Combine all file names

@@ -42,7 +42,7 @@ module Runner =
         processStartInfo.WorkingDirectory <- settings.WorkingDirectory
 
         // Start the process
-        match Process.Start(processStartInfo) with
+        match Process.Start processStartInfo with
         | null ->
             // Process failed to start
             Error $"Could not locate {splitCommandWithArgs.[0]}."

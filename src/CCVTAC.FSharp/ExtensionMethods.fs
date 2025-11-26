@@ -58,7 +58,7 @@ module ExtensionMethods =
 
             let invalidSet = HashSet<char>(invalidCharsSeq)
 
-            if invalidSet.Contains(replaceWith) then
+            if invalidSet.Contains replaceWith then
                 invalidArg "replaceWith" $"The replacement char ('%c{replaceWith}') must be a valid path character."
 
             // Replace each invalid char in the string using StringBuilder for efficiency
@@ -97,7 +97,7 @@ module Utilities =
 
         let invalidSet = HashSet<char>(invalidCharsSeq)
 
-        if invalidSet.Contains(replaceWith)
+        if invalidSet.Contains replaceWith
         then invalidArg "replaceWith" $"The replacement char ('%c{replaceWith}') must be a valid path character."
 
         // Replace each invalid char in the string. // TODO: `fold`/`reduce` this up and return a Result!

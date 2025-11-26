@@ -24,9 +24,9 @@ module InputHelper =
         if matches.Length = 0 then
             ImmutableArray.Empty
         elif matches.Length = 1 then
-            ImmutableArray.Create(input)
+            ImmutableArray.Create input
         else
-            let startIndices = matches |> Array.map (fun m -> m.Index)
+            let startIndices = matches |> Array.map _.Index
 
             let indexPairs =
                 startIndices
@@ -40,7 +40,7 @@ module InputHelper =
                 |> Array.map (fun p -> input.[p.Start..(p.End - 1)].Trim())
                 |> Array.distinct
 
-            ImmutableArray.CreateRange(splitInputs)
+            ImmutableArray.CreateRange splitInputs
 
     type InputCategory =
         | Url
@@ -62,7 +62,7 @@ module InputHelper =
     type CategoryCounts(counts: Map<InputCategory,int>) =
         member _.Item
             with get (category: InputCategory) =
-                match counts.TryGetValue(category) with
+                match counts.TryGetValue category with
                 | true, v -> v
                 | _ -> 0
 

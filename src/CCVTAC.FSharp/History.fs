@@ -50,6 +50,6 @@ type History(filePath: string, displayCount: byte) =
                 let joinedUrls = String.Join(Environment.NewLine, urls)
                 table.AddRow(formattedTime, joinedUrls) |> ignore
 
-            Printer.PrintTable(table)
+            Printer.PrintTable table
         with ex ->
             printer.Error (sprintf "Could not display recent history: %s" ex.Message)
