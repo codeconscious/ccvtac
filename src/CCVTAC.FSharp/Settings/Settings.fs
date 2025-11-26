@@ -7,8 +7,6 @@ open Spectre.Console
 
 module Settings =
 
-    let newLine = Environment.NewLine
-
     type FilePath = FilePath of string
 
     type RenamePattern = {

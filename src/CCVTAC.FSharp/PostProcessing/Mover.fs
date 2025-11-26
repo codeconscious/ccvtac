@@ -117,7 +117,7 @@ module Mover =
                 | Ok v -> v.Uploader
                 | Error _ -> String.Empty
 
-        let safeName = workingName.ReplaceInvalidPathChars().Trim()
+        let safeName = workingName |> replaceInvalidPathChars None None |> _.Trim()
         let topicSuffix = " - Topic"
         if safeName.EndsWith topicSuffix then safeName.Replace(topicSuffix, String.Empty)
         else safeName
