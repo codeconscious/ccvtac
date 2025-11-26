@@ -10,18 +10,14 @@ module Utilities =
 
     /// Determines whether a string contains any text.
     /// allowWhiteSpace = true allows whitespace to count as text.
-    let hasText text allowWhiteSpace =
-        if allowWhiteSpace then
-            not (String.IsNullOrEmpty text)
-        else
-            not (String.IsNullOrWhiteSpace text)
+    let hasText text whiteSpaceCounts =
+        let f = if whiteSpaceCounts then String.IsNullOrEmpty else String.IsNullOrWhiteSpace
+        not (f text)
 
     let hasNonWhitespaceText text = hasText text false
 
-    /// Case-insensitive contains for a sequence of strings.
-    let caseInsensitiveContains (collection: seq<string>) (text: string) : bool =
-        collection
-        |> Seq.exists (fun s -> String.Equals(s, text, StringComparison.OrdinalIgnoreCase))
+    let caseInsensitiveContains (xs: string seq) text : bool =
+        xs |> Seq.exists (fun s -> String.Equals(s, text, StringComparison.OrdinalIgnoreCase))
 
     /// String instance helpers as an F# type extension for System.String.
     type System.String with
