@@ -6,18 +6,17 @@ open System.Text
 open System.Collections.Generic
 
 [<AutoOpen>]
-module ExtensionMethods =
+module Utilities =
 
     /// Determines whether a string contains any text.
     /// allowWhiteSpace = true allows whitespace to count as text.
-    let hasText (maybeText: string) (allowWhiteSpace: bool) =
+    let hasText text allowWhiteSpace =
         if allowWhiteSpace then
-            not (String.IsNullOrEmpty maybeText)
+            not (String.IsNullOrEmpty text)
         else
-            not (String.IsNullOrWhiteSpace maybeText)
+            not (String.IsNullOrWhiteSpace text)
 
-    /// Overload with default parameter for F# callers.
-    let HasTextDefault (maybeText: string) = hasText maybeText false
+    let hasNonWhitespaceText text = hasText text false
 
     /// Collection helpers (similar to the original extension members).
     module SeqEx =
@@ -70,13 +69,11 @@ module ExtensionMethods =
 
         /// Trims trailing newline characters (Environment.NewLine) from the end of the string.
         member this.TrimTerminalLineBreak() : string =
-            if HasTextDefault this then
+            if hasNonWhitespaceText this then
                 this.TrimEnd(Environment.NewLine.ToCharArray())
             else
                 this
 
-
-module Utilities =
     /// Returns a new string in which all invalid path characters for the current OS
     /// have been replaced by the specified replacement character.
     /// Throws if the replacement character is an invalid path character.

@@ -14,7 +14,7 @@ open CCVTAC.Console.Settings.Settings.IO
 open CCVTAC.Console.Settings.Settings.LiveUpdating
 open Spectre.Console
 open CCVTAC.Console.InputHelper
-open ExtensionMethods
+open Utilities
 open Startwatch.Library
 
 module Orchestrator =
@@ -47,7 +47,7 @@ module Orchestrator =
                 | _ -> String.Empty
 
             let connector =
-                if hasText urlSummary false && hasText commandSummary false then " and " else String.Empty
+                if hasNonWhitespaceText urlSummary && hasNonWhitespaceText commandSummary then " and " else String.Empty
 
             printer.Info $"Batch of %s{urlSummary}%s{connector}%s{commandSummary} entered."
 

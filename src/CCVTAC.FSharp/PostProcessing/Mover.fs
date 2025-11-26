@@ -5,7 +5,7 @@ open System.IO
 open System.Linq
 open System.Text.Json
 open System.Text.RegularExpressions
-open CCVTAC.Console.ExtensionMethods
+open CCVTAC.Console.Utilities
 open CCVTAC.Console.PostProcessing.Tagging
 open CCVTAC.Console.Settings
 open CCVTAC.Console.Settings.Settings
@@ -111,7 +111,7 @@ module Mover =
     let private GetSafeSubDirectoryName (collectionData: CollectionMetadata option) (taggingSet: TaggingSet) : string =
         let workingName =
             match collectionData with
-            | Some metadata when hasText metadata.Uploader false && hasText metadata.Title false -> metadata.Uploader
+            | Some metadata when hasNonWhitespaceText metadata.Uploader && hasNonWhitespaceText metadata.Title -> metadata.Uploader
             | _ ->
                 match GetParsedVideoJson taggingSet with
                 | Ok v -> v.Uploader

@@ -8,7 +8,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Shared.fs" />
-    <Compile Include="ExtensionMethods.fs" />
+    <Compile Include="Utilities.fs" />
     <Compile Include="Printer.fs" />
     <Compile Include="IoUtilities\Directories.fs" />
     <Compile Include="Settings\Id3Version.fs" />

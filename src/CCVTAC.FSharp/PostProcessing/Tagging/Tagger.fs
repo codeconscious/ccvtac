@@ -120,7 +120,7 @@ module Tagger =
             | None -> printer.Debug "No title was found."
 
         // Artist / Performers
-        if hasText videoData.Artist false then
+        if hasNonWhitespaceText videoData.Artist then
             let metadataArtists = videoData.Artist
             let firstArtist = metadataArtists.Split([|", "|], StringSplitOptions.None)[0]
             let diffSummary =
@@ -137,7 +137,7 @@ module Tagger =
                 taggedFile.Tag.Performers <- [| artist |]
 
         // Album
-        if hasText videoData.Album false then
+        if hasNonWhitespaceText videoData.Album then
             printer.Debug $"• Using metadata album \"%s{videoData.Album}\""
             taggedFile.Tag.Album <- videoData.Album
         else

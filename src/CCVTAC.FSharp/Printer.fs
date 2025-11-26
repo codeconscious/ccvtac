@@ -4,7 +4,7 @@ open System
 open System.Collections.Generic
 open System.Linq
 open Spectre.Console
-open ExtensionMethods
+open Utilities
 
 type private Level =
     | Critical = 0
@@ -105,7 +105,7 @@ type Printer(showDebug: bool) =
 
     member this.Errors(errors: string seq, ?appendLines: byte) =
         if Seq.isEmpty errors then raise (ArgumentException("No errors were provided!", "errors"))
-        for err in (errors |> Seq.filter (fun x -> hasText x false)) do
+        for err in errors |> Seq.filter hasNonWhitespaceText do
             this.Error err
         Printer.EmptyLines(defaultArg appendLines 0uy)
 

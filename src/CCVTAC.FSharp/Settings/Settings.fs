@@ -88,7 +88,7 @@ module Settings =
 
     let printSummary settings (printer: Printer) headerOpt : unit =
         match headerOpt with
-        | Some h when hasText h false -> printer.Info h
+        | Some h when hasNonWhitespaceText h -> printer.Info h
         | _ -> ()
 
         let table = Table()
