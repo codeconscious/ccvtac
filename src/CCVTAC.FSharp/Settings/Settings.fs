@@ -99,7 +99,7 @@ module Settings =
         table.BorderColor(Color.Grey27) |> ignore
         table.AddColumns("Name", "Value") |> ignore
         table.HideHeaders() |> ignore
-        table.Columns.[1].Width <- 100 // Ensure maximum width.
+        table.Columns[1].Width <- 100 // Ensure maximum width.
 
         let settingPairs = summarize(settings)
         for pair in settingPairs do
@@ -116,10 +116,10 @@ module Settings =
 
             // Source: https://github.com/yt-dlp/yt-dlp/?tab=readme-ov-file#post-processing-options
             // TODO: Check similar item in Shared module.
-            let supportedAudioFormats = [| "best"; "aac"; "alac"; "flac"; "m4a"; "mp3"; "opus"; "vorbis"; "wav" |]
-            let supportedNormalizationForms = [| "C"; "D"; "KC"; "KD" |]
+            let supportedAudioFormats = [ "best"; "aac"; "alac"; "flac"; "m4a"; "mp3"; "opus"; "vorbis"; "wav" ]
+            let supportedNormalizationForms = [ "C"; "D"; "KC"; "KD" ]
 
-            let validAudioFormat fmt = supportedAudioFormats |> Array.contains fmt
+            let validAudioFormat fmt = supportedAudioFormats |> List.contains fmt
 
             match settings with
             | { WorkingDirectory = d } when d |> isEmpty ->
@@ -132,7 +132,7 @@ module Settings =
                 Error $"Move-to directory \"{d}\" is missing."
             | { AudioQuality = q } when q > 10uy ->
                 Error "Audio quality must be in the range 10 (lowest) and 0 (highest)."
-            | { NormalizationForm = nf } when not(supportedNormalizationForms |> Array.contains (nf.ToUpperInvariant())) ->
+            | { NormalizationForm = nf } when not(supportedNormalizationForms |> List.contains (nf.ToUpperInvariant())) ->
                 let okFormats = String.Join(", ", supportedNormalizationForms)
                 Error $"\"{nf}\" is an invalid normalization form. Use one of the following: {okFormats}."
             | { AudioFormats = fmt } when not (fmt |> Array.forall (fun f -> f |> validAudioFormat)) ->
