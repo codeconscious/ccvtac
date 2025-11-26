@@ -57,12 +57,11 @@ module Orchestrator =
             Printer.EmptyLines 1uy
 
     let sleep (sleepSeconds: uint16) : unit =
-        // Use a mutable remainingSeconds to mirror the C# behavior
         let mutable remainingSeconds = sleepSeconds
 
         AnsiConsole
             .Status()
-            .Start(sprintf "Sleeping for %d seconds..." sleepSeconds,
+            .Start($"Sleeping for %d{sleepSeconds} seconds...",
                    fun ctx ->
                         ctx.Spinner(Spinner.Known.Star) |> ignore
                         ctx.SpinnerStyle(Style.Parse("blue")) |> ignore
@@ -82,8 +81,7 @@ module Orchestrator =
         (batchSize: int)
         (urlIndex: int)
         (printer: Printer)
-        : Result<NextAction, string>
-        =
+        : Result<NextAction, string> =
 
         match Directories.warnIfAnyFiles settings.WorkingDirectory 10 with
         | Error firstErr ->
@@ -92,14 +90,13 @@ module Orchestrator =
         | Ok () ->
             // Don't sleep for the very first URL.
             if urlIndex > 1 then
-                Threading.Thread.Sleep(int settings.SleepSecondsBetweenURLs * 1000)
-                printer.Info(sprintf "Slept for %d second(s)." settings.SleepSecondsBetweenURLs, appendLines = 1uy)
+                sleep settings.SleepSecondsBetweenURLs
+                printer.Info($"Slept for %d{settings.SleepSecondsBetweenURLs} second(s).", appendLines = 1uy)
 
             if batchSize > 1 then
                 printer.Info(sprintf "Processing group %d of %d..." urlIndex batchSize)
 
             let jobWatch = Watch()
-
 
             match Downloading.mediaTypeWithIds url with
             | Error e ->
@@ -289,8 +286,6 @@ module Orchestrator =
             batchResults.PrintBatchFailures()
 
         nextAction
-
-
 
     /// Ensures the download environment is ready, then initiates the UI input and download process.
     let start (settings: UserSettings) (printer: Printer) : unit =
