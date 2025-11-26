@@ -53,11 +53,11 @@ module Renamer =
                                 if not settings.QuietMode then
                                     let matchedPatternSummary =
                                         // if isNull renamePattern.Summary then // TODO: Check on this.
-                                            sprintf "`%s` (no description)" renamePattern.RegexPattern
+                                            $"`%s{renamePattern.RegexPattern}` (no description)"
                                         // else
                                         //     sprintf "\"%s\"" renamePattern.Summary
 
-                                    printer.Debug (sprintf "Rename pattern %s matched × %d." matchedPatternSummary matches.Length)
+                                    printer.Debug(sprintf "Rename pattern %s matched × %d." matchedPatternSummary matches.Length)
 
                                 for m in matches do
                                     // remove matched substring

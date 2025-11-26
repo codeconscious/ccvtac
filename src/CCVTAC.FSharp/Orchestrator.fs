@@ -88,8 +88,7 @@ module Orchestrator =
             printer.FirstError firstErr
             Ok NextAction.QuitDueToErrors
         | Ok () ->
-            // Don't sleep for the very first URL.
-            if urlIndex > 1 then
+            if urlIndex > 1 then // Don't sleep for the first URL.
                 sleep settings.SleepSecondsBetweenURLs
                 printer.Info($"Slept for %d{settings.SleepSecondsBetweenURLs} second(s).", appendLines = 1uy)
 
