@@ -18,16 +18,6 @@ module Utilities =
 
     let hasNonWhitespaceText text = hasText text false
 
-    /// Collection helpers (similar to the original extension members).
-    module SeqEx =
-        /// Determines whether a sequence is empty.
-        let None (collection: seq<'a>) : bool =
-            Seq.isEmpty collection
-
-        /// Determines whether no elements of a sequence satisfy a given condition.
-        let NoneBy (predicate: 'a -> bool) (collection: seq<'a>) : bool =
-            not (Seq.exists predicate collection)
-
     /// Case-insensitive contains for a sequence of strings.
     let caseInsensitiveContains (collection: seq<string>) (text: string) : bool =
         collection
