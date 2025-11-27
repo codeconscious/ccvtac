@@ -14,17 +14,12 @@ module Downloader =
     type Urls = { Primary: string
                   Supplementary: string option }
 
+    // TODO: Is the audioFormat not in the settings?
     /// Generate the entire argument string for the download tool.
     /// audioFormat: one of the supported audio format codes (or null for none)
     /// mediaType: Some MediaType for normal downloads, None for metadata-only supplementary downloads
     /// additionalArgs: optional extra args (e.g., the URL)
-    let generateDownloadArgs
-        (audioFormat: string option)
-        (settings: UserSettings)
-        (mediaType: MediaType option)
-        (additionalArgs: string[] option)
-        : string =
-
+    let generateDownloadArgs audioFormat settings (mediaType: MediaType option) additionalArgs : string =
         let writeJson = "--write-info-json"
         let trimFileNames = "--trim-filenames 250"
 
@@ -134,7 +129,6 @@ module Downloader =
                     let args = generateDownloadArgs None settings None (Some [| supplementaryUrl |])
                     let commandWithArgs = $"{ProgramName} {args}"
                     let downloadSettings = ToolSettings.create commandWithArgs settings.WorkingDirectory
-
                     let supplementaryDownloadResult = Runner.run downloadSettings [1] printer
 
                     match supplementaryDownloadResult with
