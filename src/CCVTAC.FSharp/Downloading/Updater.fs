@@ -33,8 +33,9 @@ module Updater =
                 if exitCode <> 0 then
                     printer.Warning("Update completed with minor issues.")
 
-                    if not (System.String.IsNullOrEmpty warnings) then
-                        printer.Warning warnings
+                    match warnings with
+                    | Some w -> printer.Warning w
+                    | None -> ()
 
                 Ok()
 

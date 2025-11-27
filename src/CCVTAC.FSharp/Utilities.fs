@@ -4,6 +4,8 @@ open System
 open System.IO
 open System.Text
 
+type SB = StringBuilder
+
 [<AutoOpen>]
 module Utilities =
 
@@ -15,7 +17,8 @@ module Utilities =
         let f = if whiteSpaceCounts then String.IsNullOrEmpty else String.IsNullOrWhiteSpace
         not (f text)
 
-    let hasNonWhitespaceText text = hasText text false
+    let hasNonWhitespaceText text =
+        hasText text false
 
     let caseInsensitiveContains (xs: string seq) text : bool =
         xs |> Seq.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))
@@ -48,13 +51,17 @@ module Utilities =
             invalidArg "replaceWith" $"The replacement char ('%c{replaceWith}') must be a valid path character."
 
         Set.fold
-            (fun (sb: StringBuilder) ch -> sb.Replace(ch, replaceWith))
-            (StringBuilder text)
+            (fun (sb: SB) ch -> sb.Replace(ch, replaceWith))
+            (SB text)
             invalidChars
         |> _.ToString()
 
-    let trimTerminalLineBreak (text: string) : string =
+    let trimTerminalLineBreak text : string =
         if hasNonWhitespaceText text then
             text.TrimEnd(newLine.ToCharArray())
         else
             text
+
+module List =
+    let isNotEmpty l = not (List.isEmpty l)
+

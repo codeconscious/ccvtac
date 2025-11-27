@@ -20,8 +20,9 @@ module Updater =
             | Ok (exitCode, warnings) ->
                 if exitCode <> 0 then
                     printer.Warning "Update completed with minor issues."
-                    if not (String.IsNullOrEmpty warnings) then
-                        printer.Warning warnings
+                    match warnings with
+                    | Some w -> printer.Warning w
+                    | None -> ()
                 Ok()
             | Error error ->
                 printer.Error($"Failure updating: %s{error}")

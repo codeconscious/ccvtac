@@ -21,7 +21,7 @@ module Runner =
         (settings: ToolSettings)
         (otherSuccessExitCodes: int list)
         (printer: Printer)
-        : Result<int * string, string> =
+        : Result<int * string option, string> =
 
         let watch = Watch()
 
@@ -42,21 +42,17 @@ module Runner =
         processStartInfo.CreateNoWindow <- true
         processStartInfo.WorkingDirectory <- settings.WorkingDirectory
 
-        // Start the process
         match Process.Start processStartInfo with
         | null ->
-            // Process failed to start
             Error $"Could not locate {splitCommandWithArgs[0]}."
         | process' ->
-            // Read errors before waiting for exit
             let error = process'.StandardError.ReadToEnd()
 
-            // Wait for process to complete
             process'.WaitForExit()
 
             printer.Info($"{splitCommandWithArgs[0]} finished in {watch.ElapsedFriendly}.")
 
-            let trimmedErrors = error // TODO: Trim terminal line break?
+            let trimmedErrors = if hasNonWhitespaceText error then Some (trimTerminalLineBreak error) else None
 
             if isSuccessExitCode otherSuccessExitCodes process'.ExitCode then
                 Ok (process'.ExitCode, trimmedErrors)

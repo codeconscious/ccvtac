@@ -1,6 +1,7 @@
 namespace CCVTAC.Console.Downloading
 
 open CCVTAC.Console
+open CCVTAC.Console.IoUtilities.Directories
 open CCVTAC.Console.Downloading.Downloading
 open CCVTAC.Console.ExternalTools
 open CCVTAC.Console.Settings.Settings
@@ -77,7 +78,7 @@ module Downloader =
             { Primary = rawUrls[0]
               Supplementary = if rawUrls.Length = 2 then Some rawUrls[1] else None }
 
-        let mutable downloadResult : Result<int * string, string> = Error String.Empty
+        let mutable downloadResult : Result<int * string option, string> = Error String.Empty
         let mutable successfulFormat = String.Empty
         let mutable stopped = false
         let mutable errors : string list = []
@@ -96,8 +97,9 @@ module Downloader =
 
                     if exitCode <> 0 then
                         printer.Warning "Downloading completed with minor issues."
-                        if not (String.IsNullOrWhiteSpace warning) then
-                            printer.Warning warning
+                        match warning with
+                        | Some w -> printer.Warning w
+                        | None -> ()
 
                     stopped <- true
                 | Error e ->
@@ -105,8 +107,7 @@ module Downloader =
 
         errors <- match downloadResult with Error e -> [e] | Ok _ -> []
 
-        let audioFileCount = IoUtilities.Directories.audioFileCount settings.WorkingDirectory
-        if audioFileCount = 0 then
+        if audioFileCount settings.WorkingDirectory = 0 then
             let combinedErrors =
                 errors
                 |> List.append ["No audio files were downloaded."]
@@ -114,9 +115,9 @@ module Downloader =
             Error combinedErrors
         else
             // Continue to post-processing if errors.
-            if not (List.isEmpty errors) then
+            if List.isNotEmpty errors then
                 errors |> List.iter printer.Error
-                printer.Info("Post-processing will still be attempted.")
+                printer.Info "Post-processing will still be attempted."
             else
                 // Attempt a metadata-only supplementary download.
                 match urls.Supplementary with
