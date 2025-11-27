@@ -61,7 +61,7 @@ module Downloader =
                 |> ignore
         | None -> ()
 
-        let extras = defaultArg additionalArgs [||] |> Set.ofArray
+        let extras = defaultArg additionalArgs [] |> Set.ofList
         String.Join(" ", args |> Set.union extras)
 
     let internal wrapUrlInMediaType url : Result<MediaType, string> =
@@ -85,7 +85,7 @@ module Downloader =
 
         for format in settings.AudioFormats do
             if not stopped then
-                let args = generateDownloadArgs (Some format) settings (Some mediaType) (Some [| urls.Primary |])
+                let args = generateDownloadArgs (Some format) settings (Some mediaType) (Some [urls.Primary])
                 let commandWithArgs = $"{ProgramName} {args}"
                 let downloadSettings = ToolSettings.create commandWithArgs settings.WorkingDirectory
 
@@ -111,7 +111,7 @@ module Downloader =
             let combinedErrors =
                 errors
                 |> List.append ["No audio files were downloaded."]
-                |> String.concat Environment.NewLine
+                |> String.concat newLine
             Error combinedErrors
         else
             // Continue to post-processing if errors.
@@ -122,16 +122,16 @@ module Downloader =
                 // Attempt a metadata-only supplementary download.
                 match urls.Supplementary with
                 | Some supplementaryUrl ->
-                    let args = generateDownloadArgs None settings None (Some [| supplementaryUrl |])
+                    let args = generateDownloadArgs None settings None (Some [supplementaryUrl])
                     let commandWithArgs = $"{ProgramName} {args}"
                     let downloadSettings = ToolSettings.create commandWithArgs settings.WorkingDirectory
                     let supplementaryDownloadResult = Runner.run downloadSettings [1] printer
 
                     match supplementaryDownloadResult with
                     | Ok _ ->
-                        printer.Info("Supplementary download completed OK.")
+                        printer.Info("Supplementary metadata download completed OK.")
                     | Error err ->
-                        printer.Error("Supplementary download failed.")
+                        printer.Error("Supplementary metadata download failed.")
                         errors <- List.append [err] errors
                 | None -> ()
 
