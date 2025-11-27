@@ -11,9 +11,6 @@ type ToolSettings = {
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module ToolSettings =
-    /// Creates a new ToolSettings instance
-    let create (commandWithArgs: string) (workingDirectory: string) =
-        {
-            CommandWithArgs = commandWithArgs
-            WorkingDirectory = workingDirectory
-        }
+    let create commandWithArgs workingDirectory =
+        { CommandWithArgs = commandWithArgs
+          WorkingDirectory = workingDirectory }
