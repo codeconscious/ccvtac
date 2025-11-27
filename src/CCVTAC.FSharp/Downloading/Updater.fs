@@ -21,15 +21,10 @@ module Updater =
             printer.Info("No downloader update command provided, so will skip.")
             Ok()
         else
-            let args : ToolSettings = {
-                CommandWithArgs = settings.DownloaderUpdateCommand
-                WorkingDirectory = settings.WorkingDirectory
-            }
+            let settings = ToolSettings.create settings.DownloaderUpdateCommand settings.WorkingDirectory
 
-            // Run the update process
-            match Runner.run args [] printer with
+            match Runner.run settings [] printer with
             | Ok (exitCode, warnings) ->
-                // Handle successful run with potential warnings
                 if exitCode <> 0 then
                     printer.Warning("Update completed with minor issues.")
 
@@ -40,7 +35,7 @@ module Updater =
                 Ok()
 
             | Error error ->
-                printer.Error($"Failure updating: {error}")
+                printer.Error $"Failure updating: {error}"
                 Error error
 
 

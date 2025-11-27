@@ -78,7 +78,7 @@ module PostProcessor =
                     Some cm
 
             if settings.EmbedImages
-            then ImageProcessor.Run workingDirectory printer
+            then ImageProcessor.run workingDirectory printer
             else ()
 
             match Tagger.Run settings taggingSets collectionJsonOpt mediaType printer with
