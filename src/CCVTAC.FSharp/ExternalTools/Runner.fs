@@ -1,8 +1,8 @@
 namespace CCVTAC.Console.ExternalTools
 
-open System
 open CCVTAC.Console
 open Startwatch.Library
+open System
 open System.Diagnostics
 
 module Runner =
@@ -11,7 +11,6 @@ module Runner =
     let private AuthenticSuccessExitCode = 0
 
     let private isSuccessExitCode (otherSuccessExitCodes: int list) (exitCode: int) =
-        // List.contains exitCode (List.append otherSuccessExitCodes [AuthenticSuccessExitCode])
         List.contains exitCode (AuthenticSuccessExitCode :: otherSuccessExitCodes)
 
     /// Calls an external application.
