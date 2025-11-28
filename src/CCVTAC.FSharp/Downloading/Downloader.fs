@@ -81,7 +81,6 @@ module Downloader =
         let mutable downloadResult : Result<int * string option, string> = Error String.Empty
         let mutable successfulFormat = String.Empty
         let mutable stopped = false
-        let mutable errors : string list = []
 
         for format in settings.AudioFormats do
             if not stopped then
@@ -105,7 +104,7 @@ module Downloader =
                 | Error e ->
                     printer.Debug $"Failure downloading \"%s{format}\" format: %s{e}"
 
-        errors <- match downloadResult with Error e -> [e] | Ok _ -> []
+        let mutable errors = match downloadResult with Error e -> [e] | Ok _ -> []
 
         if audioFileCount settings.WorkingDirectory = 0 then
             let combinedErrors =
