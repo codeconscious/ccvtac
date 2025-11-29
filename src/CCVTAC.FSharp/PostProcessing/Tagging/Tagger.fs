@@ -145,14 +145,14 @@ module Tagger =
         match tagDetector.DetectComposers videoData with
         | None -> ()
         | Some composers ->
-            printer.Debug (sprintf "• Found composer(s) \"%s\"" composers)
+            printer.Debug $"• Found composer(s) \"%s{composers}\""
             taggedFile.Tag.Composers <- [| composers |]
 
         // Track number
         match videoData.PlaylistIndex with
         | NullV -> ()
         | NonNullV (trackNo: uint32) ->
-            printer.Debug (sprintf "• Using playlist index of %d for track number" trackNo)
+            printer.Debug $"• Using playlist index of %d{trackNo} for track number"
             taggedFile.Tag.Track <- uint32 trackNo
 
         // Year
