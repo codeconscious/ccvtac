@@ -1,11 +1,11 @@
 namespace CCVTAC.Console.PostProcessing.Tagging
 
+open CCVTAC.Console
 open System
 open System.IO
 open System.Text.RegularExpressions
 open System.Collections.Generic
 open System.Collections.Immutable
-open CCVTAC.Console
 
 /// Contains all the data necessary for tagging a related set of files.
 [<Struct>]
@@ -14,13 +14,10 @@ type TaggingSet =
       AudioFilePaths: string list
       JsonFilePath: string
       ImageFilePath: string }
-    /// Expose all related files as a read-only list
-    member this.AllFiles : IReadOnlyList<string> =
-        // combine the immutable hash set with json and image paths preserving as a list
-        let audio = this.AudioFilePaths |> Seq.toList
-        List.concat [ audio; [ this.JsonFilePath; this.ImageFilePath ] ] :> IReadOnlyList<string>
 
-    // Private constructor helper to perform validation (not directly callable from outside)
+    member this.AllFiles : string list =
+        List.concat [this.AudioFilePaths; [this.JsonFilePath; this.ImageFilePath]]
+
     static member private CreateValidated(resourceId: string, audioFilePaths: ICollection<string>, jsonFilePath: string, imageFilePath: string) =
         if hasNoText resourceId then
             invalidArg "resourceId" "The resource ID must be provided."
@@ -42,7 +39,6 @@ type TaggingSet =
 
     /// Create a collection of TaggingSets from a collection of file paths related to several video IDs.
     /// Files that don't match the requirements will be ignored.
-    // static member CreateSets (filePaths: ICollection<string>) : TaggingSet list =
     static member CreateSets (filePaths: ICollection<string>) : TaggingSet list =
         if Seq.isEmpty filePaths then
             []
