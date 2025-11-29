@@ -3,11 +3,11 @@ namespace CCVTAC.Console.PostProcessing.Tagging
 open System
 open System.IO
 open System.Text.Json
-// open System.Linq
 open CCVTAC.Console
 open CCVTAC.Console.Settings.Settings
 open CCVTAC.Console.PostProcessing
 open CCVTAC.Console.Downloading.Downloading
+open Startwatch.Library
 
 type TaggedFile = TagLib.File
 
@@ -236,11 +236,13 @@ module Tagger =
         (mediaType: MediaType)
         (printer: Printer)
         : Result<string, string> =
+
         printer.Debug "Adding file tags..."
-        let watch = System.Diagnostics.Stopwatch.StartNew()
+        let watch = Watch()
+
         let embedImages = settings.EmbedImages && (mediaType.IsVideo || mediaType.IsPlaylistVideo)
 
         for taggingSet in taggingSets do
             processTaggingSet settings taggingSet collectionJson embedImages printer
 
-        Ok (sprintf "Tagging done in %s." (watchFriendly watch))
+        Ok $"Tagging done in %s{watch.ElapsedFriendly}."
