@@ -7,7 +7,7 @@ open System.Text
 type SB = StringBuilder
 
 [<AutoOpen>]
-module Utilities =
+module String =
 
     let newLine = Environment.NewLine
 
@@ -22,9 +22,6 @@ module Utilities =
 
     let endsWithIgnoringCase endingText (text: string) =
         text.EndsWith(endingText, StringComparison.InvariantCultureIgnoreCase)
-
-    let caseInsensitiveContains text (xs: string seq) : bool =
-        xs |> Seq.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))
 
     /// Returns a new string in which all invalid path characters for the current OS
     /// have been replaced by the specified replacement character.
@@ -62,8 +59,15 @@ module Utilities =
     let trimTerminalLineBreak (text: string) =
         text.TrimEnd(newLine.ToCharArray())
 
+[<AutoOpen>]
+module Seq =
+    let caseInsensitiveContains text (xs: string seq) : bool =
+        xs |> Seq.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))
+
+[<AutoOpen>]
 module List =
     let isNotEmpty l = not (List.isEmpty l)
 
+[<AutoOpen>]
 module Array =
     let doesNotContain x arr = Array.contains x arr |> not
