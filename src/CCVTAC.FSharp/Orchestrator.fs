@@ -1,21 +1,16 @@
 namespace CCVTAC.Console
 
-open System
-open System.Threading
 open CCVTAC.Console.Downloading
-open CCVTAC.Console.Downloading.Downloading
+open CCVTAC.Console.InputHelper
 open CCVTAC.Console.IoUtilities
 open CCVTAC.Console.PostProcessing
 open CCVTAC.Console.Settings
 open CCVTAC.Console.Settings.Settings
-open CCVTAC.Console.Settings.TagFormat
-open CCVTAC.Console.Settings.Settings.Validation
-open CCVTAC.Console.Settings.Settings.IO
 open CCVTAC.Console.Settings.Settings.LiveUpdating
 open Spectre.Console
-open CCVTAC.Console.InputHelper
-open Utilities
 open Startwatch.Library
+open System
+open System.Threading
 
 module Orchestrator =
     type NextAction =

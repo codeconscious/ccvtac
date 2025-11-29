@@ -1,18 +1,15 @@
 namespace CCVTAC.Console.PostProcessing
 
+open CCVTAC.Console.PostProcessing.Tagging
+open CCVTAC.Console.Settings.Settings
+open CCVTAC.Console
+open CCVTAC.Console.PostProcessing
 open System
 open System.IO
 open System.Linq
 open System.Text.Json
 open System.Text.RegularExpressions
-open CCVTAC.Console.Utilities
-open CCVTAC.Console.PostProcessing.Tagging
-open CCVTAC.Console.Settings
-open CCVTAC.Console.Settings.Settings
-open CCVTAC.Console
 open Startwatch.Library
-open Utilities
-open CCVTAC.Console.PostProcessing
 
 module Mover =
 

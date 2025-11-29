@@ -4,7 +4,6 @@ open System
 open System.Collections.Generic
 open System.Linq
 open Spectre.Console
-open Utilities
 
 type private Level =
     | Critical = 0
