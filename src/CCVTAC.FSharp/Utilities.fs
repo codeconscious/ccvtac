@@ -20,6 +20,9 @@ module Utilities =
     let equalIgnoringCase x y =
         String.Equals(x, y, StringComparison.OrdinalIgnoreCase)
 
+    let endsWithIgnoringCase endingText (text: string) =
+        text.EndsWith(endingText, StringComparison.InvariantCultureIgnoreCase)
+
     let caseInsensitiveContains text (xs: string seq) : bool =
         xs |> Seq.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))
 

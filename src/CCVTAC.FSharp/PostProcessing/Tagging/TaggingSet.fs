@@ -56,17 +56,14 @@ type TaggingSet =
             |> Seq.map (fun m -> m.Captures |> Seq.cast<Match> |> Seq.head)
             |> Seq.groupBy _.Groups[1].Value
             |> Seq.map (fun (videoId, matches) -> videoId, matches |> Seq.map _.Groups[0].Value)
-            |> Seq.filter (fun (_, files) ->
-                let filesSeq = files |> Seq.toArray
+            |> Seq.filter (fun (_, fileNames) ->
                 let isSupportedExtension =
-                    filesSeq
+                    fileNames
                     |> Seq.exists (fun f ->
                         let f' = match Path.GetExtension (f: string) with Null -> "" | NonNull (x: string) -> x // TODO: Improve.
                         caseInsensitiveContains f' AudioExtensions)
-                let jsonCount =
-                    filesSeq |> Seq.filter (fun f -> f.EndsWith(jsonFileExt, StringComparison.OrdinalIgnoreCase)) |> Seq.length
-                let imageCount =
-                    filesSeq |> Seq.filter (fun f -> f.EndsWith(imageFileExt, StringComparison.OrdinalIgnoreCase)) |> Seq.length
+                let jsonCount = fileNames |> Seq.filter (endsWithIgnoringCase jsonFileExt) |> Seq.length
+                let imageCount = fileNames |> Seq.filter (endsWithIgnoringCase imageFileExt) |> Seq.length
                 isSupportedExtension && jsonCount = 1 && imageCount = 1)
             |> Seq.map (fun (key, files) ->
                 let filesArr = files |> Seq.toArray
@@ -76,8 +73,8 @@ type TaggingSet =
                         let f' = match Path.GetExtension (f: string) with Null -> "" | NonNull (x: string) -> x // TODO: Improve.
                         caseInsensitiveContains f' AudioExtensions)
                     |> Seq.toList
-                let jsonFile = filesArr |> Seq.find (fun f -> f.EndsWith(jsonFileExt, StringComparison.OrdinalIgnoreCase))
-                let imageFile = filesArr |> Seq.find (fun f -> f.EndsWith(imageFileExt, StringComparison.OrdinalIgnoreCase))
+                let jsonFile = filesArr |> Seq.find (endsWithIgnoringCase jsonFileExt)
+                let imageFile = filesArr |> Seq.find (endsWithIgnoringCase imageFileExt)
 
                 { ResourceId = key
                   AudioFilePaths = audioFiles
