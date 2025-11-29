@@ -161,19 +161,7 @@ module Tagger =
             printer.Debug $"• Using metadata release year \"%d{year}\""
             taggedFile.Tag.Year <- year
         | NullV ->
-            let maybeDefaultYear =
-                // let rec GetAppropriateReleaseDateIfAny (settings: UserSettings) (videoData: VideoMetadata) =
-                //     if settings.IgnoreUploadYearUploaders.Contains(videoData.Uploader, StringComparer.OrdinalIgnoreCase)
-                //     then
-                //         None
-                //     else
-                //         if String.IsNullOrEmpty videoData.UploadDate then None
-                //         else
-                //             let prefix = if videoData.UploadDate.Length >= 4 then videoData.UploadDate.Substring(0,4) else ""
-                //             match UInt16.TryParse prefix with
-                //             | true, parsed -> Some parsed
-                //             | _ -> None
-                releaseYear settings videoData
+            let maybeDefaultYear = releaseYear settings videoData
 
             match tagDetector.DetectReleaseYear(videoData, maybeDefaultYear) with
             | None -> ()
