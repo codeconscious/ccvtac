@@ -17,6 +17,9 @@ module String =
     let hasText text =
         not (hasNoText text)
 
+    let allHaveText xs =
+        xs |> List.forall hasText
+
     let equalIgnoringCase x y =
         String.Equals(x, y, StringComparison.OrdinalIgnoreCase)
 
