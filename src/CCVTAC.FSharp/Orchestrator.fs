@@ -139,53 +139,53 @@ module Orchestrator =
         : Result<NextAction, string> =
 
         // Help
-        if equalIgnoringCase Commands.HelpCommand command then
-            for kvp in Commands.Summary do
+        if equalIgnoringCase Commands.helpCommand command then
+            for kvp in Commands.summary do
                 printer.Info(kvp.Key)
                 printer.Info $"    %s{kvp.Value}"
             Ok NextAction.Continue
 
         // Quit
-        elif caseInsensitiveContains command Commands.QuitCommands then
+        elif caseInsensitiveContains command Commands.quitCommands then
             Ok NextAction.QuitAtUserRequest
 
         // History
-        elif caseInsensitiveContains command Commands.History then
+        elif caseInsensitiveContains command Commands.history then
             history.ShowRecent printer
             Ok NextAction.Continue
 
         // Update downloader
-        elif caseInsensitiveContains command Commands.UpdateDownloader then
+        elif caseInsensitiveContains command Commands.updateDownloader then
             Updater.run settings printer |> ignore
             Ok NextAction.Continue
 
         // Settings summary
-        elif caseInsensitiveContains command Commands.SettingsSummary then
+        elif caseInsensitiveContains command Commands.settingsSummary then
             Settings.printSummary settings printer None
             Ok NextAction.Continue
 
         // Toggle split chapters
-        elif caseInsensitiveContains command Commands.SplitChapterToggles then
+        elif caseInsensitiveContains command Commands.splitChapterToggles then
             settings <- toggleSplitChapters(settings)
             printer.Info(summarizeToggle "Split Chapters" settings.SplitChapters)
             Ok NextAction.Continue
 
         // Toggle embed images
-        elif caseInsensitiveContains command Commands.EmbedImagesToggles then
+        elif caseInsensitiveContains command Commands.embedImagesToggles then
             settings <- toggleEmbedImages(settings)
             printer.Info(summarizeToggle "Embed Images" settings.EmbedImages)
             Ok NextAction.Continue
 
         // Toggle quiet mode
-        elif caseInsensitiveContains command Commands.QuietModeToggles then
+        elif caseInsensitiveContains command Commands.quietModeToggles then
             settings <- toggleQuietMode(settings)
             printer.Info(summarizeToggle "Quiet Mode" settings.QuietMode)
             printer.ShowDebug(not settings.QuietMode)
             Ok NextAction.Continue
 
         // Update audio formats prefix
-        elif startsWithIgnoreCase command Commands.UpdateAudioFormatPrefix then
-            let format = command.Replace(Commands.UpdateAudioFormatPrefix, "").ToLowerInvariant()
+        elif startsWithIgnoreCase command Commands.updateAudioFormatPrefix then
+            let format = command.Replace(Commands.updateAudioFormatPrefix, "").ToLowerInvariant()
             if String.IsNullOrEmpty format then
                 Error "You must append one or more supported audio format separated by commas (e.g., \"m4a,opus,best\")."
             else
@@ -203,8 +203,8 @@ module Orchestrator =
                 //     Ok NextAction.Continue
 
         // Update audio quality prefix
-        elif startsWithIgnoreCase command Commands.UpdateAudioQualityPrefix then
-            let inputQuality = command.Replace(Commands.UpdateAudioQualityPrefix, "")
+        elif startsWithIgnoreCase command Commands.updateAudioQualityPrefix then
+            let inputQuality = command.Replace(Commands.updateAudioQualityPrefix, "")
             if String.IsNullOrEmpty inputQuality then
                 Error "You must enter a number representing an audio quality."
             else
@@ -227,7 +227,9 @@ module Orchestrator =
 
         // Unknown command
         else
-            Error (sprintf "\"%s\" is not a valid command. Enter \"%scommands\" to see a list of commands." command (string Commands.Prefix))
+            Error (sprintf "\"%s\" is not a valid command. Enter \"%scommands\" to see a list of commands." command (string Commands.
+                                                                                                                                prefix
+                       ))
 
 
     /// Processes a single user request, from input to downloading and file post-processing.
@@ -298,12 +300,14 @@ module Orchestrator =
 
             while nextAction = NextAction.Continue do
                 let input = printer.GetInput InputHelper.Prompt
-                let splitInputs = InputHelper.SplitInput input
+                let splitInputs = InputHelper.splitInput input
 
                 if splitInputs.IsEmpty then
-                    printer.Error (sprintf "Invalid input. Enter only URLs or commands beginning with \"%c\"." Commands.Prefix)
+                    printer.Error (sprintf "Invalid input. Enter only URLs or commands beginning with \"%c\"." Commands.
+                                                                                                                   prefix
+                        )
                 else
-                    let categorizedInputs = InputHelper.CategorizeInputs splitInputs
+                    let categorizedInputs = InputHelper.categorizeInputs splitInputs
                     let categoryCounts = InputHelper.CountCategories categorizedInputs
 
                     summarizeInput categorizedInputs categoryCounts printer

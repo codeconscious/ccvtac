@@ -9,7 +9,7 @@ open System.Collections.Immutable
 module InputHelper =
 
     let internal Prompt =
-        sprintf "Enter one or more YouTube media URLs or commands (or \"%s\"):\n▶︎" Commands.HelpCommand
+        sprintf "Enter one or more YouTube media URLs or commands (or \"%s\"):\n▶︎" Commands.helpCommand
 
     /// A regular expression that detects where commands and URLs begin in input strings.
     let private userInputRegex = Regex(@"(?:https:|\\)", RegexOptions.Compiled)
@@ -18,7 +18,7 @@ module InputHelper =
 
     /// Takes a user input string and splits it into a collection of inputs
     /// based upon substrings detected by the class's regular expression pattern.
-    let SplitInput (input: string) : ImmutableArray<string> =
+    let splitInput (input: string) : ImmutableArray<string> =
         let matches = userInputRegex.Matches(input) |> Seq.cast<Match> |> Seq.toArray
 
         if matches.Length = 0 then
@@ -48,12 +48,12 @@ module InputHelper =
 
     type CategorizedInput = { Text: string; Category: InputCategory }
 
-    let CategorizeInputs (inputs: ICollection<string>) : CategorizedInput list =
+    let categorizeInputs (inputs: ICollection<string>) : CategorizedInput list =
         inputs
         |> Seq.cast<string>
         |> Seq.map (fun input ->
             let category =
-                if input.StartsWith(string Commands.Prefix)
+                if input.StartsWith(string Commands.prefix)
                 then InputCategory.Command
                 else InputCategory.Url
             { Text = input; Category = category })

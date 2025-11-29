@@ -5,48 +5,50 @@ open System.Collections.Generic
 
 module internal Commands =
 
-    let Prefix : char = '\\'
+    let prefix: char = '\\'
 
-    let private MakeCommand (text: string) : string =
+    let private makeCommand (text: string) : string =
         if hasNoText text then
             raise (ArgumentException("The text cannot be null or white space.", "text"))
         if text.Contains ' ' then
             raise (ArgumentException("The text should not contain any white space.", "text"))
-        $"%c{Prefix}%s{text}"
+        $"%c{prefix}%s{text}"
 
-    let QuitCommands : string[] =
-        [| MakeCommand "quit"; MakeCommand "q"; MakeCommand "exit" |]
+    let quitCommands: string[] =
+        [| makeCommand "quit"; makeCommand "q"; makeCommand "exit" |]
 
-    let HelpCommand : string = MakeCommand "help"
+    let helpCommand: string = makeCommand "help"
 
-    let SettingsSummary : string[] = [| MakeCommand "settings" |]
+    let settingsSummary: string[] = [| makeCommand "settings" |]
 
-    let History : string[] = [| MakeCommand "history" |]
+    let history: string[] = [| makeCommand "history" |]
 
-    let UpdateDownloader : string[] =
-        [| MakeCommand "update-downloader"; MakeCommand "update-dl" |]
+    let updateDownloader: string[] =
+        [| makeCommand "update-downloader"; makeCommand "update-dl" |]
 
-    let SplitChapterToggles : string[] = [| MakeCommand "split"; MakeCommand "toggle-split" |]
+    let splitChapterToggles: string[] = [| makeCommand "split"; makeCommand "toggle-split" |]
 
-    let EmbedImagesToggles : string[] = [| MakeCommand "images"; MakeCommand "toggle-images" |]
+    let embedImagesToggles: string[] = [| makeCommand "images"; makeCommand "toggle-images" |]
 
-    let QuietModeToggles : string[] = [| MakeCommand "quiet"; MakeCommand "toggle-quiet" |]
+    let quietModeToggles: string[] = [| makeCommand "quiet"; makeCommand "toggle-quiet" |]
 
-    let UpdateAudioFormatPrefix : string = MakeCommand "format-"
+    let updateAudioFormatPrefix: string = makeCommand "format-"
 
-    let UpdateAudioQualityPrefix : string = MakeCommand "quality-"
+    let updateAudioQualityPrefix: string = makeCommand "quality-"
 
-    let Summary : Dictionary<string, string> =
+    let summary: Dictionary<string, string> =
         let d = Dictionary<string, string>()
-        d.Add(String.Join(" or ", History), "See the most recently entered URLs")
-        d.Add(String.Join(" or ", SplitChapterToggles), "Toggles chapter splitting for the current session only")
-        d.Add(String.Join(" or ", EmbedImagesToggles), "Toggles image embedding for the current session only")
-        d.Add(String.Join(" or ", QuietModeToggles), "Toggles quiet mode for the current session only")
-        d.Add(String.Join(" or ", UpdateDownloader), "Updates the downloader using the command specified in the settings")
-        d.Add(UpdateAudioFormatPrefix,
-              sprintf "Followed by a supported audio format (e.g., %sm4a), changes the audio format for the current session only" UpdateAudioFormatPrefix)
-        d.Add(UpdateAudioQualityPrefix,
-              sprintf "Followed by a supported audio quality (e.g., %s0), changes the audio quality for the current session only" UpdateAudioQualityPrefix)
-        d.Add(String.Join(" or ", QuitCommands), "Quit the application")
-        d.Add(HelpCommand, "See this help message")
+        d.Add(String.Join(" or ", history), "See the most recently entered URLs")
+        d.Add(String.Join(" or ", splitChapterToggles), "Toggles chapter splitting for the current session only")
+        d.Add(String.Join(" or ", embedImagesToggles), "Toggles image embedding for the current session only")
+        d.Add(String.Join(" or ", quietModeToggles), "Toggles quiet mode for the current session only")
+        d.Add(String.Join(" or ", updateDownloader), "Updates the downloader using the command specified in the settings")
+        d.Add(updateAudioFormatPrefix,
+              sprintf "Followed by a supported audio format (e.g., %sm4a), changes the audio format for the current session only"
+                  updateAudioFormatPrefix)
+        d.Add(updateAudioQualityPrefix,
+              sprintf "Followed by a supported audio quality (e.g., %s0), changes the audio quality for the current session only"
+                  updateAudioQualityPrefix)
+        d.Add(String.Join(" or ", quitCommands), "Quit the application")
+        d.Add(helpCommand, "See this help message")
         d
