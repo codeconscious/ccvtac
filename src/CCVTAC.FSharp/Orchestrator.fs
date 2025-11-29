@@ -88,7 +88,7 @@ module Orchestrator =
                 printer.Info($"Slept for %d{settings.SleepSecondsBetweenURLs} second(s).", appendLines = 1uy)
 
             if batchSize > 1 then
-                printer.Info(sprintf "Processing group %d of %d..." urlIndex batchSize)
+                printer.Info $"Processing group %d{urlIndex} of %d{batchSize}..."
 
             let jobWatch = Watch()
 
@@ -98,7 +98,7 @@ module Orchestrator =
                 printer.Error errorMsg
                 Error errorMsg
             | Ok mediaType ->
-                printer.Info(sprintf "%s URL '%s' detected." (mediaType.GetType().Name) url)
+                printer.Info $"%s{mediaType.GetType().Name} URL '%s{url}' detected."
                 history.Append(url, urlInputTime, printer)
 
                 let downloadResult = Downloader.run mediaType settings printer
@@ -121,11 +121,6 @@ module Orchestrator =
                     printer.Info $"Processed '%s{url}'%s{groupClause} in %s{jobWatch.ElapsedFriendly}."
                     Ok NextAction.Continue
 
-    let equalsIgnoreCase (a: string) (b: string) =
-        String.Equals(a, b, StringComparison.InvariantCultureIgnoreCase)
-
-    let seqContainsIgnoreCase (seq: seq<string>) (value: string) =
-        seq |> Seq.exists (fun s -> equalsIgnoreCase s value)
 
     let startsWithIgnoreCase (text: string) (prefix: string) =
         text.StartsWith(prefix, StringComparison.InvariantCultureIgnoreCase)
@@ -144,45 +139,45 @@ module Orchestrator =
         : Result<NextAction, string> =
 
         // Help
-        if equalsIgnoreCase Commands.HelpCommand command then
+        if equalIgnoringCase Commands.HelpCommand command then
             for kvp in Commands.Summary do
                 printer.Info(kvp.Key)
-                printer.Info(sprintf "    %s" kvp.Value)
+                printer.Info $"    %s{kvp.Value}"
             Ok NextAction.Continue
 
         // Quit
-        elif seqContainsIgnoreCase Commands.QuitCommands command then
+        elif caseInsensitiveContains command Commands.QuitCommands then
             Ok NextAction.QuitAtUserRequest
 
         // History
-        elif seqContainsIgnoreCase Commands.History command then
+        elif caseInsensitiveContains command Commands.History then
             history.ShowRecent printer
             Ok NextAction.Continue
 
         // Update downloader
-        elif seqContainsIgnoreCase Commands.UpdateDownloader command then
+        elif caseInsensitiveContains command Commands.UpdateDownloader then
             Updater.run settings printer |> ignore
             Ok NextAction.Continue
 
         // Settings summary
-        elif seqContainsIgnoreCase Commands.SettingsSummary command then
+        elif caseInsensitiveContains command Commands.SettingsSummary then
             Settings.printSummary settings printer None
             Ok NextAction.Continue
 
         // Toggle split chapters
-        elif seqContainsIgnoreCase Commands.SplitChapterToggles command then
+        elif caseInsensitiveContains command Commands.SplitChapterToggles then
             settings <- toggleSplitChapters(settings)
             printer.Info(summarizeToggle "Split Chapters" settings.SplitChapters)
             Ok NextAction.Continue
 
         // Toggle embed images
-        elif seqContainsIgnoreCase Commands.EmbedImagesToggles command then
+        elif caseInsensitiveContains command Commands.EmbedImagesToggles then
             settings <- toggleEmbedImages(settings)
             printer.Info(summarizeToggle "Embed Images" settings.EmbedImages)
             Ok NextAction.Continue
 
         // Toggle quiet mode
-        elif seqContainsIgnoreCase Commands.QuietModeToggles command then
+        elif caseInsensitiveContains command Commands.QuietModeToggles then
             settings <- toggleQuietMode(settings)
             printer.Info(summarizeToggle "Quiet Mode" settings.QuietMode)
             printer.ShowDebug(not settings.QuietMode)
@@ -228,7 +223,7 @@ module Orchestrator =
                     //     printer.Info(summarizeUpdate "Audio Quality" (settings.AudioQuality.ToString()))
                     //     Ok NextAction.Continue
                 | _ ->
-                    Error (sprintf "\"%s\" is an invalid quality value." inputQuality)
+                    Error $"\"%s{inputQuality}\" is an invalid quality value."
 
         // Unknown command
         else
@@ -245,15 +240,15 @@ module Orchestrator =
         (history: History)
         (printer: Printer)
         : NextAction =
+
         let inputTime = DateTime.Now
-        let mutable nextAction = NextAction.Continue
         let watch = Watch()
         let batchResults = ResultTracker<NextAction>(printer)
+        let mutable nextAction = NextAction.Continue
         let mutable inputIndex = 0
 
         for input in categorizedInputs do
             let mutable stop = false
-            // increment input index before passing to ProcessUrl to mirror ++inputIndex
             inputIndex <- inputIndex + 1
 
             let result =
@@ -274,7 +269,7 @@ module Orchestrator =
 
         if categoryCounts[InputCategory.Url] > 1 then
             printer.Info(sprintf "%sFinished with batch of %d URLs in %s."
-                            Environment.NewLine
+                            newLine
                             categoryCounts[InputCategory.Url]
                             watch.ElapsedFriendly)
             batchResults.PrintBatchFailures()
