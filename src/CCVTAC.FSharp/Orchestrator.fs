@@ -32,13 +32,13 @@ module Orchestrator =
             let urlSummary =
                 match urlCount with
                 | 1 -> "1 URL"
-                | n when n > 1 -> sprintf "%d URLs" n
+                | n when n > 1 -> $"%d{n} URLs"
                 | _ -> String.Empty
 
             let commandSummary =
                 match cmdCount with
                 | 1 -> "1 command"
-                | n when n > 1 -> sprintf "%d commands" n
+                | n when n > 1 -> $"%d{n} commands"
                 | _ -> String.Empty
 
             let connector =
@@ -47,7 +47,7 @@ module Orchestrator =
             printer.Info $"Batch of %s{urlSummary}%s{connector}%s{commandSummary} entered."
 
             for input in categorizedInputs do
-                printer.Info(sprintf " • %s" input.Text)
+                printer.Info $" • %s{input.Text}"
 
             Printer.EmptyLines 1uy
 
