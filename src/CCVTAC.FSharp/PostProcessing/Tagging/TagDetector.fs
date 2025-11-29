@@ -1,7 +1,6 @@
 namespace CCVTAC.Console.PostProcessing.Tagging
 
 open System
-open CCVTAC.Console.Settings
 open CCVTAC.Console.Settings.Settings
 open CCVTAC.Console.PostProcessing
 
