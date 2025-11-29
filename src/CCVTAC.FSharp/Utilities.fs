@@ -17,7 +17,10 @@ module Utilities =
     let hasText text =
         not (hasNoText text)
 
-    let caseInsensitiveContains (xs: string seq) text : bool =
+    let equalIgnoringCase x y =
+        String.Equals(x, y, StringComparison.OrdinalIgnoreCase)
+
+    let caseInsensitiveContains text (xs: string seq) : bool =
         xs |> Seq.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))
 
     /// Returns a new string in which all invalid path characters for the current OS
@@ -44,7 +47,7 @@ module Utilities =
             }
             |> Set.ofSeq
 
-        if invalidChars.Contains replaceWith then
+        if invalidChars |> Set.contains replaceWith  then
             invalidArg "replaceWith" $"The replacement char ('%c{replaceWith}') must be a valid path character."
 
         Set.fold

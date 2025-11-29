@@ -81,7 +81,7 @@ module PostProcessor =
             then ImageProcessor.run workingDirectory printer
             else ()
 
-            match Tagger.Run settings taggingSets collectionJsonOpt mediaType printer with
+            match Tagger.run settings taggingSets collectionJsonOpt mediaType printer with
             | Ok msg ->
                 printer.Info msg
                 Renamer.Run settings workingDirectory printer

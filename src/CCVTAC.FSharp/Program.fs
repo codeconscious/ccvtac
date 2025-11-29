@@ -22,12 +22,12 @@ module Program =
     let main (args: string array) : int =
         let printer = Printer(showDebug = true)
 
-        if args.Length > 0 && caseInsensitiveContains helpFlags args[0] then
+        if args.Length > 0 && caseInsensitiveContains args[0] helpFlags then
             Help.Print printer
             int ExitCodes.Success
         else
             let maybeSettingsPath =
-                if args.Length >= 2 && caseInsensitiveContains settingsFileFlags args[0] then
+                if args.Length >= 2 && caseInsensitiveContains args[0] settingsFileFlags then
                     args[1] // Expected to be a settings file path
                 else
                     defaultSettingsFileName

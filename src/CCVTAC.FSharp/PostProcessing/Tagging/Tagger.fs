@@ -20,7 +20,7 @@ module Tagger =
         elif ts.TotalMinutes >= 1.0 then sprintf "%d:%02d" ts.Minutes ts.Seconds
         else sprintf "%A ms" ts.TotalMilliseconds // TODO: %d didn't work
 
-    let private ParseVideoJson (taggingSet: TaggingSet) : Result<VideoMetadata, string> =
+    let private parseVideoJson (taggingSet: TaggingSet) : Result<VideoMetadata, string> =
         try
             let json = File.ReadAllText taggingSet.JsonFilePath
             try
@@ -68,25 +68,18 @@ module Tagger =
 
     /// If the supplied video uploader is specified in the settings, returns the video's upload year.
     /// Otherwise, returns null (Nullable<uint16>).
-    let GetAppropriateReleaseDateIfAny (settings: UserSettings) (videoData: VideoMetadata) : uint32 option =
-        // If an ignore list exists and contains the uploader (case-insensitive), return null
-        if Seq.exists
-            (fun u -> String.Equals(u, videoData.Uploader, StringComparison.OrdinalIgnoreCase))
-            settings.IgnoreUploadYearUploaders
-        then
-            None
+    let releaseYear (settings: UserSettings) (videoData: VideoMetadata) : uint32 option =
+        if settings.IgnoreUploadYearUploaders |> caseInsensitiveContains videoData.Uploader
+        then None
+        else if videoData.UploadDate.Length < 4
+        then None
         else
-            // Try to parse the first 4 characters of UploadDate as a year
-            if videoData.UploadDate.Length < 4
-            then
-                None
-            else
-                let yearStr = videoData.UploadDate.Substring(0, 4)
-                match UInt32.TryParse yearStr with
-                | true, parsed -> Some parsed
-                | _ -> None
+            let yearStr = videoData.UploadDate.Substring(0, 4)
+            match UInt32.TryParse yearStr with
+            | true, parsed -> Some parsed
+            | _ -> None
 
-    let private TagSingleFile
+    let private tagSingleFile
         (settings: UserSettings)
         (videoData: VideoMetadata)
         (audioFilePath: string)
@@ -95,10 +88,10 @@ module Tagger =
         (printer: Printer)
         =
         let audioFileName = Path.GetFileName audioFilePath
-        printer.Debug (sprintf "Current audio file: \"%s\"" audioFileName)
+        printer.Debug $"Current audio file: \"%s{audioFileName}\""
 
         use taggedFile = TaggedFile.Create audioFilePath
-        let tagDetector = TagDetector(settings.TagDetectionPatterns)
+        let tagDetector = TagDetector settings.TagDetectionPatterns
 
         // Title
         // match videoData.Track with
@@ -180,7 +173,7 @@ module Tagger =
                 //             match UInt16.TryParse prefix with
                 //             | true, parsed -> Some parsed
                 //             | _ -> None
-                GetAppropriateReleaseDateIfAny settings videoData
+                releaseYear settings videoData
 
             match tagDetector.DetectReleaseYear(videoData, maybeDefaultYear) with
             | None -> ()
@@ -195,18 +188,19 @@ module Tagger =
         match imageFilePath with
         | Some path ->
             if settings.EmbedImages &&
-                Array.doesNotContain videoData.Uploader settings.DoNotEmbedImageUploaders
+                settings.DoNotEmbedImageUploaders |> Array.doesNotContain videoData.Uploader
             then
                 printer.Info "Embedding artwork."
                 WriteImage taggedFile path printer
             else
                 printer.Debug "Skipping artwork embedding."
-        | None -> printer.Debug "Skipping artwork embedding."
+        | None ->
+            printer.Debug "Skipping artwork embedding."
 
         taggedFile.Save()
         printer.Debug $"Wrote tags to \"%s{audioFileName}\"."
 
-    let private ProcessSingleTaggingSet
+    let private processTaggingSet
         (settings: UserSettings)
         (taggingSet: TaggingSet)
         (collectionJson: CollectionMetadata option)
@@ -217,25 +211,25 @@ module Tagger =
 
         printer.Debug $"%d{taggingSet.AudioFilePaths.Length} audio file(s) with resource ID \"%s{taggingSet.ResourceId}\""
 
-        match ParseVideoJson taggingSet with
-        | Error err ->
-            printer.Error $"Error deserializing video metadata from \"%s{taggingSet.JsonFilePath}\": {err}"
+        match parseVideoJson taggingSet with
         | Ok videoData ->
             let finalTaggingSet = DeleteSourceFile taggingSet printer
 
             let imagePath =
-                if embedImages && finalTaggingSet.AudioFilePaths.Length = 1 then
+                if embedImages && List.isNotEmpty finalTaggingSet.AudioFilePaths then
                     Some finalTaggingSet.ImageFilePath
                 else
                     None
 
             for audioPath in finalTaggingSet.AudioFilePaths do
                 try
-                    TagSingleFile settings videoData audioPath imagePath collectionJson printer
+                    tagSingleFile settings videoData audioPath imagePath collectionJson printer
                 with ex ->
-                    printer.Error (sprintf "Error tagging file: %s" ex.Message)
+                    printer.Error $"Error tagging file: %s{ex.Message}"
+        | Error err ->
+            printer.Error $"Error deserializing video metadata from \"%s{taggingSet.JsonFilePath}\": {err}"
 
-    let Run
+    let run
         (settings: UserSettings)
         (taggingSets: seq<TaggingSet>)
         (collectionJson: CollectionMetadata option)
@@ -247,6 +241,6 @@ module Tagger =
         let embedImages = settings.EmbedImages && (mediaType.IsVideo || mediaType.IsPlaylistVideo)
 
         for taggingSet in taggingSets do
-            ProcessSingleTaggingSet settings taggingSet collectionJson embedImages printer
+            processTaggingSet settings taggingSet collectionJson embedImages printer
 
         Ok (sprintf "Tagging done in %s." (watchFriendly watch))

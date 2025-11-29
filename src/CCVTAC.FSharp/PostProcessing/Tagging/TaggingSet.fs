@@ -66,7 +66,7 @@ type TaggingSet =
                     filesSeq
                     |> Seq.exists (fun f ->
                         let f' = match Path.GetExtension (f: string) with Null -> "" | NonNull (x: string) -> x // TODO: Improve.
-                        caseInsensitiveContains AudioExtensions f')
+                        caseInsensitiveContains f' AudioExtensions)
                 let jsonCount =
                     filesSeq |> Seq.filter (fun f -> f.EndsWith(jsonFileExt, StringComparison.OrdinalIgnoreCase)) |> Seq.length
                 let imageCount =
@@ -78,7 +78,7 @@ type TaggingSet =
                     filesArr
                     |> Seq.filter (fun f ->
                         let f' = match Path.GetExtension (f: string) with Null -> "" | NonNull (x: string) -> x // TODO: Improve.
-                        caseInsensitiveContains AudioExtensions f')
+                        caseInsensitiveContains f' AudioExtensions)
                     |> Seq.toList
                 let jsonFile = filesArr |> Seq.find (fun f -> f.EndsWith(jsonFileExt, StringComparison.OrdinalIgnoreCase))
                 let imageFile = filesArr |> Seq.find (fun f -> f.EndsWith(imageFileExt, StringComparison.OrdinalIgnoreCase))

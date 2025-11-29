@@ -152,7 +152,7 @@ module Mover =
         | Ok () ->
             let audioFileNames =
                 workingDirInfo.EnumerateFiles()
-                |> Seq.filter (fun f -> caseInsensitiveContains AudioExtensions f.Extension)
+                |> Seq.filter (fun f -> caseInsensitiveContains f.Extension AudioExtensions)
                 |> List.ofSeq
 
             if audioFileNames.IsEmpty then
