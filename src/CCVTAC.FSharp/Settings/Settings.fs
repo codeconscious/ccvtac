@@ -86,7 +86,7 @@ module Settings =
 
     let printSummary settings (printer: Printer) headerOpt : unit =
         match headerOpt with
-        | Some h when hasNonWhitespaceText h -> printer.Info h
+        | Some h when hasText h -> printer.Info h
         | _ -> ()
 
         let table = Table()
@@ -106,7 +106,6 @@ module Settings =
         open System.IO
 
         let validate settings =
-            let isEmpty str = String.IsNullOrWhiteSpace str
             let dirMissing str = not (Directory.Exists str)
 
             // Source: https://github.com/yt-dlp/yt-dlp/?tab=readme-ov-file#post-processing-options
@@ -116,11 +115,11 @@ module Settings =
             let validAudioFormat fmt = supportedAudioFormats |> List.contains fmt
 
             match settings with
-            | { WorkingDirectory = dir } when isEmpty dir ->
+            | { WorkingDirectory = dir } when hasNoText dir ->
                 Error "No working directory was specified."
             | { WorkingDirectory = dir } when dirMissing dir ->
                 Error $"Working directory \"{dir}\" is missing."
-            | { MoveToDirectory = dir } when isEmpty dir ->
+            | { MoveToDirectory = dir } when hasNoText dir ->
                 Error "No move-to directory was specified."
             | { MoveToDirectory = dir } when dirMissing dir ->
                 Error $"Move-to directory \"{dir}\" is missing."

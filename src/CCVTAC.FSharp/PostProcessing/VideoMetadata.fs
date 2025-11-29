@@ -4,6 +4,7 @@ open System
 open System.Collections.Generic
 open System.Text
 open System.Text.Json.Serialization
+open CCVTAC.Console
 
 [<Struct>]
 type VideoMetadata =
@@ -83,11 +84,11 @@ type VideoMetadata =
     /// Returns a string summarizing video uploader information.
     member private this.UploaderSummary() : string =
         let uploaderLinkOrIdOrEmpty =
-            if not (String.IsNullOrWhiteSpace this.UploaderUrl) then this.UploaderUrl
-            elif not (String.IsNullOrWhiteSpace this.UploaderId) then this.UploaderId
+            if hasText this.UploaderUrl then this.UploaderUrl
+            elif hasText this.UploaderId then this.UploaderId
             else String.Empty
 
-        let suffix = if not (String.IsNullOrWhiteSpace uploaderLinkOrIdOrEmpty) then sprintf " (%s)" uploaderLinkOrIdOrEmpty else String.Empty
+        let suffix = if hasText uploaderLinkOrIdOrEmpty then $" (%s{uploaderLinkOrIdOrEmpty})" else String.Empty
         this.Uploader + suffix
 
     /// Returns a formatted MM/DD/YYYY version of the upload date (e.g., "08/27/2023")
@@ -108,22 +109,22 @@ type VideoMetadata =
         sb.AppendLine(sprintf "■ Title: %s" this.Fulltitle) |> ignore
         sb.AppendLine(sprintf "■ Uploader: %s" (this.UploaderSummary())) |> ignore
 
-        if not (String.IsNullOrWhiteSpace this.Creator) && this.Creator <> this.Uploader then
+        if hasText this.Creator && this.Creator <> this.Uploader then
             sb.AppendLine(sprintf "■ Creator: %s" this.Creator) |> ignore
 
-        if not (String.IsNullOrWhiteSpace this.Artist) then
+        if hasText this.Artist then
             sb.AppendLine(sprintf "■ Artist: %s" this.Artist) |> ignore
 
-        if not (String.IsNullOrWhiteSpace this.Album) then
+        if hasText this.Album then
             sb.AppendLine(sprintf "■ Album: %s" this.Album) |> ignore
 
-        if not (String.IsNullOrWhiteSpace this.Title) && this.Title <> this.Fulltitle then
+        if hasText this.Title && this.Title <> this.Fulltitle then
             sb.AppendLine(sprintf "■ Track Title: %s" this.Title) |> ignore
 
         sb.AppendLine(sprintf "■ Uploaded: %s" (this.FormattedUploadDate())) |> ignore
 
         let description =
-            if String.IsNullOrWhiteSpace this.Description then "None." else this.Description
+            if hasNoText this.Description then "None." else this.Description
 
         sb.AppendLine(sprintf "■ Video description: %s" description) |> ignore
 
@@ -135,7 +136,7 @@ type VideoMetadata =
             match this.PlaylistIndex with
             | NonNullV (index: uint32) -> if index > 0u then sb.AppendLine(sprintf "■ Playlist index: %d" index) |> ignore
             | NullV -> ()
-            sb.AppendLine(sprintf "■ Playlist description: %s" (if String.IsNullOrWhiteSpace collectionData.Description then String.Empty else collectionData.Description)) |> ignore
+            sb.AppendLine(sprintf "■ Playlist description: %s" (if hasNoText collectionData.Description then String.Empty else collectionData.Description)) |> ignore
         | None -> ()
 
         sb.ToString()

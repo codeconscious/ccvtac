@@ -47,7 +47,7 @@ module Orchestrator =
                 | _ -> String.Empty
 
             let connector =
-                if hasNonWhitespaceText urlSummary && hasNonWhitespaceText commandSummary then " and " else String.Empty
+                if hasText urlSummary && hasText commandSummary then " and " else String.Empty
 
             printer.Info $"Batch of %s{urlSummary}%s{connector}%s{commandSummary} entered."
 

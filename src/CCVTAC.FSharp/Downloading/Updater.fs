@@ -17,7 +17,7 @@ module Updater =
     /// <returns>A `Result` that, if successful, contains the name of the successfully downloaded format.</returns>
     let internal run (settings: UserSettings) (printer: Printer) =
         // Check if update command is provided
-        if System.String.IsNullOrWhiteSpace(settings.DownloaderUpdateCommand) then
+        if hasNoText settings.DownloaderUpdateCommand then
             printer.Info("No downloader update command provided, so will skip.")
             Ok()
         else

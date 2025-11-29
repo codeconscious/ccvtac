@@ -22,11 +22,11 @@ type TaggingSet =
 
     // Private constructor helper to perform validation (not directly callable from outside)
     static member private CreateValidated(resourceId: string, audioFilePaths: ICollection<string>, jsonFilePath: string, imageFilePath: string) =
-        if String.IsNullOrWhiteSpace resourceId then
+        if hasNoText resourceId then
             invalidArg "resourceId" "The resource ID must be provided."
-        if String.IsNullOrWhiteSpace jsonFilePath then
+        if hasNoText jsonFilePath then
             invalidArg "jsonFilePath" "The JSON file path must be provided."
-        if String.IsNullOrWhiteSpace imageFilePath then
+        if hasNoText imageFilePath then
             invalidArg "imageFilePath" "The image file path must be provided."
         if audioFilePaths.Count = 0 then
             invalidArg "audioFilePaths" "At least one audio file path must be provided."

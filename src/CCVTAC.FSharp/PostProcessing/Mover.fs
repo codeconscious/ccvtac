@@ -78,10 +78,10 @@ module Mover =
 
         try
             let baseFileName =
-                if String.IsNullOrWhiteSpace maybeCollectionName then
+                if hasNoText maybeCollectionName then
                     subFolderName
                 else
-                $"%s{subFolderName} - %s{replaceInvalidPathChars None None maybeCollectionName}"
+                    $"%s{subFolderName} - %s{replaceInvalidPathChars None None maybeCollectionName}"
 
             match getCoverImage workingDirInfo audioFileCount with
             | None -> ()
@@ -112,8 +112,8 @@ module Mover =
     let private getSafeSubDirectoryName (collectionData: CollectionMetadata option) taggingSet : string =
         let workingName =
             match collectionData with
-            | Some metadata when hasNonWhitespaceText metadata.Uploader &&
-                                 hasNonWhitespaceText metadata.Title -> metadata.Uploader
+            | Some metadata when hasText metadata.Uploader &&
+                                 hasText metadata.Title -> metadata.Uploader
             | _ ->
                 match getParsedVideoJson taggingSet with
                 | Ok v -> v.Uploader

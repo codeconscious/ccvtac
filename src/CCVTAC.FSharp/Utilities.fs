@@ -11,14 +11,11 @@ module Utilities =
 
     let newLine = Environment.NewLine
 
-    /// Determines whether a string contains any text.
-    /// allowWhiteSpace = true allows whitespace to count as text.
-    let hasText text whiteSpaceCounts =
-        let f = if whiteSpaceCounts then String.IsNullOrEmpty else String.IsNullOrWhiteSpace
-        not (f text)
+    let hasNoText text =
+        String.IsNullOrWhiteSpace text
 
-    let hasNonWhitespaceText text =
-        hasText text false
+    let hasText text =
+        not (hasNoText text)
 
     let caseInsensitiveContains (xs: string seq) text : bool =
         xs |> Seq.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))
@@ -56,12 +53,11 @@ module Utilities =
             invalidChars
         |> _.ToString()
 
-    let trimTerminalLineBreak text : string =
-        if hasNonWhitespaceText text then
-            text.TrimEnd(newLine.ToCharArray())
-        else
-            text
+    let trimTerminalLineBreak (text: string) =
+        text.TrimEnd(newLine.ToCharArray())
 
 module List =
     let isNotEmpty l = not (List.isEmpty l)
 
+module Array =
+    let doesNotContain x arr = Array.contains x arr |> not

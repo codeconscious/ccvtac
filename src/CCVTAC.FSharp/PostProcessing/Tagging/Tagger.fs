@@ -3,7 +3,7 @@ namespace CCVTAC.Console.PostProcessing.Tagging
 open System
 open System.IO
 open System.Text.Json
-open System.Linq
+// open System.Linq
 open CCVTAC.Console
 open CCVTAC.Console.Settings.Settings
 open CCVTAC.Console.PostProcessing
@@ -54,12 +54,12 @@ module Tagger =
                 taggingSet
 
     let private WriteImage (taggedFile: TaggedFile) (imageFilePath: string) (printer: Printer) =
-        if String.IsNullOrWhiteSpace imageFilePath then
+        if hasNoText imageFilePath then
             printer.Error "No image file path was provided, so cannot add an image to the file."
         else
             try
                 let pics = Array.zeroCreate<TagLib.IPicture> 1
-                pics.[0] <- TagLib.Picture imageFilePath
+                pics[0] <- TagLib.Picture imageFilePath
                 taggedFile.Tag.Pictures <- pics
                 printer.Debug "Image written to file tags OK."
             with ex ->
@@ -109,7 +109,7 @@ module Tagger =
         //     let title = tagDetector.DetectTitle(videoData, videoData.Title)
         //     printer.Debug (sprintf "• Found title \"%s\"" title)
         //     taggedFile.Tag.Title <- title
-        if not (String.IsNullOrWhiteSpace videoData.Track) then
+        if hasText videoData.Track then
             printer.Debug $"• Using metadata title \"%s{videoData.Track}\""
             taggedFile.Tag.Title <- videoData.Track
         else
@@ -120,7 +120,7 @@ module Tagger =
             | None -> printer.Debug "No title was found."
 
         // Artist / Performers
-        if hasNonWhitespaceText videoData.Artist then
+        if hasText videoData.Artist then
             let metadataArtists = videoData.Artist
             let firstArtist = metadataArtists.Split([|", "|], StringSplitOptions.None)[0]
             let diffSummary =
@@ -137,7 +137,7 @@ module Tagger =
                 taggedFile.Tag.Performers <- [| artist |]
 
         // Album
-        if hasNonWhitespaceText videoData.Album then
+        if hasText videoData.Album then
             printer.Debug $"• Using metadata album \"%s{videoData.Album}\""
             taggedFile.Tag.Album <- videoData.Album
         else
@@ -195,7 +195,7 @@ module Tagger =
         match imageFilePath with
         | Some path ->
             if settings.EmbedImages &&
-                (not (settings.DoNotEmbedImageUploaders.Contains(videoData.Uploader)))
+                Array.doesNotContain videoData.Uploader settings.DoNotEmbedImageUploaders
             then
                 printer.Info "Embedding artwork."
                 WriteImage taggedFile path printer

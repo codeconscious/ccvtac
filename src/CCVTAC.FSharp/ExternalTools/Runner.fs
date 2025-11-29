@@ -45,7 +45,7 @@ module Runner =
             process'.WaitForExit()
             printer.Info($"{splitCommandWithArgs[0]} finished in {watch.ElapsedFriendly}.")
 
-            let trimmedErrors = if hasNonWhitespaceText error
+            let trimmedErrors = if hasText error
                                 then Some (trimTerminalLineBreak error)
                                 else None
 
