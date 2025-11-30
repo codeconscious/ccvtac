@@ -47,15 +47,14 @@ type TaggingSet =
                 let imageCount = fileNames |> Seq.filter (endsWithIgnoringCase imageFileExt) |> Seq.length
                 isSupportedExtension && jsonCount = 1 && imageCount = 1)
             |> Seq.map (fun (key, files) ->
-                let filesArr = files |> Seq.toArray
                 let audioFiles =
-                    filesArr
+                    files
                     |> Seq.filter (fun f ->
                         let f' = match Path.GetExtension (f: string) with Null -> "" | NonNull (x: string) -> x // TODO: Improve.
                         caseInsensitiveContains f' AudioExtensions)
                     |> Seq.toList
-                let jsonFile = filesArr |> Seq.find (endsWithIgnoringCase jsonFileExt)
-                let imageFile = filesArr |> Seq.find (endsWithIgnoringCase imageFileExt)
+                let jsonFile = files |> Seq.find (endsWithIgnoringCase jsonFileExt)
+                let imageFile = files |> Seq.find (endsWithIgnoringCase imageFileExt)
 
                 { ResourceId = key
                   AudioFilePaths = audioFiles
