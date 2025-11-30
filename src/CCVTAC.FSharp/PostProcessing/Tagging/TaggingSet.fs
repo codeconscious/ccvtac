@@ -18,25 +18,6 @@ type TaggingSet =
     member this.AllFiles : string list =
         List.concat [this.AudioFilePaths; [this.JsonFilePath; this.ImageFilePath]]
 
-    static member private CreateValidated(resourceId: string, audioFilePaths: ICollection<string>, jsonFilePath: string, imageFilePath: string) =
-        if hasNoText resourceId then
-            invalidArg "resourceId" "The resource ID must be provided."
-        if hasNoText jsonFilePath then
-            invalidArg "jsonFilePath" "The JSON file path must be provided."
-        if hasNoText imageFilePath then
-            invalidArg "imageFilePath" "The image file path must be provided."
-        if audioFilePaths.Count = 0 then
-            invalidArg "audioFilePaths" "At least one audio file path must be provided."
-
-        let resourceIdTrimmed = resourceId.Trim()
-        let jsonTrimmed = jsonFilePath.Trim()
-        let imageTrimmed = imageFilePath.Trim()
-        let audioSet = ImmutableHashSet.CreateRange(StringComparer.OrdinalIgnoreCase, audioFilePaths)
-        { ResourceId = resourceIdTrimmed
-          AudioFilePaths = audioSet |> Seq.toList
-          JsonFilePath = jsonTrimmed
-          ImageFilePath = imageTrimmed }
-
     /// Create a collection of TaggingSets from a collection of file paths related to several video IDs.
     /// Files that don't match the requirements will be ignored.
     static member CreateSets (filePaths: ICollection<string>) : TaggingSet list =
