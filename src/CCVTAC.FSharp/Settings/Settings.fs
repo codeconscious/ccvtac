@@ -123,16 +123,15 @@ module Settings =
                 Error "No move-to directory was specified."
             | { MoveToDirectory = dir } when dirMissing dir ->
                 Error $"Move-to directory \"{dir}\" is missing."
-            | { AudioQuality = q } when q > 10uy ->
+            | { AudioQuality = q } when q < 0uy || q > 10uy ->
                 Error "Audio quality must be in the range 10 (lowest) and 0 (highest)."
             | { NormalizationForm = nf } when not(supportedNormalizationForms |> List.contains (nf.ToUpperInvariant())) ->
                 let okFormats = String.Join(", ", supportedNormalizationForms)
                 Error $"\"{nf}\" is an invalid normalization form. Use one of the following: {okFormats}."
-            | { AudioFormats = fmt } when not (fmt |> Array.forall (fun f -> f |> validAudioFormat)) ->
+            | { AudioFormats = fmt } when not (fmt |> Array.forall validAudioFormat) ->
                 let formats = String.Join(", ", fmt)
                 let approved = supportedAudioFormats |> String.concat ", "
-                let nl = Environment.NewLine
-                Error $"Audio formats (\"%s{formats}\") include an unsupported audio format.{nl}Only the following supported formats: {approved}."
+                Error $"Audio formats (\"%s{formats}\") include an unsupported audio format.{newLine}Only the following supported formats: {approved}."
             | _ ->
                 Ok settings
 
