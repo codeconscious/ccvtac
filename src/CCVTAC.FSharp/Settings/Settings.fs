@@ -146,12 +146,14 @@ module Settings =
             let options = JsonSerializerOptions()
             options.AllowTrailingCommas <- true
             options.ReadCommentHandling <- JsonCommentHandling.Skip
-            match JsonSerializer.Deserialize<'a>(json, options) with // TODO: Add exception handling.
-            | null -> Error "Could not deserialize the JSON"
-            | s -> Ok s
+            try
+                match JsonSerializer.Deserialize<'a>(json, options) with
+                | null -> Error "Could not deserialize the settings JSON"
+                | s -> Ok s
+            with e -> Error e.Message
 
         let fileExists (FilePath path) =
-            match path |> File.Exists with
+            match File.Exists path with
             | true -> Ok()
             | false -> Error $"File \"{path}\" does not exist."
 
@@ -173,12 +175,12 @@ module Settings =
 
             try
                 let json = JsonSerializer.Serialize(settings, options)
-                (file, json) |> File.WriteAllText
+                File.WriteAllText(file, json)
                 Ok $"A new settings file was saved to \"{file}\". Please populate it with your desired settings."
             with
                 | :? FileNotFoundException -> Error $"File \"{file}\" was not found."
                 | :? JsonException -> Error "Failure parsing user settings to JSON."
-                | e -> Error $"Failure writing \"{file}\": {e.Message}"
+                | e -> Error $"Unexpected error writing \"{file}\": {e.Message}"
 
         let writeDefaultFile (filePath: FilePath option) defaultFileName =
             let confirmedPath =
