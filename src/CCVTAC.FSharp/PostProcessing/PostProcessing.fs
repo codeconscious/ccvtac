@@ -46,7 +46,7 @@ module PostProcessor =
     let private generateTaggingSets directoryName : Result<TaggingSet list, string> =
         try
             let files = Directory.GetFiles directoryName
-            let taggingSets = TaggingSet.CreateSets files
+            let taggingSets = TaggingSet.createSets files
             if List.isEmpty taggingSets
             then Error $"No tagging sets were created using working directory \"%s{directoryName}\"."
             else Ok taggingSets
