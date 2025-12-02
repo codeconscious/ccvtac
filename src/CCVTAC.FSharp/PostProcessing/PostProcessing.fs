@@ -61,10 +61,8 @@ module PostProcessor =
         | Error _ ->
             printer.Error $"No tagging sets were generated for directory {workingDirectory}, so tagging cannot be done."
         | Ok taggingSets ->
-            let collectionJsonResult = getCollectionJson workingDirectory
-
-            let collectionJsonOpt =
-                match collectionJsonResult with
+            let collectionJson =
+                match getCollectionJson workingDirectory with
                 | Error e ->
                     printer.Debug $"No playlist or channel metadata found: %s{e}"
                     None
@@ -76,18 +74,14 @@ module PostProcessor =
             then ImageProcessor.run workingDirectory printer
             else ()
 
-            match Tagger.run settings taggingSets collectionJsonOpt mediaType printer with
+            match Tagger.run settings taggingSets collectionJson mediaType printer with
             | Ok msg ->
                 printer.Info msg
                 Renamer.Run settings workingDirectory printer
-                Mover.run taggingSets collectionJsonOpt settings true printer
+                Mover.run taggingSets collectionJson settings true printer
 
-                let taggingSetFileNames =
-                    taggingSets
-                    |> Seq.collect allFiles
-                    |> Seq.toList
-
-                Deleter.run taggingSetFileNames collectionJsonOpt workingDirectory printer
+                let allTaggingSetFiles = taggingSets |> Seq.collect allFiles
+                Deleter.run allTaggingSetFiles collectionJson workingDirectory printer
 
                 match Directories.warnIfAnyFiles workingDirectory 20 with
                 | Ok _ -> ()
