@@ -6,10 +6,10 @@ open System.Text.Json
 open System.Text.RegularExpressions
 open CCVTAC.Console
 open CCVTAC.Console.IoUtilities
-open CCVTAC.Console.Downloading.Downloading
 open CCVTAC.Console.PostProcessing.Tagging
 open CCVTAC.Console.Settings.Settings
 open Startwatch.Library
+open TaggingSets
 
 module PostProcessor =
 
@@ -45,16 +45,11 @@ module PostProcessor =
 
     let private generateTaggingSets directoryName : Result<TaggingSet list, string> =
         try
-            let files = Directory.GetFiles directoryName
-            let taggingSets = TaggingSet.createSets files
+            let taggingSets = createSets <| Directory.GetFiles directoryName
             if List.isEmpty taggingSets
             then Error $"No tagging sets were created using working directory \"%s{directoryName}\"."
             else Ok taggingSets
-        with
-            | :? DirectoryNotFoundException ->
-                Error $"Directory \"%s{directoryName}\" does not exist."
-            | ex ->
-                Error $"Error reading working directory files: %s{ex.Message}"
+        with ex -> Error $"Error reading working files in \"{directoryName}\": %s{ex.Message}"
 
     let run settings mediaType (printer: Printer) : unit =
         let watch = Watch()
@@ -89,7 +84,7 @@ module PostProcessor =
 
                 let taggingSetFileNames =
                     taggingSets
-                    |> Seq.collect _.AllFiles
+                    |> Seq.collect allFiles
                     |> Seq.toList
 
                 Deleter.run taggingSetFileNames collectionJsonOpt workingDirectory printer

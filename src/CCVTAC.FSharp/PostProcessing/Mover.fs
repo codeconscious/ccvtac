@@ -10,6 +10,7 @@ open System.Linq
 open System.Text.Json
 open System.Text.RegularExpressions
 open Startwatch.Library
+open TaggingSets
 
 module Mover =
 

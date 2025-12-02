@@ -5,19 +5,21 @@ open System.IO
 open System.Text.RegularExpressions
 
 /// Contains all the data necessary for tagging a related set of files.
-[<Struct>]
-type TaggingSet =
-    { ResourceId: string
-      AudioFilePaths: string list
-      JsonFilePath: string
-      ImageFilePath: string }
+module TaggingSets =
 
-    member this.AllFiles : string list =
-        List.concat [this.AudioFilePaths; [this.JsonFilePath; this.ImageFilePath]]
+    [<Struct>]
+    type TaggingSet =
+        { ResourceId: string
+          AudioFilePaths: string list
+          JsonFilePath: string
+          ImageFilePath: string }
+
+    let allFiles taggingSet =
+        List.concat [taggingSet.AudioFilePaths; [taggingSet.JsonFilePath; taggingSet.ImageFilePath]]
 
     /// Create a collection of TaggingSets from a collection of file paths related to several video IDs.
     /// Files that don't match the requirements will be ignored.
-    static member createSets (filePaths: string seq) : TaggingSet list =
+    let createSets (filePaths: string seq) : TaggingSet list =
         if Seq.isEmpty filePaths then
             []
         else

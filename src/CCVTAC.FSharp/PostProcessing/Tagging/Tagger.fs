@@ -8,6 +8,7 @@ open CCVTAC.Console.Settings.Settings
 open CCVTAC.Console.PostProcessing
 open CCVTAC.Console.Downloading.Downloading
 open Startwatch.Library
+open TaggingSets
 
 type TaggedFile = TagLib.File
 
