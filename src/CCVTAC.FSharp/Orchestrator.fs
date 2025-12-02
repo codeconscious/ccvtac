@@ -79,8 +79,8 @@ module Orchestrator =
         : Result<NextAction, string> =
 
         match Directories.warnIfAnyFiles settings.WorkingDirectory 10 with
-        | Error firstErr ->
-            printer.FirstError firstErr
+        | Error err ->
+            printer.Error err
             Ok NextAction.QuitDueToErrors
         | Ok () ->
             if urlIndex > 1 then // Don't sleep for the first URL.
@@ -282,14 +282,14 @@ module Orchestrator =
     let start (settings: UserSettings) (printer: Printer) : unit =
         // The working directory should start empty. Give the user a chance to empty it.
         match Directories.warnIfAnyFiles settings.WorkingDirectory 10 with
-        | Error firstErr ->
-            printer.FirstError firstErr
+        | Error err ->
+            printer.Error err
 
             match Directories.askToDeleteAllFiles settings.WorkingDirectory printer with
             | Ok deletedCount ->
                 printer.Info $"%d{deletedCount} file(s) deleted."
             | Error err ->
-                printer.FirstError err
+                printer.Error err
                 printer.Info "Aborting..."
                 ()
         | Ok () ->

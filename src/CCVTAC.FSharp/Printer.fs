@@ -119,10 +119,6 @@ type Printer(showDebug: bool) =
     member this.Errors<'a>(headerMessage: string, failingResult: Result<'a, string list>) =
         this.Errors(headerMessage, extractedErrors failingResult)
 
-    member this.FirstError(message: string, ?prepend: string) =
-        let prefix = match prepend with Some x -> x | None -> String.Empty
-        this.Error($"{prefix}{message}")
-
     member this.Warning(message: string, ?appendLineBreak: bool, ?prependLines: byte, ?appendLines: byte, ?processMarkup: bool) =
         this.Print(Level.Warning, message, ?appendLineBreak = appendLineBreak, ?prependLines = prependLines,
                    ?appendLines = appendLines, ?processMarkup = processMarkup)

@@ -52,10 +52,10 @@ module Program =
                     match Directories.warnIfAnyFiles settings.WorkingDirectory 10 with
                     | Ok () -> ()
                     | Error warnResult ->
-                        printer.FirstError warnResult
+                        printer.Error warnResult
                         match Directories.askToDeleteAllFiles settings.WorkingDirectory printer with
                         | Ok deletedCount -> printer.Info $"%d{deletedCount} file(s) deleted."
-                        | Error delErr -> printer.FirstError delErr
+                        | Error delErr -> printer.Error delErr
                 )
 
                 try

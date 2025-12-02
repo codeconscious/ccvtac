@@ -85,12 +85,12 @@ module PostProcessor =
 
                 match Directories.warnIfAnyFiles workingDirectory 20 with
                 | Ok _ -> ()
-                | Error firstErr ->
-                    printer.FirstError firstErr
+                | Error err ->
+                    printer.Error err
                     printer.Info "Will delete the remaining files..."
                     match Directories.deleteAllFiles workingDirectory 20 with
                     | Ok deletedCount -> printer.Info $"%d{deletedCount} file(s) deleted."
-                    | Error e -> printer.FirstError e
+                    | Error e -> printer.Error e
             | Error e ->
                 printer.Error($"Tagging error(s) preventing further post-processing: {e}")
 
