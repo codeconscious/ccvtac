@@ -14,7 +14,7 @@ type TaggedFile = TagLib.File
 
 module Tagger =
 
-    let private parseVideoJson (taggingSet: TaggingSet) : Result<VideoMetadata, string> =
+    let private parseVideoJson taggingSet : Result<VideoMetadata, string> =
         try
             let json = File.ReadAllText taggingSet.JsonFilePath
             try
@@ -22,32 +22,34 @@ module Tagger =
                 let videoData = JsonSerializer.Deserialize<VideoMetadata>(json)
                 #warnon 3265
 
-                if isNull (box videoData) then Error (sprintf "Deserialized JSON was null for \"%s\"" taggingSet.JsonFilePath)
+                // TODO: Make this more idiomatic.
+                if isNull (box videoData) then Error $"Deserialized JSON was null for \"%s{taggingSet.JsonFilePath}\""
                 else Ok videoData
             with
-            | :? JsonException as ex -> Error (sprintf "%s%s%s" ex.Message Environment.NewLine ex.StackTrace)
+            | :? JsonException as ex -> Error $"%s{ex.Message}%s{newLine}%s{ex.StackTrace}"
         with ex ->
-            Error (sprintf "Error reading JSON file \"%s\": %s." taggingSet.JsonFilePath ex.Message)
+            Error $"Error reading JSON file \"%s{taggingSet.JsonFilePath}\": %s{ex.Message}."
 
-
-    let private deleteSourceFile (taggingSet: TaggingSet) (printer: Printer) : TaggingSet =
+    let private deleteSourceFile taggingSet (printer: Printer) : TaggingSet =
         if taggingSet.AudioFilePaths.Length <= 1 then taggingSet
         else
             let largestFileInfo =
                 taggingSet.AudioFilePaths
-                |> Seq.map (fun fn -> FileInfo(fn))
-                |> Seq.sortByDescending (fun fi -> fi.Length)
+                |> Seq.map FileInfo
+                |> Seq.sortByDescending _.Length
                 |> Seq.head
 
             try
                 File.Delete largestFileInfo.FullName
-                printer.Debug (sprintf "Deleted pre-split source file \"%s\"" largestFileInfo.Name)
-                { taggingSet with AudioFilePaths = taggingSet.AudioFilePaths |> List.except [largestFileInfo.FullName] }
+                printer.Debug $"Deleted pre-split source file \"%s{largestFileInfo.Name}\""
+                { taggingSet with
+                    AudioFilePaths = taggingSet.AudioFilePaths
+                                     |> List.except [largestFileInfo.FullName] }
             with ex ->
-                printer.Error (sprintf "Error deleting pre-split source file \"%s\": %s" largestFileInfo.Name ex.Message)
+                printer.Error $"Error deleting pre-split source file \"%s{largestFileInfo.Name}\": %s{ex.Message}"
                 taggingSet
 
-    let private writeImage (taggedFile: TaggedFile) (imageFilePath: string) (printer: Printer) =
+    let private writeImage (taggedFile: TaggedFile) imageFilePath (printer: Printer) =
         if hasNoText imageFilePath then
             printer.Error "No image file path was provided, so cannot add an image to the file."
         else
@@ -57,19 +59,15 @@ module Tagger =
                 taggedFile.Tag.Pictures <- pics
                 printer.Debug "Image written to file tags OK."
             with ex ->
-                printer.Error (sprintf "Error writing image to the audio file: %s" ex.Message)
+                printer.Error $"Error writing image to the audio file: %s{ex.Message}"
 
-
-    /// If the supplied video uploader is specified in the settings, returns the video's upload year.
-    /// Otherwise, returns null (Nullable<uint16>).
-    let releaseYear (settings: UserSettings) (videoData: VideoMetadata) : uint32 option =
-        if settings.IgnoreUploadYearUploaders |> caseInsensitiveContains videoData.Uploader
+    let private releaseYear userSettings videoMetadata : uint32 option =
+        if userSettings.IgnoreUploadYearUploaders |> caseInsensitiveContains videoMetadata.Uploader
         then None
-        else if videoData.UploadDate.Length < 4
+        else if videoMetadata.UploadDate.Length <> 4
         then None
         else
-            let yearStr = videoData.UploadDate.Substring(0, 4)
-            match UInt32.TryParse yearStr with
+            match UInt32.TryParse(videoMetadata.UploadDate.Substring(0, 4)) with
             | true, parsed -> Some parsed
             | _ -> None
 
@@ -81,6 +79,7 @@ module Tagger =
         (collectionData: CollectionMetadata option)
         (printer: Printer)
         =
+
         let audioFileName = Path.GetFileName audioFilePath
         printer.Debug $"Current audio file: \"%s{audioFileName}\""
 
@@ -88,14 +87,6 @@ module Tagger =
         let tagDetector = TagDetector settings.TagDetectionPatterns
 
         // Title
-        // match videoData.Track with
-        // | NonNull (metadataTitle: string) ->
-        //     printer.Debug (sprintf "• Using metadata title \"%s\"" metadataTitle)
-        //     taggedFile.Tag.Title <- metadataTitle
-        // | Null ->
-        //     let title = tagDetector.DetectTitle(videoData, videoData.Title)
-        //     printer.Debug (sprintf "• Found title \"%s\"" title)
-        //     taggedFile.Tag.Title <- title
         if hasText videoData.Track then
             printer.Debug $"• Using metadata title \"%s{videoData.Track}\""
             taggedFile.Tag.Title <- videoData.Track
@@ -106,7 +97,7 @@ module Tagger =
                 taggedFile.Tag.Title <- title
             | None -> printer.Debug "No title was found."
 
-        // Artist / Performers
+        // Artists
         if hasText videoData.Artist then
             let metadataArtists = videoData.Artist
             let firstArtist = metadataArtists.Split([|", "|], StringSplitOptions.None)[0]
@@ -156,7 +147,6 @@ module Tagger =
             taggedFile.Tag.Year <- year
         | NullV ->
             let maybeDefaultYear = releaseYear settings videoData
-
             match tagDetector.DetectReleaseYear(videoData, maybeDefaultYear) with
             | None -> ()
             | Some year ->
@@ -169,8 +159,7 @@ module Tagger =
         // Artwork embedding
         match imageFilePath with
         | Some path ->
-            if settings.EmbedImages &&
-                settings.DoNotEmbedImageUploaders |> Array.doesNotContain videoData.Uploader
+            if settings.EmbedImages && settings.DoNotEmbedImageUploaders |> Array.doesNotContain videoData.Uploader
             then
                 printer.Info "Embedding artwork."
                 writeImage taggedFile path printer
@@ -191,7 +180,7 @@ module Tagger =
         : unit
         =
 
-        printer.Debug $"%d{taggingSet.AudioFilePaths.Length} audio file(s) with resource ID \"%s{taggingSet.ResourceId}\""
+        printer.Debug $"%d{taggingSet.AudioFilePaths.Length} audio file(s) with resource ID %s{taggingSet.ResourceId}"
 
         match parseVideoJson taggingSet with
         | Ok videoData ->
