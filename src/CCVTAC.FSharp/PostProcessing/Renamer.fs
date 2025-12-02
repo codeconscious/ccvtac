@@ -44,7 +44,7 @@ module Renamer =
             for m in matches do
                 sb.Remove(m.Index, m.Length) |> ignore
 
-                // Build replacement text by replacing %<n> placeholders with group captures
+                // Build replacement text by replacing %<n> placeholders with group captures.
                 let replacementText =
                     m.Groups
                     |> Seq.cast<Group>
@@ -56,9 +56,7 @@ module Renamer =
                             then m.Groups[i + 1].Value.Trim()
                             else String.Empty
                         (searchFor, replaceWith))
-                    |> Seq.fold (fun (sbRep: SB) (searchFor, replaceWith) ->
-                        sbRep.Replace(searchFor, replaceWith))
-                        (SB renamePattern.ReplaceWithPattern)
+                    |> Seq.fold (fun (sbRep: SB) -> sbRep.Replace) (SB renamePattern.ReplaceWithPattern)
                     |> _.ToString()
 
                 sb.Insert(m.Index, replacementText) |> ignore
