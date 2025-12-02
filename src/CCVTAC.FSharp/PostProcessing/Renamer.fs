@@ -14,13 +14,14 @@ module Renamer =
 
     let private toNormalizationForm (form: string) =
         match form.Trim().ToUpperInvariant() with
-        | "D" -> NormalizationForm.FormD
+        | "D"  -> NormalizationForm.FormD
         | "KD" -> NormalizationForm.FormKD
         | "KC" -> NormalizationForm.FormKC
-        | _ -> NormalizationForm.FormC
+        | _    -> NormalizationForm.FormC
 
     let private updateTextViaPatterns userSettings (printer: Printer) (sb: SB) (renamePattern: RenamePattern) =
         let regex = Regex renamePattern.RegexPattern
+
         let matches =
             regex.Matches(sb.ToString())
             |> Seq.cast<Match>
@@ -28,21 +29,22 @@ module Renamer =
             |> Seq.rev
             |> Seq.toList
 
-        if matches.Length = 0 then sb
+        if matches.Length = 0
+        then sb
         else
             if not userSettings.QuietMode then
                 let patternSummary =
-                    // if isNull renamePattern.Summary then // TODO: Check on this.
+                    if hasNoText renamePattern.Summary then
                         $"`%s{renamePattern.RegexPattern}` (no description)"
-                    // else
-                    //     sprintf "\"%s\"" renamePattern.Summary
+                    else
+                        $"\"%s{renamePattern.Summary}\""
 
                 printer.Debug $"Rename pattern %s{patternSummary} matched × %d{matches.Length}."
 
             for m in matches do
                 sb.Remove(m.Index, m.Length) |> ignore
 
-                // Build replacement text by replacing %<n>s placeholders with group captures
+                // Build replacement text by replacing %<n> placeholders with group captures
                 let replacementText =
                     m.Groups
                     |> Seq.cast<Group>
@@ -81,7 +83,7 @@ module Renamer =
                 let newFileName =
                     userSettings.RenamePatterns
                     |> Array.fold
-                        (fun (sb: SB) rp -> updateTextViaPatterns userSettings printer sb rp)
+                        (fun (sb: SB) -> updateTextViaPatterns userSettings printer sb)
                         (SB audioFile.Name)
                     |> _.ToString()
 
