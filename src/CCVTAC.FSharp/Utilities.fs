@@ -69,5 +69,11 @@ module Seq =
 module List =
     let isNotEmpty l = not (List.isEmpty l)
 
+    let caseInsensitiveContains text (xs: string list) : bool =
+        xs |> List.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))
+
 module Array =
     let doesNotContain x arr = Array.contains x arr |> not
+
+    let caseInsensitiveContains text (xs: string array) : bool =
+            xs |> Array.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))

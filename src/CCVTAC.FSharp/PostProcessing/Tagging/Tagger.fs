@@ -62,7 +62,7 @@ module Tagger =
                 printer.Error $"Error writing image to the audio file: %s{ex.Message}"
 
     let private releaseYear userSettings videoMetadata : uint32 option =
-        if userSettings.IgnoreUploadYearUploaders |> Seq.caseInsensitiveContains videoMetadata.Uploader
+        if userSettings.IgnoreUploadYearUploaders |> Array.caseInsensitiveContains videoMetadata.Uploader
         then None
         else if videoMetadata.UploadDate.Length <> 4
         then None

@@ -146,38 +146,38 @@ module Orchestrator =
             Ok NextAction.Continue
 
         // Quit
-        elif Seq.caseInsensitiveContains command Commands.quitCommands then
+        elif Array.caseInsensitiveContains command Commands.quitCommands then
             Ok NextAction.QuitAtUserRequest
 
         // History
-        elif Seq.caseInsensitiveContains command Commands.history then
+        elif Array.caseInsensitiveContains command Commands.history then
             history.ShowRecent printer
             Ok NextAction.Continue
 
         // Update downloader
-        elif Seq.caseInsensitiveContains command Commands.updateDownloader then
+        elif Array.caseInsensitiveContains command Commands.updateDownloader then
             Updater.run settings printer |> ignore
             Ok NextAction.Continue
 
         // Settings summary
-        elif Seq.caseInsensitiveContains command Commands.settingsSummary then
+        elif Array.caseInsensitiveContains command Commands.settingsSummary then
             Settings.printSummary settings printer None
             Ok NextAction.Continue
 
         // Toggle split chapters
-        elif Seq.caseInsensitiveContains command Commands.splitChapterToggles then
+        elif Array.caseInsensitiveContains command Commands.splitChapterToggles then
             settings <- toggleSplitChapters(settings)
             printer.Info(summarizeToggle "Split Chapters" settings.SplitChapters)
             Ok NextAction.Continue
 
         // Toggle embed images
-        elif Seq.caseInsensitiveContains command Commands.embedImagesToggles then
+        elif Array.caseInsensitiveContains command Commands.embedImagesToggles then
             settings <- toggleEmbedImages(settings)
             printer.Info(summarizeToggle "Embed Images" settings.EmbedImages)
             Ok NextAction.Continue
 
         // Toggle quiet mode
-        elif Seq.caseInsensitiveContains command Commands.quietModeToggles then
+        elif Array.caseInsensitiveContains command Commands.quietModeToggles then
             settings <- toggleQuietMode(settings)
             printer.Info(summarizeToggle "Quiet Mode" settings.QuietMode)
             printer.ShowDebug(not settings.QuietMode)
