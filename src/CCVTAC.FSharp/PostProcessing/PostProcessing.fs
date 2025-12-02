@@ -77,7 +77,7 @@ module PostProcessor =
             match Tagger.run settings taggingSets collectionJson mediaType printer with
             | Ok msg ->
                 printer.Info msg
-                Renamer.Run settings workingDirectory printer
+                Renamer.run settings workingDirectory printer
                 Mover.run taggingSets collectionJson settings true printer
 
                 let allTaggingSetFiles = taggingSets |> Seq.collect allFiles
