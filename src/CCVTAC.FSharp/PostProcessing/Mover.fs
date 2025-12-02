@@ -14,14 +14,14 @@ open TaggingSets
 
 module Mover =
 
-    let private PlaylistImageRegex = Regex(@"\[[OP]L[\w\d_-]{12,}\]", RegexOptions.Compiled)
-    let private ImageFileWildcard = "*.jp*"
+    let private playlistImageRegex = Regex(@"\[[OP]L[\w\d_-]{12,}\]", RegexOptions.Compiled)
+    let private imageFileWildcard = "*.jp*"
 
     let private isPlaylistImage (fileName: string) =
-        PlaylistImageRegex.IsMatch fileName
+        playlistImageRegex.IsMatch fileName
 
     let private getCoverImage (workingDirInfo: DirectoryInfo) audioFileCount : FileInfo option =
-        let images = workingDirInfo.EnumerateFiles ImageFileWildcard |> Seq.toArray
+        let images = workingDirInfo.EnumerateFiles imageFileWildcard |> Seq.toArray
         if images.Length = 0 then None
         else
             let playlistImages = images |> Array.filter (fun i -> isPlaylistImage i.FullName) |> Array.toList

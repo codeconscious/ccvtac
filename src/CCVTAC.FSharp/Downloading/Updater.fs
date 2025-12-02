@@ -2,12 +2,11 @@ namespace CCVTAC.Console.Downloading
 
 open CCVTAC.Console.ExternalTools
 open CCVTAC.Console
-open CCVTAC.Console.Settings
 open CCVTAC.Console.Settings.Settings
 
 /// Manages downloader updates
 module Updater =
-    /// Represents download URLs
+
     type private Urls = {
         Primary: string
         Supplementary: string option

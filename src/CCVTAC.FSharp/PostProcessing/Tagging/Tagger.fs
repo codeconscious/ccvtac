@@ -30,7 +30,7 @@ module Tagger =
             Error (sprintf "Error reading JSON file \"%s\": %s." taggingSet.JsonFilePath ex.Message)
 
 
-    let private DeleteSourceFile (taggingSet: TaggingSet) (printer: Printer) : TaggingSet =
+    let private deleteSourceFile (taggingSet: TaggingSet) (printer: Printer) : TaggingSet =
         if taggingSet.AudioFilePaths.Length <= 1 then taggingSet
         else
             let largestFileInfo =
@@ -47,7 +47,7 @@ module Tagger =
                 printer.Error (sprintf "Error deleting pre-split source file \"%s\": %s" largestFileInfo.Name ex.Message)
                 taggingSet
 
-    let private WriteImage (taggedFile: TaggedFile) (imageFilePath: string) (printer: Printer) =
+    let private writeImage (taggedFile: TaggedFile) (imageFilePath: string) (printer: Printer) =
         if hasNoText imageFilePath then
             printer.Error "No image file path was provided, so cannot add an image to the file."
         else
@@ -173,7 +173,7 @@ module Tagger =
                 settings.DoNotEmbedImageUploaders |> Array.doesNotContain videoData.Uploader
             then
                 printer.Info "Embedding artwork."
-                WriteImage taggedFile path printer
+                writeImage taggedFile path printer
             else
                 printer.Debug "Skipping artwork embedding."
         | None ->
@@ -195,7 +195,7 @@ module Tagger =
 
         match parseVideoJson taggingSet with
         | Ok videoData ->
-            let finalTaggingSet = DeleteSourceFile taggingSet printer
+            let finalTaggingSet = deleteSourceFile taggingSet printer
 
             let imagePath =
                 if embedImages && List.isNotEmpty finalTaggingSet.AudioFilePaths then

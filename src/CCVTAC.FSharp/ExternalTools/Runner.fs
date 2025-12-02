@@ -8,10 +8,10 @@ open System.Diagnostics
 module Runner =
 
     [<Literal>]
-    let private AuthenticSuccessExitCode = 0
+    let private authenticSuccessExitCode = 0
 
     let private isSuccessExitCode (otherSuccessExitCodes: int list) (exitCode: int) =
-        List.contains exitCode (AuthenticSuccessExitCode :: otherSuccessExitCodes)
+        List.contains exitCode (authenticSuccessExitCode :: otherSuccessExitCodes)
 
     /// Calls an external application.
     /// <param name="settings">Tool settings for execution</param>

@@ -6,8 +6,9 @@ open System.Text
 open CCVTAC.Console
 
 module Directories =
+
     [<Literal>]
-    let private AllFilesSearchPattern = "*"
+    let private allFilesSearchPattern = "*"
 
     let private enumerationOptions = EnumerationOptions()
 
@@ -28,7 +29,7 @@ module Directories =
             |> Seq.distinct
             |> Seq.toArray
 
-        Directory.GetFiles(directoryName, AllFilesSearchPattern, enumerationOptions)
+        Directory.GetFiles(directoryName, allFilesSearchPattern, enumerationOptions)
         |> Array.filter (fun filePath -> not (ignoreFiles |> Array.exists filePath.EndsWith))
 
     /// Deletes all files in the working directory

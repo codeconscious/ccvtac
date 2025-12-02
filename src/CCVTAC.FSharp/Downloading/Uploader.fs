@@ -1,10 +1,10 @@
 namespace CCVTAC.Console
 
-open System
 open CCVTAC.Console.ExternalTools
 open CCVTAC.Console.Settings.Settings
 
 module Updater =
+
     type private Urls =
         { Primary: string
           Supplementary: string option }

@@ -10,7 +10,7 @@ open System
 module Downloader =
 
     [<Literal>]
-    let private ProgramName = "yt-dlp"
+    let private programName = "yt-dlp"
 
     type Urls = { Primary: string
                   Supplementary: string option }
@@ -85,7 +85,7 @@ module Downloader =
         for format in settings.AudioFormats do
             if not stopped then
                 let args = generateDownloadArgs (Some format) settings (Some mediaType) (Some [urls.Primary])
-                let commandWithArgs = $"{ProgramName} {args}"
+                let commandWithArgs = $"{programName} {args}"
                 let downloadSettings = ToolSettings.create commandWithArgs settings.WorkingDirectory
 
                 downloadResult <- Runner.run downloadSettings [1] printer
@@ -122,7 +122,7 @@ module Downloader =
                 match urls.Supplementary with
                 | Some supplementaryUrl ->
                     let args = generateDownloadArgs None settings None (Some [supplementaryUrl])
-                    let commandWithArgs = $"{ProgramName} {args}"
+                    let commandWithArgs = $"{programName} {args}"
                     let downloadSettings = ToolSettings.create commandWithArgs settings.WorkingDirectory
                     let supplementaryDownloadResult = Runner.run downloadSettings [1] printer
 
