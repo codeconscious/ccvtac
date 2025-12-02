@@ -62,15 +62,12 @@ module String =
     let trimTerminalLineBreak (text: string) =
         text.TrimEnd(newLine.ToCharArray())
 
-[<AutoOpen>]
 module Seq =
     let caseInsensitiveContains text (xs: string seq) : bool =
         xs |> Seq.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))
 
-[<AutoOpen>]
 module List =
     let isNotEmpty l = not (List.isEmpty l)
 
-[<AutoOpen>]
 module Array =
     let doesNotContain x arr = Array.contains x arr |> not
