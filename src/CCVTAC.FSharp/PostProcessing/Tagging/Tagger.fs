@@ -14,13 +14,6 @@ type TaggedFile = TagLib.File
 
 module Tagger =
 
-    let private watchFriendly (watch: System.Diagnostics.Stopwatch) =
-        if watch.IsRunning then watch.Stop()
-        let ts = watch.Elapsed
-        if ts.TotalHours >= 1.0 then sprintf "%d:%02d:%02d" (int ts.TotalHours) ts.Minutes ts.Seconds
-        elif ts.TotalMinutes >= 1.0 then sprintf "%d:%02d" ts.Minutes ts.Seconds
-        else sprintf "%A ms" ts.TotalMilliseconds // TODO: %d didn't work
-
     let private parseVideoJson (taggingSet: TaggingSet) : Result<VideoMetadata, string> =
         try
             let json = File.ReadAllText taggingSet.JsonFilePath
