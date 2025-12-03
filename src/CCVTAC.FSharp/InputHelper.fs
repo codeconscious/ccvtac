@@ -66,7 +66,7 @@ module InputHelper =
                 | true, v -> v
                 | _ -> 0
 
-    let CountCategories (inputs: CategorizedInput seq) : CategoryCounts =
+    let countCategories (inputs: CategorizedInput seq) : CategoryCounts =
         let counts =
             inputs
             |> Seq.cast<CategorizedInput>

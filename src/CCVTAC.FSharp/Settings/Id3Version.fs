@@ -9,6 +9,6 @@ module TagFormat =
         | TwoPoint4 = 4
 
     /// Locks the ID3v2.x version to a valid one and optionally forces that version.
-    let SetId3V2Version (version: Id3V2Version) (forceAsDefault: bool) : unit =
+    let setId3V2Version (version: Id3V2Version) (forceAsDefault: bool) : unit =
         TagLib.Id3v2.Tag.DefaultVersion <- byte version
         TagLib.Id3v2.Tag.ForceDefaultVersion <- forceAsDefault

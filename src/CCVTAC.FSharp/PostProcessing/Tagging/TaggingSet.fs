@@ -33,7 +33,7 @@ module TaggingSets =
             let fileHasSupportedExtension (f: string) =
                 match Path.GetExtension f with
                 | Null -> false
-                | NonNull (x: string) -> Seq.caseInsensitiveContains x AudioExtensions
+                | NonNull (x: string) -> Seq.caseInsensitiveContains x audioExtensions
 
             filePaths
             |> Seq.map fileNamesWithVideoIdsRegex.Match

@@ -15,7 +15,7 @@ module Directories =
     /// Counts the number of audio files in a directory
     let internal audioFileCount (directory: string) =
         DirectoryInfo(directory).EnumerateFiles()
-        |> Seq.filter (fun f -> List.caseInsensitiveContains f.Extension AudioExtensions)
+        |> Seq.filter (fun f -> List.caseInsensitiveContains f.Extension audioExtensions)
         |> Seq.length
 
     /// Returns the filenames in a given directory, optionally ignoring specific filenames

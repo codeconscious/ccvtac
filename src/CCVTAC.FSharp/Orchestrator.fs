@@ -308,7 +308,7 @@ module Orchestrator =
                         )
                 else
                     let categorizedInputs = InputHelper.categorizeInputs splitInputs
-                    let categoryCounts = InputHelper.CountCategories categorizedInputs
+                    let categoryCounts = InputHelper.countCategories categorizedInputs
 
                     summarizeInput categorizedInputs categoryCounts printer
 
