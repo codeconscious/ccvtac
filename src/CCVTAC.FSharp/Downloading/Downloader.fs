@@ -104,11 +104,10 @@ module Downloader =
                 | Error e ->
                     printer.Debug $"Failure downloading \"%s{format}\" format: %s{e}"
 
-        let mutable errors = match downloadResult with Error e -> [e] | Ok _ -> []
+        let mutable errors = match downloadResult with Error err -> [err] | Ok _ -> []
 
         if audioFileCount userSettings.WorkingDirectory = 0 then
-            errors
-            |> List.append ["No audio files were downloaded."]
+            "No audio files were downloaded." :: errors
             |> String.concat String.newLine
             |> Error
         else
