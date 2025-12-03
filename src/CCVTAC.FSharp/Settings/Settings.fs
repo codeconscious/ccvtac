@@ -221,21 +221,18 @@ module Settings =
         open Validation
 
         let toggleSplitChapters settings =
-            let toggledSetting = not settings.SplitChapters
-            { settings with SplitChapters = toggledSetting }
+            { settings with SplitChapters = not settings.SplitChapters }
 
         let toggleEmbedImages settings =
-            let toggledSetting = not settings.EmbedImages
-            { settings with EmbedImages = toggledSetting }
+            { settings with EmbedImages = not settings.EmbedImages }
 
         let toggleQuietMode settings =
-            let toggledSetting = not settings.QuietMode
-            { settings with QuietMode = toggledSetting }
+            { settings with QuietMode = not settings.QuietMode }
 
         let updateAudioFormat settings (newFormat: string) =
-            let updatedSettings = { settings with AudioFormats = newFormat.Split(',')}
+            let updatedSettings = { settings with AudioFormats = newFormat.Split ',' }
             validate updatedSettings
 
         let updateAudioQuality settings newQuality =
-            let updatedSettings = { settings with AudioQuality = newQuality}
+            let updatedSettings = { settings with AudioQuality = newQuality }
             validate updatedSettings
