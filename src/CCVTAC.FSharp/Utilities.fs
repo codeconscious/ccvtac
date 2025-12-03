@@ -19,6 +19,12 @@ module String =
     let allHaveText xs =
         xs |> List.forall hasText
 
+    let textOrFallback fallback text =
+        if hasText text then text else fallback
+
+    let textOrEmpty text =
+        textOrFallback text String.Empty
+
     let equalIgnoringCase x y =
         String.Equals(x, y, StringComparison.OrdinalIgnoreCase)
 
