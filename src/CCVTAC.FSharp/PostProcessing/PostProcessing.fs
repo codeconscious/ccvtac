@@ -80,7 +80,7 @@ module PostProcessor =
                 Renamer.run settings workingDirectory printer
                 Mover.run taggingSets collectionJson settings true printer
 
-                let allTaggingSetFiles = taggingSets |> Seq.collect allFiles
+                let allTaggingSetFiles = taggingSets |> List.collect allFiles
                 Deleter.run allTaggingSetFiles collectionJson workingDirectory printer
 
                 match Directories.warnIfAnyFiles workingDirectory 20 with

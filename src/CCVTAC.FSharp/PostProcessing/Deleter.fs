@@ -1,30 +1,22 @@
 namespace CCVTAC.Console.PostProcessing
 
-open System
-open System.IO
 open CCVTAC.Console
+open System.IO
 
 module Deleter =
-    /// Retrieves collection files based on collection metadata
     let private getCollectionFiles
         (collectionMetadata: CollectionMetadata option)
         (workingDirectory: string)
-        : Result<string[], string> =
+        : Result<string array, string> =
 
         match collectionMetadata with
         | None -> Ok [||]
         | Some metadata ->
-            try
-                let files =
-                    Directory.GetFiles(workingDirectory, $"*{metadata.Id}*")
+            try Ok (Directory.GetFiles(workingDirectory, $"*{metadata.Id}*"))
+            with ex -> Error $"Error collecting filenames: {ex.Message}"
 
-                Ok files
-            with
-            | ex -> Error $"Error collecting filenames: {ex.Message}"
-
-    /// Deletes all specified files
     let private deleteAll
-        (fileNames: string[])
+        (fileNames: string array)
         (printer: Printer)
         : unit =
 
@@ -37,7 +29,6 @@ module Deleter =
             | ex -> printer.Error($"• Deletion error: {ex.Message}")
         )
 
-    /// Runs the deletion process for temporary files
     let internal run
         (taggingSetFileNames: string seq)
         (collectionMetadata: CollectionMetadata option)
@@ -45,25 +36,20 @@ module Deleter =
         (printer: Printer)
         : unit =
 
-        // Get collection files
         let collectionFileNames =
             match getCollectionFiles collectionMetadata workingDirectory with
             | Ok files ->
-                printer.Debug($"Found {files.Length} collection files.")
+                printer.Debug $"Found {files.Length} collection files."
                 files
             | Error err ->
                 printer.Warning err
                 [||]
 
-        // Combine all file names
-        let allFileNames =
-            Seq.concat [taggingSetFileNames; collectionFileNames]
-            |> Seq.toArray
+        let allFileNames = Seq.concat [taggingSetFileNames; collectionFileNames] |> Seq.toArray
 
-        // Check if any files to delete
-        if allFileNames.Length = 0 then
-            printer.Warning("No files to delete were found.")
+        if Array.isEmpty allFileNames then
+            printer.Warning "No files to delete were found."
         else
-            printer.Debug($"Deleting {allFileNames.Length} temporary files...")
+            printer.Debug $"Deleting {allFileNames.Length} temporary files..."
             deleteAll allFileNames printer
-            printer.Info("Deleted temporary files.")
+            printer.Info "Deleted temporary files."
