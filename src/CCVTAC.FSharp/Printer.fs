@@ -73,7 +73,7 @@ type Printer(showDebug: bool) =
         if int logLevel > int minimumLogLevel then
             ()
         else
-            if hasNoText message then
+            if String.hasNoText message then
                 raise (ArgumentNullException("message", "Message cannot be empty."))
 
             Printer.EmptyLines prependLines
@@ -104,7 +104,7 @@ type Printer(showDebug: bool) =
 
     member this.Errors(errors: string seq, ?appendLines: byte) =
         if Seq.isEmpty errors then raise (ArgumentException("No errors were provided!", "errors"))
-        for err in errors |> Seq.filter hasText do
+        for err in errors |> Seq.filter String.hasText do
             this.Error err
         Printer.EmptyLines(defaultArg appendLines 0uy)
 

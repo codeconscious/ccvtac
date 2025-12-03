@@ -42,7 +42,7 @@ module Orchestrator =
                 | _ -> String.Empty
 
             let connector =
-                if allHaveText [urlSummary; commandSummary] then " and " else String.Empty
+                if String.allHaveText [urlSummary; commandSummary] then " and " else String.Empty
 
             printer.Info $"Batch of %s{urlSummary}%s{connector}%s{commandSummary} entered."
 
@@ -139,7 +139,7 @@ module Orchestrator =
         : Result<NextAction, string> =
 
         // Help
-        if equalIgnoringCase Commands.helpCommand command then
+        if String.equalIgnoringCase Commands.helpCommand command then
             for kvp in Commands.summary do
                 printer.Info(kvp.Key)
                 printer.Info $"    %s{kvp.Value}"
@@ -271,7 +271,7 @@ module Orchestrator =
 
         if categoryCounts[InputCategory.Url] > 1 then
             printer.Info(sprintf "%sFinished with batch of %d URLs in %s."
-                            newLine
+                            String.newLine
                             categoryCounts[InputCategory.Url]
                             watch.ElapsedFriendly)
             batchResults.PrintBatchFailures()

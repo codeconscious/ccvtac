@@ -6,7 +6,6 @@ open System.Text
 
 type SB = StringBuilder
 
-[<AutoOpen>]
 module String =
 
     let newLine = Environment.NewLine

@@ -110,7 +110,7 @@ module Downloader =
             let combinedErrors =
                 errors
                 |> List.append ["No audio files were downloaded."]
-                |> String.concat newLine
+                |> String.concat String.newLine
             Error combinedErrors
         else
             // Continue to post-processing if errors.

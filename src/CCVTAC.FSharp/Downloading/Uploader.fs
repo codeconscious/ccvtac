@@ -10,7 +10,7 @@ module Updater =
           Supplementary: string option }
 
     let internal run (settings: UserSettings) (printer: Printer) : Result<unit,string> =
-        if hasNoText settings.DownloaderUpdateCommand then
+        if String.hasNoText settings.DownloaderUpdateCommand then
             printer.Info("No downloader update command provided, so will skip.")
             Ok()
         else

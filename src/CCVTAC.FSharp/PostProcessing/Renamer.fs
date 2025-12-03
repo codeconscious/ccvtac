@@ -34,7 +34,7 @@ module Renamer =
         else
             if not userSettings.QuietMode then
                 let patternSummary =
-                    if hasNoText renamePattern.Summary then
+                    if String.hasNoText renamePattern.Summary then
                         $"`%s{renamePattern.RegexPattern}` (no description)"
                     else
                         $"\"%s{renamePattern.Summary}\""

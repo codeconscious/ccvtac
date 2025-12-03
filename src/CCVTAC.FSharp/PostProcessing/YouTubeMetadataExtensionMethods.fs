@@ -10,11 +10,11 @@ module YouTubeMetadataExtensionMethods =
         /// Returns a string summarizing video uploader information.
         member private this.UploaderSummary() : string =
             let uploaderLinkOrIdOrEmpty =
-                if hasText this.UploaderUrl then this.UploaderUrl
-                elif hasText this.UploaderId then this.UploaderId
+                if String.hasText this.UploaderUrl then this.UploaderUrl
+                elif String.hasText this.UploaderId then this.UploaderId
                 else String.Empty
 
-            let suffix = if hasText uploaderLinkOrIdOrEmpty then
+            let suffix = if String.hasText uploaderLinkOrIdOrEmpty then
                              $" (%s{uploaderLinkOrIdOrEmpty})"
                          else String.Empty
             this.Uploader + suffix
@@ -37,22 +37,22 @@ module YouTubeMetadataExtensionMethods =
             sb.AppendLine(sprintf "■ Title: %s" this.Fulltitle) |> ignore
             sb.AppendLine(sprintf "■ Uploader: %s" (this.UploaderSummary())) |> ignore
 
-            if hasText this.Creator && this.Creator <> this.Uploader then
+            if String.hasText this.Creator && this.Creator <> this.Uploader then
                 sb.AppendLine $"■ Creator: %s{this.Creator}" |> ignore
 
-            if hasText this.Artist then
+            if String.hasText this.Artist then
                 sb.AppendLine $"■ Artist: %s{this.Artist}" |> ignore
 
-            if hasText this.Album then
+            if String.hasText this.Album then
                 sb.AppendLine $"■ Album: %s{this.Album}" |> ignore
 
-            if hasText this.Title && this.Title <> this.Fulltitle then
+            if String.hasText this.Title && this.Title <> this.Fulltitle then
                 sb.AppendLine $"■ Track Title: %s{this.Title}" |> ignore
 
             sb.AppendLine $"■ Uploaded: %s{this.FormattedUploadDate()}" |> ignore
 
             let description =
-                if hasNoText this.Description then "None." else this.Description
+                if String.hasNoText this.Description then "None." else this.Description
 
             sb.AppendLine(sprintf "■ Video description: %s" description) |> ignore
 
@@ -64,7 +64,7 @@ module YouTubeMetadataExtensionMethods =
                 match this.PlaylistIndex with
                 | NullV -> ()
                 | NonNullV index -> if index > 0u then sb.AppendLine(sprintf "■ Playlist index: %d" index) |> ignore
-                sb.AppendLine(sprintf "■ Playlist description: %s" (if hasNoText collectionData.Description then String.Empty else collectionData.Description)) |> ignore
+                sb.AppendLine(sprintf "■ Playlist description: %s" (if String.hasNoText collectionData.Description then String.Empty else collectionData.Description)) |> ignore
             | None -> ()
 
             sb.ToString()

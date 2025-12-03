@@ -86,7 +86,7 @@ module Settings =
 
     let printSummary settings (printer: Printer) headerOpt : unit =
         match headerOpt with
-        | Some h when hasText h -> printer.Info h
+        | Some h when String.hasText h -> printer.Info h
         | _ -> ()
 
         let table = Table()
@@ -115,11 +115,11 @@ module Settings =
             let validAudioFormat fmt = supportedAudioFormats |> List.contains fmt
 
             match settings with
-            | { WorkingDirectory = dir } when hasNoText dir ->
+            | { WorkingDirectory = dir } when String.hasNoText dir ->
                 Error "No working directory was specified."
             | { WorkingDirectory = dir } when dirMissing dir ->
                 Error $"Working directory \"{dir}\" is missing."
-            | { MoveToDirectory = dir } when hasNoText dir ->
+            | { MoveToDirectory = dir } when String.hasNoText dir ->
                 Error "No move-to directory was specified."
             | { MoveToDirectory = dir } when dirMissing dir ->
                 Error $"Move-to directory \"{dir}\" is missing."
@@ -131,7 +131,7 @@ module Settings =
             | { AudioFormats = fmt } when not (fmt |> Array.forall validAudioFormat) ->
                 let formats = String.Join(", ", fmt)
                 let approved = supportedAudioFormats |> String.concat ", "
-                Error $"Audio formats (\"%s{formats}\") include an unsupported audio format.{newLine}Only the following supported formats: {approved}."
+                Error $"Audio formats (\"%s{formats}\") include an unsupported audio format.{String.newLine}Only the following supported formats: {approved}."
             | _ ->
                 Ok settings
 

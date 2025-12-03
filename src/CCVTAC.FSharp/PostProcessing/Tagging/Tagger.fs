@@ -26,7 +26,7 @@ module Tagger =
                 if isNull (box videoData) then Error $"Deserialized JSON was null for \"%s{taggingSet.JsonFilePath}\""
                 else Ok videoData
             with
-            | :? JsonException as ex -> Error $"%s{ex.Message}%s{newLine}%s{ex.StackTrace}"
+            | :? JsonException as ex -> Error $"%s{ex.Message}%s{String.newLine}%s{ex.StackTrace}"
         with ex ->
             Error $"Error reading JSON file \"%s{taggingSet.JsonFilePath}\": %s{ex.Message}."
 
@@ -50,7 +50,7 @@ module Tagger =
                 taggingSet
 
     let private writeImage (taggedFile: TaggedFile) imageFilePath (printer: Printer) =
-        if hasNoText imageFilePath then
+        if String.hasNoText imageFilePath then
             printer.Error "No image file path was provided, so cannot add an image to the file."
         else
             try
@@ -87,7 +87,7 @@ module Tagger =
         let tagDetector = TagDetector settings.TagDetectionPatterns
 
         // Title
-        if hasText videoData.Track then
+        if String.hasText videoData.Track then
             printer.Debug $"• Using metadata title \"%s{videoData.Track}\""
             taggedFile.Tag.Title <- videoData.Track
         else
@@ -98,7 +98,7 @@ module Tagger =
             | None -> printer.Debug "No title was found."
 
         // Artists
-        if hasText videoData.Artist then
+        if String.hasText videoData.Artist then
             let metadataArtists = videoData.Artist
             let firstArtist = metadataArtists.Split([|", "|], StringSplitOptions.None)[0]
             let diffSummary =
@@ -115,7 +115,7 @@ module Tagger =
                 taggedFile.Tag.Performers <- [| artist |]
 
         // Album
-        if hasText videoData.Album then
+        if String.hasText videoData.Album then
             printer.Debug $"• Using metadata album \"%s{videoData.Album}\""
             taggedFile.Tag.Album <- videoData.Album
         else

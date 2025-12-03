@@ -45,8 +45,8 @@ module Runner =
             process'.WaitForExit()
             printer.Info($"{splitCommandWithArgs[0]} finished in {watch.ElapsedFriendly}.")
 
-            let trimmedErrors = if hasText error
-                                then Some (trimTerminalLineBreak error)
+            let trimmedErrors = if String.hasText error
+                                then Some (String.trimTerminalLineBreak error)
                                 else None
 
             if isSuccessExitCode otherSuccessExitCodes process'.ExitCode

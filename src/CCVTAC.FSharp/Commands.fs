@@ -8,7 +8,7 @@ module internal Commands =
     let prefix: char = '\\'
 
     let private makeCommand (text: string) : string =
-        if hasNoText text then
+        if String.hasNoText text then
             raise (ArgumentException("The text cannot be null or white space.", "text"))
         if text.Contains ' ' then
             raise (ArgumentException("The text should not contain any white space.", "text"))
