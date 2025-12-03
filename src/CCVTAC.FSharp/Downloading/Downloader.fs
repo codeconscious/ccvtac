@@ -21,8 +21,8 @@ module Downloader =
     /// mediaType: Some MediaType for normal downloads, None for metadata-only supplementary downloads
     /// additionalArgs: optional extra args (e.g., the URL)
     let generateDownloadArgs audioFormat settings (mediaType: MediaType option) additionalArgs : string =
-        let writeJson = "--write-info-json"
-        let trimFileNames = "--trim-filenames 250"
+        let writeJsonArg = "--write-info-json"
+        let trimFileNamesArg = "--trim-filenames 250"
 
         let formatArg =
             match audioFormat with
@@ -33,14 +33,13 @@ module Downloader =
         let args =
             match mediaType with
             | None ->
-                [ $"--flat-playlist {writeJson} {trimFileNames}" ]
+                [ $"--flat-playlist {writeJsonArg} {trimFileNamesArg}" ]
             | Some _ ->
-                [ "--extract-audio"
-                  formatArg
+                [ $"--extract-audio {formatArg}"
                   $"--audio-quality {settings.AudioQuality}"
                   "--write-thumbnail --convert-thumbnails jpg"
-                  writeJson
-                  trimFileNames
+                  writeJsonArg
+                  trimFileNamesArg
                   "--retries 2" ]
             |> Set.ofList
 
@@ -61,19 +60,20 @@ module Downloader =
                 |> ignore
         | None -> ()
 
-        let extras = defaultArg additionalArgs [] |> Set.ofList
-        String.Join(" ", args |> Set.union extras)
+        let extraArgs = defaultArg additionalArgs [] |> Set.ofList
+        String.Join(" ", Set.union args extraArgs)
 
     let internal wrapUrlInMediaType url : Result<MediaType, string> =
         mediaTypeWithIds url
 
     /// Completes the actual download process.
     /// Returns a Result that, if successful, contains the name of the successfully downloaded format.
-    let internal run (mediaType: MediaType) settings (printer: Printer) : Result<string, string> =
+    let internal run (mediaType: MediaType) userSettings (printer: Printer) : Result<string, string> =
         if not mediaType.IsVideo && not mediaType.IsPlaylistVideo then
             printer.Info("Please wait for multiple videos to be downloaded...")
 
         let rawUrls = generateDownloadUrl(mediaType)
+
         let urls =
             { Primary = rawUrls[0]
               Supplementary = if rawUrls.Length = 2 then Some rawUrls[1] else None }
@@ -82,11 +82,11 @@ module Downloader =
         let mutable successfulFormat = String.Empty
         let mutable stopped = false
 
-        for format in settings.AudioFormats do
+        for format in userSettings.AudioFormats do
             if not stopped then
-                let args = generateDownloadArgs (Some format) settings (Some mediaType) (Some [urls.Primary])
+                let args = generateDownloadArgs (Some format) userSettings (Some mediaType) (Some [urls.Primary])
                 let commandWithArgs = $"{programName} {args}"
-                let downloadSettings = ToolSettings.create commandWithArgs settings.WorkingDirectory
+                let downloadSettings = ToolSettings.create commandWithArgs userSettings.WorkingDirectory
 
                 downloadResult <- Runner.run downloadSettings [1] printer
 
@@ -106,12 +106,11 @@ module Downloader =
 
         let mutable errors = match downloadResult with Error e -> [e] | Ok _ -> []
 
-        if audioFileCount settings.WorkingDirectory = 0 then
-            let combinedErrors =
-                errors
-                |> List.append ["No audio files were downloaded."]
-                |> String.concat String.newLine
-            Error combinedErrors
+        if audioFileCount userSettings.WorkingDirectory = 0 then
+            errors
+            |> List.append ["No audio files were downloaded."]
+            |> String.concat String.newLine
+            |> Error
         else
             // Continue to post-processing if errors.
             if List.isNotEmpty errors then
@@ -121,16 +120,16 @@ module Downloader =
                 // Attempt a metadata-only supplementary download.
                 match urls.Supplementary with
                 | Some supplementaryUrl ->
-                    let args = generateDownloadArgs None settings None (Some [supplementaryUrl])
+                    let args = generateDownloadArgs None userSettings None (Some [supplementaryUrl])
                     let commandWithArgs = $"{programName} {args}"
-                    let downloadSettings = ToolSettings.create commandWithArgs settings.WorkingDirectory
+                    let downloadSettings = ToolSettings.create commandWithArgs userSettings.WorkingDirectory
                     let supplementaryDownloadResult = Runner.run downloadSettings [1] printer
 
                     match supplementaryDownloadResult with
                     | Ok _ ->
-                        printer.Info("Supplementary metadata download completed OK.")
+                        printer.Info "Supplementary metadata download completed OK."
                     | Error err ->
-                        printer.Error("Supplementary metadata download failed.")
+                        printer.Error "Supplementary metadata download failed."
                         errors <- List.append [err] errors
                 | None -> ()
 
