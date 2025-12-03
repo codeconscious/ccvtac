@@ -14,13 +14,10 @@ module MetadataUtilities =
             | None -> String.Empty
         v.Uploader + suffix
 
-    /// Returns a formatted MM/DD/YYYY version of the upload date (e.g., "08/27/2023")
-    /// from the plain YYYYMMDD version (e.g., "20230827").
-    let private formattedUploadDate (v: VideoMetadata) : string =
-        // Assumes UploadDate has at least 8 characters (YYYYMMDD)
-        let y = if String.IsNullOrEmpty v.UploadDate then String.Empty else v.UploadDate.[0..3]
-        let m = if v.UploadDate.Length >= 6 then v.UploadDate.[4..5] else String.Empty
-        let d = if v.UploadDate.Length >= 8 then v.UploadDate.[6..7] else String.Empty
+    let private formattedUploadDate (dateText: string) : string =
+        let y = dateText[0..3]
+        let m = dateText[4..5]
+        let d = dateText[6..7]
         sprintf "%s/%s/%s" m d y
 
     /// Returns a formatted comment using data parsed from the JSON file.
@@ -44,7 +41,8 @@ module MetadataUtilities =
         if String.hasText v.Title && v.Title <> v.Fulltitle then
             sb.AppendLine $"■ Track Title: %s{v.Title}" |> ignore
 
-        sb.AppendLine $"■ Uploaded: %s{formattedUploadDate v}" |> ignore
+        if v.UploadDate.Length = 8 then
+            sb.AppendLine $"■ Uploaded: %s{formattedUploadDate v.UploadDate}" |> ignore
 
         let description =
             if String.hasNoText v.Description then "None." else v.Description
