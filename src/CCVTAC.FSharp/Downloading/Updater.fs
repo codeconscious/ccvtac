@@ -4,23 +4,19 @@ open CCVTAC.Console.ExternalTools
 open CCVTAC.Console
 open CCVTAC.Console.Settings.Settings
 
-/// Manages downloader updates
 module Updater =
 
-    /// Completes the actual download process.
-    /// <returns>A `Result` that, if successful, contains the name of the successfully downloaded format.</returns>
-    let internal run (settings: UserSettings) (printer: Printer) =
-        // Check if update command is provided
-        if String.hasNoText settings.DownloaderUpdateCommand then
+    let internal run userSettings (printer: Printer) : Result<unit,string> =
+        if String.hasNoText userSettings.DownloaderUpdateCommand then
             printer.Info("No downloader update command provided, so will skip.")
             Ok()
         else
-            let settings = ToolSettings.create settings.DownloaderUpdateCommand settings.WorkingDirectory
+            let toolSettings = ToolSettings.create userSettings.DownloaderUpdateCommand userSettings.WorkingDirectory
 
-            match Runner.run settings [] printer with
+            match Runner.run toolSettings [] printer with
             | Ok (exitCode, warnings) ->
                 if exitCode <> 0 then
-                    printer.Warning("Update completed with minor issues.")
+                    printer.Warning("Tool updated with minor issues.")
 
                     match warnings with
                     | Some w -> printer.Warning w
@@ -28,8 +24,6 @@ module Updater =
 
                 Ok()
 
-            | Error error ->
-                printer.Error $"Failure updating: {error}"
-                Error error
-
-
+            | Error err ->
+                printer.Error $"Failure updating: {err}"
+                Error err
