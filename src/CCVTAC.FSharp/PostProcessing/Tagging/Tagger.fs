@@ -82,14 +82,14 @@ module Tagger =
         printer.Debug $"Current audio file: \"%s{audioFileName}\""
 
         use taggedFile = TaggedFile.Create audioFilePath
-        let tagDetector = TagDetector settings.TagDetectionPatterns
+        let patterns = settings.TagDetectionPatterns
 
         // Title
         if String.hasText videoData.Track then
             printer.Debug $"• Using metadata title \"%s{videoData.Track}\""
             taggedFile.Tag.Title <- videoData.Track
         else
-            match tagDetector.DetectTitle(videoData, videoData.Title) with
+            match TagDetection.detectTitle videoData (Some videoData.Title) patterns with
             | Some title ->
                 printer.Debug $"• Found title \"%s{title}\""
                 taggedFile.Tag.Title <- title
@@ -106,7 +106,7 @@ module Tagger =
             taggedFile.Tag.Performers <- [| firstArtist |]
             printer.Debug $"• Using metadata artist \"%s{firstArtist}\"%s{diffSummary}"
         else
-            match tagDetector.DetectArtist videoData with
+            match TagDetection.detectArtist videoData None patterns with
             | None -> ()
             | Some artist ->
                 printer.Debug $"• Found artist \"%s{artist}\""
@@ -118,14 +118,14 @@ module Tagger =
             taggedFile.Tag.Album <- videoData.Album
         else
             let collectionTitle = collectionData |> Option.map _.Title
-            match tagDetector.DetectAlbum(videoData, collectionTitle) with
+            match TagDetection.detectAlbum videoData collectionTitle patterns with
             | None -> ()
             | Some album ->
                 printer.Debug $"• Found album \"%s{album}\""
                 taggedFile.Tag.Album <- album
 
         // Composers
-        match tagDetector.DetectComposers videoData with
+        match TagDetection.detectComposers videoData patterns with
         | None -> ()
         | Some composers ->
             printer.Debug $"• Found composer(s) \"%s{composers}\""
@@ -144,8 +144,8 @@ module Tagger =
             printer.Debug $"• Using metadata release year \"%d{year}\""
             taggedFile.Tag.Year <- year
         | NullV ->
-            let maybeDefaultYear = releaseYear settings videoData
-            match tagDetector.DetectReleaseYear(videoData, maybeDefaultYear) with
+            let defaultYear = releaseYear settings videoData
+            match TagDetection.detectReleaseYear videoData defaultYear patterns with
             | None -> ()
             | Some year ->
                 printer.Debug $"• Found year \"%d{year}\""
