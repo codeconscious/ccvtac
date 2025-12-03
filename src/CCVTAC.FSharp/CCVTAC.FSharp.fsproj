@@ -17,7 +17,6 @@
     <Compile Include="ExternalTools\ExternalTool.fs" />
     <Compile Include="ExternalTools\Runner.fs" />
     <Compile Include="Downloading\Updater.fs" />
-    <Compile Include="Downloading\Uploader.fs" />
     <Compile Include="Downloading\Downloading.fs" />
     <Compile Include="Downloading\Downloader.fs" />
     <Compile Include="PostProcessing\CollectionMetadata.fs" />
