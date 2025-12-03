@@ -7,11 +7,6 @@ open CCVTAC.Console.Settings.Settings
 /// Manages downloader updates
 module Updater =
 
-    type private Urls = {
-        Primary: string
-        Supplementary: string option
-    }
-
     /// Completes the actual download process.
     /// <returns>A `Result` that, if successful, contains the name of the successfully downloaded format.</returns>
     let internal run (settings: UserSettings) (printer: Printer) =
