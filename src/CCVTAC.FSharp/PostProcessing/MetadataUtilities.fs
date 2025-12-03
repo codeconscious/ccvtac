@@ -8,14 +8,10 @@ module MetadataUtilities =
 
     /// Returns a string summarizing video uploader information.
     let private uploaderSummary (v: VideoMetadata) : string =
-        let uploaderLinkOrIdOrEmpty =
-            if String.hasText v.UploaderUrl then v.UploaderUrl
-            elif String.hasText v.UploaderId then v.UploaderId
-            else String.Empty
-
-        let suffix = if String.hasText uploaderLinkOrIdOrEmpty then
-                         $" (%s{uploaderLinkOrIdOrEmpty})"
-                     else String.Empty
+        let suffix =
+            match List.tryFind String.hasText [v.UploaderUrl; v.UploaderId] with
+            | Some x -> $" (%s{x})"
+            | None -> String.Empty
         v.Uploader + suffix
 
     /// Returns a formatted MM/DD/YYYY version of the upload date (e.g., "08/27/2023")
