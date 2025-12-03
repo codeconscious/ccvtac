@@ -6,7 +6,6 @@ open CCVTAC.Console
 
 module MetadataUtilities =
 
-    /// Returns a string summarizing video uploader information.
     let private uploaderSummary (v: VideoMetadata) : string =
         let suffix =
             match List.tryFind String.hasText [v.UploaderUrl; v.UploaderId] with
@@ -20,14 +19,13 @@ module MetadataUtilities =
         let d = dateText[6..7]
         sprintf "%s/%s/%s" m d y
 
-    /// Returns a formatted comment using data parsed from the JSON file.
-    let generateComment (v: VideoMetadata) (maybeCollectionData: CollectionMetadata option) : string =
+    let generateComment (v: VideoMetadata) (c: CollectionMetadata option) : string =
         let sb = StringBuilder()
         sb.AppendLine("CCVTAC SOURCE DATA:") |> ignore
-        sb.AppendLine(sprintf "■ Downloaded: %O" DateTime.Now) |> ignore
-        sb.AppendLine(sprintf "■ URL: %s" v.WebpageUrl) |> ignore
-        sb.AppendLine(sprintf "■ Title: %s" v.Fulltitle) |> ignore
-        sb.AppendLine(sprintf "■ Uploader: %s" (uploaderSummary v)) |> ignore
+        sb.AppendLine $"■ Downloaded: {DateTime.Now}" |> ignore
+        sb.AppendLine $"■ URL: %s{v.WebpageUrl}" |> ignore
+        sb.AppendLine $"■ Title: %s{v.Fulltitle}" |> ignore
+        sb.AppendLine $"■ Uploader: %s{uploaderSummary v}" |> ignore
 
         if String.hasText v.Creator && v.Creator <> v.Uploader then
             sb.AppendLine $"■ Creator: %s{v.Creator}" |> ignore
@@ -44,20 +42,18 @@ module MetadataUtilities =
         if v.UploadDate.Length = 8 then
             sb.AppendLine $"■ Uploaded: %s{formattedUploadDate v.UploadDate}" |> ignore
 
-        let description =
-            if String.hasNoText v.Description then "None." else v.Description
+        let description = String.textOrFallback "None." v.Description
+        sb.AppendLine $"■ Video description: %s{description}" |> ignore
 
-        sb.AppendLine(sprintf "■ Video description: %s" description) |> ignore
-
-        match maybeCollectionData with
-        | Some collectionData ->
+        match c with
+        | Some c' ->
             sb.AppendLine() |> ignore
-            sb.AppendLine(sprintf "■ Playlist name: %s" collectionData.Title) |> ignore
-            sb.AppendLine(sprintf "■ Playlist URL: %s" collectionData.WebpageUrl) |> ignore
+            sb.AppendLine $"■ Playlist name: %s{c'.Title}" |> ignore
+            sb.AppendLine $"■ Playlist URL: %s{c'.WebpageUrl}" |> ignore
             match v.PlaylistIndex with
-            | NullV -> ()
-            | NonNullV index -> if index > 0u then sb.AppendLine(sprintf "■ Playlist index: %d" index) |> ignore
-            sb.AppendLine(sprintf "■ Playlist description: %s" (if String.hasNoText collectionData.Description then String.Empty else collectionData.Description)) |> ignore
+                | NonNullV index -> if index > 0u then sb.AppendLine $"■ Playlist index: %d{index}" |> ignore
+                | NullV -> ()
+            sb.AppendLine($"■ Playlist description: %s{String.textOrEmpty c'.Description}") |> ignore
         | None -> ()
 
         sb.ToString()
