@@ -140,7 +140,7 @@ module DownloadUrlsTests =
     let ``Generates expected URL for video`` () =
         let video = Video "12312312312"
         let expectedUrl = ["https://www.youtube.com/watch?v=12312312312"]
-        let result = extractDownloadUrls video
+        let result = generateDownloadUrl video
         Assert.Equal(result.Length, 1)
         Assert.Equal(expectedUrl.Length, result.Length)
         Assert.Equal(expectedUrl.Head, result.Head)
@@ -151,7 +151,7 @@ module DownloadUrlsTests =
         let videoUrl = "https://www.youtube.com/watch?v=12312312312"
         let playlistUrl = "https://www.youtube.com/playlist?list=OLZK5uy_kgsbf_bzaknqCjNbb2BtnfylIvHdNlKzg"
         let expectedUrls = [videoUrl; playlistUrl]
-        let result = extractDownloadUrls playlistVideo
+        let result = generateDownloadUrl playlistVideo
         Assert.Equal(result.Length, 2)
         Assert.Equal(expectedUrls.Length, result.Length)
         Assert.Equal(expectedUrls.Head, result.Head)
@@ -161,7 +161,7 @@ module DownloadUrlsTests =
     let ``Generates expected URL for standard playlist`` () =
         let sPlaylist = StandardPlaylist "PLaB53ktYgG5CBaIe-otRu41Wop8Ji8C2L"
         let expectedUrls = ["https://www.youtube.com/playlist?list=PLaB53ktYgG5CBaIe-otRu41Wop8Ji8C2L"]
-        let result = extractDownloadUrls sPlaylist
+        let result = generateDownloadUrl sPlaylist
         Assert.Equal(result.Length, 1)
         Assert.Equal(expectedUrls.Length, result.Length)
         Assert.Equal(expectedUrls.Head, result.Head)
@@ -170,7 +170,7 @@ module DownloadUrlsTests =
     let ``Generates expected URL for release playlist`` () =
         let rPlaylist = ReleasePlaylist "OLaB53ktYgG5CBaIe-otRu41Wop8Ji8C2L"
         let expectedUrls = ["https://www.youtube.com/playlist?list=OLaB53ktYgG5CBaIe-otRu41Wop8Ji8C2L"]
-        let result = extractDownloadUrls rPlaylist
+        let result = generateDownloadUrl rPlaylist
         Assert.Equal(result.Length, 1)
         Assert.Equal(expectedUrls.Length, result.Length)
         Assert.Equal(expectedUrls.Head, result.Head)
@@ -179,7 +179,7 @@ module DownloadUrlsTests =
     let ``Generates expected URL for channel`` () =
         let channel = Channel "www.youtube.com/channel/UBMmt12UKW571UWtJAgWkWrg"
         let expectedUrls = ["https://www.youtube.com/channel/UBMmt12UKW571UWtJAgWkWrg"]
-        let result = extractDownloadUrls channel
+        let result = generateDownloadUrl channel
         Assert.Equal(result.Length, 1)
         Assert.Equal(expectedUrls.Length, result.Length)
         Assert.Equal(expectedUrls.Head, result.Head)

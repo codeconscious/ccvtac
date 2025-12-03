@@ -10,30 +10,29 @@ module public Downloading =
         | ReleasePlaylist of Id: string
         | Channel of Id: string
 
-    let private (|Regex|_|) pattern input =
+    let private (|RegexMatch|_|) pattern input =
         match Regex.Match(input, pattern) with
         | m when m.Success -> Some (List.tail [for g in m.Groups -> g.Value])
         | _ -> None
 
-
     let mediaTypeWithIds url =
         match url with
-        | Regex @"(?<=v=|v\=)([\w-]{11})(?:&list=([\w_-]+))" [videoId; playlistId] ->
+        | RegexMatch @"(?<=v=|v\=)([\w-]{11})(?:&list=([\w_-]+))" [videoId; playlistId] ->
             Ok (PlaylistVideo (videoId, playlistId))
-        | Regex @"^([\w-]{11})$" [id]
-        | Regex @"(?<=v=|v\\=)([\w-]{11})" [id]
-        | Regex @"(?<=youtu\.be/)(.{11})" [id] ->
+        | RegexMatch @"^([\w-]{11})$" [id]
+        | RegexMatch @"(?<=v=|v\\=)([\w-]{11})" [id]
+        | RegexMatch @"(?<=youtu\.be/)(.{11})" [id] ->
             Ok (Video id)
-        | Regex @"(?<=list=)(P[\w\-]+)" [id] ->
+        | RegexMatch @"(?<=list=)(P[\w\-]+)" [id] ->
             Ok (StandardPlaylist id)
-        | Regex @"(?<=list=)(O[\w\-]+)" [id] ->
+        | RegexMatch @"(?<=list=)(O[\w\-]+)" [id] ->
             Ok (ReleasePlaylist id)
-        | Regex @"((?:www\.)?youtube\.com\/(?:channel\/|c\/|user\/|@)(?:[A-Za-z0-9\-@%\/]+))" [ id ] ->
+        | RegexMatch @"((?:www\.)?youtube\.com\/(?:channel\/|c\/|user\/|@)(?:[A-Za-z0-9\-@%\/]+))" [id] ->
             Ok (Channel id)
         | _ ->
             Error $"Unable to determine media type of URL \"{url}\". (Might it contain invalid characters?)"
 
-    let extractDownloadUrls mediaType =
+    let generateDownloadUrl mediaType =
         let fullUrl urlBase id = urlBase + id
         let videoUrl = fullUrl "https://www.youtube.com/watch?v="
         let playlistUrl = fullUrl "https://www.youtube.com/playlist?list="

@@ -73,7 +73,7 @@ module Downloader =
         if not mediaType.IsVideo && not mediaType.IsPlaylistVideo then
             printer.Info("Please wait for multiple videos to be downloaded...")
 
-        let rawUrls = extractDownloadUrls(mediaType)
+        let rawUrls = generateDownloadUrl(mediaType)
         let urls =
             { Primary = rawUrls[0]
               Supplementary = if rawUrls.Length = 2 then Some rawUrls[1] else None }
