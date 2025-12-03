@@ -6,9 +6,11 @@ open System.Text.Json
 open CCVTAC.Console
 open CCVTAC.Console.Settings.Settings
 open CCVTAC.Console.PostProcessing
+open CCVTAC.Console.PostProcessing.Tagging
 open CCVTAC.Console.Downloading.Downloading
 open Startwatch.Library
 open TaggingSets
+open MetadataUtilities
 
 type TaggedFile = TagLib.File
 
@@ -18,13 +20,9 @@ module Tagger =
         try
             let json = File.ReadAllText taggingSet.JsonFilePath
             try
-                #nowarn 3265
-                let videoData = JsonSerializer.Deserialize<VideoMetadata>(json)
-                #warnon 3265
-
-                // TODO: Make this more idiomatic.
-                if isNull (box videoData) then Error $"Deserialized JSON was null for \"%s{taggingSet.JsonFilePath}\""
-                else Ok videoData
+                match JsonSerializer.Deserialize<VideoMetadata> json with
+                | Null -> Error $"Deserialized JSON was null for \"%s{taggingSet.JsonFilePath}\"."
+                | NonNull v -> Ok v
             with
             | :? JsonException as ex -> Error $"%s{ex.Message}%s{String.newLine}%s{ex.StackTrace}"
         with ex ->
@@ -154,7 +152,7 @@ module Tagger =
                 taggedFile.Tag.Year <- year
 
         // Comment
-        taggedFile.Tag.Comment <- videoData.GenerateComment collectionData
+        taggedFile.Tag.Comment <- generateComment videoData collectionData
 
         // Artwork embedding
         match imageFilePath with

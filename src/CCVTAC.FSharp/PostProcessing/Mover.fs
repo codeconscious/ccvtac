@@ -92,20 +92,15 @@ module Mover =
 
     let private getParsedVideoJson (taggingSet: TaggingSet) : Result<VideoMetadata, string> =
         try
-            let json = File.ReadAllText(taggingSet.JsonFilePath)
-
-            try
-                #nowarn 3265
-                let videoData = JsonSerializer.Deserialize<VideoMetadata>(json)
-                #warnon 3265
-
-                if isNull (box videoData)
-                then Error $"Deserialized JSON was null for \"%s{taggingSet.JsonFilePath}\""
-                else Ok videoData
-            with :? JsonException as ex ->
-                Error $"Error deserializing JSON from file \"%s{taggingSet.JsonFilePath}\": %s{ex.Message}"
-        with ex ->
-            Error $"Error reading JSON file \"%s{taggingSet.JsonFilePath}\": %s{ex.Message}."
+            let json = File.ReadAllText taggingSet.JsonFilePath
+            match JsonSerializer.Deserialize<VideoMetadata> json with
+            | Null -> Error $"Deserialized JSON was null for \"%s{taggingSet.JsonFilePath}\""
+            | NonNull v -> Ok v
+        with
+        | :? JsonException as exn ->
+            Error $"Error deserializing JSON from file \"%s{taggingSet.JsonFilePath}\": %s{exn.Message}"
+        | exn ->
+            Error $"Error reading JSON file \"%s{taggingSet.JsonFilePath}\": %s{exn.Message}."
 
     let private getSafeSubDirectoryName (collectionData: CollectionMetadata option) taggingSet : string =
         let workingName =

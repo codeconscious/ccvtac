@@ -3,6 +3,7 @@ namespace CCVTAC.Console.PostProcessing.Tagging
 open System
 open CCVTAC.Console.Settings.Settings
 open CCVTAC.Console.PostProcessing
+open CCVTAC.Console.PostProcessing.Tagging
 
 /// Provides methods to search for specific tag field data (artist, album, etc.) within video metadata.
 type TagDetector(tagDetectionPatterns: TagDetectionPatterns) =

@@ -1,10 +1,9 @@
 namespace CCVTAC.Console.PostProcessing.Tagging
 
-open System
-open System.Text.RegularExpressions
-open CCVTAC.Console.Settings
 open CCVTAC.Console.Settings.Settings
 open CCVTAC.Console.PostProcessing
+open System
+open System.Text.RegularExpressions
 
 module Detectors =
     /// Attempts casting the input text to type T and returning it.
