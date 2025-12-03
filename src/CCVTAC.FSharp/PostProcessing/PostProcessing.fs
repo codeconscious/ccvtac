@@ -33,15 +33,11 @@ module PostProcessor =
             else
                 let fileName = fileNames.Single()
                 let json = File.ReadAllText fileName
-                #nowarn 3265
-                let collectionData = JsonSerializer.Deserialize<CollectionMetadata>(json)
-                #warnon 3265
-                if isNull (box collectionData) then
-                    Error $"Deserialized collection metadata for \"%s{fileName}\" was null."
-                else
-                    Ok collectionData
-        with ex ->
-            Error ex.Message
+                match JsonSerializer.Deserialize<CollectionMetadata> json with
+                | Null -> Error $"Deserialized collection metadata for \"%s{fileName}\" was null."
+                | NonNull collectionData -> Ok collectionData
+        with
+        | ex -> Error ex.Message
 
     let private generateTaggingSets directoryName : Result<TaggingSet list, string> =
         try
@@ -70,9 +66,8 @@ module PostProcessor =
                     printer.Debug "Found playlist/channel metadata."
                     Some cm
 
-            if settings.EmbedImages
-            then ImageProcessor.run workingDirectory printer
-            else ()
+            if settings.EmbedImages then
+                ImageProcessor.run workingDirectory printer
 
             match Tagger.run settings taggingSets collectionJson mediaType printer with
             | Ok msg ->

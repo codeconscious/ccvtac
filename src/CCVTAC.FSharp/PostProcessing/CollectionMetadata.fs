@@ -4,7 +4,6 @@ open System
 open System.Collections.Generic
 open System.Text.Json.Serialization
 
-[<Struct>]
 type CollectionMetadata =
     { [<property: JsonPropertyName("id")>] Id: string
       [<property: JsonPropertyName("title")>] Title: string
