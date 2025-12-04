@@ -7,6 +7,8 @@ open System.Diagnostics
 
 module Runner =
 
+    type ToolResult = { ExitCode: int; Error: string option }
+
     [<Literal>]
     let private authenticSuccessExitCode = 0
 
@@ -19,7 +21,7 @@ module Runner =
     /// <param name="printer">Printer for logging</param>
     /// <returns>A Result instance containing the exit code and any warnings or else an error message.</returns>
     let internal run toolSettings (otherSuccessExitCodes: int list) (printer: Printer)
-        : Result<int * string option, string> =
+        : Result<ToolResult, string> =
 
         let watch = Watch()
         printer.Info $"Running {toolSettings.CommandWithArgs}..."
@@ -43,12 +45,12 @@ module Runner =
             let error = process'.StandardError.ReadToEnd()
 
             process'.WaitForExit()
-            printer.Info($"{splitCommandWithArgs[0]} finished in {watch.ElapsedFriendly}.")
+            printer.Info $"{splitCommandWithArgs[0]} finished in {watch.ElapsedFriendly}."
 
             let trimmedErrors = if String.hasText error
                                 then Some (String.trimTerminalLineBreak error)
                                 else None
 
             if isSuccessExitCode otherSuccessExitCodes process'.ExitCode
-            then Ok (process'.ExitCode, trimmedErrors)
+            then Ok { ExitCode = process'.ExitCode; Error = trimmedErrors }
             else Error $"{splitCommandWithArgs[0]} exited with code {process'.ExitCode}: {trimmedErrors}."

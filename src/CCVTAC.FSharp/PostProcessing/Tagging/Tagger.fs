@@ -62,7 +62,7 @@ module Tagger =
     let private releaseYear userSettings videoMetadata : uint32 option =
         if userSettings.IgnoreUploadYearUploaders |> Array.caseInsensitiveContains videoMetadata.Uploader
         then None
-        else if videoMetadata.UploadDate.Length <> 4
+        elif videoMetadata.UploadDate.Length <> 4
         then None
         else
             match UInt32.TryParse(videoMetadata.UploadDate.Substring(0, 4)) with

@@ -25,23 +25,25 @@ module Mover =
         if images.Length = 0 then None
         else
             let playlistImages = images |> Array.filter (fun i -> isPlaylistImage i.FullName) |> Array.toList
-            if playlistImages.Any() then Some (playlistImages.First())
-            else if audioFileCount > 1 && images.Length = 1 then Some images[0]
+            if playlistImages.Any()
+            then Some (playlistImages[0])
+            elif audioFileCount > 1 && images.Length = 1
+            then Some images[0]
             else None
 
     let private ensureDirectoryExists (moveToDir: string) (printer: Printer) : Result<unit, string> =
         try
             if Directory.Exists moveToDir then
-                printer.Debug $"Found move-to directory \"%s{moveToDir}\"."
-                Ok ()
+                Ok <| printer.Debug $"Found move-to directory \"%s{moveToDir}\"."
             else
-                printer.Debug ($"Creating move-to directory \"%s{moveToDir}\" (based on playlist metadata)... ", appendLineBreak = false)
+                printer.Debug ($"Creating move-to directory \"%s{moveToDir}\" (based on playlist metadata)... ",
+                               appendLineBreak = false)
                 Directory.CreateDirectory moveToDir |> ignore
-                printer.Debug "OK."
-                Ok ()
+                Ok <| printer.Debug "OK."
         with ex ->
-            printer.Error $"Error creating move-to directory \"%s{moveToDir}\": %s{ex.Message}"
-            Error String.Empty // TODO: Update.
+            let errMsg = $"Error creating move-to directory \"%s{moveToDir}\": %s{ex.Message}"
+            printer.Error errMsg
+            Error errMsg
 
     let private moveAudioFiles
         (audioFiles: FileInfo list)

@@ -1,6 +1,7 @@
 namespace CCVTAC.Console.Downloading
 
 open CCVTAC.Console
+open CCVTAC.Console.ExternalTools.Runner
 open CCVTAC.Console.IoUtilities.Directories
 open CCVTAC.Console.Downloading.Downloading
 open CCVTAC.Console.ExternalTools
@@ -78,7 +79,7 @@ module Downloader =
             { Primary = rawUrls[0]
               Supplementary = if rawUrls.Length = 2 then Some rawUrls[1] else None }
 
-        let mutable downloadResult : Result<int * string option, string> = Error String.Empty
+        let mutable downloadResult : Result<ToolResult, string> = Error String.Empty
         let mutable successfulFormat = String.Empty
         let mutable stopped = false
 
@@ -91,12 +92,12 @@ module Downloader =
                 downloadResult <- Runner.run downloadSettings [1] printer
 
                 match downloadResult with
-                | Ok (exitCode, warning) ->
+                | Ok result ->
                     successfulFormat <- format
 
-                    if exitCode <> 0 then
+                    if result.ExitCode <> 0 then
                         printer.Warning "Downloading completed with minor issues."
-                        match warning with
+                        match result.Error with
                         | Some w -> printer.Warning w
                         | None -> ()
 
