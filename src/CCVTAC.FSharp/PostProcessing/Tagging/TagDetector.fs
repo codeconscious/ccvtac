@@ -1,71 +1,45 @@
 namespace CCVTAC.Console.PostProcessing.Tagging
 
 open CCVTAC.Console.Settings.Settings
-open CCVTAC.Console.PostProcessing
 open CCVTAC.Console.PostProcessing.Tagging
-open System
 
 module TagDetection =
 
-    let detectTitle
-        (videoData: VideoMetadata)
-        (defaultTitle: string option)
-        (tagDetectionPatterns: TagDetectionPatterns)
-        : string option =
-
+    let detectTitle videoData fallback (tagDetectionPatterns: TagDetectionPatterns) : string option =
         let detectedTitle =
             Detectors.detectSingle<string> videoData tagDetectionPatterns.Title None
 
-        match detectedTitle, defaultTitle with
+        match detectedTitle, fallback with
         | Some title, _ -> Some title
-        | None, Some defaultVal -> Some defaultVal
+        | None, Some title -> Some title
         | None, None -> None
 
-    let detectArtist
-        (videoData: VideoMetadata)
-        (defaultArtist: string option)
-        (tagDetectionPatterns: TagDetectionPatterns)
-        : string option =
-
+    let detectArtist videoData fallback (tagDetectionPatterns: TagDetectionPatterns) : string option =
         let detectedArtist =
             Detectors.detectSingle<string> videoData tagDetectionPatterns.Artist None
 
-        match detectedArtist, defaultArtist with
+        match detectedArtist, fallback with
         | Some artist, _ -> Some artist
-        | None, Some defaultVal -> Some defaultVal
+        | None, Some artist -> Some artist
         | None, None -> None
 
-    let detectAlbum
-        (videoData: VideoMetadata)
-        (defaultAlbum: string option)
-        (tagDetectionPatterns: TagDetectionPatterns)
-        : string option =
-
+    let detectAlbum videoData fallback (tagDetectionPatterns: TagDetectionPatterns) : string option =
         let detectedAlbum =
             Detectors.detectSingle<string> videoData tagDetectionPatterns.Album None
 
-        match detectedAlbum, defaultAlbum with
+        match detectedAlbum, fallback with
         | Some album, _ -> Some album
-        | None, Some defaultVal -> Some defaultVal
+        | None, Some album -> Some album
         | None, None -> None
 
-    let detectComposers
-        (videoData: VideoMetadata)
-        (tagDetectionPatterns: TagDetectionPatterns)
-        : string option =
+    let detectComposers videoData (tagDetectionPatterns: TagDetectionPatterns) : string option =
+        Detectors.detectMultiple<string option> videoData tagDetectionPatterns.Composer None "; "
 
-        Detectors.detectMultiple<string> videoData tagDetectionPatterns.Composer String.Empty "; " |> Some
-
-    let detectReleaseYear
-        (videoData: VideoMetadata)
-        (defaultYear: uint32 option)
-        (tagDetectionPatterns: TagDetectionPatterns)
-        : uint32 option =
-
+    let detectReleaseYear videoData fallback (tagDetectionPatterns: TagDetectionPatterns) : uint32 option =
         let detectedYear =
             Detectors.detectSingle<uint32> videoData tagDetectionPatterns.Year None
 
-        match detectedYear, defaultYear with
+        match detectedYear, fallback with
         | Some year, _ -> Some year
-        | None, Some defaultVal -> Some defaultVal
+        | None, Some year -> Some year
         | None, None -> None
