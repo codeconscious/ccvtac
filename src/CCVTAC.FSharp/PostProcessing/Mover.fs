@@ -1,5 +1,6 @@
 namespace CCVTAC.Console.PostProcessing
 
+open CCVTAC.Console.IoUtilities
 open CCVTAC.Console.PostProcessing.Tagging
 open CCVTAC.Console.Settings.Settings
 open CCVTAC.Console
@@ -31,21 +32,6 @@ module Mover =
             elif audioFileCount > 1 && images.Length = 1
             then Some images[0]
             else None
-
-    // TODO: Move to IoUtilities.
-    let private ensureDirectoryExists (moveToDir: string) (printer: Printer) : Result<unit, string> =
-        try
-            if Directory.Exists moveToDir then
-                Ok <| printer.Debug $"Found move-to directory \"%s{moveToDir}\"."
-            else
-                printer.Debug ($"Creating move-to directory \"%s{moveToDir}\" (based on playlist metadata)... ",
-                               appendLineBreak = false)
-                Directory.CreateDirectory moveToDir |> ignore
-                Ok <| printer.Debug "OK."
-        with ex ->
-            let errMsg = $"Error creating move-to directory \"%s{moveToDir}\": %s{ex.Message}"
-            printer.Error errMsg
-            Error errMsg
 
     let private moveAudioFiles
         (audioFiles: FileInfo list)
@@ -144,7 +130,7 @@ module Mover =
         let collectionName = maybeCollectionData |> Option.map _.Title |> Option.defaultValue String.Empty
         let fullMoveToDir = Path.Combine(settings.MoveToDirectory, subFolderName, collectionName)
 
-        match ensureDirectoryExists fullMoveToDir printer with
+        match Directories.ensureDirectoryExists fullMoveToDir printer with
         | Error _ -> () // Error was already printed.
         | Ok () ->
             let audioFileNames =

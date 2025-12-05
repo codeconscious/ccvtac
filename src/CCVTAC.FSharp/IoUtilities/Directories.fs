@@ -96,3 +96,17 @@ module Directories =
             report.AppendLine("This generally occurs due to the same video appearing twice in playlists.") |> ignore
 
             Error (report.ToString())
+
+    let ensureDirectoryExists moveToDir (printer: Printer) : Result<unit, string> =
+        try
+            if Directory.Exists moveToDir then
+                Ok <| printer.Debug $"Found move-to directory \"%s{moveToDir}\"."
+            else
+                printer.Debug ($"Creating move-to directory \"%s{moveToDir}\" (based on playlist metadata)... ",
+                               appendLineBreak = false)
+                Directory.CreateDirectory moveToDir |> ignore
+                Ok <| printer.Debug "OK."
+        with ex ->
+            let errMsg = $"Error creating move-to directory \"%s{moveToDir}\": %s{ex.Message}"
+            printer.Error errMsg
+            Error errMsg
