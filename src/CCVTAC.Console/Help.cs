@@ -26,7 +26,7 @@ public static class Help
 
             PREREQUISITES
 
-            • .NET 9 runtime (https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
+            • .NET 10 runtime (https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
             • yt-dlp (https://github.com/yt-dlp/yt-dlp)
             • [ffmpeg](https://ffmpeg.org/) (for yt-dlp artwork extraction)
             • Optional: mogrify https://imagemagick.org/script/mogrify.php

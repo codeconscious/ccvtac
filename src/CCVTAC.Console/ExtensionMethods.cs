@@ -18,59 +18,63 @@ public static class ExtensionMethods
             : !string.IsNullOrWhiteSpace(maybeText);
     }
 
-    /// <summary>
-    /// Determines whether a collection is empty.
-    /// </summary>
-    public static bool None<T>(this IEnumerable<T> collection) => !collection.Any();
+    extension<T>(IEnumerable<T> collection)
+    {
+        /// <summary>
+        /// Determines whether a collection is empty.
+        /// </summary>
+        public bool None() => !collection.Any();
 
-    /// <summary>
-    /// Determines whether no elements of a sequence satisfy a given condition.
-    /// </summary>
-    public static bool None<T>(this IEnumerable<T> collection, Func<T, bool> predicate) =>
-        !collection.Any(predicate);
+        /// <summary>
+        /// Determines whether no elements of a sequence satisfy a given condition.
+        /// </summary>
+        public bool None(Func<T, bool> predicate) =>
+            !collection.Any(predicate);
+    }
 
     public static bool CaseInsensitiveContains(this IEnumerable<string> collection, string text) =>
         collection.Contains(text, new Comparers.CaseInsensitiveStringComparer());
 
-    /// <summary>
-    /// Returns a new string in which all invalid path characters for the current OS
-    /// have been replaced by specified replacement character.
-    /// Throws if the replacement character is an invalid path character.
-    /// </summary>
     /// <param name="sourceText"></param>
-    /// <param name="replaceWith"></param>
-    /// <param name="customInvalidChars">Optional additional characters to consider invalid.</param>
-    public static string ReplaceInvalidPathChars(
-        this string sourceText,
-        char replaceWith = '_',
-        char[]? customInvalidChars = null
-    )
+    extension(string sourceText)
     {
-        var invalidChars = Path.GetInvalidFileNameChars()
-            .Concat(Path.GetInvalidPathChars())
-            .Concat(
-                [
-                    Path.PathSeparator,
-                    Path.DirectorySeparatorChar,
-                    Path.AltDirectorySeparatorChar,
-                    Path.VolumeSeparatorChar,
-                ]
-            )
-            .Concat(customInvalidChars ?? Enumerable.Empty<char>())
-            .ToFrozenSet();
+        /// <summary>
+        /// Returns a new string in which all invalid path characters for the current OS
+        /// have been replaced by specified replacement character.
+        /// Throws if the replacement character is an invalid path character.
+        /// </summary>
+        /// <param name="replaceWith"></param>
+        /// <param name="customInvalidChars">Optional additional characters to consider invalid.</param>
+        public string ReplaceInvalidPathChars(char replaceWith = '_',
+            char[]? customInvalidChars = null
+        )
+        {
+            var invalidChars = Path.GetInvalidFileNameChars()
+                .Concat(Path.GetInvalidPathChars())
+                .Concat(
+                    [
+                        Path.PathSeparator,
+                        Path.DirectorySeparatorChar,
+                        Path.AltDirectorySeparatorChar,
+                        Path.VolumeSeparatorChar,
+                    ]
+                )
+                .Concat(customInvalidChars ?? Enumerable.Empty<char>())
+                .ToFrozenSet();
 
-        if (invalidChars.Contains(replaceWith))
-            throw new ArgumentException(
-                $"The replacement char ('{replaceWith}') must be a valid path character."
+            if (invalidChars.Contains(replaceWith))
+                throw new ArgumentException(
+                    $"The replacement char ('{replaceWith}') must be a valid path character."
+                );
+
+            return invalidChars.Aggregate(
+                new StringBuilder(sourceText),
+                (workingText, ch) => workingText.Replace(ch, replaceWith),
+                workingText => workingText.ToString()
             );
+        }
 
-        return invalidChars.Aggregate(
-            new StringBuilder(sourceText),
-            (workingText, ch) => workingText.Replace(ch, replaceWith),
-            workingText => workingText.ToString()
-        );
+        public string TrimTerminalLineBreak() =>
+            sourceText.HasText() ? sourceText.TrimEnd(Environment.NewLine.ToCharArray()) : sourceText;
     }
-
-    public static string TrimTerminalLineBreak(this string text) =>
-        text.HasText() ? text.TrimEnd(Environment.NewLine.ToCharArray()) : text;
 }

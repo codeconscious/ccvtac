@@ -46,7 +46,7 @@ internal static class Updater
 
         if (errors.Count != 0)
         {
-            result.Errors.ForEach(e => printer.Error(e.Message));
+            result.Errors.ToList().ForEach(e => printer.Error(e.Message));
         }
 
         return errors.Count > 0

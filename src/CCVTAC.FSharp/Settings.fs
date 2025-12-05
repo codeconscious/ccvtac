@@ -171,7 +171,7 @@ module Settings =
             let confirmedPath =
                 match filePath with
                 | Some p -> p
-                | None -> FilePath <| Path.Combine(AppContext.BaseDirectory, defaultFileName);
+                | None -> FilePath (Path.Combine(AppContext.BaseDirectory, defaultFileName))
 
             let defaultSettings =
                 {

@@ -20,7 +20,7 @@ internal class Orchestrator
     internal static void Start(UserSettings settings, Printer printer)
     {
         // The working directory should start empty. Give the user a chance to empty it.
-        var emptyDirResult = IoUtilities.Directories.WarnIfAnyFiles(settings.WorkingDirectory, 10);
+        var emptyDirResult = Directories.WarnIfAnyFiles(settings.WorkingDirectory, 10);
         if (emptyDirResult.IsFailed)
         {
             printer.FirstError(emptyDirResult);
@@ -147,7 +147,7 @@ internal class Orchestrator
         Printer printer
     )
     {
-        var emptyDirResult = IoUtilities.Directories.WarnIfAnyFiles(settings.WorkingDirectory, 10);
+        var emptyDirResult = Directories.WarnIfAnyFiles(settings.WorkingDirectory, 10);
         if (emptyDirResult.IsFailed)
         {
             printer.FirstError(emptyDirResult);
@@ -238,10 +238,10 @@ internal class Orchestrator
         }
 
         if (Commands.SettingsSummary.CaseInsensitiveContains(command))
-            {
-                SettingsAdapter.PrintSummary(settings, printer);
-                return Result.Ok(NextAction.Continue);
-            }
+        {
+            SettingsAdapter.PrintSummary(settings, printer);
+            return Result.Ok(NextAction.Continue);
+        }
 
         static string SummarizeToggle(string settingName, bool setting) =>
             $"{settingName} was toggled to {(setting ? "ON" : "OFF")} for this session.";
