@@ -130,28 +130,34 @@ module Mover =
         let collectionName = maybeCollectionData |> Option.map _.Title |> Option.defaultValue String.Empty
         let fullMoveToDir = Path.Combine(settings.MoveToDirectory, subFolderName, collectionName)
 
-        match Directories.ensureDirectoryExists fullMoveToDir printer with
-        | Error _ -> () // Error was already printed.
-        | Ok () ->
+        match Directories.ensureDirectoryExists fullMoveToDir with
+        | Error err ->
+            printer.Error err
+        | Ok dirInfo ->
+            printer.Debug $"Move-to directory \"%s{dirInfo.Name}\" exists."
+
+            let inline fileLabel count = NumberUtilities.pluralize "file" "files" count
+
             let audioFileNames =
                 workingDirInfo.EnumerateFiles()
                 |> Seq.filter (fun f -> List.caseInsensitiveContains f.Extension audioExtensions)
                 |> List.ofSeq
 
             if audioFileNames.IsEmpty then
-                printer.Error "No audio filenames to move found."
+                printer.Error "No audio filenames to move were found."
             else
-                printer.Debug $"Moving %d{audioFileNames.Length} audio file(s) to \"%s{fullMoveToDir}\"..."
+                let toMoveFileLabel = fileLabel audioFileNames.Length
+                printer.Debug $"Moving %d{audioFileNames.Length} audio %s{toMoveFileLabel} to \"%s{fullMoveToDir}\"..."
 
-                let successCount, failureCount =
+                let moveSuccessCount, moveFailureCount =
                     moveAudioFiles audioFileNames fullMoveToDir overwrite printer
 
                 moveImageFile collectionName subFolderName workingDirInfo fullMoveToDir
                               audioFileNames.Length overwrite printer
 
-                let fileLabel = if successCount = 1u then "file" else "files"
-                printer.Info $"Moved %d{successCount} audio %s{fileLabel} in %s{watch.ElapsedFriendly}."
+                let movedFileLabel = fileLabel moveSuccessCount
+                printer.Info $"Moved %d{moveSuccessCount} audio %s{movedFileLabel} in %s{watch.ElapsedFriendly}."
 
-                if failureCount > 0u then
-                    let fileLabel' = if failureCount = 1u then "file" else "files"
-                    printer.Warning $"However, %d{failureCount} audio %s{fileLabel'} could not be moved."
+                if moveFailureCount > 0u then
+                    let fileLabel' = fileLabel moveFailureCount
+                    printer.Warning $"However, %d{moveFailureCount} audio %s{fileLabel'} could not be moved."

@@ -97,16 +97,12 @@ module Directories =
 
             Error (report.ToString())
 
-    let ensureDirectoryExists moveToDir (printer: Printer) : Result<unit, string> =
+    let ensureDirectoryExists dirName : Result<DirectoryInfo, string> =
         try
-            if Directory.Exists moveToDir then
-                Ok <| printer.Debug $"Found move-to directory \"%s{moveToDir}\"."
-            else
-                printer.Debug ($"Creating move-to directory \"%s{moveToDir}\" (based on playlist metadata)... ",
-                               appendLineBreak = false)
-                Directory.CreateDirectory moveToDir |> ignore
-                Ok <| printer.Debug "OK."
-        with ex ->
-            let errMsg = $"Error creating move-to directory \"%s{moveToDir}\": %s{ex.Message}"
-            printer.Error errMsg
-            Error errMsg
+            dirName
+            |> Path.GetFullPath
+            |> Directory.CreateDirectory
+            |> Ok
+        with exn ->
+            Error $"Error accessing or creating directory \"%s{dirName}\": %s{exn.Message}"
+

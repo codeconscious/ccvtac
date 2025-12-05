@@ -11,6 +11,13 @@ module Utilities =
         try Ok (f())
         with exn -> Error exn.Message
 
+module NumberUtilities =
+    let inline isOne (x: ^a) =
+        x = LanguagePrimitives.GenericOne<'a>
+
+    let inline pluralize ifOne ifNotOne count =
+        if isOne count then ifOne else ifNotOne
+
 module String =
 
     let newLine = Environment.NewLine
