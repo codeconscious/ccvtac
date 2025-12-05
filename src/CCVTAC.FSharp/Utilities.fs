@@ -6,6 +6,11 @@ open System.Text
 
 type SB = StringBuilder
 
+module Utilities =
+    let ofTry (f: unit -> 'a) : Result<'a, string> =
+        try Ok (f())
+        with exn -> Error exn.Message
+
 module String =
 
     let newLine = Environment.NewLine
