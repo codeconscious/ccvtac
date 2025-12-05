@@ -8,21 +8,21 @@ open System.Text.RegularExpressions
 module Detectors =
     /// Attempts casting the input text to type 'a and returning it.
     /// If casting fails, the default value is returned instead.
-    let private cast<'a> (text: string) (defaultValue: 'a) : 'a =
+    let tryCast<'a> (text: string) : 'a option =
         try
             // If T is string, return the text directly
             if typeof<'a> = typeof<string> then
-                box text :?> 'a
+                Some (box text :?> 'a)
             else
-                Convert.ChangeType(text, typeof<'a>) :?> 'a
+                Some (Convert.ChangeType(text, typeof<'a>) :?> 'a)
         with
-        | _ -> defaultValue
+        | _ -> None
 
     /// Extracts the value of the specified tag field from the given data.
     /// <param name="metadata">Video metadata</param>
     /// <param name="fieldName">The name of the field within the video metadata to read</param>
     /// <returns>The text content of the requested field of the video metadata</returns>
-    let private extractMetadataText (metadata: VideoMetadata) (fieldName: string) =
+    let private extractMetadataText (metadata: VideoMetadata) (fieldName: string) : string =
         match fieldName with
         | "title" -> metadata.Title
         | "description" -> metadata.Description
@@ -32,7 +32,7 @@ module Detectors =
 
     /// Finds and returns the first instance of text matching a given detection scheme pattern,
     /// parsing into T if necessary.
-    /// <returns>A match of type T if there was a match; otherwise, the default value provided.</returns>
+    /// <returns>A match of type 'a if there was a match; otherwise, the default value provided.</returns>
     let internal detectSingle<'a>
         (videoMetadata: VideoMetadata)
         (patterns: TagDetectionPattern seq)
@@ -44,29 +44,28 @@ module Detectors =
             let fieldText = extractMetadataText videoMetadata pattern.SearchField
             let match' = Regex(pattern.RegexPattern).Match(fieldText)
 
-            if not match'.Success then
-                None
-            else
+            if match'.Success then
                 let matchedText = match'.Groups[pattern.MatchGroup].Value.Trim()
-                cast matchedText None)
-        |> Option.defaultValue defaultValue
+                tryCast<'a> matchedText
+            else
+                None)
+        |> Option.orElse defaultValue
 
     /// Finds and returns all instances of text matching a given detection scheme pattern,
     /// concatenating them into a single string (using a custom separator), then casting
-    /// to type T if necessary.
-    /// <returns>A match of type T if there were any matches; otherwise, the default value provided.</returns>
+    /// to type 'a if necessary.
+    /// <returns>A match of type 'a if there were any matches; otherwise, the default value provided.</returns>
     let internal detectMultiple<'a>
         (data: VideoMetadata)
         (patterns: TagDetectionPattern seq)
-        (defaultValue: 'a)
+        (defaultValue: 'a option)
         (separator: string)
-        : 'a =
+        : 'a option =
 
         let matchedValues =
             patterns
             |> Seq.collect (fun pattern ->
                 let fieldText = extractMetadataText data pattern.SearchField
-
                 Regex(pattern.RegexPattern).Matches(fieldText)
                 |> Seq.filter _.Success
                 |> Seq.map _.Groups[pattern.MatchGroup].Value.Trim())
@@ -76,5 +75,7 @@ module Detectors =
         if matchedValues.Length = 0 then
             defaultValue
         else
-            let joinedMatchedText = String.Join(separator, matchedValues)
-            cast<'a> joinedMatchedText defaultValue
+            String.Join(separator, matchedValues)
+            |> tryCast<'a>
+            |> Option.orElse defaultValue
+

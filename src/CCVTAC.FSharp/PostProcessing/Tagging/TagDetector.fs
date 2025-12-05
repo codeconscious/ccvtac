@@ -33,7 +33,7 @@ module TagDetection =
         | None, None -> None
 
     let detectComposers videoData (tagDetectionPatterns: TagDetectionPatterns) : string option =
-        Detectors.detectMultiple<string option> videoData tagDetectionPatterns.Composer None "; "
+        Detectors.detectMultiple<string> videoData tagDetectionPatterns.Composer None "; "
 
     let detectReleaseYear videoData fallback (tagDetectionPatterns: TagDetectionPatterns) : uint32 option =
         let detectedYear =

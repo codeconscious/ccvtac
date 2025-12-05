@@ -1,7 +1,6 @@
 module DownloadEntityTests
 
 open Xunit
-open CCVTAC.Console.Downloading
 open CCVTAC.Console.Downloading.Downloading
 
 module MediaTypeWithIdsTests =
