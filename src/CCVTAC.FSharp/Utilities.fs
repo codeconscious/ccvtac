@@ -43,6 +43,9 @@ module String =
     let endsWithIgnoringCase endingText (text: string) =
         text.EndsWith(endingText, StringComparison.InvariantCultureIgnoreCase)
 
+    let inline fileLabel count =
+        NumberUtilities.pluralize "file" "files" count
+
     /// Returns a new string in which all invalid path characters for the current OS
     /// have been replaced by the specified replacement character.
     /// Throws if the replacement character is an invalid path character.

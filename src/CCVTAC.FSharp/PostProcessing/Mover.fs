@@ -136,8 +136,6 @@ module Mover =
         | Ok dirInfo ->
             printer.Debug $"Move-to directory \"%s{dirInfo.Name}\" exists."
 
-            let inline fileLabel count = NumberUtilities.pluralize "file" "files" count
-
             let audioFileNames =
                 workingDirInfo.EnumerateFiles()
                 |> Seq.filter (fun f -> List.caseInsensitiveContains f.Extension audioExtensions)
@@ -146,7 +144,7 @@ module Mover =
             if audioFileNames.IsEmpty then
                 printer.Error "No audio filenames to move were found."
             else
-                let toMoveFileLabel = fileLabel audioFileNames.Length
+                let toMoveFileLabel = String.fileLabel audioFileNames.Length
                 printer.Debug $"Moving %d{audioFileNames.Length} audio %s{toMoveFileLabel} to \"%s{fullMoveToDir}\"..."
 
                 let moveSuccessCount, moveFailureCount =
@@ -155,9 +153,9 @@ module Mover =
                 moveImageFile collectionName subFolderName workingDirInfo fullMoveToDir
                               audioFileNames.Length overwrite printer
 
-                let movedFileLabel = fileLabel moveSuccessCount
+                let movedFileLabel = String.fileLabel moveSuccessCount
                 printer.Info $"Moved %d{moveSuccessCount} audio %s{movedFileLabel} in %s{watch.ElapsedFriendly}."
 
                 if moveFailureCount > 0u then
-                    let fileLabel' = fileLabel moveFailureCount
-                    printer.Warning $"However, %d{moveFailureCount} audio %s{fileLabel'} could not be moved."
+                    let failFileLabel = String.fileLabel moveFailureCount
+                    printer.Warning $"However, %d{moveFailureCount} audio %s{failFileLabel} could not be moved."
