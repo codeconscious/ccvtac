@@ -55,10 +55,8 @@ module Settings =
             | true -> "ON"
             | false -> "OFF"
 
-        let pluralize (label: string) count =
-            if count = 1
-            then $"{count} {label}"
-            else $"{count} {label}s" // Intentionally naive implementation.
+        let pluralize label count =
+            NumberUtilities.pluralize label $"{label}s" count
 
         let tagDetectionPatternCount (patterns: TagDetectionPatterns) =
             patterns.Title.Length +
