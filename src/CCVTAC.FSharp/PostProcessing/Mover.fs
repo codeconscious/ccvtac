@@ -21,16 +21,18 @@ module Mover =
         playlistImageRegex.IsMatch fileName
 
     let private getCoverImage (workingDirInfo: DirectoryInfo) audioFileCount : FileInfo option =
-        let images = workingDirInfo.EnumerateFiles imageFileWildcard |> Seq.toArray
-        if images.Length = 0 then None
+        let images = workingDirInfo.EnumerateFiles imageFileWildcard |> Seq.toList
+        if List.isEmpty images then
+            None
         else
-            let playlistImages = images |> Array.filter (fun i -> isPlaylistImage i.FullName) |> Array.toList
-            if playlistImages.Any()
-            then Some (playlistImages[0])
+            let playlistImages = images |> List.filter (fun i -> isPlaylistImage i.FullName)
+            if not (List.isEmpty playlistImages)
+            then Some playlistImages[0]
             elif audioFileCount > 1 && images.Length = 1
             then Some images[0]
             else None
 
+    // TODO: Move to IoUtilities.
     let private ensureDirectoryExists (moveToDir: string) (printer: Printer) : Result<unit, string> =
         try
             if Directory.Exists moveToDir then
@@ -158,7 +160,8 @@ module Mover =
                 let successCount, failureCount =
                     moveAudioFiles audioFileNames fullMoveToDir overwrite printer
 
-                moveImageFile collectionName subFolderName workingDirInfo fullMoveToDir audioFileNames.Length overwrite printer
+                moveImageFile collectionName subFolderName workingDirInfo fullMoveToDir
+                              audioFileNames.Length overwrite printer
 
                 let fileLabel = if successCount = 1u then "file" else "files"
                 printer.Info $"Moved %d{successCount} audio %s{fileLabel} in %s{watch.ElapsedFriendly}."
