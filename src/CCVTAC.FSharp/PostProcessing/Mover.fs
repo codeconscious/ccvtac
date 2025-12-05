@@ -61,8 +61,7 @@ module Mover =
         (moveToDir: string)
         (audioFileCount: int)
         (overwrite: bool)
-        (printer: Printer)
-        : unit =
+        : Result<unit, string> =
 
         try
             let baseFileName =
@@ -72,13 +71,13 @@ module Mover =
                     $"%s{subFolderName} - %s{String.replaceInvalidPathChars None None maybeCollectionName}"
 
             match getCoverImage workingDirInfo audioFileCount with
-            | None -> ()
-            | Some image ->
+            | None ->
+                Error "No image found."
+            | Some fileInfo ->
                 let dest = Path.Combine(moveToDir, $"%s{baseFileName.Trim()}.jpg")
-                image.MoveTo(dest, overwrite = overwrite)
-                printer.Info "Moved image file."
+                Ok <| fileInfo.MoveTo(dest, overwrite = overwrite)
         with ex ->
-            printer.Warning $"Error copying the image file: %s{ex.Message}"
+            Error $"Error copying the image file: %s{ex.Message}"
 
     let private getParsedVideoJson (taggingSet: TaggingSet) : Result<VideoMetadata, string> =
         try
@@ -150,12 +149,14 @@ module Mover =
                 let moveSuccessCount, moveFailureCount =
                     moveAudioFiles audioFileNames fullMoveToDir overwrite printer
 
-                moveImageFile collectionName subFolderName workingDirInfo fullMoveToDir
-                              audioFileNames.Length overwrite printer
-
                 let movedFileLabel = String.fileLabel moveSuccessCount
                 printer.Info $"Moved %d{moveSuccessCount} audio %s{movedFileLabel} in %s{watch.ElapsedFriendly}."
 
                 if moveFailureCount > 0u then
                     let failFileLabel = String.fileLabel moveFailureCount
                     printer.Warning $"However, %d{moveFailureCount} audio %s{failFileLabel} could not be moved."
+
+                match moveImageFile collectionName subFolderName workingDirInfo fullMoveToDir
+                                    audioFileNames.Length overwrite with
+                | Ok _ -> printer.Info $"Moved image to %s{fullMoveToDir}."
+                | Error err -> printer.Error $"Error moving the image file: %s{err}."
