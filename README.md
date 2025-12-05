@@ -206,4 +206,4 @@ If you run into any issues, feel free to create an issue on GitHub. Please provi
 
 ## History
 
-This application was originally written in C#, but I ported it to F# beginning in late 2025 to try out F#'s object-oriented programming capabilities and to move toward a more functional codebase.
+The first incarnation of this application was written in C#. After picking up F# and functional programming out of curiosity in 2024 and creating other tools (such as Audio Tag Tools) with it, I become curious about its OOP capabilities as well. I rewrote this application in OOP F# (initially using LLMs reduce the work and time necessary, though a *lot* of cleanup was necessary). Ultimately, I prefer the F# code over the C# code, so I kept this version.
