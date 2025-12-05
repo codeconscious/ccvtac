@@ -14,12 +14,12 @@ type VideoMetadata = {
     [<property: JsonPropertyName("view_count")>] ViewCount: int option
     [<property: JsonPropertyName("age_limit")>] AgeLimit: int option
     [<property: JsonPropertyName("webpage_url")>] WebpageUrl: string
-    [<property: JsonPropertyName("categories")>] Categories: IReadOnlyList<string>
-    [<property: JsonPropertyName("tags")>] Tags: IReadOnlyList<string>
+    [<property: JsonPropertyName("categories")>] Categories: string list
+    [<property: JsonPropertyName("tags")>] Tags: string list
     [<property: JsonPropertyName("playable_in_embed")>] PlayableInEmbed: bool option
     [<property: JsonPropertyName("live_status")>] LiveStatus: string
     [<property: JsonPropertyName("release_timestamp")>] ReleaseTimestamp: int option
-    [<property: JsonPropertyName("_format_sort_fields")>] FormatSortFields: IReadOnlyList<string>
+    [<property: JsonPropertyName("_format_sort_fields")>] FormatSortFields: string list
     [<property: JsonPropertyName("album")>] Album: string
     [<property: JsonPropertyName("artist")>] Artist: string
     [<property: JsonPropertyName("track")>] Track: string
