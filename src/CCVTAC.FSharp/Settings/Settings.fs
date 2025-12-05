@@ -57,6 +57,7 @@ module Settings =
 
         let pluralize label count =
             NumberUtilities.pluralize label $"{label}s" count
+            |> sprintf "%d %s" count
 
         let tagDetectionPatternCount (patterns: TagDetectionPatterns) =
             patterns.Title.Length +
