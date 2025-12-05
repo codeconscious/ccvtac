@@ -61,21 +61,20 @@ module Mover =
         (moveToDir: string)
         (audioFileCount: int)
         (overwrite: bool)
-        : Result<unit, string> =
+        : Result<string, string> =
 
         try
-            let baseFileName =
-                if String.hasNoText maybeCollectionName then
-                    subFolderName
-                else
-                    $"%s{subFolderName} - %s{String.replaceInvalidPathChars None None maybeCollectionName}"
-
             match getCoverImage workingDirInfo audioFileCount with
             | None ->
-                Error "No image found."
+                Ok "No image to move was found."
             | Some fileInfo ->
+                let baseFileName =
+                    if String.hasNoText maybeCollectionName
+                    then subFolderName
+                    else $"%s{subFolderName} - %s{String.replaceInvalidPathChars None None maybeCollectionName}"
                 let dest = Path.Combine(moveToDir, $"%s{baseFileName.Trim()}.jpg")
-                Ok <| fileInfo.MoveTo(dest, overwrite = overwrite)
+                fileInfo.MoveTo(dest, overwrite = overwrite)
+                Ok $"Image file \"{fileInfo.Name}\" was moved."
         with ex ->
             Error $"Error copying the image file: %s{ex.Message}"
 
@@ -108,7 +107,7 @@ module Mover =
         else safeName
 
     let run
-        (taggingSets: seq<TaggingSet>)
+        (taggingSets: TaggingSet seq)
         (maybeCollectionData: CollectionMetadata option)
         (settings: UserSettings)
         (overwrite: bool)
@@ -158,5 +157,5 @@ module Mover =
 
                 match moveImageFile collectionName subFolderName workingDirInfo fullMoveToDir
                                     audioFileNames.Length overwrite with
-                | Ok _ -> printer.Info $"Moved image to %s{fullMoveToDir}."
+                | Ok msg -> printer.Info msg
                 | Error err -> printer.Error $"Error moving the image file: %s{err}."

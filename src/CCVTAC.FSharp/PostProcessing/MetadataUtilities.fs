@@ -51,8 +51,8 @@ module MetadataUtilities =
             sb.AppendLine $"■ Playlist name: %s{c'.Title}" |> ignore
             sb.AppendLine $"■ Playlist URL: %s{c'.WebpageUrl}" |> ignore
             match v.PlaylistIndex with
-                | NonNullV index -> if index > 0u then sb.AppendLine $"■ Playlist index: %d{index}" |> ignore
-                | NullV -> ()
+                | Some index -> if index > 0u then sb.AppendLine $"■ Playlist index: %d{index}" |> ignore
+                | None -> ()
             sb.AppendLine($"■ Playlist description: %s{String.textOrEmpty c'.Description}") |> ignore
         | None -> ()
 

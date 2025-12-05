@@ -133,17 +133,17 @@ module Tagger =
 
         // Track number
         match videoData.PlaylistIndex with
-        | NullV -> ()
-        | NonNullV (trackNo: uint32) ->
+        | None -> ()
+        | Some (trackNo: uint32) ->
             printer.Debug $"• Using playlist index of %d{trackNo} for track number"
             taggedFile.Tag.Track <- uint32 trackNo
 
         // Year
         match videoData.ReleaseYear with
-        | NonNullV (year: uint32) ->
+        | Some (year: uint32) ->
             printer.Debug $"• Using metadata release year \"%d{year}\""
             taggedFile.Tag.Year <- year
-        | NullV ->
+        | None ->
             let defaultYear = releaseYear settings videoData
             match TagDetection.detectReleaseYear videoData defaultYear patterns with
             | None -> ()
@@ -200,7 +200,7 @@ module Tagger =
 
     let run
         (settings: UserSettings)
-        (taggingSets: seq<TaggingSet>)
+        (taggingSets: TaggingSet seq)
         (collectionJson: CollectionMetadata option)
         (mediaType: MediaType)
         (printer: Printer)
