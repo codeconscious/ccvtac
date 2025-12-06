@@ -13,6 +13,19 @@ module InputHelper =
 
     type private IndexPair = { Start: int; End: int }
 
+    type InputCategory =
+        | Url
+        | Command
+
+    type CategorizedInput = { Text: string; Category: InputCategory }
+
+    type CategoryCounts(counts: Map<InputCategory,int>) =
+        member _.Item
+            with get (category: InputCategory) =
+                match counts.TryGetValue category with
+                | true, v -> v
+                | _ -> 0
+
     /// Takes a user input string and splits it into a collection of inputs
     /// based upon substrings detected by the class's regular expression pattern.
     let splitInput (input: string) : string array =
@@ -38,12 +51,6 @@ module InputHelper =
             |> Array.map (fun p -> input[p.Start..(p.End - 1)].Trim())
             |> Array.distinct
 
-    type InputCategory =
-        | Url
-        | Command
-
-    type CategorizedInput = { Text: string; Category: InputCategory }
-
     let categorizeInputs (inputs: ICollection<string>) : CategorizedInput list =
         inputs
         |> Seq.cast<string>
@@ -54,13 +61,6 @@ module InputHelper =
                 else InputCategory.Url
             { Text = input; Category = category })
         |> List.ofSeq
-
-    type CategoryCounts(counts: Map<InputCategory,int>) =
-        member _.Item
-            with get (category: InputCategory) =
-                match counts.TryGetValue category with
-                | true, v -> v
-                | _ -> 0
 
     let countCategories (inputs: CategorizedInput seq) : CategoryCounts =
         let counts =

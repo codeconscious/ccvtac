@@ -1,5 +1,6 @@
 module TagDetectionTests
 
+open CCVTAC.Console
 open CCVTAC.Console.PostProcessing.Tagging
 open CCVTAC.Console.PostProcessing
 open CCVTAC.Console.Settings.Settings
