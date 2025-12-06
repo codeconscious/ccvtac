@@ -68,9 +68,6 @@ module InputHelper =
             |> Seq.cast<CategorizedInput>
             |> Seq.groupBy (fun i -> i.Category)
             |> Seq.map (fun (k, grp) -> k, grp |> Seq.length)
-            // |> dict
-            // :?> IDictionary<InputCategory,int>
-            // |> fun d -> Dictionary<InputCategory,int>(d)
             |> Map.ofSeq
 
         CategoryCounts(counts)
