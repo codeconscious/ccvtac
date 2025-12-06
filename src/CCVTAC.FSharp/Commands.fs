@@ -13,14 +13,14 @@ module Commands =
             raise (ArgumentException("Commands cannot contain white space.", "text"))
         $"%c{prefix}%s{text}"
 
-    let quitCommands = [| toCommand "quit"; toCommand "q"; toCommand "exit" |]
+    let quitCommands = [ toCommand "quit"; toCommand "q"; toCommand "exit" ]
     let helpCommand: string = toCommand "help"
-    let settingsSummary = [| toCommand "settings" |]
-    let history = [| toCommand "history" |]
-    let updateDownloader = [| toCommand "update-downloader"; toCommand "update-dl" |]
-    let splitChapterToggles = [| toCommand "split"; toCommand "toggle-split" |]
-    let embedImagesToggles = [| toCommand "images"; toCommand "toggle-images" |]
-    let quietModeToggles = [| toCommand "quiet"; toCommand "toggle-quiet" |]
+    let settingsSummary = [ toCommand "settings" ]
+    let history = [ toCommand "history" ]
+    let updateDownloader = [ toCommand "update-downloader"; toCommand "update-dl" ]
+    let splitChapterToggles = [ toCommand "split"; toCommand "toggle-split" ]
+    let embedImagesToggles = [ toCommand "images"; toCommand "toggle-images" ]
+    let quietModeToggles = [ toCommand "quiet"; toCommand "toggle-quiet" ]
     let updateAudioFormatPrefix: string = toCommand "format-"
     let updateAudioQualityPrefix: string = toCommand "quality-"
 
