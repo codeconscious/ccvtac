@@ -206,4 +206,5 @@ If you run into any issues, feel free to create an issue on GitHub. Please provi
 
 ## History
 
-The first incarnation of this application was written in C#. After picking up F# and functional programming out of curiosity in 2024 and creating other tools (such as Audio Tag Tools) with it, I become curious about its OOP capabilities as well. I rewrote this application in OOP F# (initially using LLMs reduce the work and time necessary, though a *lot* of cleanup was necessary). Ultimately, I prefer the F# code over the C# code, so I kept this version.
+The first incarnation of this application was written in C#. After picking up F# and functional programming out of curiosity in 2024 and creating other tools (such as Audio Tag Tools) with it, I become curious about its OOP capabilities as well. I rewrote this application in OOP F# (initially using LLMs reduce the work and time necessary, though a *lot* of cleanup was necessary). Ultimately, I prefer the F# code over the C# code, so I kept this version. It is not idiomatic F#, but that's kind of the point as well. 😄
+

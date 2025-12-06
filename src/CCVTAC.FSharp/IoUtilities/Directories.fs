@@ -33,7 +33,7 @@ module Directories =
         |> Array.filter (fun filePath -> not (ignoreFiles |> Array.exists filePath.EndsWith))
 
     /// Deletes all files in the working directory
-    let internal deleteAllFiles (workingDirectory: string) (showMaxErrors: int) =
+    let internal deleteAllFiles showMaxErrors workingDirectory =
         let fileNames = getDirectoryFileNames workingDirectory None
 
         let mutable successCount = 0
@@ -68,32 +68,31 @@ module Directories =
     /// Asks user if they want to delete all files
     let internal askToDeleteAllFiles (workingDirectory: string) (printer: Printer) =
         if printer.AskToBool("Delete all temporary files?", "Yes", "No")
-        then deleteAllFiles workingDirectory 10
+        then deleteAllFiles 10 workingDirectory
         else Error "Will not delete the files."
 
-    let internal warnIfAnyFiles (directory: string) (showMax: int) =
-        let fileNames = getDirectoryFileNames directory None
+    let internal warnIfAnyFiles showMax dirName =
+        let fileNames = getDirectoryFileNames dirName None
 
-        if fileNames.Length = 0 then
-            Ok()
+        if Array.isEmpty fileNames then
+            Ok ()
         else
-            let fileLabel = if fileNames.Length = 1 then "file" else "files"
+            let fileLabel : int -> string = NumberUtilities.pluralize "file" "files"
             let report = StringBuilder()
 
-            report.AppendLine(
-                $"Unexpectedly found {fileNames.Length} {fileLabel} in working directory \"{directory}\":"
-            ) |> ignore
+            report.AppendLine $"Unexpectedly found {fileNames.Length} {fileLabel} in working directory \"{dirName}\":"
+                |> ignore
 
-            fileNames
-            |> Array.truncate showMax
-            |> Array.iter (fun fileName ->
-                report.AppendLine($"• {fileName}") |> ignore
-            )
+            report.AppendLine
+                (fileNames
+                 |> Array.truncate showMax
+                 |> Array.map (sprintf "• %s")
+                 |> String.concat String.newLine) |> ignore
 
             if fileNames.Length > showMax then
                 report.AppendLine($"... plus {fileNames.Length - showMax} more.") |> ignore
 
-            report.AppendLine("This generally occurs due to the same video appearing twice in playlists.") |> ignore
+            report.AppendLine("This sometimes occurs due to the same video appearing twice in playlists.") |> ignore
 
             Error (report.ToString())
 

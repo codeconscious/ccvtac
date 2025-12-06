@@ -78,7 +78,7 @@ module Orchestrator =
         (printer: Printer)
         : Result<NextAction, string> =
 
-        match Directories.warnIfAnyFiles settings.WorkingDirectory 10 with
+        match Directories.warnIfAnyFiles 10 settings.WorkingDirectory with
         | Error err ->
             printer.Error err
             Ok NextAction.QuitDueToErrors
@@ -281,7 +281,7 @@ module Orchestrator =
     /// Ensures the download environment is ready, then initiates the UI input and download process.
     let start (settings: UserSettings) (printer: Printer) : unit =
         // The working directory should start empty. Give the user a chance to empty it.
-        match Directories.warnIfAnyFiles settings.WorkingDirectory 10 with
+        match Directories.warnIfAnyFiles 10 settings.WorkingDirectory with
         | Error err ->
             printer.Error err
 
@@ -292,26 +292,27 @@ module Orchestrator =
                 printer.Error err
                 printer.Info "Aborting..."
                 ()
-        | Ok () ->
-            let results = ResultTracker<string> printer
-            let history = History(settings.HistoryFile, settings.HistoryDisplayCount)
-            let mutable nextAction = NextAction.Continue
-            let mutable settingsRef = settings
+        | Ok () -> ()
 
-            while nextAction = NextAction.Continue do
-                let input = printer.GetInput prompt
-                let splitInputs = splitInput input
+        let results = ResultTracker<string> printer
+        let history = History(settings.HistoryFile, settings.HistoryDisplayCount)
+        let mutable nextAction = NextAction.Continue
+        let mutable settingsRef = settings
 
-                if Array.isEmpty splitInputs then
-                    printer.Error $"Invalid input. Enter only URLs or commands beginning with \"%c{Commands.prefix}\"."
-                else
-                    let categorizedInputs = categorizeInputs splitInputs
-                    let categoryCounts = countCategories categorizedInputs
+        while nextAction = NextAction.Continue do
+            let input = printer.GetInput prompt
+            let splitInputs = splitInput input
 
-                    summarizeInput categorizedInputs categoryCounts printer
+            if Array.isEmpty splitInputs then
+                printer.Error $"Invalid input. Enter only URLs or commands beginning with \"%c{Commands.prefix}\"."
+            else
+                let categorizedInputs = categorizeInputs splitInputs
+                let categoryCounts = countCategories categorizedInputs
 
-                    // ProcessBatch may modify settings; reflect that by using a mutable reference
-                    nextAction <- processBatch categorizedInputs categoryCounts &settingsRef results history printer
+                summarizeInput categorizedInputs categoryCounts printer
 
-            results.PrintSessionSummary()
+                // ProcessBatch may modify settings; reflect that by using a mutable reference
+                nextAction <- processBatch categorizedInputs categoryCounts &settingsRef results history printer
+
+        results.PrintSessionSummary()
 

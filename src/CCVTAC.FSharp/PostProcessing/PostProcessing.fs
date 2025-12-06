@@ -78,12 +78,12 @@ module PostProcessor =
                 let allTaggingSetFiles = taggingSets |> List.collect allFiles
                 Deleter.run allTaggingSetFiles collectionJson workingDirectory printer
 
-                match Directories.warnIfAnyFiles workingDirectory 20 with
+                match Directories.warnIfAnyFiles 20 workingDirectory with
                 | Ok _ -> ()
                 | Error err ->
                     printer.Error err
                     printer.Info "Will delete the remaining files..."
-                    match Directories.deleteAllFiles workingDirectory 20 with
+                    match Directories.deleteAllFiles 20 workingDirectory with
                     | Ok deletedCount -> printer.Info $"%d{deletedCount} file(s) deleted."
                     | Error e -> printer.Error e
             | Error e ->

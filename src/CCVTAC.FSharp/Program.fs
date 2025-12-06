@@ -49,7 +49,7 @@ module Program =
                 Console.CancelKeyPress.Add(fun _ ->
                     printer.Warning("\nQuitting at user's request.")
 
-                    match Directories.warnIfAnyFiles settings.WorkingDirectory 10 with
+                    match Directories.warnIfAnyFiles 10 settings.WorkingDirectory with
                     | Ok () -> ()
                     | Error warnResult ->
                         printer.Error warnResult
@@ -64,7 +64,5 @@ module Program =
                 with ex ->
                     printer.Critical $"Fatal error: %s{ex.Message}"
                     AnsiConsole.WriteException ex
-                    printer.Info(
-                        "Please help improve this tool by reporting this error and any relevant URLs at https://github.com/codeconscious/ccvtac/issues."
-                    )
+                    printer.Info "Please help improve this tool by reporting this error and any relevant URLs at https://github.com/codeconscious/ccvtac/issues."
                     int ExitCodes.OperationError
