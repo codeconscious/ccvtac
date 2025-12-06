@@ -59,11 +59,13 @@ module Directories =
             |> _.ToString()
             |> Error
 
-    let askToDeleteAllFiles (workingDirectory: string) (printer: Printer) =
+    /// Ask the user to confirm the deletion of files in the specified directory.
+    let askToDeleteAllFiles dirName (printer: Printer) =
         if printer.AskToBool("Delete all temporary files?", "Yes", "No")
-        then deleteAllFiles 10 workingDirectory
+        then deleteAllFiles 10 dirName
         else Error "Will not delete the files."
 
+    /// Warn the user if there are any files in the specified directory.
     let warnIfAnyFiles showMax dirName =
         let fileNames = getDirectoryFileNames dirName None
 
@@ -86,6 +88,7 @@ module Directories =
             |> _.ToString()
             |> Error
 
+    /// Ensures the specified directory exists, including creation of it if necessary.
     let ensureDirectoryExists dirName : Result<DirectoryInfo, string> =
         try
             dirName
