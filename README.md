@@ -1,8 +1,8 @@
 # CCVTAC
 
-CCVTAC (CodeConscious Video-to-Audio Converter) is a small .NET-powered CLI tool that acts as a wrapper around [yt-dlp](https://github.com/yt-dlp/yt-dlp) to enable easier download and extractions of audio from YouTube videos, playlists, and channels, plus do some automatic post-processing (tagging, renaming, and moving).
+CCVTAC (CodeConscious Video-to-Audio Converter) is a small .NET-powered CLI tool written in F# that acts as a wrapper around [yt-dlp](https://github.com/yt-dlp/yt-dlp) to enable easier download and extractions of audio from YouTube videos, playlists, and channels, plus do some automatic post-processing (tagging, renaming, and moving).
 
-While I maintain it for my own use, feel free to use it yourself! However, please note it's geared to my own personal use cases and that no warranties or guarantees are provided.
+While I maintain it for my own use, feel free to use it yourself! However, please note that it's geared to my own personal use cases and that no warranties or guarantees are provided.
 
 [![Build and test](https://github.com/codeconscious/ccvtac/actions/workflows/build-test.yml/badge.svg)](https://github.com/codeconscious/ccvtac/actions/workflows/build-test.yml)
 
@@ -203,3 +203,8 @@ List of commands:
 ## Reporting issues
 
 If you run into any issues, feel free to create an issue on GitHub. Please provide as much information as possible (i.e., entered URLs, system information, yt-dlp version, etc.).
+
+## History
+
+The first incarnation of this application was written in C#. After picking up F# and functional programming out of curiosity in 2024 and creating other tools (such as Audio Tag Tools) with it, I become curious about its OOP capabilities as well. I rewrote this application in OOP F# (initially using LLMs reduce the work and time necessary, though a *lot* of cleanup was necessary). Ultimately, I prefer the F# code over the C# code, so I kept this version. It is not idiomatic F#, but that's kind of the point as well. 😄
+
