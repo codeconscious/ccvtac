@@ -11,6 +11,7 @@ module InputHelper =
 
     type private IndexPair = { Start: int; End: int }
 
+    // TODO: Add input strings?
     type InputCategory =
         | Url
         | Command
@@ -53,11 +54,10 @@ module InputHelper =
         inputs
         |> Seq.cast<string>
         |> Seq.map (fun input ->
-            let category =
-                if input.StartsWith(string Commands.prefix)
-                then InputCategory.Command
-                else InputCategory.Url
-            { Text = input; Category = category })
+            { Text = input
+              Category = if input.StartsWith(string Commands.prefix)
+                         then InputCategory.Command
+                         else InputCategory.Url })
         |> List.ofSeq
 
     let countCategories (inputs: CategorizedInput seq) : CategoryCounts =
