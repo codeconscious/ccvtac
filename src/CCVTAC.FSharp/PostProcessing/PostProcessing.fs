@@ -35,7 +35,7 @@ module PostProcessor =
                 let json = File.ReadAllText fileName
                 match JsonSerializer.Deserialize<CollectionMetadata> json with
                 | Null -> Error $"Deserialized collection metadata for \"%s{fileName}\" was null."
-                | NonNull collectionData -> Ok collectionData
+                | NonNull parsedData -> Ok parsedData
         with
         | ex -> Error ex.Message
 
