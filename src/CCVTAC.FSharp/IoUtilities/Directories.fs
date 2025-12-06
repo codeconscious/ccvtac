@@ -10,8 +10,6 @@ module Directories =
     [<Literal>]
     let private allFilesSearchPattern = "*"
 
-    let private enumerationOptions = EnumerationOptions()
-
     /// Counts the number of audio files in a directory
     let audioFileCount (directory: string) =
         DirectoryInfo(directory).EnumerateFiles()
@@ -29,7 +27,7 @@ module Directories =
             |> Seq.distinct
             |> Seq.toArray
 
-        Directory.GetFiles(directoryName, allFilesSearchPattern, enumerationOptions)
+        Directory.GetFiles(directoryName, allFilesSearchPattern, EnumerationOptions())
         |> Array.filter (fun filePath -> not (ignoreFiles |> Array.exists filePath.EndsWith))
 
     /// Deletes all files in the working directory
