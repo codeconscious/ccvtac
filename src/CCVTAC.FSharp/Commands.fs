@@ -6,34 +6,23 @@ module Commands =
 
     let prefix = '\\'
 
-    let private makeCommand text : string =
+    let private toCommand text : string =
         if String.hasNoText text then
             raise (ArgumentException("Commands cannot be null or white space.", "text"))
         if text.Contains ' ' then
             raise (ArgumentException("Commands cannot contain white space.", "text"))
         $"%c{prefix}%s{text}"
 
-    let quitCommands: string[] =
-        [| makeCommand "quit"; makeCommand "q"; makeCommand "exit" |]
-
-    let helpCommand: string = makeCommand "help"
-
-    let settingsSummary: string[] = [| makeCommand "settings" |]
-
-    let history: string[] = [| makeCommand "history" |]
-
-    let updateDownloader: string[] =
-        [| makeCommand "update-downloader"; makeCommand "update-dl" |]
-
-    let splitChapterToggles: string[] = [| makeCommand "split"; makeCommand "toggle-split" |]
-
-    let embedImagesToggles: string[] = [| makeCommand "images"; makeCommand "toggle-images" |]
-
-    let quietModeToggles: string[] = [| makeCommand "quiet"; makeCommand "toggle-quiet" |]
-
-    let updateAudioFormatPrefix: string = makeCommand "format-"
-
-    let updateAudioQualityPrefix: string = makeCommand "quality-"
+    let quitCommands = [| toCommand "quit"; toCommand "q"; toCommand "exit" |]
+    let helpCommand: string = toCommand "help"
+    let settingsSummary = [| toCommand "settings" |]
+    let history = [| toCommand "history" |]
+    let updateDownloader = [| toCommand "update-downloader"; toCommand "update-dl" |]
+    let splitChapterToggles = [| toCommand "split"; toCommand "toggle-split" |]
+    let embedImagesToggles = [| toCommand "images"; toCommand "toggle-images" |]
+    let quietModeToggles = [| toCommand "quiet"; toCommand "toggle-quiet" |]
+    let updateAudioFormatPrefix: string = toCommand "format-"
+    let updateAudioQualityPrefix: string = toCommand "quality-"
 
     let summary: Map<string, string> =
         [
