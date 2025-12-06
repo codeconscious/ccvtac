@@ -1,11 +1,11 @@
 namespace CCVTAC.Console.IoUtilities
 
-open System
 open System.IO
-open System.Text
 open CCVTAC.Console
 
 module Directories =
+
+    type private ErrorList = string ResizeArray
 
     [<Literal>]
     let private allFilesSearchPattern = "*"
@@ -33,39 +33,34 @@ module Directories =
         |> Array.filter (fun filePath -> not (ignoreFiles |> Array.exists filePath.EndsWith))
 
     /// Deletes all files in the working directory
-    let deleteAllFiles showMaxErrors workingDirectory =
+    let deleteAllFiles showMaxErrors workingDirectory : Result<uint,string> =
         let fileNames = getDirectoryFileNames workingDirectory None
 
-        let mutable successCount = 0
-        let errors = ResizeArray<string>() // TODO: Use an F# list.
-
-        fileNames |> Array.iter (fun fileName ->
-            try
-                File.Delete fileName
-                successCount <- successCount + 1
-            with
-            | ex -> errors.Add ex.Message
-        )
+        let successCount, errors =
+            Array.fold
+                (fun (s: uint, errs: ErrorList) fileName ->
+                    try File.Delete fileName
+                        (s + 1u, errs)
+                    with ex -> errs.Add ex.Message; s, errs)
+                (0u, ErrorList())
+                fileNames
 
         if errors.Count = 0 then
             Ok successCount
         else
-            let output = StringBuilder(
-                $"While {successCount} files were deleted successfully, some files could not be deleted:"
-            )
+            SB($"While {successCount} files were deleted successfully, some files could not be deleted:{String.newLine}")
+                .AppendLine
+                    (fileNames
+                     |> Array.truncate showMaxErrors
+                     |> Array.map (sprintf "• %s")
+                     |> String.concat String.newLine)
+            |> fun sb ->
+                if errors.Count > showMaxErrors
+                then sb.AppendLine $"... plus {errors.Count - showMaxErrors} more."
+                else sb
+            |> _.ToString()
+            |> Error
 
-            errors
-            |> Seq.truncate showMaxErrors
-            |> Seq.iter (fun error ->
-                output.AppendLine($"• {error}") |> ignore
-            )
-
-            if errors.Count > showMaxErrors then
-                output.AppendLine($"... plus {errors.Count - showMaxErrors} more.") |> ignore
-
-            Error (output.ToString())
-
-    /// Asks user if they want to delete all files
     let askToDeleteAllFiles (workingDirectory: string) (printer: Printer) =
         if printer.AskToBool("Delete all temporary files?", "Yes", "No")
         then deleteAllFiles 10 workingDirectory
@@ -79,8 +74,7 @@ module Directories =
         else
             let fileLabel = NumberUtilities.pluralize "file" "files" fileNames.Length
 
-            StringBuilder()
-                .AppendLine($"Unexpectedly found {fileNames.Length} {fileLabel} in working directory \"{dirName}\":")
+            SB($"Unexpectedly found {fileNames.Length} {fileLabel} in working directory \"{dirName}\":{String.newLine}")
                 .AppendLine
                     (fileNames
                      |> Array.truncate showMax
