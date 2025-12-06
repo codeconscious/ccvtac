@@ -1,7 +1,6 @@
 namespace CCVTAC.Console
 
 open System
-open System.Collections.Generic
 
 module Commands =
 
@@ -36,19 +35,18 @@ module Commands =
 
     let updateAudioQualityPrefix: string = makeCommand "quality-"
 
-    let summary: Dictionary<string, string> =
-        let d = Dictionary<string, string>()
-        d.Add(String.Join(" or ", history), "See the most recently entered URLs")
-        d.Add(String.Join(" or ", splitChapterToggles), "Toggles chapter splitting for the current session only")
-        d.Add(String.Join(" or ", embedImagesToggles), "Toggles image embedding for the current session only")
-        d.Add(String.Join(" or ", quietModeToggles), "Toggles quiet mode for the current session only")
-        d.Add(String.Join(" or ", updateDownloader), "Updates the downloader using the command specified in the settings")
-        d.Add(updateAudioFormatPrefix,
-              sprintf "Followed by a supported audio format (e.g., %sm4a), changes the audio format for the current session only"
-                  updateAudioFormatPrefix)
-        d.Add(updateAudioQualityPrefix,
-              sprintf "Followed by a supported audio quality (e.g., %s0), changes the audio quality for the current session only"
-                  updateAudioQualityPrefix)
-        d.Add(String.Join(" or ", quitCommands), "Quit the application")
-        d.Add(helpCommand, "See this help message")
-        d
+    let summary: Map<string, string> =
+        [
+            String.Join(" or ", history), "See the most recently entered URLs"
+            String.Join(" or ", splitChapterToggles), "Toggles chapter splitting for the current session only"
+            String.Join(" or ", embedImagesToggles), "Toggles image embedding for the current session only"
+            String.Join(" or ", quietModeToggles), "Toggles quiet mode for the current session only"
+            String.Join(" or ", updateDownloader), "Updates the downloader using the command specified in the settings"
+            (updateAudioFormatPrefix,
+                  $"Followed by a supported audio format (e.g., %s{updateAudioFormatPrefix}m4a), changes the audio format for the current session only")
+            (updateAudioQualityPrefix,
+                  $"Followed by a supported audio quality (e.g., %s{updateAudioQualityPrefix}0), changes the audio quality for the current session only")
+            String.Join(" or ", quitCommands), "Quit the application"
+            helpCommand, "See this help message"
+        ]
+        |> Map.ofList
