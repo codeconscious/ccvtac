@@ -81,7 +81,7 @@ let emptyVideoMetadata = {
     Type = String.Empty
 }
 
-let newLine = Environment.NewLine
+let newLine = String.newLine
 
 [<Fact>]
 let ``Detects album name in video description`` () =

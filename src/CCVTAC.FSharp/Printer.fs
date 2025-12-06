@@ -140,7 +140,7 @@ type Printer(showDebug: bool) =
             let repeats = int count - 1
             if repeats <= 0
             then AnsiConsole.WriteLine()
-            else Enumerable.Repeat(Environment.NewLine, repeats) |> String.Concat |> AnsiConsole.WriteLine
+            else Enumerable.Repeat(String.newLine, repeats) |> String.Concat |> AnsiConsole.WriteLine
 
     member this.GetInput(prompt: string) : string =
         Printer.EmptyLines 1uy
