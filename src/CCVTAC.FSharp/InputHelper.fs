@@ -18,9 +18,9 @@ module InputHelper =
     let splitInput (input: string) : string array =
         let matches = userInputRegex.Matches(input) |> Seq.cast<Match> |> Seq.toArray
 
-        if matches.Length = 0 then
+        if isZero matches.Length then
             [| |]
-        elif matches.Length = 1 then
+        elif isOne matches.Length then
             [| input |]
         else
             let startIndices = matches |> Array.map _.Index

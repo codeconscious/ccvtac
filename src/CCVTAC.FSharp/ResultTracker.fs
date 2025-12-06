@@ -32,7 +32,7 @@ type ResultTracker<'a>(printer: Printer) =
 
     /// Prints any failures for the current batch.
     member _.PrintBatchFailures() : unit =
-        if failures.Count = 0 then
+        if isZero failures.Count then
             _printer.Debug("No failures in batch.")
         else
             let failureLabel = if failures.Count = 1 then "failure" else "failures"

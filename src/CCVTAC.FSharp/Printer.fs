@@ -133,7 +133,7 @@ type Printer(showDebug: bool) =
 
     /// Prints the requested number of blank lines.
     static member EmptyLines(count: byte) =
-        if count = 0uy
+        if isZero count
         then ()
         else
             // Write count blank lines. The original wrote (count - 1) extra NewLines inside WriteLine call.

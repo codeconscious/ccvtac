@@ -26,7 +26,7 @@ module PostProcessor =
                 |> Seq.filter isCollectionMetadataMatch
                 |> Set.ofSeq
 
-            if fileNames.Count = 0 then
+            if isZero fileNames.Count then
                 Error "No relevant files found."
             elif fileNames.Count > 1 then
                 Error "Unexpectedly found more than one relevant file, so none will be processed."

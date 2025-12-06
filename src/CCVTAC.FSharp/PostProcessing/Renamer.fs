@@ -27,7 +27,7 @@ module Renamer =
             |> Seq.rev
             |> Seq.toList
 
-        if matches.Length = 0
+        if isZero matches.Length
         then sb
         else
             if not userSettings.QuietMode then

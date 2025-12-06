@@ -1,5 +1,6 @@
 namespace CCVTAC.Console.PostProcessing.Tagging
 
+open CCVTAC.Console
 open CCVTAC.Console.Settings.Settings
 open CCVTAC.Console.PostProcessing
 open System
@@ -72,7 +73,7 @@ module Detectors =
             |> Seq.distinct
             |> Seq.toArray
 
-        if matchedValues.Length = 0 then
+        if isZero matchedValues.Length then
             defaultValue
         else
             String.Join(separator, matchedValues)

@@ -6,12 +6,17 @@ open System.Text
 
 type SB = StringBuilder
 
+[<AutoOpen>]
 module Utilities =
     let ofTry (f: unit -> 'a) : Result<'a, string> =
         try Ok (f())
         with exn -> Error exn.Message
 
+[<AutoOpen>]
 module NumberUtilities =
+    let inline isZero (x: ^a) =
+        x = LanguagePrimitives.GenericZero<'a>
+
     let inline isOne (x: ^a) =
         x = LanguagePrimitives.GenericOne<'a>
 
