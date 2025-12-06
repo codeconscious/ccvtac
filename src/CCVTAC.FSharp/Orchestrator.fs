@@ -293,22 +293,20 @@ module Orchestrator =
                 printer.Info "Aborting..."
                 ()
         | Ok () ->
-            let results = ResultTracker<string>(printer)
+            let results = ResultTracker<string> printer
             let history = History(settings.HistoryFile, settings.HistoryDisplayCount)
             let mutable nextAction = NextAction.Continue
             let mutable settingsRef = settings
 
             while nextAction = NextAction.Continue do
-                let input = printer.GetInput InputHelper.Prompt
-                let splitInputs = InputHelper.splitInput input
+                let input = printer.GetInput prompt
+                let splitInputs = splitInput input
 
-                if splitInputs.IsEmpty then
-                    printer.Error (sprintf "Invalid input. Enter only URLs or commands beginning with \"%c\"." Commands.
-                                                                                                                   prefix
-                        )
+                if Array.isEmpty splitInputs then
+                    printer.Error $"Invalid input. Enter only URLs or commands beginning with \"%c{Commands.prefix}\"."
                 else
-                    let categorizedInputs = InputHelper.categorizeInputs splitInputs
-                    let categoryCounts = InputHelper.countCategories categorizedInputs
+                    let categorizedInputs = categorizeInputs splitInputs
+                    let categoryCounts = countCategories categorizedInputs
 
                     summarizeInput categorizedInputs categoryCounts printer
 

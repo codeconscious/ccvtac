@@ -1,15 +1,12 @@
 namespace CCVTAC.Console
 
-open System
-open System.Linq
 open System.Text.RegularExpressions
 open System.Collections.Generic
-open System.Collections.Immutable
 
 module InputHelper =
 
-    let internal Prompt =
-        sprintf "Enter one or more YouTube media URLs or commands (or \"%s\"):\n▶︎" Commands.helpCommand
+    let internal prompt =
+        $"Enter one or more YouTube media URLs or commands (or \"%s{Commands.helpCommand}\"):\n▶︎"
 
     /// A regular expression that detects where commands and URLs begin in input strings.
     let private userInputRegex = Regex(@"(?:https:|\\)", RegexOptions.Compiled)
@@ -18,29 +15,28 @@ module InputHelper =
 
     /// Takes a user input string and splits it into a collection of inputs
     /// based upon substrings detected by the class's regular expression pattern.
-    let splitInput (input: string) : ImmutableArray<string> =
+    let splitInput (input: string) : string array =
         let matches = userInputRegex.Matches(input) |> Seq.cast<Match> |> Seq.toArray
 
         if matches.Length = 0 then
-            ImmutableArray.Empty
+            [| |]
         elif matches.Length = 1 then
-            ImmutableArray.Create input
+            [| input |]
         else
             let startIndices = matches |> Array.map _.Index
 
             let indexPairs =
                 startIndices
-                |> Array.mapi (fun i startIndex ->
+                |> Array.mapi (fun idx startIndex ->
                     let endIndex =
-                        if i = startIndices.Length - 1 then input.Length else startIndices[i + 1]
+                        if idx = startIndices.Length - 1
+                        then input.Length
+                        else startIndices[idx + 1]
                     { Start = startIndex; End = endIndex })
 
-            let splitInputs =
-                indexPairs
-                |> Array.map (fun p -> input[p.Start..(p.End - 1)].Trim())
-                |> Array.distinct
-
-            ImmutableArray.CreateRange splitInputs
+            indexPairs
+            |> Array.map (fun p -> input[p.Start..(p.End - 1)].Trim())
+            |> Array.distinct
 
     type InputCategory =
         | Url
