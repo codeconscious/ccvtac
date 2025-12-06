@@ -19,11 +19,11 @@ module Program =
         | OperationError = 2
 
     [<EntryPoint>]
-    let main (args: string array) : int =
+    let main args : int =
         let printer = Printer(showDebug = true)
 
         if args.Length > 0 && Array.caseInsensitiveContains args[0] helpFlags then
-            Help.Print printer
+            printer.Info Help.helpText
             int ExitCodes.Success
         else
             let maybeSettingsPath =
