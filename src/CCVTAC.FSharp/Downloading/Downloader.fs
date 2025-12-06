@@ -64,12 +64,12 @@ module Downloader =
         let extraArgs = defaultArg additionalArgs [] |> Set.ofList
         String.Join(" ", Set.union args extraArgs)
 
-    let internal wrapUrlInMediaType url : Result<MediaType, string> =
+    let wrapUrlInMediaType url : Result<MediaType, string> =
         mediaTypeWithIds url
 
     /// Completes the actual download process.
     /// Returns a Result that, if successful, contains the name of the successfully downloaded format.
-    let internal run (mediaType: MediaType) userSettings (printer: Printer) : Result<string, string> =
+    let run (mediaType: MediaType) userSettings (printer: Printer) : Result<string, string> =
         if not mediaType.IsVideo && not mediaType.IsPlaylistVideo then
             printer.Info("Please wait for multiple videos to be downloaded...")
 

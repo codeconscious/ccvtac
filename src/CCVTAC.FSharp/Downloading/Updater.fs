@@ -6,7 +6,7 @@ open CCVTAC.Console.Settings.Settings
 
 module Updater =
 
-    let internal run userSettings (printer: Printer) : Result<unit,string> =
+    let run userSettings (printer: Printer) : Result<unit,string> =
         if String.hasNoText userSettings.DownloaderUpdateCommand then
             printer.Info("No downloader update command provided, so will skip.")
             Ok()

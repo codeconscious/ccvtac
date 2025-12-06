@@ -20,7 +20,7 @@ module Runner =
     /// <param name="otherSuccessExitCodes">Additional exit codes, other than 0, that can be treated as non-failures</param>
     /// <param name="printer">Printer for logging</param>
     /// <returns>A Result instance containing the exit code and any warnings or else an error message.</returns>
-    let internal run toolSettings (otherSuccessExitCodes: int list) (printer: Printer)
+    let run toolSettings (otherSuccessExitCodes: int list) (printer: Printer)
         : Result<ToolResult, string> =
 
         let watch = Watch()

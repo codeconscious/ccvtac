@@ -2,7 +2,7 @@ namespace CCVTAC.Console
 
 module Help =
 
-    let internal Print (printer: Printer) : unit =
+    let Print (printer: Printer) : unit =
         let helpText = """
             CCVTAC (CodeConscious Video-to-Audio Converter) is a small .NET-powered CLI
             tool that acts as a wrapper around yt-dlp (https://github.com/yt-dlp/yt-dlp)

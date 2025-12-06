@@ -13,7 +13,7 @@ module Directories =
     let private enumerationOptions = EnumerationOptions()
 
     /// Counts the number of audio files in a directory
-    let internal audioFileCount (directory: string) =
+    let audioFileCount (directory: string) =
         DirectoryInfo(directory).EnumerateFiles()
         |> Seq.filter (fun f -> List.caseInsensitiveContains f.Extension audioExtensions)
         |> Seq.length
@@ -33,7 +33,7 @@ module Directories =
         |> Array.filter (fun filePath -> not (ignoreFiles |> Array.exists filePath.EndsWith))
 
     /// Deletes all files in the working directory
-    let internal deleteAllFiles showMaxErrors workingDirectory =
+    let deleteAllFiles showMaxErrors workingDirectory =
         let fileNames = getDirectoryFileNames workingDirectory None
 
         let mutable successCount = 0
@@ -66,12 +66,12 @@ module Directories =
             Error (output.ToString())
 
     /// Asks user if they want to delete all files
-    let internal askToDeleteAllFiles (workingDirectory: string) (printer: Printer) =
+    let askToDeleteAllFiles (workingDirectory: string) (printer: Printer) =
         if printer.AskToBool("Delete all temporary files?", "Yes", "No")
         then deleteAllFiles 10 workingDirectory
         else Error "Will not delete the files."
 
-    let internal warnIfAnyFiles showMax dirName =
+    let warnIfAnyFiles showMax dirName =
         let fileNames = getDirectoryFileNames dirName None
 
         if Array.isEmpty fileNames then

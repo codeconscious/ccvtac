@@ -33,7 +33,7 @@ module Detectors =
     /// Finds and returns the first instance of text matching a given detection scheme pattern,
     /// parsing into T if necessary.
     /// <returns>A match of type 'a if there was a match; otherwise, the default value provided.</returns>
-    let internal detectSingle<'a>
+    let detectSingle<'a>
         (videoMetadata: VideoMetadata)
         (patterns: TagDetectionPattern seq)
         (defaultValue: 'a option)
@@ -55,7 +55,7 @@ module Detectors =
     /// concatenating them into a single string (using a custom separator), then casting
     /// to type 'a if necessary.
     /// <returns>A match of type 'a if there were any matches; otherwise, the default value provided.</returns>
-    let internal detectMultiple<'a>
+    let detectMultiple<'a>
         (data: VideoMetadata)
         (patterns: TagDetectionPattern seq)
         (defaultValue: 'a option)

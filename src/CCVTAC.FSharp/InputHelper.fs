@@ -5,7 +5,7 @@ open System.Collections.Generic
 
 module InputHelper =
 
-    let internal prompt =
+    let prompt =
         $"Enter one or more YouTube media URLs or commands (or \"%s{Commands.helpCommand}\"):\n▶︎"
 
     /// A regular expression that detects where commands and URLs begin in input strings.

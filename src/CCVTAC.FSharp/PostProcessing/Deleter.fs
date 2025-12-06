@@ -29,7 +29,7 @@ module Deleter =
             | ex -> printer.Error($"• Deletion error: {ex.Message}")
         )
 
-    let internal run
+    let run
         (taggingSetFileNames: string seq)
         (collectionMetadata: CollectionMetadata option)
         (workingDirectory: string)
