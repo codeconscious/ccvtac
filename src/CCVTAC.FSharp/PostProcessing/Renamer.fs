@@ -8,8 +8,6 @@ open System.Text
 open System.Text.RegularExpressions
 open Startwatch.Library
 
-type SB = StringBuilder
-
 module Renamer =
 
     let private toNormalizationForm (form: string) =

@@ -20,7 +20,7 @@ module MetadataUtilities =
         sprintf "%s/%s/%s" m d y
 
     let generateComment (v: VideoMetadata) (c: CollectionMetadata option) : string =
-        let sb = StringBuilder()
+        let sb = SB()
         sb.AppendLine("CCVTAC SOURCE DATA:") |> ignore
         sb.AppendLine $"■ Downloaded: {DateTime.Now}" |> ignore
         sb.AppendLine $"■ URL: %s{v.WebpageUrl}" |> ignore
