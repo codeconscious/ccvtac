@@ -32,9 +32,9 @@ module ExternalTool =
 
         try
             match Process.Start processStartInfo with
-            | null ->
+            | Null ->
                 Error $"The program \"{name}\" was not found. (The process was null.)"
-            | process' ->
+            | NonNull process' ->
                 process'.WaitForExit()
                 Ok()
         with

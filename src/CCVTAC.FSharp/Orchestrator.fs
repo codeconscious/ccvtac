@@ -186,7 +186,7 @@ module Orchestrator =
         // Update audio formats prefix
         elif startsWithIgnoreCase command Commands.updateAudioFormatPrefix then
             let format = command.Replace(Commands.updateAudioFormatPrefix, "").ToLowerInvariant()
-            if String.IsNullOrEmpty format then
+            if String.hasNoText format then
                 Error "You must append one or more supported audio format separated by commas (e.g., \"m4a,opus,best\")."
             else
                 let updateResult = updateAudioFormat settings format

@@ -39,9 +39,9 @@ module Runner =
         processStartInfo.WorkingDirectory <- toolSettings.WorkingDirectory
 
         match Process.Start processStartInfo with
-        | null ->
+        | Null ->
             Error $"Could not locate {splitCommandWithArgs[0]}."
-        | process' ->
+        | NonNull process' ->
             let error = process'.StandardError.ReadToEnd()
 
             process'.WaitForExit()
