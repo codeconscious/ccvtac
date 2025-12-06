@@ -1,13 +1,13 @@
 namespace CCVTAC.Console.PostProcessing
 
-open System.IO
-open System.Linq
-open System.Text.Json
-open System.Text.RegularExpressions
 open CCVTAC.Console
 open CCVTAC.Console.IoUtilities
 open CCVTAC.Console.PostProcessing.Tagging
 open CCVTAC.Console.Settings.Settings
+open System.IO
+open System.Linq
+open System.Text.Json
+open System.Text.RegularExpressions
 open Startwatch.Library
 open TaggingSets
 
