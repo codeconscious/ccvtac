@@ -3,15 +3,15 @@ namespace CCVTAC.Console
 open System
 open System.Collections.Generic
 
-module internal Commands =
+module Commands =
 
-    let prefix: char = '\\'
+    let prefix = '\\'
 
-    let private makeCommand (text: string) : string =
+    let private makeCommand text : string =
         if String.hasNoText text then
-            raise (ArgumentException("The text cannot be null or white space.", "text"))
+            raise (ArgumentException("Commands cannot be null or white space.", "text"))
         if text.Contains ' ' then
-            raise (ArgumentException("The text should not contain any white space.", "text"))
+            raise (ArgumentException("Commands cannot contain white space.", "text"))
         $"%c{prefix}%s{text}"
 
     let quitCommands: string[] =
