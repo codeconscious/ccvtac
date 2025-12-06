@@ -77,24 +77,22 @@ module Directories =
         if Array.isEmpty fileNames then
             Ok ()
         else
-            let fileLabel : int -> string = NumberUtilities.pluralize "file" "files"
-            let report = StringBuilder()
+            let fileLabel = NumberUtilities.pluralize "file" "files" fileNames.Length
 
-            report.AppendLine $"Unexpectedly found {fileNames.Length} {fileLabel} in working directory \"{dirName}\":"
-                |> ignore
-
-            report.AppendLine
-                (fileNames
-                 |> Array.truncate showMax
-                 |> Array.map (sprintf "• %s")
-                 |> String.concat String.newLine) |> ignore
-
-            if fileNames.Length > showMax then
-                report.AppendLine($"... plus {fileNames.Length - showMax} more.") |> ignore
-
-            report.AppendLine("This sometimes occurs due to the same video appearing twice in playlists.") |> ignore
-
-            Error (report.ToString())
+            StringBuilder()
+                .AppendLine($"Unexpectedly found {fileNames.Length} {fileLabel} in working directory \"{dirName}\":")
+                .AppendLine
+                    (fileNames
+                     |> Array.truncate showMax
+                     |> Array.map (sprintf "• %s")
+                     |> String.concat String.newLine)
+            |> fun sb ->
+                if fileNames.Length > showMax
+                then sb.AppendLine $"... plus {fileNames.Length - showMax} more."
+                else sb
+            |> _.AppendLine("This sometimes occurs due to the same video appearing twice in playlists.")
+            |> _.ToString()
+            |> Error
 
     let ensureDirectoryExists dirName : Result<DirectoryInfo, string> =
         try
