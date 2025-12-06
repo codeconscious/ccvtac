@@ -1,6 +1,5 @@
 namespace CCVTAC.Console.PostProcessing
 
-open System.Collections.Generic
 open System.Text.Json.Serialization
 
 type VideoMetadata = {

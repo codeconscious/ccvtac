@@ -1,12 +1,10 @@
 namespace CCVTAC.Console
 
 open System.Text.RegularExpressions
-open System.Collections.Generic
 
 module InputHelper =
 
-    let prompt =
-        $"Enter one or more YouTube media URLs or commands (or \"%s{Commands.helpCommand}\"):\n▶︎"
+    let prompt = $"Enter one or more YouTube media URLs or commands (or \"%s{Commands.helpCommand}\"):\n▶︎"
 
     /// A regular expression that detects where commands and URLs begin in input strings.
     let private userInputRegex = Regex(@"(?:https:|\\)", RegexOptions.Compiled)
@@ -51,7 +49,7 @@ module InputHelper =
             |> Array.map (fun p -> input[p.Start..(p.End - 1)].Trim())
             |> Array.distinct
 
-    let categorizeInputs (inputs: ICollection<string>) : CategorizedInput list =
+    let categorizeInputs (inputs: string seq) : CategorizedInput list =
         inputs
         |> Seq.cast<string>
         |> Seq.map (fun input ->
@@ -66,8 +64,8 @@ module InputHelper =
         let counts =
             inputs
             |> Seq.cast<CategorizedInput>
-            |> Seq.groupBy (fun i -> i.Category)
+            |> Seq.groupBy _.Category
             |> Seq.map (fun (k, grp) -> k, grp |> Seq.length)
             |> Map.ofSeq
 
-        CategoryCounts(counts)
+        CategoryCounts counts
