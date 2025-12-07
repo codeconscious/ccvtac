@@ -14,9 +14,9 @@ open System.Threading
 
 module Orchestrator =
     type NextAction =
-        | Continue = 0uy
-        | QuitAtUserRequest = 1uy
-        | QuitDueToErrors = 2uy
+        | Continue
+        | QuitAtUserRequest
+        | QuitDueToErrors
 
     let summarizeInput
         (categorizedInputs: CategorizedInput list)
