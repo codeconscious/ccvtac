@@ -8,12 +8,14 @@ type SB = StringBuilder
 
 [<AutoOpen>]
 module Utilities =
+
     let ofTry (f: unit -> 'a) : Result<'a, string> =
         try Ok (f())
         with exn -> Error exn.Message
 
 [<AutoOpen>]
 module NumberUtilities =
+
     let inline isZero (x: ^a) =
         x = LanguagePrimitives.GenericZero<'a>
 
@@ -45,11 +47,14 @@ module String =
     let equalIgnoringCase x y =
         String.Equals(x, y, StringComparison.OrdinalIgnoreCase)
 
-    let endsWithIgnoringCase endingText (text: string) =
-        text.EndsWith(endingText, StringComparison.InvariantCultureIgnoreCase)
+    let startsWithIgnoreCase startText (text: string)  =
+        text.StartsWith(startText, StringComparison.InvariantCultureIgnoreCase)
+
+    let endsWithIgnoringCase endText (text: string) =
+        text.EndsWith(endText, StringComparison.InvariantCultureIgnoreCase)
 
     let inline fileLabel count =
-        NumberUtilities.pluralize "file" "files" count
+        pluralize "file" "files" count
 
     /// Returns a new string in which all invalid path characters for the current OS
     /// have been replaced by the specified replacement character.
@@ -88,16 +93,19 @@ module String =
         text.TrimEnd(newLine.ToCharArray())
 
 module Seq =
+
     let caseInsensitiveContains text (xs: string seq) : bool =
         xs |> Seq.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))
 
 module List =
+
     let isNotEmpty l = not (List.isEmpty l)
 
     let caseInsensitiveContains text (xs: string list) : bool =
         xs |> List.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))
 
 module Array =
+
     let doesNotContain x arr = Array.contains x arr |> not
 
     let caseInsensitiveContains text (xs: string array) : bool =

@@ -118,10 +118,6 @@ module Orchestrator =
                     printer.Info $"Processed '%s{url}'%s{groupClause} in %s{jobWatch.ElapsedFriendly}."
                     Ok NextAction.Continue
 
-
-    let startsWithIgnoreCase (text: string) (prefix: string) =
-        text.StartsWith(prefix, StringComparison.InvariantCultureIgnoreCase)
-
     let summarizeToggle settingName setting =
         sprintf "%s was toggled to %s for this session." settingName (if setting then "ON" else "OFF")
 
@@ -181,10 +177,10 @@ module Orchestrator =
             Ok NextAction.Continue
 
         // Update audio formats prefix
-        elif startsWithIgnoreCase command Commands.updateAudioFormatPrefix then
-            let format = command.Replace(Commands.updateAudioFormatPrefix, "").ToLowerInvariant()
+        elif String.startsWithIgnoreCase Commands.updateAudioFormatPrefix command then
+            let format = command.Replace(Commands.updateAudioFormatPrefix, String.Empty).ToLowerInvariant()
             if String.hasNoText format then
-                Error "You must append one or more supported audio format separated by commas (e.g., \"m4a,opus,best\")."
+                Error "You must append one or more supported audio formats separated by commas (e.g., \"m4a,opus,best\")."
             else
                 let updateResult = updateAudioFormat settings format
                 match updateResult with
@@ -200,9 +196,9 @@ module Orchestrator =
                 //     Ok NextAction.Continue
 
         // Update audio quality prefix
-        elif startsWithIgnoreCase command Commands.updateAudioQualityPrefix then
+        elif String.startsWithIgnoreCase Commands.updateAudioQualityPrefix command then
             let inputQuality = command.Replace(Commands.updateAudioQualityPrefix, "")
-            if String.IsNullOrEmpty inputQuality then
+            if String.hasNoText inputQuality then
                 Error "You must enter a number representing an audio quality."
             else
                 match Byte.TryParse inputQuality with
@@ -224,9 +220,9 @@ module Orchestrator =
 
         // Unknown command
         else
-            Error (sprintf "\"%s\" is not a valid command. Enter \"%scommands\" to see a list of commands." command (string Commands.
-                                                                                                                                prefix
-                       ))
+            Error (sprintf "\"%s\" is not a valid command. Enter \"%scommands\" to see a list of commands."
+                        command
+                        (string Commands.prefix))
 
 
     /// Processes a single user request, from input to downloading and file post-processing.
@@ -242,7 +238,7 @@ module Orchestrator =
 
         let inputTime = DateTime.Now
         let watch = Watch()
-        let batchResults = ResultTracker<NextAction>(printer)
+        let batchResults = ResultTracker<NextAction> printer
         let mutable nextAction = NextAction.Continue
         let mutable inputIndex = 0
 
@@ -288,7 +284,6 @@ module Orchestrator =
             | Error err ->
                 printer.Error err
                 printer.Info "Aborting..."
-                ()
         | Ok () -> ()
 
         let results = ResultTracker<string> printer
@@ -308,7 +303,6 @@ module Orchestrator =
 
                 summarizeInput categorizedInputs categoryCounts printer
 
-                // ProcessBatch may modify settings; reflect that by using a mutable reference
                 nextAction <- processBatch categorizedInputs categoryCounts &settingsRef results history printer
 
         results.PrintSessionSummary()
