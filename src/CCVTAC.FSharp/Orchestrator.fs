@@ -51,20 +51,18 @@ module Orchestrator =
             Printer.EmptyLines 1uy
 
     let sleep (sleepSeconds: uint16) : unit =
-        let mutable remainingSeconds = sleepSeconds
+        let message seconds = $"Sleeping for {seconds} seconds..."
 
-        AnsiConsole
-            .Status()
-            .Start($"Sleeping for %d{sleepSeconds} seconds...",
-                   fun ctx ->
-                        ctx.Spinner(Spinner.Known.Star) |> ignore
-                        ctx.SpinnerStyle(Style.Parse("blue")) |> ignore
+        let rec loop (remaining: uint16) (ctx: StatusContext) =
+            if remaining > 0us then
+                ctx.Status (message remaining) |> ignore
+                Thread.Sleep 1000
+                loop (remaining - 1us) ctx
 
-                        while remainingSeconds > 0us do
-                            ctx.Status $"Sleeping for %d{remainingSeconds} seconds..." |> ignore
-                            remainingSeconds <- remainingSeconds - 1us
-                            Thread.Sleep 1000
-                   )
+        AnsiConsole.Status().Start((message sleepSeconds), fun ctx ->
+            ctx.Spinner(Spinner.Known.Star)
+               .SpinnerStyle(Style.Parse "blue")
+            |> loop sleepSeconds)
 
     let processUrl
         (url: string)
