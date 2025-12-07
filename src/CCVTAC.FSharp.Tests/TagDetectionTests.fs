@@ -85,7 +85,7 @@ let emptyVideoMetadata = {
 let newLine = String.newLine
 
 [<Fact>]
-let ``Detects album name in video description`` () =
+let ``Tag detection patterns detect metadata in video metadata`` () =
     let testArtist = "Test Artist Name (日本語入り）"
     let testAlbum = "Test Album Name (日本語入り）"
     let testTitle = "Test Title (日本語入り）"
