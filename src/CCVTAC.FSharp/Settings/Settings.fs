@@ -7,8 +7,6 @@ open Spectre.Console
 
 module Settings =
 
-    type FilePath = FilePath of string
-
     type RenamePattern = {
         [<JsonPropertyName("regex")>]           RegexPattern : string
         [<JsonPropertyName("replacePattern")>]  ReplaceWithPattern : string
@@ -50,13 +48,40 @@ module Settings =
         [<JsonPropertyName("downloaderUpdateCommand")>]       DownloaderUpdateCommand : string
     }
 
+    let private defaultSettings =
+        {
+            WorkingDirectory = String.Empty
+            MoveToDirectory = String.Empty
+            HistoryFile = String.Empty
+            HistoryDisplayCount = 25uy // byte
+            SplitChapters = true
+            SleepSecondsBetweenDownloads = 10us
+            SleepSecondsBetweenURLs = 15us
+            AudioFormats = [||]
+            AudioQuality = 0uy
+            QuietMode = false
+            EmbedImages = true
+            DoNotEmbedImageUploaders = [||]
+            IgnoreUploadYearUploaders = [||]
+            TagDetectionPatterns = {
+                Title = [||]
+                Artist = [||]
+                Album = [||]
+                Composer = [||]
+                Year = [||]
+            }
+            RenamePatterns = [||]
+            NormalizationForm = "C" // Recommended for compatibility between Linux and macOS.
+            DownloaderUpdateCommand = String.Empty
+        }
+
     let summarize settings : (string * string) list =
         let onOrOff = function
             | true -> "ON"
             | false -> "OFF"
 
         let pluralize label count =
-            NumberUtilities.pluralize label $"{label}s" count
+            pluralize label $"{label}s" count
             |> sprintf "%d %s" count
 
         let tagDetectionPatternCount (patterns: TagDetectionPatterns) =
@@ -115,11 +140,11 @@ module Settings =
 
             match settings with
             | { WorkingDirectory = dir } when String.hasNoText dir ->
-                Error "No working directory was specified."
+                Error "No working directory was specified in the settings."
             | { WorkingDirectory = dir } when dirMissing dir ->
                 Error $"Working directory \"{dir}\" is missing."
             | { MoveToDirectory = dir } when String.hasNoText dir ->
-                Error "No move-to directory was specified."
+                Error "No move-to directory was specified in the settings."
             | { MoveToDirectory = dir } when dirMissing dir ->
                 Error $"Move-to directory \"{dir}\" is missing."
             | { AudioQuality = q } when q < 0uy || q > 10uy ->
@@ -151,70 +176,33 @@ module Settings =
                 | s -> Ok s
             with e -> Error e.Message
 
-        let fileExists (FilePath path) =
-            match File.Exists path with
-            | true -> Ok()
-            | false -> Error $"File \"{path}\" does not exist."
-
-        let read (FilePath path) =
+        let read (fileInfo: FileInfo) : Result<UserSettings, string> =
             try
-                path
+                fileInfo.FullName
                 |> File.ReadAllText
                 |> deserialize<UserSettings>
                 |> Result.bind validate
             with
-                | :? FileNotFoundException -> Error $"File \"{path}\" was not found."
-                | :? JsonException as e -> Error $"Parse error in \"{path}\": {e.Message}"
-                | e -> Error $"Unexpected error reading from \"{path}\": {e.Message}"
+                | :? FileNotFoundException -> Error $"File \"{fileInfo.FullName}\" was not found."
+                | :? JsonException as e -> Error $"Parse error in \"{fileInfo.FullName}\": {e.Message}"
+                | e -> Error $"Unexpected error reading from \"{fileInfo.FullName}\": {e.Message}"
 
-        let private writeFile (FilePath filePath) settings =
+        let private writeFile (filePath: FileInfo) settings : Result<string, string> =
             let unicodeEncoder = JavaScriptEncoder.Create UnicodeRanges.All
             let writeIndented = true
             let options = JsonSerializerOptions(WriteIndented = writeIndented, Encoder = unicodeEncoder)
 
             try
                 let json = JsonSerializer.Serialize(settings, options)
-                File.WriteAllText(filePath, json)
-                Ok $"A new settings file was saved to \"{filePath}\". Please populate it with your desired settings."
+                File.WriteAllText(filePath.FullName, json)
+                Ok $"A new settings file was saved to \"{filePath.FullName}\". Please populate it with your desired settings."
             with
-                | :? FileNotFoundException -> Error $"File \"{filePath}\" was not found."
+                | :? FileNotFoundException -> Error $"File \"{filePath.FullName}\" was not found."
                 | :? JsonException -> Error "Failure parsing user settings to JSON."
-                | e -> Error $"Unexpected error writing \"{filePath}\": {e.Message}"
+                | e -> Error $"Unexpected error writing \"{filePath.FullName}\": {e.Message}"
 
-        let writeDefaultFile (filePath: FilePath option) defaultFileName =
-            let confirmedPath =
-                match filePath with
-                | Some p -> p
-                | None -> FilePath (Path.Combine(AppContext.BaseDirectory, defaultFileName))
-
-            let defaultSettings =
-                {
-                    WorkingDirectory = String.Empty
-                    MoveToDirectory = String.Empty
-                    HistoryFile = String.Empty
-                    HistoryDisplayCount = 25uy // byte
-                    SplitChapters = true
-                    SleepSecondsBetweenDownloads = 10us
-                    SleepSecondsBetweenURLs = 15us
-                    AudioFormats = [||]
-                    AudioQuality = 0uy
-                    QuietMode = false
-                    EmbedImages = true
-                    DoNotEmbedImageUploaders = [||]
-                    IgnoreUploadYearUploaders = [||]
-                    TagDetectionPatterns = {
-                        Title = [||]
-                        Artist = [||]
-                        Album = [||]
-                        Composer = [||]
-                        Year = [||]
-                    }
-                    RenamePatterns = [||]
-                    NormalizationForm = "C" // Recommended for compatibility between Linux and macOS.
-                    DownloaderUpdateCommand = String.Empty
-                }
-
-            writeFile confirmedPath defaultSettings
+        let writeDefaultFile (fileInfo: FileInfo) : Result<string, string> =
+            writeFile fileInfo defaultSettings
 
     module LiveUpdating =
         open Validation

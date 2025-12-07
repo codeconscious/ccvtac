@@ -113,4 +113,4 @@ module Array =
     let doesNotContain x arr = Array.contains x arr |> not
 
     let caseInsensitiveContains text (xs: string array) : bool =
-            xs |> Array.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))
+        xs |> Array.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))

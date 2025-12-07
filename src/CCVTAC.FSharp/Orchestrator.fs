@@ -176,7 +176,7 @@ module Orchestrator =
             printer.ShowDebug(not settings.QuietMode)
             Ok NextAction.Continue
 
-        // Update audio formats prefix
+        // Update audio formats
         elif String.startsWithIgnoreCase Commands.updateAudioFormatPrefix command then
             let format = command.Replace(Commands.updateAudioFormatPrefix, String.Empty).ToLowerInvariant()
             if String.hasNoText format then
@@ -195,7 +195,7 @@ module Orchestrator =
                 //     printer.Info(summarizeUpdate "Audio Formats" (String.Join(", ", settings.AudioFormats)))
                 //     Ok NextAction.Continue
 
-        // Update audio quality prefix
+        // Update audio quality
         elif String.startsWithIgnoreCase Commands.updateAudioQualityPrefix command then
             let inputQuality = command.Replace(Commands.updateAudioQualityPrefix, "")
             if String.hasNoText inputQuality then
@@ -300,9 +300,7 @@ module Orchestrator =
             else
                 let categorizedInputs = categorizeInputs splitInputs
                 let categoryCounts = countCategories categorizedInputs
-
                 summarizeInput categorizedInputs categoryCounts printer
-
                 nextAction <- processBatch categorizedInputs categoryCounts &settingsRef results history printer
 
         results.PrintSessionSummary()
