@@ -9,8 +9,7 @@ type ResultTracker<'a>(printer: Printer) =
 
     let failures = Dictionary<string,string>()
 
-    let _printer =
-        if isNull (box printer) then nullArg "printer" else printer
+    let _printer = printer
 
     static let combineErrors (errors: string list) =
         String.Join(" / ", errors)
