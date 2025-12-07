@@ -110,7 +110,7 @@ module Array =
 
     let hasMultiple arr = arr |> Array.length |> (<) 1
 
-    let doesNotContain x arr = Array.contains x arr |> not
+    let doesNotContain x arr = not <| Array.contains x arr
 
     let caseInsensitiveContains text (xs: string array) : bool =
         xs |> Array.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))
