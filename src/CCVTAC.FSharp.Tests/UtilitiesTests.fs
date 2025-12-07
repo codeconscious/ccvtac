@@ -28,6 +28,7 @@ module NumberUtilitiesTests =
         Assert.False <| NumberUtilities.isOne 2
         Assert.False <| NumberUtilities.isZero 1u
         Assert.False <| NumberUtilities.isZero 1us
+        Assert.False <| NumberUtilities.isZero -0.0000000000001
         Assert.False <| NumberUtilities.isZero 0.0000000000001
         Assert.False <| NumberUtilities.isZero 1.
         Assert.False <| NumberUtilities.isZero 1L
@@ -62,80 +63,80 @@ module SeqTests =
     [<Fact>]
     let ``caseInsensitiveContains returns true when exact match exists`` () =
         let input = ["Hello"; "World"; "Test"]
-        Seq.caseInsensitiveContains "Hello" input |> Assert.True
-        Seq.caseInsensitiveContains "World" input |> Assert.True
-        Seq.caseInsensitiveContains "Test" input  |> Assert.True
+        Assert.True <| Seq.caseInsensitiveContains "Hello" input
+        Assert.True <| Seq.caseInsensitiveContains "World" input
+        Assert.True <| Seq.caseInsensitiveContains "Test" input
 
     [<Fact>]
     let ``caseInsensitiveContains returns true when exists but case differs`` () =
         let input = ["hello"; "WORLD"; "test"]
-        Seq.caseInsensitiveContains "Hello" input |> Assert.True
-        Seq.caseInsensitiveContains "hello" input |> Assert.True
-        Seq.caseInsensitiveContains "HELLO" input |> Assert.True
-        Seq.caseInsensitiveContains "wOrLd" input |> Assert.True
-        Seq.caseInsensitiveContains "tESt" input  |> Assert.True
-        Seq.caseInsensitiveContains "TEST" input  |> Assert.True
+        Assert.True <| Seq.caseInsensitiveContains "Hello" input
+        Assert.True <| Seq.caseInsensitiveContains "hello" input
+        Assert.True <| Seq.caseInsensitiveContains "HELLO" input
+        Assert.True <| Seq.caseInsensitiveContains "wOrLd" input
+        Assert.True <| Seq.caseInsensitiveContains "tESt" input
+        Assert.True <| Seq.caseInsensitiveContains "TEST" input
 
     [<Fact>]
     let ``caseInsensitiveContains returns false when text not in sequence`` () =
         let input = ["Hello"; "World"; "Test"]
-        Seq.caseInsensitiveContains "Missing" input |> Assert.False
+        Assert.False <| Seq.caseInsensitiveContains "Missing" input
 
     [<Fact>]
     let ``caseInsensitiveContains works with empty sequence`` () =
-        Seq.caseInsensitiveContains "Any" [] |> Assert.False
+        Assert.False <| Seq.caseInsensitiveContains "Any" []
 
     [<Fact>]
     let ``caseInsensitiveContains handles null or empty strings`` () =
         let input = [String.Empty; null; "Test"]
-        Seq.caseInsensitiveContains String.Empty input |> Assert.True
-        Seq.caseInsensitiveContains null input |> Assert.True
+        Assert.True <| Seq.caseInsensitiveContains String.Empty input
+        Assert.True <| Seq.caseInsensitiveContains null input
 
     [<Fact>]
     let ``caseInsensitiveContains handles Japanese strings`` () =
         let input = ["関数型プログラミング"; "楽しいぞ"]
-        Seq.caseInsensitiveContains "関数型プログラミング" input |> Assert.True
-        Seq.caseInsensitiveContains "いや、楽しくないや" input |> Assert.False
+        Assert.True <| Seq.caseInsensitiveContains "関数型プログラミング" input
+        Assert.False <| Seq.caseInsensitiveContains "いや、楽しくないや" input
 
 module ListTests =
 
     [<Fact>]
     let ``caseInsensitiveContains returns true when exact match exists`` () =
         let input = ["Hello"; "World"; "Test"]
-        List.caseInsensitiveContains "Hello" input |> Assert.True
-        List.caseInsensitiveContains "World" input |> Assert.True
-        List.caseInsensitiveContains "Test" input |> Assert.True
+        Assert.True <| List.caseInsensitiveContains "Hello" input
+        Assert.True <| List.caseInsensitiveContains "World" input
+        Assert.True <| List.caseInsensitiveContains "Test" input
 
     [<Fact>]
     let ``caseInsensitiveContains returns true when exists but case differs`` () =
         let input = ["hello"; "WORLD"; "test"]
-        List.caseInsensitiveContains "Hello" input |> Assert.True
-        List.caseInsensitiveContains "hello" input |> Assert.True
-        List.caseInsensitiveContains "HELLO" input |> Assert.True
-        List.caseInsensitiveContains "wOrLd" input |> Assert.True
-        List.caseInsensitiveContains "tESt" input |> Assert.True
-        List.caseInsensitiveContains "TEST" input |> Assert.True
+        Assert.True <| List.caseInsensitiveContains "Hello" input
+        Assert.True <| List.caseInsensitiveContains "hello" input
+        Assert.True <| List.caseInsensitiveContains "HELLO" input
+        Assert.True <| List.caseInsensitiveContains "wOrLd" input
+        Assert.True <| List.caseInsensitiveContains "tESt" input
+        Assert.True <| List.caseInsensitiveContains "TEST" input
 
     [<Fact>]
     let ``caseInsensitiveContains returns false when text not in sequence`` () =
         let input = ["Hello"; "World"; "Test"]
-        List.caseInsensitiveContains "Missing" input |> Assert.False
+        Assert.False <| List.caseInsensitiveContains "Missing" input
 
     [<Fact>]
     let ``caseInsensitiveContains works with empty sequence`` () =
-        List.caseInsensitiveContains "Any" [] |> Assert.False
+        Assert.False <| List.caseInsensitiveContains "Any" []
 
     [<Fact>]
     let ``caseInsensitiveContains handles null or empty strings`` () =
         let input = [String.Empty; null; "Test"]
-        List.caseInsensitiveContains String.Empty input |> Assert.True
-        List.caseInsensitiveContains null input |> Assert.True
+        Assert.True <| List.caseInsensitiveContains String.Empty input
+        Assert.True <| List.caseInsensitiveContains null input
 
     [<Fact>]
     let ``caseInsensitiveContains handles Japanese strings`` () =
         let input = ["関数型プログラミング"; "楽しいぞ"]
-        List.caseInsensitiveContains "関数型プログラミング" input |> Assert.True
-        List.caseInsensitiveContains "いや、楽しくないや"   input |> Assert.False
+        Assert.True  <| List.caseInsensitiveContains "関数型プログラミング" input
+        Assert.False <| List.caseInsensitiveContains "いや、楽しくないや"   input
 
 module ArrayTests =
 
@@ -143,23 +144,23 @@ module ArrayTests =
 
         [<Fact>]
         let ``hasMultiple returns true for array with more than one element`` () =
-            Array.hasMultiple [| 1; 2; 3 |] |> Assert.True
+            Assert.True <| Array.hasMultiple [| 1; 2; 3 |]
 
         [<Fact>]
         let ``hasMultiple returns false for empty array`` () =
-            Array.hasMultiple [||] |> Assert.False
+            Assert.False <| Array.hasMultiple [||]
 
         [<Fact>]
         let ``hasMultiple returns false for single-element array`` () =
-            Array.hasMultiple [| 0 |] |> Assert.False
+            Assert.False <| Array.hasMultiple [| 0 |]
 
         [<Fact>]
         let ``hasMultiple works with different types of arrays`` () =
-            Array.hasMultiple [| "hello"; "world" |]        |> Assert.True
-            Array.hasMultiple [| 1.0; 2.0; 3.0 |]           |> Assert.True
-            Array.hasMultiple [| false; true; true |]       |> Assert.True
-            Array.hasMultiple [| Array.sum; Array.length |] |> Assert.True
+            Assert.True <| Array.hasMultiple [| "hello"; "world" |]
+            Assert.True <| Array.hasMultiple [| 1.0; 2.0; 3.0 |]
+            Assert.True <| Array.hasMultiple [| false; true; true |]
+            Assert.True <| Array.hasMultiple [| Array.sum; Array.length |]
 
         [<Fact>]
         let ``hasMultiple handles large arrays`` () =
-            Array.init 100 id |> Array.hasMultiple |> Assert.True
+            Assert.True <| Array.hasMultiple (Array.init 100 id)
