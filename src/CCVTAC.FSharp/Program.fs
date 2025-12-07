@@ -29,11 +29,11 @@ module Program =
             int ExitCodes.Success
         else
             let settingsPath =
-                if Array.hasMultiple args && Array.caseInsensitiveContains args[0] settingsFileFlags then
-                    args[1] // Expected to be a settings file path.
-                else
-                    defaultSettingsFileName
-                |> FileInfo
+                FileInfo <|
+                    if Array.hasMultiple args && Array.caseInsensitiveContains args[0] settingsFileFlags then
+                        args[1] // Expected to be a settings file path.
+                    else
+                        defaultSettingsFileName
 
             if not settingsPath.Exists then
                 match writeDefaultFile settingsPath with
