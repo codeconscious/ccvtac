@@ -1,11 +1,12 @@
 namespace CCVTAC.Console
 
-open System.IO
 open CCVTAC.Console
 open CCVTAC.Console.IoUtilities
 open CCVTAC.Console.Settings
 open CCVTAC.Console.Settings.Settings
+open Settings.IO
 open System
+open System.IO
 open Spectre.Console
 
 module Program =
@@ -35,7 +36,7 @@ module Program =
                 |> FileInfo
 
             if not settingsPath.Exists then
-                match Settings.IO.writeDefaultFile settingsPath with
+                match writeDefaultFile settingsPath with
                 | Ok msg ->
                     printer.Info msg
                     int ExitCodes.Success
@@ -43,13 +44,12 @@ module Program =
                     printer.Error err
                     int ExitCodes.OperationError
             else
-                let readResult = Settings.IO.read settingsPath
-                match readResult with
-                | Error e ->
-                    printer.Error e
+                match read settingsPath with
+                | Error err ->
+                    printer.Error err
                     int ExitCodes.ArgError
                 | Ok settings ->
-                    Settings.printSummary settings printer (Some "Settings loaded OK.")
+                    printSummary settings printer (Some "Settings loaded OK.")
                     printer.ShowDebug(not settings.QuietMode)
 
                     // Catch Ctrl-C (SIGINT)
