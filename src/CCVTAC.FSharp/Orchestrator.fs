@@ -22,8 +22,7 @@ module Orchestrator =
         (categorizedInputs: CategorizedInput list)
         (counts: CategoryCounts)
         (printer: Printer)
-        : unit
-        =
+        : unit =
 
         if categorizedInputs.Length > 1 then
             let urlCount = counts[InputCategory.Url]
@@ -301,9 +300,9 @@ module Orchestrator =
 
         while nextAction = NextAction.Continue do
             let input = printer.GetInput prompt
-            let splitInputs = splitInput input
+            let splitInputs = splitInputText input
 
-            if Array.isEmpty splitInputs then
+            if List.isEmpty splitInputs then
                 printer.Error $"Invalid input. Enter only URLs or commands beginning with \"%c{Commands.prefix}\"."
             else
                 let categorizedInputs = categorizeInputs splitInputs

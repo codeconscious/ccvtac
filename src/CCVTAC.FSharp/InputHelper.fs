@@ -6,51 +6,48 @@ module InputHelper =
 
     let prompt = $"Enter one or more YouTube media URLs or commands (or \"%s{Commands.helpCommand}\"):\n▶︎"
 
-    /// A regular expression that detects where commands and URLs begin in input strings.
+    /// A regular expression that detects the beginnings of URLs and application commands in input strings.
     let private userInputRegex = Regex(@"(?:https:|\\)", RegexOptions.Compiled)
 
     type private IndexPair = { Start: int; End: int }
 
-    // TODO: Add input strings?
-    type InputCategory =
-        | Url
-        | Command
+    type InputCategory = Url | Command
 
     type CategorizedInput = { Text: string; Category: InputCategory }
 
-    type CategoryCounts(counts: Map<InputCategory,int>) =
+    type CategoryCounts (counts: Map<InputCategory,int>) =
         member _.Item
             with get (category: InputCategory) =
                 match counts.TryGetValue category with
                 | true, v -> v
                 | _ -> 0
 
-    /// Takes a user input string and splits it into a collection of inputs
-    /// based upon substrings detected by the class's regular expression pattern.
-    let splitInput (input: string) : string array =
-        let matches = userInputRegex.Matches(input) |> Seq.cast<Match> |> Seq.toArray
+    /// Takes a user input string and splits it into a collection of inputs.
+    let splitInputText input : string list =
+        let matches = userInputRegex.Matches input |> Seq.cast<Match> |> Seq.toList
 
         if isZero matches.Length then
-            [| |]
+            [ ]
         elif isOne matches.Length then
-            [| input |]
+            [ input ]
         else
-            let startIndices = matches |> Array.map _.Index
+            let startIndices = matches |> List.map _.Index
 
             let indexPairs =
                 startIndices
-                |> Array.mapi (fun idx startIndex ->
+                |> List.mapi (fun idx startIndex ->
                     let endIndex =
                         if idx = startIndices.Length - 1
                         then input.Length
                         else startIndices[idx + 1]
-                    { Start = startIndex; End = endIndex })
+                    { Start = startIndex
+                      End = endIndex })
 
             indexPairs
-            |> Array.map (fun p -> input[p.Start..(p.End - 1)].Trim())
-            |> Array.distinct
+            |> List.map (fun p -> input[p.Start..(p.End - 1)].Trim())
+            |> List.distinct
 
-    let categorizeInputs (inputs: string seq) : CategorizedInput list =
+    let categorizeInputs inputs : CategorizedInput list =
         inputs
         |> Seq.cast<string>
         |> Seq.map (fun input ->
