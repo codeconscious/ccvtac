@@ -167,19 +167,19 @@ module Settings =
                 | :? JsonException as e -> Error $"Parse error in \"{path}\": {e.Message}"
                 | e -> Error $"Unexpected error reading from \"{path}\": {e.Message}"
 
-        let private writeFile (FilePath file) settings =
+        let private writeFile (FilePath filePath) settings =
             let unicodeEncoder = JavaScriptEncoder.Create UnicodeRanges.All
             let writeIndented = true
             let options = JsonSerializerOptions(WriteIndented = writeIndented, Encoder = unicodeEncoder)
 
             try
                 let json = JsonSerializer.Serialize(settings, options)
-                File.WriteAllText(file, json)
-                Ok $"A new settings file was saved to \"{file}\". Please populate it with your desired settings."
+                File.WriteAllText(filePath, json)
+                Ok $"A new settings file was saved to \"{filePath}\". Please populate it with your desired settings."
             with
-                | :? FileNotFoundException -> Error $"File \"{file}\" was not found."
+                | :? FileNotFoundException -> Error $"File \"{filePath}\" was not found."
                 | :? JsonException -> Error "Failure parsing user settings to JSON."
-                | e -> Error $"Unexpected error writing \"{file}\": {e.Message}"
+                | e -> Error $"Unexpected error writing \"{filePath}\": {e.Message}"
 
         let writeDefaultFile (filePath: FilePath option) defaultFileName =
             let confirmedPath =

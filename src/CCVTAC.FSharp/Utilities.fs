@@ -106,6 +106,10 @@ module List =
 
 module Array =
 
+    let isNotEmpty arr = not <| Array.isEmpty arr
+
+    let hasMultiple arr = arr |> Array.length |> (<) 1
+
     let doesNotContain x arr = Array.contains x arr |> not
 
     let caseInsensitiveContains text (xs: string array) : bool =
