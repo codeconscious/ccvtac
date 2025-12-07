@@ -34,17 +34,17 @@ type ResultTracker<'a>(printer: Printer) =
         if isZero failures.Count then
             _printer.Debug("No failures in batch.")
         else
-            let failureLabel = if failures.Count = 1 then "failure" else "failures"
+            let failureLabel = pluralize "failure" "failures" failures.Count
             _printer.Info $"%d{failures.Count} %s{failureLabel} in this batch:"
-            for kvp in failures do
-                _printer.Warning $"- %s{kvp.Key}: %s{kvp.Value}"
+            for pair in failures do
+                _printer.Warning $"- %s{pair.Key}: %s{pair.Value}"
 
     /// Prints the output for the current application session.
     member _.PrintSessionSummary() : unit =
-        let successLabel = if successCount = 1UL then "success" else "successes"
-        let failureLabel = if failures.Count = 1 then "failure" else "failures"
+        let successLabel = pluralize "success" "successes" successCount
+        let failureLabel = pluralize "failure" "failures" failures.Count
 
         _printer.Info $"Quitting with %d{successCount} %s{successLabel} and %d{failures.Count} %s{failureLabel}."
 
-        for kvp in failures do
-            _printer.Warning $"- %s{kvp.Key}: %s{kvp.Value}"
+        for pair in failures do
+            _printer.Warning $"- %s{pair.Key}: %s{pair.Value}"
