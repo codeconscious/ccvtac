@@ -94,6 +94,12 @@ module String =
 
 module Seq =
 
+    let isNotEmpty l = not (Seq.isEmpty l)
+
+    let doesNotContain x seq = not <| Seq.contains x seq
+
+    let hasMultiple seq = seq |> Seq.length |> (<) 1
+
     let caseInsensitiveContains text (xs: string seq) : bool =
         xs |> Seq.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))
 
@@ -108,9 +114,9 @@ module Array =
 
     let isNotEmpty arr = not <| Array.isEmpty arr
 
-    let hasMultiple arr = arr |> Array.length |> (<) 1
-
     let doesNotContain x arr = not <| Array.contains x arr
+
+    let hasMultiple arr = arr |> Array.length |> (<) 1
 
     let caseInsensitiveContains text (xs: string array) : bool =
         xs |> Array.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))

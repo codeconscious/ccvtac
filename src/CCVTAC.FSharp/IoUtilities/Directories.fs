@@ -43,7 +43,7 @@ module Directories =
                 (0u, ErrorList())
                 fileNames
 
-        if isZero errors.Count then
+        if Seq.isEmpty errors then
             Ok successCount
         else
             SB($"While {successCount} files were deleted successfully, some files could not be deleted:{String.newLine}")
