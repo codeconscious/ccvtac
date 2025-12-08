@@ -32,7 +32,7 @@ module InputHelper =
         | _ ->
             let startIndices = matches |> List.map _.Index
 
-            let indexPairs =
+            let indexPairs : IndexPair list =
                 startIndices
                 |> List.mapi (fun idx startIndex ->
                     let endIndex =
@@ -48,13 +48,11 @@ module InputHelper =
 
     let categorizeInputs inputs : CategorizedInput list =
         inputs
-        |> Seq.cast<string>
-        |> Seq.map (fun input ->
+        |> List.map (fun input ->
             { Text = input
               Category = if input.StartsWith(string Commands.prefix)
                          then InputCategory.Command
                          else InputCategory.Url })
-        |> List.ofSeq
 
     let countCategories (inputs: CategorizedInput seq) : CategoryCounts =
         let counts =
