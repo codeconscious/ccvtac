@@ -32,10 +32,10 @@ module Renamer =
         else
             if not isQuietMode then
                 let patternSummary =
-                    if String.hasNoText renamePattern.Summary then
-                        $"`%s{renamePattern.RegexPattern}` (no description)"
-                    else
+                    if String.hasText renamePattern.Summary then
                         $"\"%s{renamePattern.Summary}\""
+                    else
+                        $"`%s{renamePattern.RegexPattern}` (no description)"
 
                 printer.Debug $"Rename pattern %s{patternSummary} matched × %d{matches.Length}."
 
@@ -54,7 +54,7 @@ module Renamer =
                             then m.Groups[i + 1].Value.Trim()
                             else String.Empty
                         (searchFor, replaceWith))
-                    |> Seq.fold (fun (sbRep: SB) -> sbRep.Replace) (SB renamePattern.ReplaceWithPattern)
+                    |> Seq.fold (fun (sb': SB) -> sb'.Replace) (SB renamePattern.ReplaceWithPattern)
                     |> _.ToString()
 
                 sb.Insert(m.Index, replacementText) |> ignore
