@@ -50,6 +50,9 @@ You can copy and paste the sample settings file below to a JSON file named `sett
 <details>
   <summary>Click here to expand!</summary>
 
+> [!IMPORTANT]
+> When entering regular expressions in the JSON, you must enter two backslashes for each one you want to include. For example, to match a whitespace character, use `\\s` instead of `\s`.
+
 ```js
 {
   // Mandatory. The working directory for temporary files.
@@ -71,7 +74,7 @@ You can copy and paste the sample settings file below to a JSON file named `sett
   // The audio formats (codec) audio should be extracted to.
   // Options: best, aac, alac, flac, m4a, mp3, opus, vorbis, wav.
   // Not all options are available for all videos.
-  "audioFormats": ["best"],
+  "audioFormats": ["m4a", "best"],
 
   // The audio quality to use, with 10 being the lowest and 0 being the highest.
   "audioQuality": 0,
@@ -139,7 +142,7 @@ You can copy and paste the sample settings file below to a JSON file named `sett
         // Which video metadata field should be searched, `title` or `description`?
         "searchField": "description",
 
-        // An arbitrary summary to the rule. If quiet mode is off, this name will appear
+        // An arbitrary summary of the rule. If quiet mode is off, this name will appear
         // in the output when this pattern is matched.
         "summary": "Topic style"
       }
