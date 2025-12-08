@@ -17,7 +17,7 @@ module Renamer =
         | "KC" -> NormalizationForm.FormKC
         | _    -> NormalizationForm.FormC
 
-    let private updateTextViaPatterns userSettings (printer: Printer) (sb: SB) (renamePattern: RenamePattern) =
+    let updateTextViaPatterns isQuietMode (printer: Printer) (sb: SB) (renamePattern: RenamePattern) =
         let regex = Regex renamePattern.RegexPattern
 
         let matches =
@@ -30,7 +30,7 @@ module Renamer =
         if List.isEmpty matches
         then sb
         else
-            if not userSettings.QuietMode then
+            if not isQuietMode then
                 let patternSummary =
                     if String.hasNoText renamePattern.Summary then
                         $"`%s{renamePattern.RegexPattern}` (no description)"
@@ -79,7 +79,7 @@ module Renamer =
                 let newFileName =
                     userSettings.RenamePatterns
                     |> Array.fold
-                        (fun (sb: SB) -> updateTextViaPatterns userSettings printer sb)
+                        (fun (sb: SB) -> updateTextViaPatterns userSettings.QuietMode printer sb)
                         (SB audioFile.Name)
                     |> _.ToString()
 
@@ -89,6 +89,7 @@ module Renamer =
                         |> _.Normalize(toNormalizationForm userSettings.NormalizationForm)
 
                     File.Move(audioFile.FullName, destinationPath)
+
                     printer.Debug $"• From: \"%s{audioFile.Name}\""
                     printer.Debug $"    To: \"%s{newFileName}\""
                 with ex ->
