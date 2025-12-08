@@ -10,7 +10,7 @@ open Xunit
 module UpdateTextViaPatternsTests =
 
     [<Fact>]
-    let ``Renames filenames per given rename patterns`` () =
+    let ``Renames files per specified rename patterns`` () =
         let patterns : RenamePattern list =
             [
                 { RegexPattern = "\s\[[\w_-]{11}\](?=\.\w{3,5})"
