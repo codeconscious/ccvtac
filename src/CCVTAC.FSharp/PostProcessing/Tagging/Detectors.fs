@@ -73,7 +73,7 @@ module Detectors =
             |> Seq.distinct
             |> Seq.toArray
 
-        if isZero matchedValues.Length then
+        if Array.isEmpty matchedValues then
             defaultValue
         else
             String.Join(separator, matchedValues)
