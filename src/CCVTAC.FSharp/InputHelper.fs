@@ -54,12 +54,11 @@ module InputHelper =
                          then InputCategory.Command
                          else InputCategory.Url })
 
-    let countCategories (inputs: CategorizedInput seq) : CategoryCounts =
+    let countCategories (inputs: CategorizedInput list) : CategoryCounts =
         let counts =
             inputs
-            |> Seq.cast<CategorizedInput>
-            |> Seq.groupBy _.Category
-            |> Seq.map (fun (k, grp) -> k, grp |> Seq.length)
+            |> List.groupBy _.Category
+            |> List.map (fun (k, grp) -> k, grp |> Seq.length)
             |> Map.ofSeq
 
         CategoryCounts counts
