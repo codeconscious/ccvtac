@@ -26,11 +26,10 @@ module InputHelper =
     let splitInputText input : string list =
         let matches = userInputRegex.Matches input |> Seq.cast<Match> |> Seq.toList
 
-        if isZero matches.Length then
-            [ ]
-        elif isOne matches.Length then
-            [ input ]
-        else
+        match matches with
+        | [] -> []
+        | [_] -> [input]
+        | _ ->
             let startIndices = matches |> List.map _.Index
 
             let indexPairs =
