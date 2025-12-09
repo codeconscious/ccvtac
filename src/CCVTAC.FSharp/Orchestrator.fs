@@ -33,7 +33,8 @@ module Orchestrator =
             let cmdSummary = match cmdCount with 1 -> "1 command" | n -> $"%d{n} commands"
 
             printer.Info <|
-                match counts[InputCategory.Url], counts[InputCategory.Command] with
+                match counts[InputCategory.Url],
+                      counts[InputCategory.Command] with
                 | u, c when u > 0 && c > 0 -> $"Batch of %s{urlSummary} and %s{cmdSummary} entered:"
                 | u, _ when u > 0 ->          $"Batch of %s{urlSummary} entered:"
                 | _, c when c > 0 ->          $"Batch of %s{cmdSummary} entered:"
@@ -44,7 +45,7 @@ module Orchestrator =
 
             Printer.EmptyLines 1uy
 
-    let sleep seconds : unit =
+    let sleep seconds : string =
         let message seconds = $"Sleeping for {seconds} seconds..."
 
         let rec loop remaining (ctx: StatusContext) =
@@ -57,6 +58,8 @@ module Orchestrator =
             ctx.Spinner(Spinner.Known.Star)
                .SpinnerStyle(Style.Parse "blue")
             |> loop seconds)
+
+        $"Slept for %d{seconds} second(s)."
 
     let processUrl
         (url: string)
@@ -76,9 +79,7 @@ module Orchestrator =
         | Ok () ->
             if urlIndex > 1 then // Don't sleep for the first URL.
                 sleep settings.SleepSecondsBetweenURLs
-                printer.Info(
-                    $"{String.newLine}Slept for %d{settings.SleepSecondsBetweenURLs} second(s).",
-                    appendLines = 1uy)
+                |> fun msg -> printer.Info($"{String.newLine}{msg}", appendLines = 1uy)
 
             if batchSize > 1 then
                 printer.Info $"Processing group %d{urlIndex} of %d{batchSize}..."
