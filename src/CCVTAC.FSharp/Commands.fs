@@ -33,6 +33,7 @@ module Commands =
                   $"Followed by a supported audio format (e.g., %s{updateAudioFormatPrefix}m4a), changes the audio format for the current session only")
             (updateAudioQualityPrefix,
                   $"Followed by a supported audio quality (e.g., %s{updateAudioQualityPrefix}0), changes the audio quality for the current session only")
+            String.Join(" or ", settingsSummary), "See the current settings"
             String.Join(" or ", quitCommands), "Quit this application"
             helpCommand, "See this help message"
         ]

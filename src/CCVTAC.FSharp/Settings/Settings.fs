@@ -99,7 +99,7 @@ module Settings =
             ("Embed images", onOrOff settings.EmbedImages)
             ("Quiet mode", onOrOff settings.QuietMode)
             ("Audio formats", String.Join(", ", settings.AudioFormats))
-            ("Audio quality (10 up to 0)", settings.AudioQuality |> sprintf "%B")
+            ("Audio quality (10 up to 0)", settings.AudioQuality |> sprintf "%d")
             ("Sleep between URLs", settings.SleepSecondsBetweenURLs |> int |> simplePluralize "second")
             ("Sleep between downloads", settings.SleepSecondsBetweenDownloads |> int |> simplePluralize "second")
             ("Ignore-upload-year channels", settings.IgnoreUploadYearUploaders.Length |> simplePluralize "channel")
