@@ -45,21 +45,21 @@ module Orchestrator =
 
             Printer.EmptyLines 1uy
 
-    let sleep seconds : string =
-        let message seconds = $"Sleeping for {seconds} seconds..."
-
+    let private sleep (workingMsg: uint16 -> string) (doneMsg: uint16 -> string) seconds : string =
         let rec loop remaining (ctx: StatusContext) =
             if remaining > 0us then
-                ctx.Status (message remaining) |> ignore
+                ctx.Status (workingMsg remaining) |> ignore
                 Thread.Sleep 1000
                 loop (remaining - 1us) ctx
 
-        AnsiConsole.Status().Start((message seconds), fun ctx ->
-            ctx.Spinner(Spinner.Known.Star)
-               .SpinnerStyle(Style.Parse "blue")
-            |> loop seconds)
+        AnsiConsole
+            .Status()
+            .Start((workingMsg seconds), fun ctx ->
+                ctx.Spinner(Spinner.Known.Star)
+                   .SpinnerStyle(Style.Parse "blue")
+                |> loop seconds)
 
-        $"Slept for %d{seconds} second(s)."
+        doneMsg seconds
 
     let processUrl
         (url: string)
@@ -78,7 +78,11 @@ module Orchestrator =
             Ok NextAction.QuitDueToErrors
         | Ok () ->
             if urlIndex > 1 then // Don't sleep for the first URL.
-                sleep settings.SleepSecondsBetweenURLs
+                let secondsLabel = NumberUtilities.pluralize "second" "seconds" settings.SleepSecondsBetweenURLs
+                sleep
+                    (fun seconds -> $"Sleeping for {seconds} {secondsLabel}...")
+                    (fun seconds -> $"Slept for {seconds} {secondsLabel}.")
+                    settings.SleepSecondsBetweenURLs
                 |> fun msg -> printer.Info($"{String.newLine}{msg}", appendLines = 1uy)
 
             if batchSize > 1 then
