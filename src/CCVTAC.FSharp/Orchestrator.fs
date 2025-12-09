@@ -30,9 +30,14 @@ module Orchestrator =
             let cmdCount = counts[InputCategory.Command]
 
             let urlSummary = match urlCount with 1 -> "1 URL" | n -> $"%d{n} URLs"
-            let commandSummary = match cmdCount with 1 -> "1 command" | n -> $"%d{n} commands"
-            let conjunction = if String.allHaveText [urlSummary; commandSummary] then " and " else String.Empty
-            printer.Info $"Batch of %s{urlSummary}%s{conjunction}%s{commandSummary} entered:"
+            let cmdSummary = match cmdCount with 1 -> "1 command" | n -> $"%d{n} commands"
+
+            printer.Info <|
+                match counts[InputCategory.Url], counts[InputCategory.Command] with
+                | u, c when u > 0 && c > 0 -> $"Batch of %s{urlSummary} and %s{cmdSummary} entered:"
+                | u, _ when u > 0 ->          $"Batch of %s{urlSummary} entered:"
+                | _, c when c > 0 ->          $"Batch of %s{cmdSummary} entered:"
+                | _, _ ->                      "No URLs or commands were entered!"
 
             for input in categorizedInputs do
                 printer.Info $" • %s{input.Text}"
