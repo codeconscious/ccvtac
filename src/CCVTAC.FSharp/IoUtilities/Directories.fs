@@ -72,7 +72,7 @@ module Directories =
         if Array.isEmpty fileNames then
             Ok ()
         else
-            let fileLabel = Numerics.pluralize "file" "files" fileNames.Length
+            let fileLabel = String.fileLabel fileNames.Length
 
             SB($"Unexpectedly found {fileNames.Length} {fileLabel} in working directory \"{dirName}\":{String.newLine}")
                 .AppendLine
