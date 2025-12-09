@@ -31,8 +31,7 @@ module Orchestrator =
             let cmdSummary = match cmdCount with 1 -> "1 command" | n -> $"%d{n} commands"
 
             printer.Info <|
-                match counts[InputCategory.Url],
-                      counts[InputCategory.Command] with
+                match counts[InputCategory.Url], counts[InputCategory.Command] with
                 | u, c when u > 0 && c > 0 -> $"Batch of %s{urlSummary} and %s{cmdSummary} entered:"
                 | u, _ when u > 0 ->          $"Batch of %s{urlSummary} entered:"
                 | _, c when c > 0 ->          $"Batch of %s{cmdSummary} entered:"
@@ -171,16 +170,11 @@ module Orchestrator =
             else
                 let updateResult = updateAudioFormat settings format
                 match updateResult with
-                | Error e -> Error e
+                | Error err -> Error err
                 | Ok x ->
                     settings <- x
                     printer.Info(summarizeUpdate "Audio Formats" (String.Join(", ", settings.AudioFormats)))
                     Ok NextAction.Continue
-                // if updateResult.IsError then Error updateResult.ErrorValue
-                // else
-                //     settings <- updateResult.ResultValue
-                //     printer.Info(summarizeUpdate "Audio Formats" (String.Join(", ", settings.AudioFormats)))
-                //     Ok NextAction.Continue
 
         // Update audio quality
         elif String.startsWithIgnoreCase Commands.updateAudioQualityPrefix command then
@@ -192,16 +186,11 @@ module Orchestrator =
                 | true, quality ->
                     let updateResult = updateAudioQuality settings quality
                     match updateResult with
-                    | Error e -> Error e
-                    | Ok x ->
-                        settings <- x
+                    | Error err -> Error err
+                    | Ok updatedSettings ->
+                        settings <- updatedSettings
                         printer.Info(summarizeUpdate "Audio Quality" (settings.AudioQuality.ToString()))
                         Ok NextAction.Continue
-                    // if updateResult.IsError then Error updateResult.ErrorValue
-                    // else
-                    //     settings <- updateResult.ResultValue
-                    //     printer.Info(summarizeUpdate "Audio Quality" (settings.AudioQuality.ToString()))
-                    //     Ok NextAction.Continue
                 | _ ->
                     Error $"\"%s{inputQuality}\" is an invalid quality value."
 
