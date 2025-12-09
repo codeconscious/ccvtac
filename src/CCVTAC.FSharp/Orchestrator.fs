@@ -7,10 +7,8 @@ open CCVTAC.Console.PostProcessing
 open CCVTAC.Console.Settings
 open CCVTAC.Console.Settings.Settings
 open CCVTAC.Console.Settings.Settings.LiveUpdating
-open Spectre.Console
 open Startwatch.Library
 open System
-open System.Threading
 
 module Orchestrator =
 
@@ -44,22 +42,6 @@ module Orchestrator =
                 printer.Info $" • %s{input.Text}"
 
             Printer.EmptyLines 1uy
-
-    let private sleep workingMsgFn doneMsgFn seconds : string =
-        let rec loop remaining (ctx: StatusContext) =
-            if remaining > 0us then
-                ctx.Status (workingMsgFn remaining) |> ignore
-                Thread.Sleep 1000
-                loop (remaining - 1us) ctx
-
-        AnsiConsole
-            .Status()
-            .Start((workingMsgFn seconds), fun ctx ->
-                ctx.Spinner(Spinner.Known.Star)
-                   .SpinnerStyle(Style.Parse "blue")
-                |> loop seconds)
-
-        doneMsgFn seconds
 
     let processUrl
         (url: string)
