@@ -61,7 +61,7 @@ module Orchestrator =
         | Ok () ->
             if urlIndex > 1 then // Don't sleep for the first URL.
                 settings.SleepSecondsBetweenURLs
-                |> Numerics.pluralize "second" "seconds"
+                |> String.pluralize "second" "seconds"
                 |> fun secondsLabel ->
                     sleep
                         (fun seconds -> $"Sleeping for {seconds} {secondsLabel}...")

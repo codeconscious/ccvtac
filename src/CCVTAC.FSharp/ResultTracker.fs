@@ -32,15 +32,15 @@ type ResultTracker<'a>(printer: Printer) =
         if Numerics.isZero failures.Count then
             printer.Debug "No failures in batch."
         else
-            let failureLabel = Numerics.pluralize "failure" "failures" failures.Count
+            let failureLabel = String.pluralize "failure" "failures" failures.Count
             printer.Info $"%d{failures.Count} %s{failureLabel} in this batch:"
             for pair in failures do
                 printer.Warning $"- %s{pair.Key}: %s{pair.Value}"
 
     /// Prints the output for the current application session.
     member _.PrintSessionSummary() : unit =
-        let successLabel = Numerics.pluralize "success" "successes" successCount
-        let failureLabel = Numerics.pluralize "failure" "failures" failures.Count
+        let successLabel = String.pluralize "success" "successes" successCount
+        let failureLabel = String.pluralize "failure" "failures" failures.Count
 
         printer.Info $"Quitting with %d{successCount} %s{successLabel} and %d{failures.Count} %s{failureLabel}."
 

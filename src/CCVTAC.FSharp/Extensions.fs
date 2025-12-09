@@ -14,10 +14,8 @@ module Numerics =
     let inline isOne (n: ^a) =
         n = LanguagePrimitives.GenericOne<'a>
 
-    let inline pluralize ifOne ifNotOne count =
-        if isOne count then ifOne else ifNotOne
-
 module String =
+
     let newLine = Environment.NewLine
 
     let hasNoText text =
@@ -44,10 +42,13 @@ module String =
     let endsWithIgnoringCase endText (text: string) =
         text.EndsWith(endText, StringComparison.InvariantCultureIgnoreCase)
 
+    let inline pluralize ifOne ifNotOne count =
+        if Numerics.isOne count then ifOne else ifNotOne
+
     let inline fileLabel descriptor count =
         match descriptor with
-        | None   -> $"""%d{count} %s{Numerics.pluralize "file" "files" count}"""
-        | Some d -> $"""%d{count} %s{d} {Numerics.pluralize "file" "files" count}"""
+        | None   -> $"""%d{count} %s{pluralize "file" "files" count}"""
+        | Some d -> $"""%d{count} %s{d} {pluralize "file" "files" count}"""
 
     /// Returns a new string in which all invalid path characters for the current OS
     /// have been replaced by the specified replacement character.
