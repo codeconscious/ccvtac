@@ -66,10 +66,10 @@ module String =
             seq {
                 yield! Path.GetInvalidFileNameChars()
                 yield! Path.GetInvalidPathChars()
-                yield Path.PathSeparator
-                yield Path.DirectorySeparatorChar
-                yield Path.AltDirectorySeparatorChar
-                yield Path.VolumeSeparatorChar
+                yield  Path.PathSeparator
+                yield  Path.DirectorySeparatorChar
+                yield  Path.AltDirectorySeparatorChar
+                yield  Path.VolumeSeparatorChar
                 yield! custom
             }
             |> Set.ofSeq
@@ -88,7 +88,7 @@ module String =
 
 module Seq =
 
-    let isNotEmpty l = not (Seq.isEmpty l)
+    let isNotEmpty seq = not (Seq.isEmpty seq)
 
     let doesNotContain x seq = not <| Seq.contains x seq
 
@@ -99,10 +99,10 @@ module Seq =
 
 module List =
 
-    let isNotEmpty l = not (List.isEmpty l)
+    let isNotEmpty list = not (List.isEmpty list)
 
-    let caseInsensitiveContains text (xs: string list) : bool =
-        xs |> List.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))
+    let caseInsensitiveContains text (list: string list) : bool =
+        list |> List.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))
 
 module Array =
 
@@ -112,5 +112,5 @@ module Array =
 
     let hasMultiple arr = arr |> Array.length |> (<) 1
 
-    let caseInsensitiveContains text (xs: string array) : bool =
-        xs |> Array.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))
+    let caseInsensitiveContains text (arr: string array) : bool =
+        arr |> Array.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))
