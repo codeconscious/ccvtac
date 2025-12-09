@@ -39,7 +39,7 @@ module Deleter =
         let collectionFileNames =
             match getCollectionFiles collectionMetadata workingDirectory with
             | Ok files ->
-                printer.Debug $"Found {files.Length} collection files."
+                printer.Debug $"""Found {String.fileLabel (Some "collection") files.Length}."""
                 files
             | Error err ->
                 printer.Warning err
@@ -50,6 +50,6 @@ module Deleter =
         if Array.isEmpty allFileNames then
             printer.Warning "No files to delete were found."
         else
-            printer.Debug $"Deleting {allFileNames.Length} temporary files..."
+            printer.Debug $"""Deleting {String.fileLabel (Some "temporary") allFileNames.Length}..."""
             deleteAll allFileNames printer
             printer.Info "Deleted temporary files."

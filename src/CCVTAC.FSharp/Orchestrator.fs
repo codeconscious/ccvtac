@@ -268,7 +268,7 @@ module Orchestrator =
 
             match Directories.askToDeleteAllFiles settings.WorkingDirectory printer with
             | Ok deletedCount ->
-                printer.Info $"%d{deletedCount} file(s) deleted."
+                printer.Info $"%s{String.fileLabel None deletedCount} deleted."
             | Error err ->
                 printer.Error err
                 printer.Info "Aborting..."

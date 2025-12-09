@@ -84,7 +84,7 @@ module PostProcessor =
                     printer.Error err
                     printer.Info "Will delete the remaining files..."
                     match Directories.deleteAllFiles 20 workingDirectory with
-                    | Ok deletedCount -> printer.Info $"%d{deletedCount} file(s) deleted."
+                    | Ok deletedCount -> printer.Info $"%s{String.fileLabel None deletedCount} deleted."
                     | Error e -> printer.Error e
             | Error e ->
                 printer.Error($"Tagging error(s) preventing further post-processing: {e}")

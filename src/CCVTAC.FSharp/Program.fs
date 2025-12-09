@@ -61,7 +61,7 @@ module Program =
                         | Error warnResult ->
                             printer.Error warnResult
                             match Directories.askToDeleteAllFiles settings.WorkingDirectory printer with
-                            | Ok deletedCount -> printer.Info $"%d{deletedCount} file(s) deleted."
+                            | Ok deletedCount -> printer.Info $"%s{String.fileLabel None deletedCount} deleted."
                             | Error delErr -> printer.Error delErr
                     )
 

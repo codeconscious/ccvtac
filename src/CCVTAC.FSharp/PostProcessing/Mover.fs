@@ -38,18 +38,18 @@ module Mover =
         (moveToDir: string)
         (overwrite: bool)
         (printer: Printer)
-        : uint32 * uint32 = // TODO: Need a custom type for clarity.
+        : int * int = // TODO: Need a custom type for clarity.
 
-        let mutable successCount = 0u
-        let mutable failureCount = 0u
+        let mutable successCount = 0
+        let mutable failureCount = 0
 
         for file in audioFiles do
             try
                 File.Move(file.FullName, Path.Combine(moveToDir, file.Name), overwrite)
-                successCount <- successCount + 1u
+                successCount <- successCount + 1
                 printer.Debug $"• Moved \"%s{file.Name}\""
             with ex ->
-                failureCount <- failureCount + 1u
+                failureCount <- failureCount + 1
                 printer.Error $"• Error moving file \"%s{file.Name}\": %s{ex.Message}"
 
         (successCount, failureCount)
@@ -142,18 +142,17 @@ module Mover =
             if audioFileNames.IsEmpty then
                 printer.Error "No audio filenames to move were found."
             else
-                let toMoveFileLabel = String.fileLabel audioFileNames.Length
-                printer.Debug $"Moving %d{audioFileNames.Length} audio %s{toMoveFileLabel} to \"%s{fullMoveToDir}\"..."
+                let fileCountMsg = String.fileLabel (Some "audio")
+
+                printer.Debug $"Moving %s{fileCountMsg audioFileNames.Length} to \"%s{fullMoveToDir}\"..."
 
                 let moveSuccessCount, moveFailureCount =
                     moveAudioFiles audioFileNames fullMoveToDir overwrite printer
 
-                let movedFileLabel = String.fileLabel moveSuccessCount
-                printer.Info $"Moved %d{moveSuccessCount} audio %s{movedFileLabel} in %s{watch.ElapsedFriendly}."
+                printer.Info $"Moved %s{fileCountMsg moveSuccessCount} in %s{watch.ElapsedFriendly}."
 
-                if moveFailureCount > 0u then
-                    let failFileLabel = String.fileLabel moveFailureCount
-                    printer.Warning $"However, %d{moveFailureCount} audio %s{failFileLabel} could not be moved."
+                if moveFailureCount > 0 then
+                    printer.Warning $"However, %s{fileCountMsg moveFailureCount} could not be moved."
 
                 match moveImageFile collectionName subFolderName workingDirInfo fullMoveToDir
                                     audioFileNames.Length overwrite with

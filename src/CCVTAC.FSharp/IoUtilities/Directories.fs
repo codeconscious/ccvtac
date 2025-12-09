@@ -46,7 +46,7 @@ module Directories =
         if Seq.isEmpty errors then
             Ok successCount
         else
-            SB($"While {successCount} files were deleted successfully, some files could not be deleted:{String.newLine}")
+            SB($"{String.fileLabel None successCount} deleted successfully, but some files could not be deleted:{String.newLine}")
                 .AppendLine
                     (fileNames
                      |> Array.truncate showMaxErrors
@@ -72,9 +72,7 @@ module Directories =
         if Array.isEmpty fileNames then
             Ok ()
         else
-            let fileLabel = String.fileLabel fileNames.Length
-
-            SB($"Unexpectedly found {fileNames.Length} {fileLabel} in working directory \"{dirName}\":{String.newLine}")
+            SB($"Unexpectedly found {String.fileLabel None fileNames.Length} in working directory \"{dirName}\":{String.newLine}")
                 .AppendLine
                     (fileNames
                      |> Array.truncate showMax

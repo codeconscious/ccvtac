@@ -73,7 +73,7 @@ module Renamer =
         if List.isEmpty audioFiles then
             printer.Warning "No audio files to rename were found."
         else
-            printer.Debug $"Renaming %d{audioFiles.Length} audio file(s)..."
+            printer.Debug $"""Renaming %s{String.fileLabel (Some "audio") audioFiles.Length}..."""
 
             for audioFile in audioFiles do
                 let newFileName =
