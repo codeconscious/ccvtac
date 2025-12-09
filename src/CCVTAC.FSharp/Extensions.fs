@@ -6,14 +6,13 @@ open System.Text
 
 type SB = StringBuilder
 
-[<AutoOpen>]
 module Numerics =
 
-    let inline isZero (x: ^a) =
-        x = LanguagePrimitives.GenericZero<'a>
+    let inline isZero (n: ^a) =
+        n = LanguagePrimitives.GenericZero<'a>
 
-    let inline isOne (x: ^a) =
-        x = LanguagePrimitives.GenericOne<'a>
+    let inline isOne (n: ^a) =
+        n = LanguagePrimitives.GenericOne<'a>
 
     let inline pluralize ifOne ifNotOne count =
         if isOne count then ifOne else ifNotOne
@@ -46,7 +45,7 @@ module String =
         text.EndsWith(endText, StringComparison.InvariantCultureIgnoreCase)
 
     let inline fileLabel count =
-        pluralize "file" "files" count
+        Numerics.pluralize "file" "files" count
 
     /// Returns a new string in which all invalid path characters for the current OS
     /// have been replaced by the specified replacement character.

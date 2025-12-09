@@ -80,8 +80,8 @@ module Settings =
             | true -> "ON"
             | false -> "OFF"
 
-        let pluralize label count =
-            pluralize label $"{label}s" count
+        let simplePluralize label count =
+            Numerics.pluralize label $"{label}s" count
             |> sprintf "%d %s" count
 
         let tagDetectionPatternCount (patterns: TagDetectionPatterns) =
@@ -100,12 +100,12 @@ module Settings =
             ("Quiet mode", onOrOff settings.QuietMode)
             ("Audio formats", String.Join(", ", settings.AudioFormats))
             ("Audio quality (10 up to 0)", settings.AudioQuality |> sprintf "%B")
-            ("Sleep between URLs", settings.SleepSecondsBetweenURLs |> int |> pluralize "second")
-            ("Sleep between downloads", settings.SleepSecondsBetweenDownloads |> int |> pluralize "second")
-            ("Ignore-upload-year channels", settings.IgnoreUploadYearUploaders.Length |> pluralize "channel")
-            ("Do-not-embed-image channels", settings.DoNotEmbedImageUploaders.Length |> pluralize "channel")
-            ("Tag-detection patterns", tagDetectionPatternCount settings.TagDetectionPatterns |> pluralize "pattern")
-            ("Rename patterns", settings.RenamePatterns.Length |> pluralize "pattern")
+            ("Sleep between URLs", settings.SleepSecondsBetweenURLs |> int |> simplePluralize "second")
+            ("Sleep between downloads", settings.SleepSecondsBetweenDownloads |> int |> simplePluralize "second")
+            ("Ignore-upload-year channels", settings.IgnoreUploadYearUploaders.Length |> simplePluralize "channel")
+            ("Do-not-embed-image channels", settings.DoNotEmbedImageUploaders.Length |> simplePluralize "channel")
+            ("Tag-detection patterns", tagDetectionPatternCount settings.TagDetectionPatterns |> simplePluralize "pattern")
+            ("Rename patterns", settings.RenamePatterns.Length |> simplePluralize "pattern")
         ]
 
     let printSummary settings (printer: Printer) headerOpt : unit =
