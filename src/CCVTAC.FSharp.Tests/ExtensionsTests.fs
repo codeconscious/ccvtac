@@ -1,62 +1,62 @@
-module UtilitiesTests
+module ExtensionsTests
 
 open CCVTAC.Console
 open Xunit
 open System
 
-module NumberUtilitiesTests =
+module NumericsTests =
 
     [<Fact>]
     let ``isZero returns true for any zero value`` () =
-        Assert.True <| NumberUtilities.isZero 0
-        Assert.True <| NumberUtilities.isZero 0u
-        Assert.True <| NumberUtilities.isZero 0us
-        Assert.True <| NumberUtilities.isZero 0.
-        Assert.True <| NumberUtilities.isZero 0L
-        Assert.True <| NumberUtilities.isZero 0m
-        Assert.True <| NumberUtilities.isZero -0
-        Assert.True <| NumberUtilities.isZero -0.
-        Assert.True <| NumberUtilities.isZero -0L
-        Assert.True <| NumberUtilities.isZero -0m
+        Assert.True <| Numerics.isZero 0
+        Assert.True <| Numerics.isZero 0u
+        Assert.True <| Numerics.isZero 0us
+        Assert.True <| Numerics.isZero 0.
+        Assert.True <| Numerics.isZero 0L
+        Assert.True <| Numerics.isZero 0m
+        Assert.True <| Numerics.isZero -0
+        Assert.True <| Numerics.isZero -0.
+        Assert.True <| Numerics.isZero -0L
+        Assert.True <| Numerics.isZero -0m
 
     [<Fact>]
     let ``isZero returns false for any non-zero value`` () =
-        Assert.False <| NumberUtilities.isZero 1
-        Assert.False <| NumberUtilities.isOne -1
-        Assert.False <| NumberUtilities.isOne Int64.MinValue
-        Assert.False <| NumberUtilities.isOne Int64.MaxValue
-        Assert.False <| NumberUtilities.isOne 2
-        Assert.False <| NumberUtilities.isZero 1u
-        Assert.False <| NumberUtilities.isZero 1us
-        Assert.False <| NumberUtilities.isZero -0.0000000000001
-        Assert.False <| NumberUtilities.isZero 0.0000000000001
-        Assert.False <| NumberUtilities.isZero 1.
-        Assert.False <| NumberUtilities.isZero 1L
-        Assert.False <| NumberUtilities.isZero 1m
+        Assert.False <| Numerics.isZero 1
+        Assert.False <| Numerics.isOne -1
+        Assert.False <| Numerics.isOne Int64.MinValue
+        Assert.False <| Numerics.isOne Int64.MaxValue
+        Assert.False <| Numerics.isOne 2
+        Assert.False <| Numerics.isZero 1u
+        Assert.False <| Numerics.isZero 1us
+        Assert.False <| Numerics.isZero -0.0000000000001
+        Assert.False <| Numerics.isZero 0.0000000000001
+        Assert.False <| Numerics.isZero 1.
+        Assert.False <| Numerics.isZero 1L
+        Assert.False <| Numerics.isZero 1m
 
     [<Fact>]
     let ``isOne returns true for any one value`` () =
-        Assert.True <| NumberUtilities.isOne 1
-        Assert.True <| NumberUtilities.isOne 1u
-        Assert.True <| NumberUtilities.isOne 1us
-        Assert.True <| NumberUtilities.isOne 1.
-        Assert.True <| NumberUtilities.isOne 1L
-        Assert.True <| NumberUtilities.isOne 1m
+        Assert.True <| Numerics.isOne 1
+        Assert.True <| Numerics.isOne 1u
+        Assert.True <| Numerics.isOne 1us
+        Assert.True <| Numerics.isOne 1.
+        Assert.True <| Numerics.isOne 1L
+        Assert.True <| Numerics.isOne 1m
 
     [<Fact>]
     let ``isOne returns false for any non-one value`` () =
-        Assert.False <| NumberUtilities.isOne 0
-        Assert.False <| NumberUtilities.isOne -1
-        Assert.False <| NumberUtilities.isOne Int64.MinValue
-        Assert.False <| NumberUtilities.isOne Int64.MaxValue
-        Assert.False <| NumberUtilities.isOne 2
-        Assert.False <| NumberUtilities.isOne 0u
-        Assert.False <| NumberUtilities.isOne 16u
-        Assert.False <| NumberUtilities.isOne 0us
-        Assert.False <| NumberUtilities.isOne -0.
-        Assert.False <| NumberUtilities.isOne 0.001
-        Assert.False <| NumberUtilities.isOne 0L
-        Assert.False <| NumberUtilities.isOne 0m
+        Assert.False <| Numerics.isOne 0
+        Assert.False <| Numerics.isOne -1
+        Assert.False <| Numerics.isOne Int64.MinValue
+        Assert.False <| Numerics.isOne Int64.MaxValue
+        Assert.False <| Numerics.isOne 2
+        Assert.False <| Numerics.isOne 0u
+        Assert.False <| Numerics.isOne 16u
+        Assert.False <| Numerics.isOne 0us
+        Assert.False <| Numerics.isOne -0.
+        Assert.False <| Numerics.isOne 0.001
+        Assert.False <| Numerics.isOne 0L
+        Assert.False <| Numerics.isOne 0m
 
 module SeqTests =
 

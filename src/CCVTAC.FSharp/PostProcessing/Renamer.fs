@@ -67,7 +67,7 @@ module Renamer =
 
         let audioFiles =
             workingDirInfo.EnumerateFiles()
-            |> Seq.filter (fun f -> List.caseInsensitiveContains f.Extension audioExtensions)
+            |> Seq.filter (fun f -> List.caseInsensitiveContains f.Extension audioFileExtensions)
             |> List.ofSeq
 
         if List.isEmpty audioFiles then

@@ -1,14 +1,17 @@
 namespace CCVTAC.Console
 
-
 open System.Threading
 open Spectre.Console
 
 [<AutoOpen>]
 module Shared =
 
-    let audioExtensions =
+    let audioFileExtensions =
         [ ".aac"; ".alac"; ".flac"; ".m4a"; ".mp3"; ".ogg"; ".vorbis"; ".opus"; ".wav" ]
+
+    let ofTry (f: unit -> 'a) : Result<'a, string> =
+        try Ok (f())
+        with exn -> Error exn.Message
 
     let sleep workingMsgFn doneMsgFn seconds : string =
         let rec loop remaining (ctx: StatusContext) =

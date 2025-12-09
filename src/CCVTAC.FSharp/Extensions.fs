@@ -7,14 +7,7 @@ open System.Text
 type SB = StringBuilder
 
 [<AutoOpen>]
-module Utilities =
-
-    let ofTry (f: unit -> 'a) : Result<'a, string> =
-        try Ok (f())
-        with exn -> Error exn.Message
-
-[<AutoOpen>]
-module NumberUtilities =
+module Numerics =
 
     let inline isZero (x: ^a) =
         x = LanguagePrimitives.GenericZero<'a>
@@ -26,7 +19,6 @@ module NumberUtilities =
         if isOne count then ifOne else ifNotOne
 
 module String =
-
     let newLine = Environment.NewLine
 
     let hasNoText text =

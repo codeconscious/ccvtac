@@ -13,7 +13,7 @@ module Directories =
     /// Counts the number of audio files in a directory
     let audioFileCount (directory: string) =
         DirectoryInfo(directory).EnumerateFiles()
-        |> Seq.filter (fun f -> List.caseInsensitiveContains f.Extension audioExtensions)
+        |> Seq.filter (fun f -> List.caseInsensitiveContains f.Extension audioFileExtensions)
         |> Seq.length
 
     /// Returns the filenames in a given directory, optionally ignoring specific filenames
@@ -72,7 +72,7 @@ module Directories =
         if Array.isEmpty fileNames then
             Ok ()
         else
-            let fileLabel = NumberUtilities.pluralize "file" "files" fileNames.Length
+            let fileLabel = Numerics.pluralize "file" "files" fileNames.Length
 
             SB($"Unexpectedly found {fileNames.Length} {fileLabel} in working directory \"{dirName}\":{String.newLine}")
                 .AppendLine
