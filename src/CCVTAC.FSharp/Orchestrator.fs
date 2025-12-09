@@ -13,6 +13,7 @@ open System
 open System.Threading
 
 module Orchestrator =
+
     type NextAction =
         | Continue
         | QuitAtUserRequest
@@ -28,41 +29,29 @@ module Orchestrator =
             let urlCount = counts[InputCategory.Url]
             let cmdCount = counts[InputCategory.Command]
 
-            let urlSummary =
-                match urlCount with
-                | 1 -> "1 URL"
-                | n when n > 1 -> $"%d{n} URLs"
-                | _ -> String.Empty
-
-            let commandSummary =
-                match cmdCount with
-                | 1 -> "1 command"
-                | n when n > 1 -> $"%d{n} commands"
-                | _ -> String.Empty
-
-            let connector =
-                if String.allHaveText [urlSummary; commandSummary] then " and " else String.Empty
-
-            printer.Info $"Batch of %s{urlSummary}%s{connector}%s{commandSummary} entered."
+            let urlSummary = match urlCount with 1 -> "1 URL" | n -> $"%d{n} URLs"
+            let commandSummary = match cmdCount with 1 -> "1 command" | n -> $"%d{n} commands"
+            let conjunction = if String.allHaveText [urlSummary; commandSummary] then " and " else String.Empty
+            printer.Info $"Batch of %s{urlSummary}%s{conjunction}%s{commandSummary} entered:"
 
             for input in categorizedInputs do
                 printer.Info $" • %s{input.Text}"
 
             Printer.EmptyLines 1uy
 
-    let sleep (sleepSeconds: uint16) : unit =
+    let sleep seconds : unit =
         let message seconds = $"Sleeping for {seconds} seconds..."
 
-        let rec loop (remaining: uint16) (ctx: StatusContext) =
+        let rec loop remaining (ctx: StatusContext) =
             if remaining > 0us then
                 ctx.Status (message remaining) |> ignore
                 Thread.Sleep 1000
                 loop (remaining - 1us) ctx
 
-        AnsiConsole.Status().Start((message sleepSeconds), fun ctx ->
+        AnsiConsole.Status().Start((message seconds), fun ctx ->
             ctx.Spinner(Spinner.Known.Star)
                .SpinnerStyle(Style.Parse "blue")
-            |> loop sleepSeconds)
+            |> loop seconds)
 
     let processUrl
         (url: string)
@@ -82,7 +71,9 @@ module Orchestrator =
         | Ok () ->
             if urlIndex > 1 then // Don't sleep for the first URL.
                 sleep settings.SleepSecondsBetweenURLs
-                printer.Info($"Slept for %d{settings.SleepSecondsBetweenURLs} second(s).", appendLines = 1uy)
+                printer.Info(
+                    $"{String.newLine}Slept for %d{settings.SleepSecondsBetweenURLs} second(s).",
+                    appendLines = 1uy)
 
             if batchSize > 1 then
                 printer.Info $"Processing group %d{urlIndex} of %d{batchSize}..."
@@ -251,7 +242,8 @@ module Orchestrator =
                 | InputCategory.Command ->
                     processCommand input.Text &settings history printer
                 | InputCategory.Url ->
-                    processUrl input.Text settings resultTracker history inputTime categoryCounts[InputCategory.Url] inputIndex printer
+                    processUrl input.Text settings resultTracker history inputTime
+                               categoryCounts[InputCategory.Url] inputIndex printer
 
             batchResults.RegisterResult(input.Text, result)
 

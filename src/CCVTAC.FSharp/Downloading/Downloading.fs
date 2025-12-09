@@ -1,7 +1,8 @@
 ﻿namespace CCVTAC.Console.Downloading
 
+open System.Text.RegularExpressions
+
 module public Downloading =
-    open System.Text.RegularExpressions
 
     type MediaType =
         | Video of Id: string
@@ -15,7 +16,7 @@ module public Downloading =
         | m when m.Success -> Some (List.tail [for g in m.Groups -> g.Value])
         | _ -> None
 
-    let mediaTypeWithIds url =
+    let mediaTypeWithIds url : Result<MediaType,string> =
         match url with
         | RegexMatch @"(?<=v=|v\=)([\w-]{11})(?:&list=([\w_-]+))" [videoId; playlistId] ->
             Ok (PlaylistVideo (videoId, playlistId))
