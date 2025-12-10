@@ -27,7 +27,7 @@ module Orchestrator =
         (printer: Printer)
         : unit =
 
-        if categorizedInputs.Length > 1 then
+        if List.hasMultiple categorizedInputs then
             let urlCount = counts[InputCategory.Url]
             let cmdCount = counts[InputCategory.Command]
 

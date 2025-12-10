@@ -29,7 +29,7 @@ module Runner =
         let splitCommandWithArgs = toolSettings.CommandWithArgs.Split([|' '|], 2)
 
         let processStartInfo = ProcessStartInfo splitCommandWithArgs[0]
-        processStartInfo.Arguments <- if splitCommandWithArgs.Length > 1
+        processStartInfo.Arguments <- if Array.hasMultiple splitCommandWithArgs
                                       then splitCommandWithArgs[1]
                                       else String.Empty
         processStartInfo.UseShellExecute <- false

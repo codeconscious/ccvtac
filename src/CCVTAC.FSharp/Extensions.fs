@@ -99,10 +99,12 @@ module Seq =
 
 module List =
 
-    let isNotEmpty list = not (List.isEmpty list)
+    let isNotEmpty lst = not (List.isEmpty lst)
 
-    let caseInsensitiveContains text (list: string list) : bool =
-        list |> List.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))
+    let hasMultiple lst = lst |> List.length |> (<) 1
+
+    let caseInsensitiveContains text (lst: string list) : bool =
+        lst |> List.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))
 
 module Array =
 
