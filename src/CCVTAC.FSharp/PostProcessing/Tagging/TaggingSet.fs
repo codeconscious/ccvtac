@@ -8,7 +8,6 @@ open System.Text.RegularExpressions
 /// Contains all the data necessary for tagging a related set of files.
 module TaggingSets =
 
-    [<Struct>]
     type TaggingSet =
         { ResourceId: string
           AudioFilePaths: string list
@@ -44,13 +43,13 @@ module TaggingSets =
             |> Seq.map (fun (videoId, matches) -> videoId, matches |> Seq.map _.Groups[0].Value)
             |> Seq.filter (fun (_, fileNames) ->
                 let isSupportedExtension = fileNames |> Seq.exists fileHasSupportedExtension
-                let jsonCount = fileNames |> Seq.filter (String.endsWithIgnoringCase jsonFileExt) |> Seq.length
+                let jsonCount =  fileNames |> Seq.filter (String.endsWithIgnoringCase jsonFileExt)  |> Seq.length
                 let imageCount = fileNames |> Seq.filter (String.endsWithIgnoringCase imageFileExt) |> Seq.length
                 isSupportedExtension && jsonCount = 1 && imageCount = 1)
             |> Seq.map (fun (key, files) ->
                 let audioFiles = files |> Seq.filter fileHasSupportedExtension
-                let jsonFile = files |> Seq.find (String.endsWithIgnoringCase jsonFileExt)
-                let imageFile = files |> Seq.find (String.endsWithIgnoringCase imageFileExt)
+                let jsonFile   = files |> Seq.find (String.endsWithIgnoringCase jsonFileExt)
+                let imageFile  = files |> Seq.find (String.endsWithIgnoringCase imageFileExt)
                 { ResourceId = key
                   AudioFilePaths = audioFiles |> Seq.toList
                   JsonFilePath = jsonFile
