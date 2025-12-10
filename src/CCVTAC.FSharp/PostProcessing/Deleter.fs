@@ -24,9 +24,9 @@ module Deleter =
         |> Array.iter (fun fileName ->
             try
                 File.Delete fileName
-                printer.Debug($"• Deleted \"{fileName}\"")
+                printer.Debug $"• Deleted \"{fileName}\""
             with
-            | ex -> printer.Error($"• Deletion error: {ex.Message}")
+            | ex -> printer.Error $"• Deletion error: {ex.Message}"
         )
 
     let run
