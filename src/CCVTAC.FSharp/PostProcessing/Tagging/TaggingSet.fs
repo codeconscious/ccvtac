@@ -19,7 +19,7 @@ module TaggingSets =
 
     /// Create a collection of TaggingSets from a collection of file paths related to several video IDs.
     /// Files that don't match the requirements will be ignored.
-    let createSets (filePaths: string seq) : TaggingSet list =
+    let createSets filePaths : TaggingSet list =
         if Seq.isEmpty filePaths then
             []
         else
@@ -30,10 +30,10 @@ module TaggingSets =
             let fileNamesWithVideoIdsRegex =
                 Regex(@".+\[([\w_\-]{11})\](?:.*)?\.(\w+)", RegexOptions.Compiled)
 
-            let fileHasSupportedExtension (f: string) =
-                match Path.GetExtension f with
+            let fileHasSupportedExtension (file: string) =
+                match Path.GetExtension file with
                 | Null -> false
-                | NonNull (x: string) -> Seq.caseInsensitiveContains x Files.audioFileExtensions
+                | NonNull (ext: string) -> Seq.caseInsensitiveContains ext Files.audioFileExtensions
 
             filePaths
             |> Seq.map fileNamesWithVideoIdsRegex.Match
@@ -41,16 +41,18 @@ module TaggingSets =
             |> Seq.map (fun m -> m.Captures |> Seq.cast<Match> |> Seq.head)
             |> Seq.groupBy _.Groups[1].Value
             |> Seq.map (fun (videoId, matches) -> videoId, matches |> Seq.map _.Groups[0].Value)
-            |> Seq.filter (fun (_, fileNames) ->
-                let isSupportedExtension = fileNames |> Seq.exists fileHasSupportedExtension
-                let jsonCount =  fileNames |> Seq.filter (String.endsWithIgnoringCase jsonFileExt)  |> Seq.length
-                let imageCount = fileNames |> Seq.filter (String.endsWithIgnoringCase imageFileExt) |> Seq.length
-                isSupportedExtension && jsonCount = 1 && imageCount = 1)
-            |> Seq.map (fun (key, files) ->
+            |> Seq.filter (fun (_, files) ->
+                let isSupportedExt = files |> Seq.exists fileHasSupportedExtension
+                let jsonCount  = files |> Seq.filter (String.endsWithIgnoringCase jsonFileExt)  |> Seq.length
+                let imageCount = files |> Seq.filter (String.endsWithIgnoringCase imageFileExt) |> Seq.length
+                isSupportedExt
+                    && Numerics.isOne jsonCount
+                    && Numerics.isOne imageCount)
+            |> Seq.map (fun (videoId, files) ->
                 let audioFiles = files |> Seq.filter fileHasSupportedExtension
                 let jsonFile   = files |> Seq.find (String.endsWithIgnoringCase jsonFileExt)
                 let imageFile  = files |> Seq.find (String.endsWithIgnoringCase imageFileExt)
-                { ResourceId = key
+                { ResourceId = videoId
                   AudioFilePaths = audioFiles |> Seq.toList
                   JsonFilePath = jsonFile
                   ImageFilePath = imageFile })
