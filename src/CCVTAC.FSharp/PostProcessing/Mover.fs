@@ -7,7 +7,6 @@ open CCVTAC.Console
 open CCVTAC.Console.PostProcessing
 open System
 open System.IO
-open System.Linq
 open System.Text.Json
 open System.Text.RegularExpressions
 open Startwatch.Library

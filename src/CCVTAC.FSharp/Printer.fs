@@ -22,7 +22,7 @@ type Printer(showDebug: bool) =
     static let colors : Dictionary<Level, ColorFormat> =
         Dictionary()
         |> fun d ->
-            d.Add(Level.Critical, { Foreground = Some "white";  Background = Some "red3"; Bold = true })
+            d.Add(Level.Critical, { Foreground = Some "white";  Background = Some "red3"; Bold = true  })
             d.Add(Level.Error,    { Foreground = Some "red";    Background = None;        Bold = false })
             d.Add(Level.Warning,  { Foreground = Some "yellow"; Background = None;        Bold = false })
             d.Add(Level.Info,     { Foreground = None;          Background = None;        Bold = false })
@@ -43,7 +43,10 @@ type Printer(showDebug: bool) =
 
     /// Escape text so Spectre markup and format strings are safe.
     static member private EscapeText(text: string) : string =
-        text.Replace("{", "{{").Replace("}", "}}").Replace("[", "[[").Replace("]", "]]")
+        text.Replace("{", "{{")
+            .Replace("}", "}}")
+            .Replace("[", "[[")
+            .Replace("]", "]]")
 
     static member private AddMarkup(message: string, colors: ColorFormat) : string =
         match colors.Foreground, colors.Background, colors.Bold with
