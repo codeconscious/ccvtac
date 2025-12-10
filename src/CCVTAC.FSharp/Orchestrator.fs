@@ -23,7 +23,7 @@ module Orchestrator =
 
     let summarizeInput
         (categorizedInputs: CategorizedInput list)
-        (counts: CategoryCounts)
+        (counts: Map<InputCategory, int>)
         (printer: Printer)
         : unit =
 
@@ -208,7 +208,7 @@ module Orchestrator =
     /// Returns the next action the application should take (e.g., continue or quit).
     let processBatch
         (categorizedInputs: CategorizedInput list)
-        (categoryCounts: CategoryCounts)
+        (categoryCounts: Map<InputCategory, int>)
         (settings: UserSettings)
         (resultTracker: ResultTracker<string>)
         (history: History)
