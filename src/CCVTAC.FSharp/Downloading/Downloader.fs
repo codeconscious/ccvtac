@@ -90,7 +90,7 @@ module Downloader =
                 let commandWithArgs = $"{programName} {args}"
                 let downloadSettings = ToolSettings.create commandWithArgs userSettings.WorkingDirectory
 
-                downloadResult <- Runner.run downloadSettings [1] printer
+                downloadResult <- runTool downloadSettings [1] printer
 
                 match downloadResult with
                 | Ok result ->
@@ -124,7 +124,7 @@ module Downloader =
                     let args = generateDownloadArgs None userSettings None (Some [supplementaryUrl])
                     let commandWithArgs = $"{programName} {args}"
                     let downloadSettings = ToolSettings.create commandWithArgs userSettings.WorkingDirectory
-                    let supplementaryDownloadResult = Runner.run downloadSettings [1] printer
+                    let supplementaryDownloadResult = runTool downloadSettings [1] printer
 
                     match supplementaryDownloadResult with
                     | Ok _ ->

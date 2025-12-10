@@ -12,4 +12,4 @@ module ImageProcessor =
                 $"{programName} -trim -fuzz 10%% *.jpg"
                 workingDirectory
 
-        Runner.run toolSettings [] printer |> ignore
+        Runner.runTool toolSettings [] printer |> ignore

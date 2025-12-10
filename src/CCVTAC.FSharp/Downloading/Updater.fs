@@ -13,7 +13,7 @@ module Updater =
         else
             let toolSettings = ToolSettings.create userSettings.DownloaderUpdateCommand userSettings.WorkingDirectory
 
-            match Runner.run toolSettings [] printer with
+            match Runner.runTool toolSettings [] printer with
             | Ok result ->
                 if result.ExitCode <> 0 then
                     printer.Warning("Tool updated with minor issues.")
