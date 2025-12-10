@@ -254,7 +254,8 @@ module Orchestrator =
                             watch.ElapsedFriendly)
             batchResults.PrintBatchFailures()
 
-        { NextAction = nextAction; UpdatedSettings = Some currentSettings }
+        { NextAction = nextAction
+          UpdatedSettings = Some currentSettings }
 
     /// Ensures the download environment is ready, then initiates the input and download process.
     let start (settings: UserSettings) (printer: Printer) : unit =
@@ -262,12 +263,11 @@ module Orchestrator =
         match Directories.warnIfAnyFiles 10 settings.WorkingDirectory with
         | Error err ->
             printer.Error err
-
             match Directories.askToDeleteAllFiles settings.WorkingDirectory printer with
             | Ok deletedCount ->
                 printer.Info $"%s{String.fileLabel None deletedCount} deleted."
-            | Error err ->
-                printer.Error err
+            | Error err' ->
+                printer.Error err'
                 printer.Info "Aborting..."
         | Ok () -> ()
 
@@ -289,8 +289,8 @@ module Orchestrator =
                 let batchResult = processBatch categorizedInputs categoryCounts currentSettings results history printer
                 nextAction <- batchResult.NextAction
                 match batchResult.UpdatedSettings with
+                | Some s -> currentSettings <- s
                 | None -> ()
-                | Some us -> currentSettings <- us
 
         results.PrintSessionSummary()
 
