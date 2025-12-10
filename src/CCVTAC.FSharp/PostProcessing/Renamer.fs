@@ -1,6 +1,7 @@
 namespace CCVTAC.Console.PostProcessing
 
 open CCVTAC.Console
+open CCVTAC.Console.IoUtilities
 open CCVTAC.Console.Settings.Settings
 open System
 open System.IO
@@ -67,7 +68,7 @@ module Renamer =
 
         let audioFiles =
             workingDirInfo.EnumerateFiles()
-            |> Seq.filter (fun f -> List.caseInsensitiveContains f.Extension audioFileExtensions)
+            |> Seq.filter (fun f -> List.caseInsensitiveContains f.Extension Files.audioFileExtensions)
             |> List.ofSeq
 
         if List.isEmpty audioFiles then

@@ -2,6 +2,7 @@ namespace CCVTAC.Console.Downloading
 
 open CCVTAC.Console
 open CCVTAC.Console.ExternalTools.Runner
+open CCVTAC.Console.IoUtilities
 open CCVTAC.Console.IoUtilities.Directories
 open CCVTAC.Console.Downloading.Downloading
 open CCVTAC.Console.ExternalTools
@@ -107,7 +108,7 @@ module Downloader =
 
         let mutable errors = match downloadResult with Error err -> [err] | Ok _ -> []
 
-        if audioFileCount userSettings.WorkingDirectory = 0 then
+        if audioFileCount userSettings.WorkingDirectory Files.audioFileExtensions = 0 then
             "No audio files were downloaded." :: errors
             |> String.concat String.newLine
             |> Error

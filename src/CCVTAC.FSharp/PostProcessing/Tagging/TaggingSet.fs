@@ -1,6 +1,7 @@
 namespace CCVTAC.Console.PostProcessing.Tagging
 
 open CCVTAC.Console
+open CCVTAC.Console.IoUtilities
 open System.IO
 open System.Text.RegularExpressions
 
@@ -33,7 +34,7 @@ module TaggingSets =
             let fileHasSupportedExtension (f: string) =
                 match Path.GetExtension f with
                 | Null -> false
-                | NonNull (x: string) -> Seq.caseInsensitiveContains x audioFileExtensions
+                | NonNull (x: string) -> Seq.caseInsensitiveContains x Files.audioFileExtensions
 
             filePaths
             |> Seq.map fileNamesWithVideoIdsRegex.Match

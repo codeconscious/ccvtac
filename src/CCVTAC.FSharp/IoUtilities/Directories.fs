@@ -3,6 +3,11 @@ namespace CCVTAC.Console.IoUtilities
 open System.IO
 open CCVTAC.Console
 
+module Files =
+
+    let audioFileExtensions =
+        [ ".aac"; ".alac"; ".flac"; ".m4a"; ".mp3"; ".ogg"; ".vorbis"; ".opus"; ".wav" ]
+
 module Directories =
 
     type private ErrorList = string ResizeArray
@@ -11,9 +16,9 @@ module Directories =
     let private allFilesSearchPattern = "*"
 
     /// Counts the number of audio files in a directory
-    let audioFileCount (directory: string) =
+    let audioFileCount (directory: string) (includedExtensions: string list) =
         DirectoryInfo(directory).EnumerateFiles()
-        |> Seq.filter (fun f -> List.caseInsensitiveContains f.Extension audioFileExtensions)
+        |> Seq.filter (fun f -> List.caseInsensitiveContains f.Extension includedExtensions)
         |> Seq.length
 
     /// Returns the filenames in a given directory, optionally ignoring specific filenames

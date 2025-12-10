@@ -6,9 +6,6 @@ open Spectre.Console
 [<AutoOpen>]
 module Shared =
 
-    let audioFileExtensions =
-        [ ".aac"; ".alac"; ".flac"; ".m4a"; ".mp3"; ".ogg"; ".vorbis"; ".opus"; ".wav" ]
-
     let ofTry (f: unit -> 'a) : Result<'a, string> =
         try Ok (f())
         with exn -> Error exn.Message
