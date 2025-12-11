@@ -90,12 +90,14 @@ module Orchestrator =
                 resultTracker.RegisterResult(url, downloadResult)
 
                 match downloadResult with
-                | Error err ->
-                    let errorMsg = $"Download error: %s{err}"
-                    printer.Error errorMsg
-                    Error errorMsg
-                | Ok msg ->
-                    printer.Debug $"Successfully downloaded \"%s{msg}\" format."
+                | Error errs ->
+                    errs
+                    |> List.map (sprintf "Media download error: %s")
+                    |> String.concat String.newLine
+                    |> Error
+                | Ok msgs ->
+                    printer.Debug "Media download(s) successful!"
+                    msgs |> List.iter printer.Info
                     PostProcessor.run settings mediaType printer
 
                     let groupClause =

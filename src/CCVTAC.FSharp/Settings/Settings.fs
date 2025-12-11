@@ -33,7 +33,7 @@ module Settings =
         [<JsonPropertyName("moveToDirectory")>]               MoveToDirectory: string
         [<JsonPropertyName("historyFile")>]                   HistoryFile: string
         [<JsonPropertyName("historyDisplayCount")>]           HistoryDisplayCount: byte
-        [<JsonPropertyName("audioFormats")>]                  AudioFormats: string array
+        [<JsonPropertyName("audioFormats")>]                  AudioFormats: string list
         [<JsonPropertyName("audioQuality")>]                  AudioQuality: byte
         [<JsonPropertyName("splitChapters")>]                 SplitChapters: bool
         [<JsonPropertyName("sleepSecondsBetweenDownloads")>]  SleepSecondsBetweenDownloads: uint16
@@ -57,7 +57,7 @@ module Settings =
             SplitChapters = true
             SleepSecondsBetweenDownloads = 10us
             SleepSecondsBetweenURLs = 15us
-            AudioFormats = [||]
+            AudioFormats = []
             AudioQuality = 0uy
             QuietMode = false
             EmbedImages = true
@@ -152,7 +152,7 @@ module Settings =
             | { NormalizationForm = nf } when not(supportedNormalizationForms |> List.contains (nf.ToUpperInvariant())) ->
                 let okFormats = String.Join(", ", supportedNormalizationForms)
                 Error $"\"{nf}\" is an invalid normalization form. Use one of the following: {okFormats}."
-            | { AudioFormats = fmt } when not (fmt |> Array.forall validAudioFormat) ->
+            | { AudioFormats = fmt } when not (fmt |> List.forall validAudioFormat) ->
                 let formats = String.Join(", ", fmt)
                 let approved = supportedAudioFormats |> String.concat ", "
                 Error $"Audio formats (\"%s{formats}\") include an unsupported audio format.{String.newLine}Only the following supported formats: {approved}."
@@ -217,7 +217,7 @@ module Settings =
             { settings with QuietMode = not settings.QuietMode }
 
         let updateAudioFormat settings (newFormat: string) =
-            let updatedSettings = { settings with AudioFormats = newFormat.Split ',' }
+            let updatedSettings = { settings with AudioFormats = newFormat.Split ',' |> List.ofArray }
             validate updatedSettings
 
         let updateAudioQuality settings newQuality =

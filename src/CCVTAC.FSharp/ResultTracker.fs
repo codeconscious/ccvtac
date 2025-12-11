@@ -27,6 +27,16 @@ type ResultTracker<'a>(printer: Printer) =
             if not (failures.TryAdd(input, e)) then
                 failures[input] <- e
 
+    /// Logs the result for a specific corresponding input.
+    member _.RegisterResult(input: string, result: Result<'a list, string list>) : unit =
+        match result with
+        | Ok _ ->
+            successCount <- successCount + 1UL
+        | Error e ->
+            let msg = if e.Length > 0 then List.head e else String.Empty
+            if not (failures.TryAdd(input, msg)) then
+                failures[input] <- msg
+
     /// Prints any failures for the current batch.
     member _.PrintBatchFailures() : unit =
         if Numerics.isZero failures.Count then

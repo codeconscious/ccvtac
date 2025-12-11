@@ -7,6 +7,7 @@ open CCVTAC.Console.IoUtilities.Directories
 open CCVTAC.Console.Downloading.Downloading
 open CCVTAC.Console.ExternalTools
 open CCVTAC.Console.Settings.Settings
+open FsToolkit.ErrorHandling
 open System
 
 module Downloader =
@@ -14,8 +15,11 @@ module Downloader =
     [<Literal>]
     let private programName = "yt-dlp"
 
-    type Urls = { Primary: string
-                  Supplementary: string option }
+    type PrimaryUrl = PrimaryUrl of string
+    type SupplementaryUrl = SupplementaryUrl of string option
+
+    type Urls = { Primary: PrimaryUrl
+                  Metadata: SupplementaryUrl }
 
     // TODO: Is the audioFormat not in the settings?
     /// Generate the entire argument string for the download tool.
@@ -71,74 +75,60 @@ module Downloader =
 
     /// Completes the actual download process.
     /// Returns a Result that, if successful, contains the name of the successfully downloaded format.
-    let run (mediaType: MediaType) userSettings (printer: Printer) : Result<string, string> =
+    let downloadMedia (printer: Printer) (mediaType: MediaType) userSettings (PrimaryUrl url)
+        : Result<string list, string list> =
+
         if not mediaType.IsVideo && not mediaType.IsPlaylistVideo then
             printer.Info("Please wait for multiple videos to be downloaded...")
 
-        let rawUrls = generateDownloadUrl(mediaType)
-
-        let urls =
-            { Primary = rawUrls[0]
-              Supplementary = if rawUrls.Length = 2 then Some rawUrls[1] else None }
-
-        let mutable downloadResult : Result<ToolResult, string> = Error String.Empty
-        let mutable successfulFormat = String.Empty
-        let mutable stopped = false
-
-        for format in userSettings.AudioFormats do
-            if not stopped then
-                let args = generateDownloadArgs (Some format) userSettings (Some mediaType) (Some [urls.Primary])
+        let rec loop (errors: string list) formats =
+            match formats with
+            | [] ->
+                Error errors
+            | format :: fs ->
+                let args = generateDownloadArgs (Some format) userSettings (Some mediaType) (Some [url])
                 let commandWithArgs = $"{programName} {args}"
                 let downloadSettings = ToolSettings.create commandWithArgs userSettings.WorkingDirectory
 
-                downloadResult <- runTool downloadSettings [1] printer
+                let downloadResult = runTool downloadSettings [1] printer
+                let filesDownloaded = audioFileCount userSettings.WorkingDirectory Files.audioFileExtensions > 0
 
-                match downloadResult with
-                | Ok result ->
-                    successfulFormat <- format
+                match downloadResult, filesDownloaded with
+                | Ok result, true ->
+                    Ok (List.append [$"Successfully downloaded the \"{format}\" format."] errors)
+                | Ok result, false ->
+                    Error (List.append errors [$"The downloader reported OK for \"{format}\", but no audio files were downloaded."])
+                | Error err, true ->
+                    Error (List.append errors [$"Error was reported for \"{format}\", but audio files were unexpectedly found."])
+                | Error err, false ->
+                    loop (List.append errors [$"Error was reported for \"{format}\", and no audio files were downloaded."]) fs
 
-                    if result.ExitCode <> 0 then
-                        printer.Warning "Downloading completed with minor issues."
-                        match result.Error with
-                        | Some w -> printer.Warning w
-                        | None -> ()
+        loop [] userSettings.AudioFormats
 
-                    stopped <- true
-                | Error e ->
-                    printer.Debug $"Failure downloading \"%s{format}\" format: %s{e}"
+    let downloadMetadata (printer: Printer) (mediaType: MediaType) userSettings (SupplementaryUrl url)
+        : Result<string list, string list> =
 
-        let mutable errors = match downloadResult with Error err -> [err] | Ok _ -> []
+        match url with
+        | Some url' ->
+            let args = generateDownloadArgs None userSettings None (Some [url'])
+            let commandWithArgs = $"{programName} {args}"
+            let downloadSettings = ToolSettings.create commandWithArgs userSettings.WorkingDirectory
+            let supplementaryDownloadResult = runTool downloadSettings [1] printer
 
-        if audioFileCount userSettings.WorkingDirectory Files.audioFileExtensions = 0 then
-            "No audio files were downloaded." :: errors
-            |> String.concat String.newLine
-            |> Error
-        else
-            // Continue to post-processing if errors.
-            if List.isNotEmpty errors then
-                errors |> List.iter printer.Error
-                printer.Info "Post-processing will still be attempted."
-            else
-                // Attempt a metadata-only supplementary download.
-                match urls.Supplementary with
-                | Some supplementaryUrl ->
-                    let args = generateDownloadArgs None userSettings None (Some [supplementaryUrl])
-                    let commandWithArgs = $"{programName} {args}"
-                    let downloadSettings = ToolSettings.create commandWithArgs userSettings.WorkingDirectory
-                    let supplementaryDownloadResult = runTool downloadSettings [1] printer
+            match supplementaryDownloadResult with
+            | Ok _ -> Error ["Supplementary metadata download completed OK."]
+            | Error err -> Error [$"Supplementary metadata download failed: {err}"]
+        | None -> Ok ["No supplementary link found."]
 
-                    match supplementaryDownloadResult with
-                    | Ok _ ->
-                        printer.Info "Supplementary metadata download completed OK."
-                    | Error err ->
-                        printer.Error "Supplementary metadata download failed."
-                        errors <- List.append [err] errors
-                | None -> ()
-
-            if List.isEmpty errors then
-                Ok successfulFormat
-            else
-                Error (String.Join(" / ", errors))
-
-
-
+    /// Completes the actual download process.
+    /// Returns a Result that, if successful, contains the name of the successfully downloaded format.
+    let run (mediaType: MediaType) userSettings (printer: Printer) : Result<string list, string list> =
+        result {
+            let rawUrls = generateDownloadUrl mediaType
+            let urls =
+                { Primary = PrimaryUrl rawUrls[0]
+                  Metadata = SupplementaryUrl <| if rawUrls.Length = 2 then Some rawUrls[1] else None }
+            let! mediaDownloadResult = downloadMedia printer mediaType userSettings urls.Primary
+            let! metadataDownloadResult = downloadMetadata printer mediaType userSettings urls.Metadata
+            return! Ok metadataDownloadResult
+        }
