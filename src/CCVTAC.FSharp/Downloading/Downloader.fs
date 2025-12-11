@@ -49,6 +49,7 @@ module Downloader =
             args <- args.Add "--quiet --no-warnings"
 
         // No MediaType indicates that this is a supplemental metadata-only download.
+        // TODO: Add a union type to more clearly indicate this difference.
         match mediaType with
         | Some mt ->
             if settings.SplitChapters then
