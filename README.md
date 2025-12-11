@@ -1,8 +1,8 @@
 # CCVTAC
 
-CCVTAC (CodeConscious Video-to-Audio Converter) is a small .NET-powered CLI tool that acts as a wrapper around [yt-dlp](https://github.com/yt-dlp/yt-dlp) to enable easier download and extractions of audio from YouTube videos, playlists, and channels, plus do some automatic post-processing (tagging, renaming, and moving).
+CCVTAC (CodeConscious Video-to-Audio Converter) is a small .NET-powered CLI tool written in F# that acts as a wrapper around [yt-dlp](https://github.com/yt-dlp/yt-dlp) to enable easier download and extractions of audio from YouTube videos, playlists, and channels, plus do some automatic post-processing (tagging, renaming, and moving).
 
-While I maintain it for my own use, feel free to use it yourself! However, please note it's geared to my own personal use cases and that no warranties or guarantees are provided.
+While I maintain it for my own use, feel free to use it yourself! However, please note that it's geared to my own personal use cases and that no warranties or guarantees are provided.
 
 [![Build and test](https://github.com/codeconscious/ccvtac/actions/workflows/build-test.yml/badge.svg)](https://github.com/codeconscious/ccvtac/actions/workflows/build-test.yml)
 
@@ -50,6 +50,9 @@ You can copy and paste the sample settings file below to a JSON file named `sett
 <details>
   <summary>Click here to expand!</summary>
 
+> [!IMPORTANT]
+> When entering regular expressions in the JSON, you must enter two backslashes for each one you want to include. For example, to match a whitespace character, use `\\s` instead of `\s`.
+
 ```js
 {
   // Mandatory. The working directory for temporary files.
@@ -71,7 +74,7 @@ You can copy and paste the sample settings file below to a JSON file named `sett
   // The audio formats (codec) audio should be extracted to.
   // Options: best, aac, alac, flac, m4a, mp3, opus, vorbis, wav.
   // Not all options are available for all videos.
-  "audioFormats": ["best"],
+  "audioFormats": ["m4a", "best"],
 
   // The audio quality to use, with 10 being the lowest and 0 being the highest.
   "audioQuality": 0,
@@ -139,7 +142,7 @@ You can copy and paste the sample settings file below to a JSON file named `sett
         // Which video metadata field should be searched, `title` or `description`?
         "searchField": "description",
 
-        // An arbitrary summary to the rule. If quiet mode is off, this name will appear
+        // An arbitrary summary of the rule. If quiet mode is off, this name will appear
         // in the output when this pattern is matched.
         "summary": "Topic style"
       }
@@ -203,3 +206,13 @@ List of commands:
 ## Reporting issues
 
 If you run into any issues, feel free to create an issue on GitHub. Please provide as much information as possible (i.e., entered URLs, system information, yt-dlp version, etc.).
+
+## History
+
+The first incarnation of this application was written in C#.
+
+After picking up F# out of curiosity in 2024 and using it to create other tools (such as [Audio Tag Tools](https://github.com/codeconscious/audio-tag-tools/)) in a functional programming style, I become curious about F#'s OOP capabilities as well.
+
+As an experiment to both test OOP F# and leverage LLMs more, I rewrote this application in OOP F#, only using LLMs for the initial conversion, which greatly reduced the time necessary, though a *lot* of cleanup was necessary. Ultimately, I was surprised to see that I preferred the F# code over the C#, so I decided to keep this tool in F#.
+
+Due to this, the code is not particularly idiomatic F#. I'll probably tweak it over time to gradually bring it closer to the functional style, but the tool is perfectly viable and works well in its current blended-style form.

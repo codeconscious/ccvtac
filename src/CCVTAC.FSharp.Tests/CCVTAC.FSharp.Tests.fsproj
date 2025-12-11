@@ -8,6 +8,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="DownloadEntityTests.fs" />
+    <Compile Include="TagDetectionTests.fs" />
+    <Compile Include="ExtensionsTests.fs" />
+    <Compile Include="RenamerTests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
