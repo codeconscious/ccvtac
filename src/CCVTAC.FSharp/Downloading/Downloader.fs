@@ -32,7 +32,7 @@ module Downloader =
             | Some f when f = "best" -> String.Empty
             | Some f -> $"-f {f}"
 
-        let args =
+        let mutable args =
             match mediaType with
             | None ->
                 [ $"--flat-playlist {writeJsonArg} {trimFileNamesArg}" ]
@@ -46,20 +46,20 @@ module Downloader =
             |> Set.ofList
 
         if settings.QuietMode then
-            args.Add "--quiet --no-warnings" |> ignore
+            args <- args.Add "--quiet --no-warnings"
 
+        // No MediaType indicates that this is a supplemental metadata-only download.
         match mediaType with
         | Some mt ->
             if settings.SplitChapters then
-                args.Add("--split-chapters") |> ignore
+                args <- args.Add "--split-chapters"
 
             if not mt.IsVideo && not mt.IsPlaylistVideo then
-                args.Add($"--sleep-interval {settings.SleepSecondsBetweenDownloads}") |> ignore
+                args <- args.Add $"--sleep-interval {settings.SleepSecondsBetweenDownloads}"
 
             if mt.IsStandardPlaylist then
-                args.Add
+                args <- args.Add
                     """-o "%(uploader).80B - %(playlist).80B - %(playlist_autonumber)s - %(title).150B [%(id)s].%(ext)s" --playlist-reverse"""
-                |> ignore
         | None -> ()
 
         let extraArgs = defaultArg additionalArgs [] |> Set.ofList
