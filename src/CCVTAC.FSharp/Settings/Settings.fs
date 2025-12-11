@@ -21,11 +21,11 @@ module Settings =
     }
 
     type TagDetectionPatterns = {
-        [<JsonPropertyName("title")>]     Title : TagDetectionPattern array
-        [<JsonPropertyName("artist")>]    Artist : TagDetectionPattern array
-        [<JsonPropertyName("album")>]     Album : TagDetectionPattern array
-        [<JsonPropertyName("composer")>]  Composer : TagDetectionPattern array
-        [<JsonPropertyName("year")>]      Year : TagDetectionPattern array
+        [<JsonPropertyName("title")>]     Title : TagDetectionPattern list
+        [<JsonPropertyName("artist")>]    Artist : TagDetectionPattern list
+        [<JsonPropertyName("album")>]     Album : TagDetectionPattern list
+        [<JsonPropertyName("composer")>]  Composer : TagDetectionPattern list
+        [<JsonPropertyName("year")>]      Year : TagDetectionPattern list
     }
 
     type UserSettings = {
@@ -40,10 +40,10 @@ module Settings =
         [<JsonPropertyName("sleepSecondsBetweenURLs")>]       SleepSecondsBetweenURLs: uint16
         [<JsonPropertyName("quietMode")>]                     QuietMode: bool
         [<JsonPropertyName("embedImages")>]                   EmbedImages: bool
-        [<JsonPropertyName("doNotEmbedImageUploaders")>]      DoNotEmbedImageUploaders: string array
-        [<JsonPropertyName("ignoreUploadYearUploaders")>]     IgnoreUploadYearUploaders: string array
+        [<JsonPropertyName("doNotEmbedImageUploaders")>]      DoNotEmbedImageUploaders: string list
+        [<JsonPropertyName("ignoreUploadYearUploaders")>]     IgnoreUploadYearUploaders: string list
         [<JsonPropertyName("tagDetectionPatterns")>]          TagDetectionPatterns: TagDetectionPatterns
-        [<JsonPropertyName("renamePatterns")>]                RenamePatterns: RenamePattern array
+        [<JsonPropertyName("renamePatterns")>]                RenamePatterns: RenamePattern list
         [<JsonPropertyName("normalizationForm")>]             NormalizationForm : string
         [<JsonPropertyName("downloaderUpdateCommand")>]       DownloaderUpdateCommand : string
     }
@@ -61,16 +61,16 @@ module Settings =
             AudioQuality = 0uy
             QuietMode = false
             EmbedImages = true
-            DoNotEmbedImageUploaders = [||]
-            IgnoreUploadYearUploaders = [||]
+            DoNotEmbedImageUploaders = []
+            IgnoreUploadYearUploaders = []
             TagDetectionPatterns = {
-                Title = [||]
-                Artist = [||]
-                Album = [||]
-                Composer = [||]
-                Year = [||]
+                Title = []
+                Artist = []
+                Album = []
+                Composer = []
+                Year = []
             }
-            RenamePatterns = [||]
+            RenamePatterns = []
             NormalizationForm = "C" // Recommended for compatibility between Linux and macOS.
             DownloaderUpdateCommand = String.Empty
         }

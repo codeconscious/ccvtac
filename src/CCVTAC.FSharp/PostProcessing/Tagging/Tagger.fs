@@ -60,7 +60,7 @@ module Tagger =
                 printer.Error $"Error writing image to the audio file: %s{ex.Message}"
 
     let private releaseYear userSettings videoMetadata : uint32 option =
-        if userSettings.IgnoreUploadYearUploaders |> Array.caseInsensitiveContains videoMetadata.Uploader
+        if userSettings.IgnoreUploadYearUploaders |> List.caseInsensitiveContains videoMetadata.Uploader
         then None
         elif videoMetadata.UploadDate.Length <> 4
         then None
@@ -157,7 +157,7 @@ module Tagger =
         // Artwork embedding
         match imageFilePath with
         | Some path ->
-            if settings.EmbedImages && settings.DoNotEmbedImageUploaders |> Array.doesNotContain videoData.Uploader
+            if settings.EmbedImages && settings.DoNotEmbedImageUploaders |> List.doesNotContain videoData.Uploader
             then
                 printer.Info "Embedding artwork."
                 writeImage taggedFile path printer

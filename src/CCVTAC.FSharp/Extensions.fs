@@ -101,6 +101,8 @@ module List =
 
     let isNotEmpty lst = not (List.isEmpty lst)
 
+    let doesNotContain x lst = not <| List.contains x lst
+
     let hasMultiple lst = lst |> List.length |> (<) 1
 
     let caseInsensitiveContains text (lst: string list) : bool =

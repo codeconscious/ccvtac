@@ -132,11 +132,11 @@ let ``Tag detection patterns detect metadata in video metadata`` () =
     }
 
     let tagDetectionPatterns = {
-        Title = [| titlePattern |]
-        Artist = [| artistPattern  |]
-        Album = [| albumPattern |]
-        Composer = [| composerPattern |]
-        Year = [| yearPattern |]
+        Title = [ titlePattern ]
+        Artist = [ artistPattern ]
+        Album = [ albumPattern ]
+        Composer = [ composerPattern ]
+        Year = [ yearPattern ]
     }
 
     match TagDetection.detectArtist videoMetadata None tagDetectionPatterns with

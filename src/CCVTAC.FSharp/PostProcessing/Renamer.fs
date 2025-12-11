@@ -79,7 +79,7 @@ module Renamer =
             for audioFile in audioFiles do
                 let newFileName =
                     userSettings.RenamePatterns
-                    |> Array.fold
+                    |> List.fold
                         (fun (sb: SB) -> updateTextViaPatterns userSettings.QuietMode printer sb)
                         (SB audioFile.Name)
                     |> _.ToString()
