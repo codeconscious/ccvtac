@@ -22,7 +22,7 @@ module Downloader =
     /// audioFormat: one of the supported audio format codes (or null for none)
     /// mediaType: Some MediaType for normal downloads, None for metadata-only supplementary downloads
     /// additionalArgs: optional extra args (e.g., the URL)
-    let generateDownloadArgs audioFormat settings (mediaType: MediaType option) additionalArgs : string =
+    let generateDownloadArgs audioFormat userSettings (mediaType: MediaType option) additionalArgs : string =
         let writeJsonArg = "--write-info-json"
         let trimFileNamesArg = "--trim-filenames 250"
 
@@ -38,25 +38,25 @@ module Downloader =
                 [ $"--flat-playlist {writeJsonArg} {trimFileNamesArg}" ]
             | Some _ ->
                 [ $"--extract-audio {formatArg}"
-                  $"--audio-quality {settings.AudioQuality}"
+                  $"--audio-quality {userSettings.AudioQuality}"
                   "--write-thumbnail --convert-thumbnails jpg"
                   writeJsonArg
                   trimFileNamesArg
                   "--retries 2" ]
             |> Set.ofList
 
-        if settings.QuietMode then
+        if userSettings.QuietMode then
             args <- args.Add "--quiet --no-warnings"
 
         // No MediaType indicates that this is a supplemental metadata-only download.
         // TODO: Add a union type to more clearly indicate this difference.
         match mediaType with
         | Some mt ->
-            if settings.SplitChapters then
+            if userSettings.SplitChapters then
                 args <- args.Add "--split-chapters"
 
             if not mt.IsVideo && not mt.IsPlaylistVideo then
-                args <- args.Add $"--sleep-interval {settings.SleepSecondsBetweenDownloads}"
+                args <- args.Add $"--sleep-interval {userSettings.SleepSecondsBetweenDownloads}"
 
             if mt.IsStandardPlaylist then
                 args <- args.Add
