@@ -81,7 +81,7 @@ module Downloader =
         if not mediaType.IsVideo && not mediaType.IsPlaylistVideo then
             printer.Info("Please wait for multiple videos to be downloaded...")
 
-        let rec loop (errors: string list) formats =
+        let rec loop errors formats =
             match formats with
             | [] ->
                 Error errors
@@ -95,17 +95,23 @@ module Downloader =
 
                 match downloadResult, filesDownloaded with
                 | Ok result, true ->
-                    Ok (List.append [$"Successfully downloaded the \"{format}\" format."] errors)
+                    if result.ExitCode = 0 then
+                        Ok (List.append [$"Successfully downloaded the \"{format}\" format."] errors)
+                    else
+                        match result.Error with
+                        | Some warning -> [$"Successfully downloaded the \"{format}\" format, but with minor issues: {warning}"]
+                        | None -> ["Downloading completed with unknown minor issues."]
+                        |> Ok
                 | Ok result, false ->
                     Error (List.append errors [$"The downloader reported OK for \"{format}\", but no audio files were downloaded."])
                 | Error err, true ->
-                    Error (List.append errors [$"Error was reported for \"{format}\", but audio files were unexpectedly found."])
+                    Error (List.append errors [$"Error was reported for \"{format}\", but audio files were unexpectedly found: {err}"])
                 | Error err, false ->
-                    loop (List.append errors [$"Error was reported for \"{format}\", and no audio files were downloaded."]) fs
+                    loop (List.append errors [$"Error was reported for \"{format}\" format. No audio files were downloaded. {err}"]) fs
 
         loop [] userSettings.AudioFormats
 
-    let downloadMetadata (printer: Printer) (mediaType: MediaType) userSettings (SupplementaryUrl url)
+    let downloadMetadata (printer: Printer) userSettings (SupplementaryUrl url)
         : Result<string list, string list> =
 
         match url with
@@ -128,7 +134,7 @@ module Downloader =
             let urls =
                 { Primary = PrimaryUrl rawUrls[0]
                   Metadata = SupplementaryUrl <| if rawUrls.Length = 2 then Some rawUrls[1] else None }
-            let! mediaDownloadResult = downloadMedia printer mediaType userSettings urls.Primary
-            let! metadataDownloadResult = downloadMetadata printer mediaType userSettings urls.Metadata
+            let! _ = downloadMedia printer mediaType userSettings urls.Primary
+            let! metadataDownloadResult = downloadMetadata printer userSettings urls.Metadata
             return! Ok metadataDownloadResult
         }
