@@ -15,10 +15,12 @@ module InputHelper =
 
     type CategorizedInput = { Text: string; Category: InputCategory }
 
-    let countCategoryItems (category: InputCategory)  (counts: Map<InputCategory,int>) =
-        match counts.TryGetValue category with
-        | true, c -> c
-        | _       -> 0
+    type CategoryCounts (counts: Map<InputCategory,int>) =
+        member _.Item
+            with get (category: InputCategory) =
+                match counts.TryGetValue category with
+                | true, v -> v
+                | _ -> 0
 
     /// Takes a user input string and splits it into a collection of inputs.
     let splitInputText input : string list =
@@ -52,8 +54,11 @@ module InputHelper =
                          then InputCategory.Command
                          else InputCategory.Url })
 
-    let countCategories (inputs: CategorizedInput list) : Map<InputCategory, int> =
-        inputs
-        |> List.groupBy _.Category
-        |> List.map (fun (k, grp) -> k, grp |> Seq.length)
-        |> Map.ofSeq
+    let countCategories (inputs: CategorizedInput list) : CategoryCounts =
+        let counts =
+            inputs
+            |> List.groupBy _.Category
+            |> List.map (fun (k, grp) -> k, grp |> Seq.length)
+            |> Map.ofSeq
+
+        CategoryCounts counts
