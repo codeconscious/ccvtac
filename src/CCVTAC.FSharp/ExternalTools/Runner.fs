@@ -26,13 +26,13 @@ module Runner =
         let watch = Watch()
         printer.Info $"Running {toolSettings.CommandWithArgs}..."
 
-        let splitCommandWithArgs = toolSettings.CommandWithArgs.Split([|' '|], 2)
+        let command =
+            toolSettings.CommandWithArgs.Split([|' '|], 2)
+            |> fun arr -> {| Tool = arr[0]
+                             Args = if Array.hasMultiple arr then arr[1] else String.Empty |}
 
-        let processStartInfo = ProcessStartInfo splitCommandWithArgs[0]
-        processStartInfo.Arguments <- if Array.hasMultiple splitCommandWithArgs
-                                      then splitCommandWithArgs[1]
-                                      else String.Empty
-        processStartInfo.UseShellExecute <- false
+        let processStartInfo = ProcessStartInfo command.Tool
+        processStartInfo.Arguments <- command.Args
         processStartInfo.RedirectStandardOutput <- false
         processStartInfo.RedirectStandardError <- true
         processStartInfo.CreateNoWindow <- true
@@ -40,17 +40,17 @@ module Runner =
 
         match Process.Start processStartInfo with
         | Null ->
-            Error $"Could not locate {splitCommandWithArgs[0]}."
+            Error $"Could not locate or start {command.Tool}."
         | NonNull process' ->
             let error = process'.StandardError.ReadToEnd()
 
             process'.WaitForExit()
-            printer.Info $"{splitCommandWithArgs[0]} finished in {watch.ElapsedFriendly}."
+            printer.Info $"{command.Tool} finished in {watch.ElapsedFriendly}."
 
-            let trimmedErrors = if String.hasText error
-                                then Some (String.trimTerminalLineBreak error)
-                                else None
+            let trimmedError = if String.hasText error
+                               then Some (String.trimTerminalLineBreak error)
+                               else None
 
             if isSuccessExitCode otherSuccessExitCodes process'.ExitCode
-            then Ok { ExitCode = process'.ExitCode; Error = trimmedErrors }
-            else Error $"{splitCommandWithArgs[0]} exited with code {process'.ExitCode}: {trimmedErrors}."
+            then Ok { ExitCode = process'.ExitCode; Error = trimmedError }
+            else Error $"{command.Tool} exited with code {process'.ExitCode}: {trimmedError}."

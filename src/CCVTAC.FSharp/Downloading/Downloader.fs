@@ -124,7 +124,7 @@ module Downloader =
             match supplementaryDownloadResult with
             | Ok _ -> Error ["Supplementary metadata download completed OK."]
             | Error err -> Error [$"Supplementary metadata download failed: {err}"]
-        | None -> Ok ["No supplementary link found."]
+        | None -> Ok ["No supplementary metadata link found."]
 
     /// Completes the actual download process.
     /// Returns a Result that, if successful, contains the name of the successfully downloaded format.
