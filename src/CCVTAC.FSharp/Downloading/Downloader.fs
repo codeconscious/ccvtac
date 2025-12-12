@@ -74,7 +74,6 @@ module Downloader =
         mediaTypeWithIds url
 
     /// Completes the actual download process.
-    /// Returns a Result that, if successful, contains the name of the successfully downloaded format.
     let downloadMedia (printer: Printer) (mediaType: MediaType) userSettings (PrimaryUrl url)
         : Result<string list, string list> =
 
@@ -120,19 +119,18 @@ module Downloader =
         : Result<string list, string list> =
 
         match url with
+        | None -> Ok ["No supplementary metadata link found."]
         | Some url' ->
             let args = generateDownloadArgs None userSettings None (Some [url'])
             let commandWithArgs = $"{programName} {args}"
             let downloadSettings = ToolSettings.create commandWithArgs userSettings.WorkingDirectory
-            let supplementaryDownloadResult = runTool downloadSettings [1] printer
+            let metadataDownloadResult = runTool downloadSettings [1] printer
 
-            match supplementaryDownloadResult with
+            match metadataDownloadResult with
             | Ok _ -> Error ["Supplementary metadata download completed OK."]
             | Error err -> Error [$"Supplementary metadata download failed: {err}"]
-        | None -> Ok ["No supplementary metadata link found."]
 
-    /// Completes the actual download process.
-    /// Returns a Result that, if successful, contains the name of the successfully downloaded format.
+    /// Undertakes the actual download process.
     let run (mediaType: MediaType) userSettings (printer: Printer) : Result<string list, string list> =
         result {
             let rawUrls = generateDownloadUrl mediaType
