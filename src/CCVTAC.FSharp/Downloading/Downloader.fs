@@ -15,12 +15,6 @@ module Downloader =
     [<Literal>]
     let private programName = "yt-dlp"
 
-    type PrimaryUrl = PrimaryUrl of string
-    type SupplementaryUrl = SupplementaryUrl of string option
-
-    type Urls = { Primary: PrimaryUrl
-                  Metadata: SupplementaryUrl }
-
     // TODO: Is the audioFormat not in the settings?
     /// Generate the entire argument string for the download tool.
     /// audioFormat: one of the supported audio format codes (or null for none)

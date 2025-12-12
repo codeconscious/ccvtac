@@ -2,7 +2,7 @@
 
 open System.Text.RegularExpressions
 
-module public Downloading =
+module Downloading =
 
     type MediaType =
         | Video of Id: string
@@ -10,6 +10,12 @@ module public Downloading =
         | StandardPlaylist of Id: string
         | ReleasePlaylist of Id: string
         | Channel of Id: string
+
+    type PrimaryUrl = PrimaryUrl of string
+    type SupplementaryUrl = SupplementaryUrl of string option
+
+    type Urls = { Primary: PrimaryUrl
+                  Metadata: SupplementaryUrl }
 
     let private (|RegexMatch|_|) pattern input =
         match Regex.Match(input, pattern) with
