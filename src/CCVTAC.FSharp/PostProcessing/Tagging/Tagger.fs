@@ -178,7 +178,7 @@ module Tagger =
         : unit
         =
 
-        printer.Debug $"""%s{String.fileLabel (Some "audio") taggingSet.AudioFilePaths.Length} with resource ID %s{taggingSet.ResourceId}"""
+        printer.Debug $"""Found %s{String.fileLabel (Some "audio") taggingSet.AudioFilePaths.Length} with resource ID %s{taggingSet.ResourceId}."""
 
         match parseVideoJson taggingSet with
         | Ok videoData ->

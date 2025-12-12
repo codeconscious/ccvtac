@@ -81,11 +81,11 @@ module Downloader =
         if not mediaType.IsVideo && not mediaType.IsPlaylistVideo then
             printer.Info("Please wait for multiple videos to be downloaded...")
 
-        let rec loop errors formats =
-            match formats with
+        let rec loop errors audioFormats =
+            match audioFormats with
             | [] ->
                 Error errors
-            | format :: fs ->
+            | format :: formats ->
                 let args = generateDownloadArgs (Some format) userSettings (Some mediaType) (Some [url])
                 let commandWithArgs = $"{programName} {args}"
                 let downloadSettings = ToolSettings.create commandWithArgs userSettings.WorkingDirectory
@@ -95,19 +95,24 @@ module Downloader =
 
                 match downloadResult, filesDownloaded with
                 | Ok result, true ->
-                    if result.ExitCode = 0 then
-                        Ok (List.append [$"Successfully downloaded the \"{format}\" format."] errors)
-                    else
-                        match result.Error with
-                        | Some warning -> [$"Successfully downloaded the \"{format}\" format, but with minor issues: {warning}"]
-                        | None -> ["Downloading completed with unknown minor issues."]
-                        |> Ok
+                    Ok <|
+                        $"Successfully downloaded the \"{format}\" format."
+                        :: match result.Error with
+                            | Some err -> [$"However, a minor issue was reported: {err}"]
+                            | None -> []
                 | Ok result, false ->
-                    Error (List.append errors [$"The downloader reported OK for \"{format}\", but no audio files were downloaded."])
+                    Error <|
+                        $"The \"{format}\" format download was reported as successful, but no audio files were downloaded!"
+                        :: match result.Error with
+                            | Some err -> [$"Error: {err}"]
+                            | None -> []
                 | Error err, true ->
-                    Error (List.append errors [$"Error was reported for \"{format}\", but audio files were unexpectedly found: {err}"])
+                    Error <|
+                        [$"The downloader reported failure for \"{format}\", yet audio files were unexpectedly downloaded!"
+                         $"Error: {err}"]
                 | Error err, false ->
-                    loop (List.append errors [$"Error was reported for \"{format}\" format. No audio files were downloaded. {err}"]) fs
+                    let newErr = $"A download error was reported for the \"{format}\" format, and no audio files were downloaded. {err}"
+                    loop (List.append errors [newErr]) formats
 
         loop [] userSettings.AudioFormats
 
