@@ -15,11 +15,6 @@ module Downloader =
     [<Literal>]
     let private programName = "yt-dlp"
 
-    // TODO: Is the audioFormat not in the settings?
-    /// Generate the entire argument string for the download tool.
-    /// audioFormat: one of the supported audio format codes (or null for none)
-    /// mediaType: Some MediaType for normal downloads, None for metadata-only supplementary downloads
-    /// additionalArgs: optional extra args (e.g., the URL)
     let generateDownloadArgs audioFormat userSettings (mediaType: MediaType option) additionalArgs : string =
         let writeJsonArg = "--write-info-json"
         let trimFileNamesArg = "--trim-filenames 250"
@@ -67,7 +62,6 @@ module Downloader =
     let wrapUrlInMediaType url : Result<MediaType, string> =
         mediaTypeWithIds url
 
-    /// Completes the actual download process.
     let downloadMedia (printer: Printer) (mediaType: MediaType) userSettings (PrimaryUrl url)
         : Result<string list, string list> =
 
@@ -124,7 +118,6 @@ module Downloader =
             | Ok _ -> Error ["Supplementary metadata download completed OK."]
             | Error err -> Error [$"Supplementary metadata download failed: {err}"]
 
-    /// Undertakes the actual download process.
     let run (mediaType: MediaType) userSettings (printer: Printer) : Result<string list, string list> =
         result {
             let rawUrls = generateDownloadUrl mediaType
