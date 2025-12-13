@@ -159,12 +159,12 @@ module Tagger =
         | Some path ->
             if settings.EmbedImages && settings.DoNotEmbedImageUploaders |> List.doesNotContain videoData.Uploader
             then
-                printer.Info "Embedding artwork."
+                printer.Info "Embedding artwork..."
                 writeImage taggedFile path printer
             else
                 printer.Debug "Skipping artwork embedding."
         | None ->
-            printer.Debug "Skipping artwork embedding."
+            printer.Debug "Skipping artwork embedding as none was found."
 
         taggedFile.Save()
         printer.Debug $"Wrote tags to \"%s{audioFileName}\"."
