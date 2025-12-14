@@ -209,10 +209,8 @@ If you run into any issues, feel free to create an issue on GitHub. Please provi
 
 ## History
 
-The first incarnation of this application was written in C#.
+The first incarnation of this application was written in C#. However, after picking up [F#](https://fsharp.org/) out of curiosity about it and functional programming (FP) in 2024 and subsequently using it successfully to create other tools (mainly [Audio Tag Tools](https://github.com/codeconscious/audio-tag-tools/)) in an FP style, I become curious about F#'s OOP capabilities as well.
 
-After picking up F# out of curiosity in 2024 and using it to create other tools (such as [Audio Tag Tools](https://github.com/codeconscious/audio-tag-tools/)) in a functional programming style, I become curious about F#'s OOP capabilities as well.
+As an experiment to both test OOP-style F# and LLMs more, I rewrote this application in OOP F#, using LLMs only for the rough initial conversion (which greatly reduced the overall time and labor necessary at the cost of requiring a *lot* of manual cleanup). Ultimately, I was surprised how much I preferred the F# code over the C#, so I decided to keep this tool in F# permanently.
 
-As an experiment to both test OOP F# and leverage LLMs more, I rewrote this application in OOP F#, only using LLMs for the initial conversion, which greatly reduced the time necessary, though a *lot* of cleanup was necessary. Ultimately, I was surprised to see that I preferred the F# code over the C#, so I decided to keep this tool in F#.
-
-Due to this, the code is not particularly idiomatic F#. I'll probably tweak it over time to gradually bring it closer to the functional style, but the tool is perfectly viable and works well in its current blended-style form.
+Due to this background, the code is not particularly idiomatic F#, but it is perfectly viable in its current blended-style form. That said, I'll probably tweak it over time to gradually to introduce more FP.
