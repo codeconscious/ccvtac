@@ -28,8 +28,10 @@ module Tagger =
         with ex ->
             Error $"Error reading JSON file \"%s{taggingSet.JsonFilePath}\": %s{ex.Message}."
 
+    /// If a video was split into sub-videos, then the original video is unneeded and should be deleted.
     let private deleteSourceFile taggingSet (printer: Printer) : TaggingSet =
-        if taggingSet.AudioFilePaths.Length <= 1 then taggingSet
+        if not (List.hasMultiple taggingSet.AudioFilePaths) then
+            taggingSet
         else
             let largestFileInfo =
                 taggingSet.AudioFilePaths
