@@ -49,7 +49,7 @@ module Tagger =
                 printer.Error $"Error deleting pre-split source file \"%s{largestFileInfo.Name}\": %s{ex.Message}"
                 taggingSet
 
-    let private writeImage (taggedFile: TaggedFile) imageFilePath (printer: Printer) =
+    let private writeImageToFile (taggedFile: TaggedFile) imageFilePath (printer: Printer) =
         if String.hasNoText imageFilePath then
             printer.Error "No image file path was provided, so cannot add an image to the file."
         else
@@ -62,10 +62,10 @@ module Tagger =
                 printer.Error $"Error writing image to the audio file: %s{ex.Message}"
 
     let private releaseYear userSettings videoMetadata : uint32 option =
-        if userSettings.IgnoreUploadYearUploaders |> List.caseInsensitiveContains videoMetadata.Uploader
-        then None
-        elif videoMetadata.UploadDate.Length <> 4
-        then None
+        if userSettings.IgnoreUploadYearUploaders |> List.caseInsensitiveContains videoMetadata.Uploader then
+            None
+        elif videoMetadata.UploadDate.Length <> 4 then
+            None
         else
             match UInt32.TryParse(videoMetadata.UploadDate.Substring(0, 4)) with
             | true, parsed -> Some parsed
@@ -162,7 +162,7 @@ module Tagger =
             if settings.EmbedImages && settings.DoNotEmbedImageUploaders |> List.doesNotContain videoData.Uploader
             then
                 printer.Info "Embedding artwork..."
-                writeImage taggedFile path printer
+                writeImageToFile taggedFile path printer
             else
                 printer.Debug "Skipping artwork embedding."
         | None ->
