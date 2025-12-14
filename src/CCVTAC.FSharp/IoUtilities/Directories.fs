@@ -44,7 +44,8 @@ module Directories =
                 (fun (s: uint, errs: ErrorList) fileName ->
                     try File.Delete fileName
                         (s + 1u, errs)
-                    with ex -> errs.Add ex.Message; s, errs)
+                    with exn ->
+                        errs.Add exn.Message; s, errs)
                 (0u, ErrorList())
                 fileNames
 

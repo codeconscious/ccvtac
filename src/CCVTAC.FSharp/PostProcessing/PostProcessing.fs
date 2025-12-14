@@ -45,7 +45,8 @@ module PostProcessor =
             if List.isEmpty taggingSets
             then Error $"No tagging sets were created using working directory \"%s{directoryName}\"."
             else Ok taggingSets
-        with ex -> Error $"Error reading working files in \"{directoryName}\": %s{ex.Message}"
+        with exn ->
+            Error $"Error reading working files in \"{directoryName}\": %s{exn.Message}"
 
     let run settings mediaType (printer: Printer) : unit =
         let watch = Watch()

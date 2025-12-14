@@ -68,8 +68,8 @@ module Program =
                     try
                         Orchestrator.start settings printer
                         int ExitCodes.Success
-                    with ex ->
-                        printer.Critical $"Fatal error: %s{ex.Message}"
-                        AnsiConsole.WriteException ex
+                    with exn ->
+                        printer.Critical $"Fatal error: %s{exn.Message}"
+                        AnsiConsole.WriteException exn
                         printer.Info "Please help improve this tool by reporting this error and any relevant URLs at https://github.com/codeconscious/ccvtac/issues."
                         int ExitCodes.OperationError

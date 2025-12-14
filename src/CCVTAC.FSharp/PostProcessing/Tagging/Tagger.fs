@@ -196,8 +196,8 @@ module Tagger =
             for audioPath in finalTaggingSet.AudioFilePaths do
                 try
                     tagSingleFile settings videoData audioPath imagePath collectionJson printer
-                with ex ->
-                    printer.Error $"Error tagging file: %s{ex.Message}"
+                with exn ->
+                    printer.Error $"Error tagging file: %s{exn.Message}"
         | Error err ->
             printer.Error $"Error deserializing video metadata from \"%s{taggingSet.JsonFilePath}\": {err}"
 

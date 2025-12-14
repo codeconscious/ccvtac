@@ -47,9 +47,9 @@ module Mover =
                 File.Move(file.FullName, Path.Combine(moveToDir, file.Name), overwrite)
                 successCount <- successCount + 1
                 printer.Debug $"• Moved \"%s{file.Name}\""
-            with ex ->
+            with exn ->
                 failureCount <- failureCount + 1
-                printer.Error $"• Error moving file \"%s{file.Name}\": %s{ex.Message}"
+                printer.Error $"• Error moving file \"%s{file.Name}\": %s{exn.Message}"
 
         (successCount, failureCount)
 
@@ -74,8 +74,8 @@ module Mover =
                 let dest = Path.Combine(moveToDir, $"%s{baseFileName.Trim()}.jpg")
                 fileInfo.MoveTo(dest, overwrite = overwrite)
                 Ok $"Image file \"{fileInfo.Name}\" was moved."
-        with ex ->
-            Error $"Error copying the image file: %s{ex.Message}"
+        with exn ->
+            Error $"Error copying the image file: %s{exn.Message}"
 
     let private getParsedVideoJson (taggingSet: TaggingSet) : Result<VideoMetadata, string> =
         try

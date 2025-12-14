@@ -93,7 +93,7 @@ module Renamer =
 
                     printer.Debug $"• From: \"%s{audioFile.Name}\""
                     printer.Debug $"    To: \"%s{newFileName}\""
-                with ex ->
-                    printer.Error $"• Error renaming \"%s{audioFile.Name}\": %s{ex.Message}"
+                with exn ->
+                    printer.Error $"• Error renaming \"%s{audioFile.Name}\": %s{exn.Message}"
 
             printer.Info $"Renaming done in %s{watch.ElapsedFriendly}."

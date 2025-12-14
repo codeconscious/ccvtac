@@ -18,8 +18,8 @@ type History(filePath: string, displayCount: byte) =
             let serializedEntryTime = JsonSerializer.Serialize(entryTime).Replace("\"", "")
             File.AppendAllText(this.FilePath, serializedEntryTime + string separator + url + String.newLine)
             printer.Debug $"Added \"%s{url}\" to the history log."
-        with ex ->
-            printer.Error $"Could not append URL(s) to history log: {ex.Message}"
+        with exn ->
+            printer.Error $"Could not append URL(s) to history log: {exn.Message}"
 
     member this.ShowRecent(printer: Printer) : unit =
         try
@@ -52,5 +52,5 @@ type History(filePath: string, displayCount: byte) =
                 table.AddRow(formattedTime, joinedUrls) |> ignore
 
             Printer.PrintTable table
-        with ex ->
-            printer.Error $"Could not display history: %s{ex.Message}"
+        with exn ->
+            printer.Error $"Could not display history: %s{exn.Message}"

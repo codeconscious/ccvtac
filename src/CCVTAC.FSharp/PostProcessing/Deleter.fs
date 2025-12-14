@@ -13,7 +13,7 @@ module Deleter =
         | None -> Ok [||]
         | Some metadata ->
             try Ok (Directory.GetFiles(workingDirectory, $"*{metadata.Id}*"))
-            with ex -> Error $"Error collecting filenames: {ex.Message}"
+            with exn -> Error $"Error collecting filenames: {exn.Message}"
 
     let private deleteAll
         (fileNames: string array)
