@@ -91,7 +91,7 @@ module Tagger =
         else
             match TagDetection.detectTitle videoData (Some videoData.Title) patterns with
             | Some title ->
-                printer.Debug $"• Found title \"%s{title}\""
+                printer.Debug $"• Detected title \"%s{title}\""
                 taggedFile.Tag.Title <- title
             | None -> printer.Debug "No title was found."
 
@@ -109,7 +109,7 @@ module Tagger =
             match TagDetection.detectArtist videoData None patterns with
             | None -> ()
             | Some artist ->
-                printer.Debug $"• Found artist \"%s{artist}\""
+                printer.Debug $"• Detected artist \"%s{artist}\""
                 taggedFile.Tag.Performers <- [| artist |]
 
         // Album
@@ -121,14 +121,14 @@ module Tagger =
             match TagDetection.detectAlbum videoData collectionTitle patterns with
             | None -> ()
             | Some album ->
-                printer.Debug $"• Found album \"%s{album}\""
+                printer.Debug $"• Detected album \"%s{album}\""
                 taggedFile.Tag.Album <- album
 
         // Composers
         match TagDetection.detectComposers videoData patterns with
         | None -> ()
         | Some composers ->
-            printer.Debug $"• Found composer(s) \"%s{composers}\""
+            printer.Debug $"• Detected composer(s) \"%s{composers}\""
             taggedFile.Tag.Composers <- [| composers |]
 
         // Track number
@@ -148,7 +148,7 @@ module Tagger =
             match TagDetection.detectReleaseYear videoData defaultYear patterns with
             | None -> ()
             | Some year ->
-                printer.Debug $"• Found year \"%d{year}\""
+                printer.Debug $"• Detected year \"%d{year}\""
                 taggedFile.Tag.Year <- year
 
         // Comment
@@ -157,14 +157,15 @@ module Tagger =
         // Artwork embedding
         match imageFilePath with
         | Some path ->
-            if settings.EmbedImages && settings.DoNotEmbedImageUploaders |> List.doesNotContain videoData.Uploader
+            if settings.EmbedImages
+               && settings.DoNotEmbedImageUploaders |> List.doesNotContain videoData.Uploader
             then
                 printer.Info "Embedding artwork..."
                 writeImageToFile taggedFile path printer
             else
                 printer.Debug "Skipping artwork embedding."
         | None ->
-            printer.Debug "Skipping artwork embedding as none was found."
+            printer.Debug "Skipping artwork embedding as no artwork was found."
 
         taggedFile.Save()
         printer.Debug $"Wrote tags to \"%s{audioFileName}\"."
