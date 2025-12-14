@@ -1,8 +1,5 @@
 namespace CCVTAC.Console.PostProcessing.Tagging
 
-open System
-open System.IO
-open System.Text.Json
 open CCVTAC.Console
 open CCVTAC.Console.Settings.Settings
 open CCVTAC.Console.PostProcessing
@@ -11,6 +8,9 @@ open CCVTAC.Console.Downloading.Downloading
 open Startwatch.Library
 open TaggingSets
 open MetadataUtilities
+open System
+open System.IO
+open System.Text.Json
 
 type TaggedFile = TagLib.File
 
@@ -43,8 +43,8 @@ module Tagger =
                 { taggingSet with
                     AudioFilePaths = taggingSet.AudioFilePaths
                                      |> List.except [largestFileInfo.FullName] }
-            with ex ->
-                printer.Error $"Error deleting pre-split source file \"%s{largestFileInfo.Name}\": %s{ex.Message}"
+            with exn ->
+                printer.Error $"Error deleting pre-split source file \"%s{largestFileInfo.Name}\": %s{exn.Message}"
                 taggingSet
 
     let private writeImageToFile (taggedFile: TaggedFile) imageFilePath (printer: Printer) =
@@ -56,8 +56,8 @@ module Tagger =
                 pics[0] <- TagLib.Picture imageFilePath
                 taggedFile.Tag.Pictures <- pics
                 printer.Debug "Image written to file tags OK."
-            with ex ->
-                printer.Error $"Error writing image to the audio file: %s{ex.Message}"
+            with exn ->
+                printer.Error $"Error writing image to the audio file: %s{exn.Message}"
 
     let private releaseYear userSettings videoMetadata : uint32 option =
         if userSettings.IgnoreUploadYearUploaders |> List.caseInsensitiveContains videoMetadata.Uploader then
@@ -167,8 +167,11 @@ module Tagger =
         | None ->
             printer.Debug "Skipping artwork embedding as no artwork was found."
 
-        taggedFile.Save()
-        printer.Debug $"Wrote tags to \"%s{audioFileName}\"."
+        try
+            taggedFile.Save()
+            printer.Debug $"Wrote tags to \"%s{audioFileName}\"."
+        with exn ->
+            printer.Error $"Failed to save tags: ${exn.Message}"
 
     let private processTaggingSet
         (settings: UserSettings)
