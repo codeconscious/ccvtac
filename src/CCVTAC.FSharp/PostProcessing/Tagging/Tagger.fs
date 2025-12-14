@@ -19,14 +19,12 @@ module Tagger =
     let private parseVideoJson taggingSet : Result<VideoMetadata, string> =
         try
             let json = File.ReadAllText taggingSet.JsonFilePath
-            try
-                match JsonSerializer.Deserialize<VideoMetadata> json with
-                | Null -> Error $"Deserialized JSON was null for \"%s{taggingSet.JsonFilePath}\"."
-                | NonNull v -> Ok v
-            with
-            | :? JsonException as ex -> Error $"%s{ex.Message}%s{String.newLine}%s{ex.StackTrace}"
-        with ex ->
-            Error $"Error reading JSON file \"%s{taggingSet.JsonFilePath}\": %s{ex.Message}."
+            match JsonSerializer.Deserialize<VideoMetadata> json with
+            | Null -> Error $"Deserialized JSON was null for \"%s{taggingSet.JsonFilePath}\"."
+            | NonNull v -> Ok v
+        with
+        | :? JsonException as exn -> Error $"%s{exn.Message}%s{String.newLine}%s{exn.StackTrace}"
+        | exn -> Error $"Error reading JSON file \"%s{taggingSet.JsonFilePath}\": %s{exn.Message}."
 
     /// If a video was split into sub-videos, then the original video is unneeded and should be deleted.
     let private deleteSourceFile taggingSet (printer: Printer) : TaggingSet =
@@ -78,7 +76,7 @@ module Tagger =
         (imageFilePath: string option)
         (collectionData: CollectionMetadata option)
         (printer: Printer)
-        =
+        : unit =
 
         let audioFileName = Path.GetFileName audioFilePath
         printer.Debug $"Current audio file: \"%s{audioFileName}\""
@@ -177,8 +175,7 @@ module Tagger =
         (collectionJson: CollectionMetadata option)
         (embedImages: bool)
         (printer: Printer)
-        : unit
-        =
+        : unit =
 
         printer.Debug $"""Found %s{String.fileLabel (Some "audio") taggingSet.AudioFilePaths.Length} with resource ID %s{taggingSet.ResourceId}."""
 
