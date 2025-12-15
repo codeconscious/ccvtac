@@ -73,7 +73,7 @@ module Orchestrator =
                 |> fun msg -> printer.Info($"{String.newLine}{msg}", appendLines = 1uy)
 
             if batchSize > 1 then
-                printer.Info $"Processing group %d{urlIndex} of %d{batchSize}..."
+                printer.Info $"Processing item %d{urlIndex} of %d{batchSize}..."
 
             let jobWatch = Watch()
 
@@ -102,11 +102,13 @@ module Orchestrator =
 
                     let groupClause =
                         if batchSize > 1
-                        then $" (group %d{urlIndex} of %d{batchSize})"
+                        then $" (item %d{urlIndex} of %d{batchSize})"
                         else String.Empty
 
                     printer.Info $"Processed '%s{url}'%s{groupClause} in %s{jobWatch.ElapsedFriendly}."
-                    Ok { NextAction = NextAction.Continue; UpdatedSettings = None }
+
+                    Ok { NextAction = NextAction.Continue
+                         UpdatedSettings = None }
 
     let summarizeToggle settingName setting =
         sprintf "%s was toggled to %s for this session." settingName (if setting then "ON" else "OFF")
