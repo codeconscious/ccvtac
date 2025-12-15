@@ -171,7 +171,7 @@ module Orchestrator =
             Ok { NextAction = NextAction.Continue; UpdatedSettings = Some newSettings }
 
         // Update audio formats
-        elif String.startsWithIgnoreCase Commands.updateAudioFormatPrefix command then
+        elif command |> String.startsWithIgnoreCase Commands.updateAudioFormatPrefix then
             let format = command.Replace(Commands.updateAudioFormatPrefix, String.Empty).ToLowerInvariant()
             if String.hasNoText format then
                 Error "You must append one or more supported audio formats separated by commas (e.g., \"m4a,opus,best\")."
@@ -184,7 +184,7 @@ module Orchestrator =
                     Ok { NextAction = NextAction.Continue; UpdatedSettings = Some newSettings }
 
         // Update audio quality
-        elif String.startsWithIgnoreCase Commands.updateAudioQualityPrefix command then
+        elif command |> String.startsWithIgnoreCase Commands.updateAudioQualityPrefix then
             let inputQuality = command.Replace(Commands.updateAudioQualityPrefix, String.Empty)
             if String.hasNoText inputQuality then
                 Error "You must enter a number representing an audio quality between 10 (lowest) and 0 (highest)."
@@ -203,9 +203,10 @@ module Orchestrator =
 
         // Unknown command
         else
-            Error <| sprintf "\"%s\" is not a valid command. Enter \"%shelp\" to see a list of commands."
-                        command
-                        (string Commands.prefix)
+            Error <|
+                sprintf "\"%s\" is not a valid command. Enter \"%shelp\" to see a list of commands."
+                    command
+                    (string Commands.prefix)
 
 
     /// Processes a single user request, from input to downloading and file post-processing.
