@@ -35,7 +35,10 @@ type History(filePath: string, displayCount: int) =
                 lines
                 |> Seq.choose (fun line ->
                     match line.Split separator with
-                    | [| date; url |] -> Some (DateTime.Parse date, url)
+                    | [| dateText; url |] ->
+                        match DateTime.TryParse dateText with
+                        | true, date -> Some (date, url)
+                        | _ -> None
                     | _ -> None)
                 |> Seq.groupBy fst
                 |> Seq.map (fun (dt, pairs) -> dt, pairs |> Seq.map snd |> Seq.toList)
