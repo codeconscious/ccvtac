@@ -5,17 +5,18 @@ open System.IO
 open System.Text.Json
 open Spectre.Console
 
-type History(filePath: string, displayCount: byte) =
+type History(filePath: string, displayCount: int) =
 
     let separator = ';'
 
     member private _.FilePath = filePath
     member private _.DisplayCount = displayCount
 
-    /// Add a URL and related data to the history file.
+    /// Write a URL and its related data to the history file.
     member this.Append(url: string, entryTime: DateTime, printer: Printer) : unit =
         try
             let serializedEntryTime = JsonSerializer.Serialize(entryTime).Replace("\"", "")
+            // TODO: IO should be placed elsewhere.
             File.AppendAllText(this.FilePath, serializedEntryTime + string separator + url + String.newLine)
             printer.Debug $"Added \"%s{url}\" to the history log."
         with exn ->
@@ -23,12 +24,10 @@ type History(filePath: string, displayCount: byte) =
 
     member this.ShowRecent(printer: Printer) : unit =
         try
-            // Read lines and take the last N lines in the original order
-            let max = int this.DisplayCount
             let lines =
                 File.ReadAllLines this.FilePath
                 |> Seq.rev
-                |> Seq.truncate max
+                |> Seq.truncate this.DisplayCount
                 |> Seq.rev
                 |> Seq.toList
 
@@ -40,7 +39,7 @@ type History(filePath: string, displayCount: byte) =
                 |> Seq.groupBy fst
                 |> Seq.map (fun (dt, pairs) -> dt, pairs |> Seq.map snd |> Seq.toList)
 
-            // TODO: This shouldn't be here.
+            // TODO: These presentation matters shouldn't be here.
             let table = Table()
             table.Border <- TableBorder.None
             table.AddColumns("Time", "URL") |> ignore

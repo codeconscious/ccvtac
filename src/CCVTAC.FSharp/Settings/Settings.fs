@@ -32,7 +32,7 @@ module Settings =
         [<JsonPropertyName("workingDirectory")>]              WorkingDirectory: string
         [<JsonPropertyName("moveToDirectory")>]               MoveToDirectory: string
         [<JsonPropertyName("historyFile")>]                   HistoryFile: string
-        [<JsonPropertyName("historyDisplayCount")>]           HistoryDisplayCount: byte
+        [<JsonPropertyName("historyDisplayCount")>]           HistoryDisplayCount: int
         [<JsonPropertyName("audioFormats")>]                  AudioFormats: string list
         [<JsonPropertyName("audioQuality")>]                  AudioQuality: byte
         [<JsonPropertyName("splitChapters")>]                 SplitChapters: bool
@@ -53,7 +53,7 @@ module Settings =
             WorkingDirectory = String.Empty
             MoveToDirectory = String.Empty
             HistoryFile = String.Empty
-            HistoryDisplayCount = 25uy // byte
+            HistoryDisplayCount = 25
             SplitChapters = true
             SleepSecondsBetweenDownloads = 10us
             SleepSecondsBetweenURLs = 15us
