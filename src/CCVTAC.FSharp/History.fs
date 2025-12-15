@@ -33,9 +33,10 @@ type History(filePath: string, displayCount: int) =
 
             let historyData =
                 lines
-                |> Seq.map _.Split(separator)
-                |> Seq.filter (fun parts -> parts.Length = 2)
-                |> Seq.map (fun parts -> DateTime.Parse(parts[0]), parts[1])
+                |> Seq.choose (fun line ->
+                    match line.Split separator with
+                    | [| date; url |] -> Some (DateTime.Parse date, url)
+                    | _ -> None)
                 |> Seq.groupBy fst
                 |> Seq.map (fun (dt, pairs) -> dt, pairs |> Seq.map snd |> Seq.toList)
 
