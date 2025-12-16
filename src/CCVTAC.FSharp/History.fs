@@ -1,6 +1,6 @@
 namespace CCVTAC.Console
 
-open CCVTAC.Console.IoUtilities.FileIo
+open CCVTAC.Console.IoUtilities.Files
 open System
 open System.IO
 open System.Text.Json
