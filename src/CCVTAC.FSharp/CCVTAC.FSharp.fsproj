@@ -11,6 +11,7 @@
     <Compile Include="Extensions.fs" />
     <Compile Include="Printer.fs" />
     <Compile Include="IoUtilities\Directories.fs" />
+    <Compile Include="IoUtilities\Files.fs" />
     <Compile Include="Settings\Id3Version.fs" />
     <Compile Include="Settings\Settings.fs" />
     <Compile Include="ExternalTools\ToolSettings.fs" />

@@ -78,7 +78,7 @@ module Downloader =
                 let downloadSettings = ToolSettings.create commandWithArgs userSettings.WorkingDirectory
 
                 let downloadResult = runTool downloadSettings [1] printer
-                let filesDownloaded = audioFileCount userSettings.WorkingDirectory Files.audioFileExtensions > 0
+                let filesDownloaded = audioFileCount userSettings.WorkingDirectory FileIo.audioFileExtensions > 0
 
                 match downloadResult, filesDownloaded with
                 | Ok result, true ->

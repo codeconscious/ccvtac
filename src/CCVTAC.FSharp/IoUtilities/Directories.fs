@@ -3,11 +3,6 @@ namespace CCVTAC.Console.IoUtilities
 open System.IO
 open CCVTAC.Console
 
-module Files =
-
-    let audioFileExtensions =
-        [ ".aac"; ".alac"; ".flac"; ".m4a"; ".mp3"; ".ogg"; ".vorbis"; ".opus"; ".wav" ]
-
 module Directories =
 
     type private ErrorList = string ResizeArray
