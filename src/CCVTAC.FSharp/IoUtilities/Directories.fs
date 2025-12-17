@@ -5,8 +5,6 @@ open System.IO
 
 module Directories =
 
-    type private ErrorList = string ResizeArray
-
     [<Literal>]
     let private allFilesSearchPattern = "*"
 
@@ -36,30 +34,29 @@ module Directories =
     let deleteAllFiles showMaxErrors workingDirectory : Result<uint,string> =
         let delete fileNames =
             Array.fold
-                (fun (successCount: uint, errors: ErrorList) fileName ->
-                    try File.Delete fileName
+                (fun (successCount: uint, errors: string list) fileName ->
+                    try
+                        File.Delete fileName
                         (successCount + 1u, errors)
-                    with exn ->
-                        errors.Add exn.Message; successCount, errors)
-                (0u, ErrorList())
+                    with exn -> (successCount, errors @ [exn.Message]))
+                (0u, [])
                 fileNames
 
         match getDirectoryFileNames workingDirectory None with
         | Error errMsg -> Error errMsg
         | Ok fileNames ->
             match delete fileNames with
-            | successCount, errors when errors.Count = 0 ->
+            | successCount, [] ->
                 Ok successCount
             | successCount, errors ->
                 SB($"{String.fileLabel None successCount} deleted successfully, but some files could not be deleted:{String.newLine}")
-                    .AppendLine
-                        (fileNames
-                         |> Array.truncate showMaxErrors
-                         |> Array.map (sprintf "• %s")
-                         |> String.concat String.newLine)
+                    .AppendLine(fileNames
+                                |> Array.truncate showMaxErrors
+                                |> Array.map (sprintf "• %s")
+                                |> String.concat String.newLine)
                 |> fun sb ->
-                    if errors.Count > showMaxErrors
-                    then sb.AppendLine $"... plus {errors.Count - showMaxErrors} more."
+                    if errors.Length > showMaxErrors
+                    then sb.AppendLine $"... plus {errors.Length - showMaxErrors} more."
                     else sb
                 |> _.ToString()
                 |> Error
