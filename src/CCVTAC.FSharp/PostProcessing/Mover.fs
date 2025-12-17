@@ -38,15 +38,17 @@ module Mover =
         (overwrite: bool)
         : {| Successes: string list; Failures: string list |} =
 
-        ({| Successes = []; Failures = [] |}, audioFiles)
-        ||> List.fold
-                (fun results (file: FileInfo) ->
-                    try
-                        File.Move(file.FullName, Path.Combine(moveToDir, file.Name), overwrite)
-                        {| results with Successes = results.Successes @ [$"• Moved \"%s{file.Name}\""] |}
-                    with exn ->
-                        {| results with Failures = results.Failures @ [$"• Error moving \"%s{file.Name}\": %s{exn.Message}"] |})
+        let successes, failures = ResizeArray<string>(), ResizeArray<string>()
 
+        for file in audioFiles do
+            try
+                File.Move(file.FullName, Path.Combine(moveToDir, file.Name), overwrite)
+                successes.Add $"• Moved \"%s{file.Name}\""
+            with exn ->
+                failures.Add $"• Error moving \"%s{file.Name}\": %s{exn.Message}"
+
+        {| Successes = successes |> Seq.toList |> List.rev
+           Failures  = failures  |> Seq.toList |> List.rev |}
 
     let private moveImageFile
         (maybeCollectionName: string)
