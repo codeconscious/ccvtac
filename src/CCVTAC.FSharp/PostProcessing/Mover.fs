@@ -151,7 +151,8 @@ module Mover =
                 if moveFailureCount > 0 then
                     printer.Warning $"However, %s{fileCountMsg moveFailureCount} could not be moved."
 
-                match moveImageFile collectionName subFolderName workingDirInfo fullMoveToDir
-                                    audioFileNames.Length overwrite with
+                moveImageFile collectionName subFolderName workingDirInfo fullMoveToDir
+                                    audioFileNames.Length overwrite
+                |> function
                 | Ok msg -> printer.Info msg
                 | Error err -> printer.Error $"Error moving the image file: %s{err}."
