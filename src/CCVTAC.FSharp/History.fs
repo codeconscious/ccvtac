@@ -16,8 +16,8 @@ type History(filePath: string, displayCount: int) =
     /// Write a URL and its related data to the history file.
     member this.Append(url: string, entryTime: DateTime, printer: Printer) : unit =
         try
-            let serializedEntryTime = JsonSerializer.Serialize(entryTime).Replace("\"", "")
-            let text = serializedEntryTime + string separator + url + String.newLine
+            let serializedTime = JsonSerializer.Serialize(entryTime).Replace("\"", "")
+            let text = serializedTime + string separator + url + String.newLine
 
             match appendToFile this.FilePath text with
             | Ok _      -> printer.Debug $"Added \"%s{url}\" to the history log."
