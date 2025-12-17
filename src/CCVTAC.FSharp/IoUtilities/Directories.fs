@@ -10,16 +10,17 @@ module Directories =
     [<Literal>]
     let private allFilesSearchPattern = "*"
 
-    /// Counts the number of audio files in a directory
+    /// Counts the number of audio files in a directory.
     let audioFileCount (directory: string) (includedExtensions: string list) =
         DirectoryInfo(directory).EnumerateFiles()
         |> Seq.filter (fun f -> List.caseInsensitiveContains f.Extension includedExtensions)
         |> Seq.length
 
-    /// Returns the filenames in a given directory, optionally ignoring specific filenames
+    /// Returns the filenames in a given directory, optionally ignoring specific filenames.
     let private getDirectoryFileNames
         (directoryName: string)
-        (customIgnoreFiles: string seq option) =
+        (customIgnoreFiles: string seq option)
+        : Result<string array, string> =
 
         let ignoreFiles =
             customIgnoreFiles
@@ -27,38 +28,40 @@ module Directories =
             |> Seq.distinct
             |> Seq.toArray
 
-        Directory.GetFiles(directoryName, allFilesSearchPattern, EnumerationOptions())
-        |> Array.filter (fun filePath -> not (ignoreFiles |> Array.exists filePath.EndsWith))
+        ofTry (fun _ ->
+            Directory.GetFiles(directoryName, allFilesSearchPattern, EnumerationOptions())
+            |> Array.filter (fun filePath -> not (ignoreFiles |> Array.exists filePath.EndsWith)))
 
     /// Deletes all files in the working directory
     let deleteAllFiles showMaxErrors workingDirectory : Result<uint,string> =
-        let fileNames = getDirectoryFileNames workingDirectory None
+        match getDirectoryFileNames workingDirectory None with
+        | Error errMsg -> Error errMsg
+        | Ok fileNames ->
+            let successCount, errors =
+                Array.fold
+                    (fun (s: uint, errs: ErrorList) fileName ->
+                        try File.Delete fileName
+                            (s + 1u, errs)
+                        with exn ->
+                            errs.Add exn.Message; s, errs)
+                    (0u, ErrorList())
+                    fileNames
 
-        let successCount, errors =
-            Array.fold
-                (fun (s: uint, errs: ErrorList) fileName ->
-                    try File.Delete fileName
-                        (s + 1u, errs)
-                    with exn ->
-                        errs.Add exn.Message; s, errs)
-                (0u, ErrorList())
-                fileNames
-
-        if Seq.isEmpty errors then
-            Ok successCount
-        else
-            SB($"{String.fileLabel None successCount} deleted successfully, but some files could not be deleted:{String.newLine}")
-                .AppendLine
-                    (fileNames
-                     |> Array.truncate showMaxErrors
-                     |> Array.map (sprintf "• %s")
-                     |> String.concat String.newLine)
-            |> fun sb ->
-                if errors.Count > showMaxErrors
-                then sb.AppendLine $"... plus {errors.Count - showMaxErrors} more."
-                else sb
-            |> _.ToString()
-            |> Error
+            if Seq.isEmpty errors then
+                Ok successCount
+            else
+                SB($"{String.fileLabel None successCount} deleted successfully, but some files could not be deleted:{String.newLine}")
+                    .AppendLine
+                        (fileNames
+                         |> Array.truncate showMaxErrors
+                         |> Array.map (sprintf "• %s")
+                         |> String.concat String.newLine)
+                |> fun sb ->
+                    if errors.Count > showMaxErrors
+                    then sb.AppendLine $"... plus {errors.Count - showMaxErrors} more."
+                    else sb
+                |> _.ToString()
+                |> Error
 
     /// Ask the user to confirm the deletion of files in the specified directory.
     let askToDeleteAllFiles dirName (printer: Printer) =
@@ -68,24 +71,25 @@ module Directories =
 
     /// Warn the user if there are any files in the specified directory.
     let warnIfAnyFiles showMax dirName =
-        let fileNames = getDirectoryFileNames dirName None
-
-        if Array.isEmpty fileNames then
-            Ok ()
-        else
-            SB($"Unexpectedly found {String.fileLabel None fileNames.Length} in working directory \"{dirName}\":{String.newLine}")
-                .AppendLine
-                    (fileNames
-                     |> Array.truncate showMax
-                     |> Array.map (sprintf "• %s")
-                     |> String.concat String.newLine)
-            |> fun sb ->
-                if fileNames.Length > showMax
-                then sb.AppendLine $"... plus {fileNames.Length - showMax} more."
-                else sb
-            |> _.AppendLine("This sometimes occurs due to the same video appearing twice in playlists.")
-            |> _.ToString()
-            |> Error
+        match getDirectoryFileNames dirName None with
+        | Error errMsg -> Error errMsg
+        | Ok fileNames ->
+            if Array.isEmpty fileNames then
+                Ok ()
+            else
+                SB($"Unexpectedly found {String.fileLabel None fileNames.Length} in working directory \"{dirName}\":{String.newLine}")
+                    .AppendLine
+                        (fileNames
+                         |> Array.truncate showMax
+                         |> Array.map (sprintf "• %s")
+                         |> String.concat String.newLine)
+                |> fun sb ->
+                    if fileNames.Length > showMax
+                    then sb.AppendLine $"... plus {fileNames.Length - showMax} more."
+                    else sb
+                |> _.AppendLine("This sometimes occurs due to the same video appearing twice in playlists.")
+                |> _.ToString()
+                |> Error
 
     /// Ensures the specified directory exists, including creation of it if necessary.
     let ensureDirectoryExists dirName : Result<DirectoryInfo, string> =
