@@ -101,9 +101,7 @@ module Mover =
 
         let safeName = workingName |> String.replaceInvalidPathChars None None |> _.Trim()
         let topicSuffix = " - Topic"
-        if safeName.EndsWith topicSuffix
-        then safeName.Replace(topicSuffix, String.Empty)
-        else safeName
+        safeName.Replace(topicSuffix, String.Empty)
 
     let run
         (taggingSets: TaggingSet seq)
