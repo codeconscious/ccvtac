@@ -1,7 +1,7 @@
 namespace CCVTAC.Console.IoUtilities
 
-open System.IO
 open CCVTAC.Console
+open System.IO
 
 module Directories =
 
@@ -32,24 +32,25 @@ module Directories =
             Directory.GetFiles(directoryName, allFilesSearchPattern, EnumerationOptions())
             |> Array.filter (fun filePath -> not (ignoreFiles |> Array.exists filePath.EndsWith)))
 
-    /// Deletes all files in the working directory
+    /// Empties a specified directory and reports the count of deleted files.
     let deleteAllFiles showMaxErrors workingDirectory : Result<uint,string> =
+        let delete fileNames =
+            Array.fold
+                (fun (successCount: uint, errors: ErrorList) fileName ->
+                    try File.Delete fileName
+                        (successCount + 1u, errors)
+                    with exn ->
+                        errors.Add exn.Message; successCount, errors)
+                (0u, ErrorList())
+                fileNames
+
         match getDirectoryFileNames workingDirectory None with
         | Error errMsg -> Error errMsg
         | Ok fileNames ->
-            let successCount, errors =
-                Array.fold
-                    (fun (s: uint, errs: ErrorList) fileName ->
-                        try File.Delete fileName
-                            (s + 1u, errs)
-                        with exn ->
-                            errs.Add exn.Message; s, errs)
-                    (0u, ErrorList())
-                    fileNames
-
-            if Seq.isEmpty errors then
+            match delete fileNames with
+            | successCount, errors when errors.Count = 0 ->
                 Ok successCount
-            else
+            | successCount, errors ->
                 SB($"{String.fileLabel None successCount} deleted successfully, but some files could not be deleted:{String.newLine}")
                     .AppendLine
                         (fileNames
