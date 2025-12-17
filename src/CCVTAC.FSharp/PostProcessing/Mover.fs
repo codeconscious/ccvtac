@@ -36,22 +36,17 @@ module Mover =
         (audioFiles: FileInfo list)
         (moveToDir: string)
         (overwrite: bool)
-        (printer: Printer)
-        : int * int = // TODO: Need a custom type for clarity.
+        : {| Successes: string list; Failures: string list |} =
 
-        let mutable successCount = 0
-        let mutable failureCount = 0
+        ({| Successes = []; Failures = [] |}, audioFiles)
+        ||> List.fold
+                (fun results (file: FileInfo) ->
+                    try
+                        File.Move(file.FullName, Path.Combine(moveToDir, file.Name), overwrite)
+                        {| results with Successes = results.Successes @ [$"• Moved \"%s{file.Name}\""] |}
+                    with exn ->
+                        {| results with Failures = results.Failures @ [$"• Error moving \"%s{file.Name}\": %s{exn.Message}"] |})
 
-        for file in audioFiles do
-            try
-                File.Move(file.FullName, Path.Combine(moveToDir, file.Name), overwrite)
-                successCount <- successCount + 1
-                printer.Debug $"• Moved \"%s{file.Name}\""
-            with exn ->
-                failureCount <- failureCount + 1
-                printer.Error $"• Error moving file \"%s{file.Name}\": %s{exn.Message}"
-
-        (successCount, failureCount)
 
     let private moveImageFile
         (maybeCollectionName: string)
@@ -143,16 +138,17 @@ module Mover =
 
                 printer.Debug $"Moving %s{fileCountMsg audioFileNames.Length} to \"%s{fullMoveToDir}\"..."
 
-                let moveSuccessCount, moveFailureCount =
-                    moveAudioFiles audioFileNames fullMoveToDir overwrite printer
+                let results = moveAudioFiles audioFileNames fullMoveToDir overwrite
 
-                printer.Info $"Moved %s{fileCountMsg moveSuccessCount} in %s{watch.ElapsedFriendly}."
+                printer.Info $"Moved %s{fileCountMsg results.Successes.Length} in %s{watch.ElapsedFriendly}."
+                results.Successes |> List.iter printer.Debug
 
-                if moveFailureCount > 0 then
-                    printer.Warning $"However, %s{fileCountMsg moveFailureCount} could not be moved."
+                if List.isNotEmpty results.Failures then
+                    printer.Warning $"However, %s{fileCountMsg results.Failures.Length} could not be moved:"
+                    results.Failures |> List.iter printer.Error
 
                 moveImageFile collectionName subFolderName workingDirInfo fullMoveToDir
-                                    audioFileNames.Length overwrite
+                              audioFileNames.Length overwrite
                 |> function
                 | Ok msg -> printer.Info msg
                 | Error err -> printer.Error $"Error moving the image file: %s{err}."
