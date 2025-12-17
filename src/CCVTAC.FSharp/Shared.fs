@@ -6,6 +6,8 @@ open Spectre.Console
 [<AutoOpen>]
 module Shared =
 
+    /// Safely runs a function that might raise an exception.
+    /// If an exception is thrown, only returns its message.
     let ofTry (f: unit -> 'a) : Result<'a, string> =
         try Ok (f())
         with exn -> Error exn.Message
