@@ -61,10 +61,8 @@ module Program =
                         | Error warnResult ->
                             printer.Error warnResult
                             match Directories.askToDeleteAllFiles settings.WorkingDirectory printer with
-                            | Ok deletedCount -> printer.Info $"%s{String.fileLabel None deletedCount} deleted."
-                            | Error delErr -> printer.Error delErr
-                    )
-
+                            | Error err -> printer.Error err
+                            | Ok results -> Directories.printDeletionResults printer results)
                     try
                         Orchestrator.start settings printer
                         int ExitCodes.Success

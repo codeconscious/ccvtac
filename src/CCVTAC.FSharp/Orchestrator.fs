@@ -266,15 +266,14 @@ module Orchestrator =
     let start (settings: UserSettings) (printer: Printer) : unit =
         // The working directory should start empty. Give the user a chance to empty it.
         match Directories.warnIfAnyFiles 10 settings.WorkingDirectory with
-        | Error err ->
-            printer.Error err
-            match Directories.askToDeleteAllFiles settings.WorkingDirectory printer with
-            | Ok deletedCount ->
-                printer.Info $"%s{String.fileLabel None deletedCount} deleted."
-            | Error err' ->
-                printer.Error err'
-                printer.Info "Aborting..."
         | Ok () -> ()
+        | Error filesFoundErr ->
+            printer.Error filesFoundErr
+            Directories.askToDeleteAllFiles settings.WorkingDirectory printer |> function
+            | Ok results -> Directories.printDeletionResults printer results
+            | Error deletionError ->
+                printer.Error deletionError
+                printer.Info "Aborting..."
 
         let results = ResultTracker<string> printer
         let history = History(settings.HistoryFile, settings.HistoryDisplayCount)
