@@ -136,7 +136,7 @@ module Mover =
             if audioFileNames.IsEmpty then
                 printer.Error "No audio filenames to move were found."
             else
-                let fileCountMsg = String.fileLabel (Some "audio")
+                let fileCountMsg = String.fileLabelWithDescriptor "audio"
 
                 printer.Debug $"Moving %s{fileCountMsg audioFileNames.Length} to \"%s{fullMoveToDir}\"..."
 

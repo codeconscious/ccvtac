@@ -75,7 +75,7 @@ module Directories =
             if Array.isEmpty fileNames then
                 Ok ()
             else
-                SB($"Unexpectedly found {String.fileLabel None fileNames.Length} in working directory \"{dirName}\":{String.newLine}")
+                SB($"Unexpectedly found {String.fileLabel fileNames.Length} in working directory \"{dirName}\":{String.newLine}")
                     .AppendLine
                         (fileNames
                          |> Array.truncate showMax
