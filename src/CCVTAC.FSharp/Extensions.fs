@@ -55,8 +55,8 @@ module String =
         fileLabeller None count
 
     /// Returns a file-count string with a descriptor, such as "0 audio files" or "140 deleted files".
-    let fileLabelWithDescriptor descriptor count =
-        fileLabeller (Some descriptor) count
+    let fileLabelWithDescriptor (descriptor: string) count =
+        fileLabeller (Some (descriptor.Trim())) count
 
     /// Returns a new string in which all invalid path characters for the current OS
     /// have been replaced by the specified replacement character.

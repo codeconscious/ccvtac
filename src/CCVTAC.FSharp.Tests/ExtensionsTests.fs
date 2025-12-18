@@ -58,6 +58,22 @@ module NumericsTests =
         Assert.False <| Numerics.isOne 0L
         Assert.False <| Numerics.isOne 0m
 
+module StringTests =
+
+    [<Fact>]
+    let ``fileLabel formats correctly`` () =
+        Assert.True <| (String.fileLabel 0 = "0 files")
+        Assert.True <| (String.fileLabel 1 = "1 file")
+        Assert.True <| (String.fileLabel 2 = "2 files")
+        Assert.True <| (String.fileLabel 1_000_000 = "1000000 files")
+
+    [<Fact>]
+    let ``fileLabelWithDescriptor formats correctly`` () =
+        Assert.True <| (String.fileLabelWithDescriptor "audio" 0 = "0 audio files")
+        Assert.True <| (String.fileLabelWithDescriptor " temporary " 1 = "1 temporary file")
+        Assert.True <| (String.fileLabelWithDescriptor "deleted" 2 = "2 deleted files")
+        Assert.True <| (String.fileLabelWithDescriptor "images" 1_000_000 = "1000000 image files")
+
 module SeqTests =
 
     [<Fact>]
