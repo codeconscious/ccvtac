@@ -59,6 +59,54 @@ module NumericsTests =
         Assert.False <| isOne 0L
         Assert.False <| isOne 0m
 
+    module FormatNumberTests =
+
+        // A tiny custom type that implements the required ToString signature.
+        type MyCustomNum(i: int) =
+            member _.ToString(fmt: string, provider: IFormatProvider) =
+                i.ToString(fmt, provider)
+
+        [<Fact>]
+        let ``format int`` () =
+            let actual = formatNumber 123456
+            Assert.Equal("123,456", actual)
+
+        [<Fact>]
+        let ``format negative int`` () =
+            let actual = formatNumber -1234
+            Assert.Equal("-1,234", actual)
+
+        [<Fact>]
+        let ``format zero`` () =
+            let actual = formatNumber 0
+            Assert.Equal("0", actual)
+
+        [<Fact>]
+        let ``format int64`` () =
+            let actual = formatNumber 1234567890L
+            Assert.Equal("1,234,567,890", actual)
+
+        [<Fact>]
+        let ``format decimal rounds to integer display`` () =
+            let actual = formatNumber 123456.78M
+            Assert.Equal("123,457", actual)
+
+        [<Fact>]
+        let ``format float rounds to integer display`` () =
+            let actual = formatNumber 123456.78
+            Assert.Equal("123,457", actual)
+
+        [<Fact>]
+        let ``format negative float rounds to integer display`` () =
+            let actual = formatNumber -1234.56
+            Assert.Equal("-1,235", actual)
+
+        [<Fact>]
+        let ``format custom numeric type`` () =
+            let myNum = MyCustomNum 1234
+            let actual = formatNumber myNum
+            Assert.Equal("1,234", actual)
+
 module StringTests =
     open CCVTAC.Console.String
 
