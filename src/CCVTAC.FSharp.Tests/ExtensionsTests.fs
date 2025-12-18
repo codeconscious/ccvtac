@@ -5,74 +5,76 @@ open Xunit
 open System
 
 module NumericsTests =
+    open CCVTAC.Console.Numerics
 
     [<Fact>]
     let ``isZero returns true for any zero value`` () =
-        Assert.True <| Numerics.isZero 0
-        Assert.True <| Numerics.isZero 0u
-        Assert.True <| Numerics.isZero 0us
-        Assert.True <| Numerics.isZero 0.
-        Assert.True <| Numerics.isZero 0L
-        Assert.True <| Numerics.isZero 0m
-        Assert.True <| Numerics.isZero -0
-        Assert.True <| Numerics.isZero -0.
-        Assert.True <| Numerics.isZero -0L
-        Assert.True <| Numerics.isZero -0m
+        Assert.True <| isZero 0
+        Assert.True <| isZero 0u
+        Assert.True <| isZero 0us
+        Assert.True <| isZero 0.
+        Assert.True <| isZero 0L
+        Assert.True <| isZero 0m
+        Assert.True <| isZero -0
+        Assert.True <| isZero -0.
+        Assert.True <| isZero -0L
+        Assert.True <| isZero -0m
 
     [<Fact>]
     let ``isZero returns false for any non-zero value`` () =
-        Assert.False <| Numerics.isZero 1
-        Assert.False <| Numerics.isOne -1
-        Assert.False <| Numerics.isOne Int64.MinValue
-        Assert.False <| Numerics.isOne Int64.MaxValue
-        Assert.False <| Numerics.isOne 2
-        Assert.False <| Numerics.isZero 1u
-        Assert.False <| Numerics.isZero 1us
-        Assert.False <| Numerics.isZero -0.0000000000001
-        Assert.False <| Numerics.isZero 0.0000000000001
-        Assert.False <| Numerics.isZero 1.
-        Assert.False <| Numerics.isZero 1L
-        Assert.False <| Numerics.isZero 1m
+        Assert.False <| isZero 1
+        Assert.False <| isOne -1
+        Assert.False <| isOne Int64.MinValue
+        Assert.False <| isOne Int64.MaxValue
+        Assert.False <| isOne 2
+        Assert.False <| isZero 1u
+        Assert.False <| isZero 1us
+        Assert.False <| isZero -0.0000000000001
+        Assert.False <| isZero 0.0000000000001
+        Assert.False <| isZero 1.
+        Assert.False <| isZero 1L
+        Assert.False <| isZero 1m
 
     [<Fact>]
     let ``isOne returns true for any one value`` () =
-        Assert.True <| Numerics.isOne 1
-        Assert.True <| Numerics.isOne 1u
-        Assert.True <| Numerics.isOne 1us
-        Assert.True <| Numerics.isOne 1.
-        Assert.True <| Numerics.isOne 1L
-        Assert.True <| Numerics.isOne 1m
+        Assert.True <| isOne 1
+        Assert.True <| isOne 1u
+        Assert.True <| isOne 1us
+        Assert.True <| isOne 1.
+        Assert.True <| isOne 1L
+        Assert.True <| isOne 1m
 
     [<Fact>]
     let ``isOne returns false for any non-one value`` () =
-        Assert.False <| Numerics.isOne 0
-        Assert.False <| Numerics.isOne -1
-        Assert.False <| Numerics.isOne Int64.MinValue
-        Assert.False <| Numerics.isOne Int64.MaxValue
-        Assert.False <| Numerics.isOne 2
-        Assert.False <| Numerics.isOne 0u
-        Assert.False <| Numerics.isOne 16u
-        Assert.False <| Numerics.isOne 0us
-        Assert.False <| Numerics.isOne -0.
-        Assert.False <| Numerics.isOne 0.001
-        Assert.False <| Numerics.isOne 0L
-        Assert.False <| Numerics.isOne 0m
+        Assert.False <| isOne 0
+        Assert.False <| isOne -1
+        Assert.False <| isOne Int64.MinValue
+        Assert.False <| isOne Int64.MaxValue
+        Assert.False <| isOne 2
+        Assert.False <| isOne 0u
+        Assert.False <| isOne 16u
+        Assert.False <| isOne 0us
+        Assert.False <| isOne -0.
+        Assert.False <| isOne 0.001
+        Assert.False <| isOne 0L
+        Assert.False <| isOne 0m
 
 module StringTests =
+    open CCVTAC.Console.String
 
     [<Fact>]
     let ``fileLabel formats correctly`` () =
-        Assert.True <| (String.fileLabel 0 = "0 files")
-        Assert.True <| (String.fileLabel 1 = "1 file")
-        Assert.True <| (String.fileLabel 2 = "2 files")
-        Assert.True <| (String.fileLabel 1_000_000 = "1000000 files")
+        Assert.True <| (fileLabel 0 = "0 files")
+        Assert.True <| (fileLabel 1 = "1 file")
+        Assert.True <| (fileLabel 2 = "2 files")
+        Assert.True <| (fileLabel 1_000_000 = "1,000,000 files")
 
     [<Fact>]
     let ``fileLabelWithDescriptor formats correctly`` () =
-        Assert.True <| (String.fileLabelWithDescriptor "audio" 0 = "0 audio files")
-        Assert.True <| (String.fileLabelWithDescriptor " temporary " 1 = "1 temporary file")
-        Assert.True <| (String.fileLabelWithDescriptor "deleted" 2 = "2 deleted files")
-        Assert.True <| (String.fileLabelWithDescriptor "images" 1_000_000 = "1000000 image files")
+        Assert.True <| (fileLabelWithDescriptor "audio" 0 = "0 audio files")
+        Assert.True <| (fileLabelWithDescriptor " temporary " 1 = "1 temporary file")
+        Assert.True <| (fileLabelWithDescriptor "deleted" 2 = "2 deleted files")
+        Assert.True <| (fileLabelWithDescriptor "image" 1_000_000 = "1,000,000 image files")
 
 module SeqTests =
 

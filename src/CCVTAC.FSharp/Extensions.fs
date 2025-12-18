@@ -1,6 +1,7 @@
 namespace CCVTAC.Console
 
 open System
+open System.Globalization
 open System.IO
 open System.Text
 
@@ -13,6 +14,11 @@ module Numerics =
 
     let inline isOne (n: ^a) =
         n = LanguagePrimitives.GenericOne<'a>
+
+    /// Formats a number of any type to a comma-formatted string.
+    let inline formatNumber (i: ^T) : string
+        when ^T : (member ToString : string * IFormatProvider -> string) =
+        (^T : (member ToString : string * IFormatProvider -> string) (i, "#,##0", CultureInfo.InvariantCulture))
 
 module String =
 
@@ -45,10 +51,10 @@ module String =
     let inline pluralize ifOne ifNotOne count =
         if Numerics.isOne count then ifOne else ifNotOne
 
-    let inline private fileLabeller descriptor count =
+    let inline private fileLabeller descriptor (count: int) =
         match descriptor with
-        | None   -> $"""%d{count} %s{pluralize "file" "files" count}"""
-        | Some d -> $"""%d{count} %s{d} {pluralize "file" "files" count}"""
+        | None   -> $"""%s{Numerics.formatNumber count} %s{pluralize "file" "files" count}"""
+        | Some d -> $"""%s{Numerics.formatNumber count} %s{d} {pluralize "file" "files" count}"""
 
     /// Returns a file-count string, such as "0 files" or 1 file" or "140 files".
     let fileLabel count =
@@ -94,6 +100,7 @@ module String =
     let trimTerminalLineBreak (text: string) =
         text.TrimEnd(newLine.ToCharArray())
 
+[<RequireQualifiedAccess>]
 module Seq =
 
     let isNotEmpty seq = not (Seq.isEmpty seq)
@@ -105,6 +112,7 @@ module Seq =
     let caseInsensitiveContains text (xs: string seq) : bool =
         xs |> Seq.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))
 
+[<RequireQualifiedAccess>]
 module List =
 
     let isNotEmpty lst = not (List.isEmpty lst)
@@ -116,6 +124,7 @@ module List =
     let caseInsensitiveContains text (lst: string list) : bool =
         lst |> List.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))
 
+[<RequireQualifiedAccess>]
 module Array =
 
     let isNotEmpty arr = not <| Array.isEmpty arr
