@@ -45,7 +45,7 @@ module String =
     let startsWithIgnoreCase startText (text: string)  =
         text.StartsWith(startText, StringComparison.InvariantCultureIgnoreCase)
 
-    let endsWithIgnoringCase endText (text: string) =
+    let endsWithIgnoreCase endText (text: string) =
         text.EndsWith(endText, StringComparison.InvariantCultureIgnoreCase)
 
     /// Pluralize text using a specified count.

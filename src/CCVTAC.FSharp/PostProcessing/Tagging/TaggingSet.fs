@@ -43,15 +43,15 @@ module TaggingSets =
             |> Seq.map (fun (videoId, matches) -> videoId, matches |> Seq.map _.Groups[0].Value)
             |> Seq.filter (fun (_, files) ->
                 let isSupportedExt = files |> Seq.exists fileHasSupportedExtension
-                let jsonCount  = files |> Seq.filter (String.endsWithIgnoringCase jsonFileExt)  |> Seq.length
-                let imageCount = files |> Seq.filter (String.endsWithIgnoringCase imageFileExt) |> Seq.length
+                let jsonCount  = files |> Seq.filter (String.endsWithIgnoreCase jsonFileExt)  |> Seq.length
+                let imageCount = files |> Seq.filter (String.endsWithIgnoreCase imageFileExt) |> Seq.length
                 isSupportedExt
                     && Numerics.isOne jsonCount
                     && Numerics.isOne imageCount)
             |> Seq.map (fun (videoId, files) ->
                 let audioFiles = files |> Seq.filter fileHasSupportedExtension
-                let jsonFile   = files |> Seq.find (String.endsWithIgnoringCase jsonFileExt)
-                let imageFile  = files |> Seq.find (String.endsWithIgnoringCase imageFileExt)
+                let jsonFile   = files |> Seq.find (String.endsWithIgnoreCase jsonFileExt)
+                let imageFile  = files |> Seq.find (String.endsWithIgnoreCase imageFileExt)
                 { ResourceId = videoId
                   AudioFilePaths = audioFiles |> Seq.toList
                   JsonFilePath = jsonFile
