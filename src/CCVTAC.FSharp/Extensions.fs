@@ -48,8 +48,13 @@ module String =
     let endsWithIgnoringCase endText (text: string) =
         text.EndsWith(endText, StringComparison.InvariantCultureIgnoreCase)
 
+    /// Pluralize text using a specified count.
     let inline pluralize ifOne ifNotOne count =
         if Numerics.isOne count then ifOne else ifNotOne
+
+    /// Pluralize text including its count, such as "1 file", "30 URLs".
+    let pluralizeWithCount ifOne ifNotOne count =
+        sprintf "%d %s" count (pluralize ifOne ifNotOne count)
 
     let inline private fileLabeller descriptor (count: int) =
         match descriptor with

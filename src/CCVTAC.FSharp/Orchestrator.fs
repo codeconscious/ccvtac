@@ -28,11 +28,8 @@ module Orchestrator =
         : unit =
 
         if List.hasMultiple categorizedInputs then
-            let urlCount = counts[InputCategory.Url]
-            let cmdCount = counts[InputCategory.Command]
-
-            let urlSummary = match urlCount with 1 -> "1 URL" | n -> $"%d{n} URLs"
-            let cmdSummary = match cmdCount with 1 -> "1 command" | n -> $"%d{n} commands"
+            let urlSummary = String.pluralizeWithCount "URL" "URLs" counts[InputCategory.Url]
+            let cmdSummary = String.pluralizeWithCount "command" "commands" counts[InputCategory.Command]
 
             printer.Info <|
                 match counts[InputCategory.Url], counts[InputCategory.Command] with
