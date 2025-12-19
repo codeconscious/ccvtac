@@ -53,7 +53,7 @@ module String =
         if Numerics.isOne count then ifOne else ifNotOne
 
     /// Pluralize text including its count, such as "1 file", "30 URLs".
-    let pluralizeWithCount ifOne ifNotOne count =
+    let inline pluralizeWithCount ifOne ifNotOne count =
         sprintf "%d %s" count (pluralize ifOne ifNotOne count)
 
     let inline private fileLabeller descriptor (count: int) =
