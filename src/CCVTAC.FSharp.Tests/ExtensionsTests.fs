@@ -124,6 +124,62 @@ module StringTests =
         Assert.True <| (fileLabelWithDescriptor "deleted" 2 = "2 deleted files")
         Assert.True <| (fileLabelWithDescriptor "image" 1_000_000 = "1,000,000 image files")
 
+    module ReplaceInvalidPathCharsTests =
+        open System.IO
+
+        [<Fact>]
+        let ``Default replacement '_' replaces invalid path chars`` () =
+            let invalids = Path.GetInvalidFileNameChars() |> Array.except ['\000']
+            if Array.isEmpty invalids then
+                Assert.True(false, "Unexpected environment: not enough invalid filename chars")
+            let invalid = invalids[0]
+            let input = $"start%c{invalid}end"
+            let result = replaceInvalidPathChars None None input
+
+            Assert.DoesNotContain(invalid.ToString(), result)
+            Assert.Contains("_", result)
+            Assert.StartsWith("start", result)
+            Assert.EndsWith("end", result)
+
+        [<Fact>]
+        let ``Custom invalid chars are replaced with provided replacement`` () =
+            let custom = ['#'; '%']
+            let input = "abc#def%ghi"
+            let result = replaceInvalidPathChars (Some '-') (Some custom) input
+
+            Assert.DoesNotContain("#", result)
+            Assert.DoesNotContain("%", result)
+            Assert.Equal("abc-def-ghi", result)
+
+        [<Fact>]
+        let ``Throws when replacement char itself is invalid`` () =
+            let invalidReplacement = Array.head <| Path.GetInvalidFileNameChars()
+            let input = "has-no-invalid-chars"
+            Assert.Throws<ArgumentException>(fun () ->
+                replaceInvalidPathChars (Some invalidReplacement) None input |> ignore)
+
+        [<Fact>]
+        let ``No invalid chars returns identical string`` () =
+            let input = "HelloWorld123"
+            let result = replaceInvalidPathChars None None input
+            Assert.Equal(input, result)
+
+        [<Fact>]
+        let ``All invalid path and filename chars are replaced`` () =
+            let fileInvalid = Path.GetInvalidFileNameChars() |> Array.truncate 3
+            let pathInvalid = Path.GetInvalidPathChars() |> Array.truncate 3
+            let extras = [| Path.PathSeparator
+                            Path.DirectorySeparatorChar
+                            Path.AltDirectorySeparatorChar
+                            Path.VolumeSeparatorChar |]
+            let charsToTest = Array.concat [ fileInvalid; pathInvalid; extras ]
+            let input = String charsToTest
+
+            let result = replaceInvalidPathChars None None input
+
+            result.ToCharArray() |> Array.iter (fun ch -> Assert.Equal(ch, '_'))
+            Assert.Equal(input.Length, result.Length)
+
 module SeqTests =
 
     [<Fact>]
