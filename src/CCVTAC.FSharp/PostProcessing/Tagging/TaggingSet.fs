@@ -26,7 +26,7 @@ module TaggingSets =
             let jsonFileExt = ".json"
             let imageFileExt = ".jpg"
 
-            // Regex: group 1 holds the video id; group 0 is the full filename
+            // Regex group 0 is the full filename, and group 1 contains the video ID.
             let fileNamesWithVideoIdsRegex =
                 Regex(@".+\[([\w_\-]{11})\](?:.*)?\.(\w+)", RegexOptions.Compiled)
 
@@ -43,11 +43,9 @@ module TaggingSets =
             |> Seq.map (fun (videoId, matches) -> videoId, matches |> Seq.map _.Groups[0].Value)
             |> Seq.filter (fun (_, files) ->
                 let isSupportedExt = files |> Seq.exists fileHasSupportedExtension
-                let jsonCount  = files |> Seq.filter (String.endsWithIgnoreCase jsonFileExt)  |> Seq.length
-                let imageCount = files |> Seq.filter (String.endsWithIgnoreCase imageFileExt) |> Seq.length
-                isSupportedExt
-                    && Numerics.isOne jsonCount
-                    && Numerics.isOne imageCount)
+                let hasOneJson     = files |> Seq.filter (String.endsWithIgnoreCase jsonFileExt)  |> Seq.hasOne
+                let hasOneImage    = files |> Seq.filter (String.endsWithIgnoreCase imageFileExt) |> Seq.hasOne
+                isSupportedExt && hasOneJson && hasOneImage)
             |> Seq.map (fun (videoId, files) ->
                 let audioFiles = files |> Seq.filter fileHasSupportedExtension
                 let jsonFile   = files |> Seq.find (String.endsWithIgnoreCase jsonFileExt)
