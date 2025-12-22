@@ -112,6 +112,8 @@ module Seq =
 
     let doesNotContain x seq = not <| Seq.contains x seq
 
+    let hasOne seq = seq |> Seq.length |> Numerics.isOne
+
     let hasMultiple seq = seq |> Seq.length |> (<) 1
 
     let caseInsensitiveContains text (xs: string seq) : bool =
@@ -124,6 +126,8 @@ module List =
 
     let doesNotContain x lst = not <| List.contains x lst
 
+    let hasOne lst = lst |> List.length |> Numerics.isOne
+
     let hasMultiple lst = lst |> List.length |> (<) 1
 
     let caseInsensitiveContains text (lst: string list) : bool =
@@ -135,6 +139,8 @@ module Array =
     let isNotEmpty arr = not <| Array.isEmpty arr
 
     let doesNotContain x arr = not <| Array.contains x arr
+
+    let hasOne arr = arr |> Array.length |> Numerics.isOne
 
     let hasMultiple arr = arr |> Array.length |> (<) 1
 
