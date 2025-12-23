@@ -20,7 +20,7 @@ While I maintain it for my own use, feel free to use it yourself! However, pleas
 
 - [.NET 10 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp)
-- [ffmpeg](https://ffmpeg.org/) (for yt-dlp artwork extraction)
+- [ffmpeg](https://ffmpeg.org/) (for yt-dlp artwork extraction and conversion)
 - Optional: [mogrify](https://imagemagick.org/script/mogrify.php) (for auto-trimming album art)
 
 ## Screenshots
