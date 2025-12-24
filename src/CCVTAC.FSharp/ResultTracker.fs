@@ -28,7 +28,7 @@ type ResultTracker<'a>(printer: Printer) =
                 failures[input] <- e
 
     /// Logs the result for a specific corresponding input.
-    member _.RegisterResult(input: string, result: Result<'a list, string list>) : unit =
+    member _.RegisterResult(input: string, result: Result<'a, string list>) : unit =
         match result with
         | Ok _ ->
             successCount <- successCount + 1UL

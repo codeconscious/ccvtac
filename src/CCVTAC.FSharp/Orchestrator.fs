@@ -92,9 +92,9 @@ module Orchestrator =
                     |> List.map (sprintf "Media download error: %s")
                     |> String.concat String.newLine
                     |> Error
-                | Ok msgs ->
+                | Ok message ->
                     printer.Debug "Media download(s) successful!"
-                    msgs |> List.iter printer.Info
+                    if String.hasText message then printer.Info message
                     PostProcessor.run settings mediaType printer
 
                     let groupClause =

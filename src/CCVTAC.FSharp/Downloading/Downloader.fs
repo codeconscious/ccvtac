@@ -103,11 +103,10 @@ module Downloader =
 
         loop [] userSettings.AudioFormats
 
-    let downloadMetadata (printer: Printer) userSettings (SupplementaryUrl url)
-        : Result<string list, string list> =
+    let downloadMetadata (printer: Printer) userSettings (SupplementaryUrl url) : Result<string, string list> =
 
         match url with
-        | None -> Ok ["No supplementary metadata link found."]
+        | None -> Ok "No supplementary metadata link found."
         | Some url' ->
             let args = generateDownloadArgs None userSettings None (Some [url'])
             let commandWithArgs = $"{programName} {args}"
@@ -115,10 +114,10 @@ module Downloader =
             let metadataDownloadResult = runTool downloadSettings [1] printer
 
             match metadataDownloadResult with
-            | Ok _ -> Ok ["Supplementary metadata download completed OK."]
+            | Ok _ -> Ok "Supplementary metadata download completed OK."
             | Error err -> Error [$"Supplementary metadata download failed: {err}"]
 
-    let run (mediaType: MediaType) userSettings (printer: Printer) : Result<string list, string list> =
+    let run (mediaType: MediaType) userSettings (printer: Printer) : Result<string, string list> =
         result {
             let rawUrls = generateDownloadUrl mediaType
             let urls =
