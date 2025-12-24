@@ -115,7 +115,7 @@ module Downloader =
             let metadataDownloadResult = runTool downloadSettings [1] printer
 
             match metadataDownloadResult with
-            | Ok _ -> Error ["Supplementary metadata download completed OK."]
+            | Ok _ -> Ok ["Supplementary metadata download completed OK."]
             | Error err -> Error [$"Supplementary metadata download failed: {err}"]
 
     let run (mediaType: MediaType) userSettings (printer: Printer) : Result<string list, string list> =
