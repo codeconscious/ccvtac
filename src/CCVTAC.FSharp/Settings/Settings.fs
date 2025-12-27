@@ -46,6 +46,7 @@ module Settings =
         [<JsonPropertyName("renamePatterns")>]                RenamePatterns: RenamePattern list
         [<JsonPropertyName("normalizationForm")>]             NormalizationForm : string
         [<JsonPropertyName("downloaderUpdateCommand")>]       DownloaderUpdateCommand : string
+        [<JsonPropertyName("downloaderAdditionalOptions")>]   DownloaderAdditionalOptions : string option
     }
 
     let private defaultSettings =
@@ -73,6 +74,7 @@ module Settings =
             RenamePatterns = []
             NormalizationForm = "C" // Recommended for compatibility between Linux and macOS.
             DownloaderUpdateCommand = String.Empty
+            DownloaderAdditionalOptions = None
         }
 
     let summarize settings : (string * string) list =

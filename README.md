@@ -108,7 +108,14 @@ You can copy and paste the sample settings file below to a JSON file named `sett
 
   // The full command you use to update your local yt-dlp installation.
   // This is a sample entry.
-  "downloaderUpdateCommand": "pip install --upgrade yt-dlp",
+  "downloaderUpdateCommand": "pip install --upgrade yt-dlp", 
+
+  // Arbitrary yt-dlp options to be included in all yt-dlp commands.
+  // Use with caution, as some options could disrupt operation of this program.
+  // Intended to be used only when necessary to resolve download issues.
+  // For example, see https://github.com/yt-dlp/yt-dlp/wiki/EJS,
+  // upon which this sample is based.
+  "downloaderAdditionalOptions": "--remote-components ejs:github",
 
   // Channel names for which the video thumbnail should
   // never be embedded in the audio file.
@@ -128,7 +135,7 @@ You can copy and paste the sample settings file below to a JSON file named `sett
   // These require familiarity with regular expressions (regex).
   "tagDetectionPatterns": {
 
-    // Currently supports 5 tags: this one (Title) and its siblings listed below.
+    // Currently supports 5 tags: this one (title) and its siblings listed below.
     "title": [
       {
         // A regex pattern for searching in the video metadata field specified below.
