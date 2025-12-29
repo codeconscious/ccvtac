@@ -15,6 +15,7 @@ open TaggingSets
 module Mover =
 
     let private playlistImageRegex = Regex(@"\[[OP]L[\w\d_-]{12,}\]", RegexOptions.Compiled)
+
     let private imageFileWildcard = "*.jp*"
 
     let private isPlaylistImage (fileName: string) =
