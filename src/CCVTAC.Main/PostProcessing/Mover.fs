@@ -113,44 +113,42 @@ module Mover =
 
         let workingDirInfo = DirectoryInfo settings.WorkingDirectory
 
-        let firstTaggingSet =
-            taggingSets
-            |> Seq.tryHead
-            |> Option.defaultWith (fun () -> failwith "No tagging sets provided") // TODO: Improve.
+        match taggingSets |> Seq.tryHead with
+        | None -> printer.Error "No tagging sets provided"
+        | Some firstTaggingSet ->
+            let subFolderName = getSafeSubDirectoryName maybeCollectionData firstTaggingSet
+            let collectionName = maybeCollectionData |> Option.map _.Title |> Option.defaultValue String.Empty
+            let fullMoveToDir = Path.Combine(settings.MoveToDirectory, subFolderName, collectionName)
 
-        let subFolderName = getSafeSubDirectoryName maybeCollectionData firstTaggingSet
-        let collectionName = maybeCollectionData |> Option.map _.Title |> Option.defaultValue String.Empty
-        let fullMoveToDir = Path.Combine(settings.MoveToDirectory, subFolderName, collectionName)
+            match Directories.ensureDirectoryExists fullMoveToDir with
+            | Error err ->
+                printer.Error err
+            | Ok dirInfo ->
+                printer.Debug $"Move-to directory \"%s{dirInfo.Name}\" exists."
 
-        match Directories.ensureDirectoryExists fullMoveToDir with
-        | Error err ->
-            printer.Error err
-        | Ok dirInfo ->
-            printer.Debug $"Move-to directory \"%s{dirInfo.Name}\" exists."
+                let audioFileNames =
+                    workingDirInfo.EnumerateFiles()
+                    |> Seq.filter (fun f -> List.caseInsensitiveContains f.Extension Files.audioFileExtensions)
+                    |> List.ofSeq
 
-            let audioFileNames =
-                workingDirInfo.EnumerateFiles()
-                |> Seq.filter (fun f -> List.caseInsensitiveContains f.Extension Files.audioFileExtensions)
-                |> List.ofSeq
+                if audioFileNames.IsEmpty then
+                    printer.Error "No audio filenames to move were found."
+                else
+                    let fileCountMsg = String.fileLabelWithDescriptor "audio"
 
-            if audioFileNames.IsEmpty then
-                printer.Error "No audio filenames to move were found."
-            else
-                let fileCountMsg = String.fileLabelWithDescriptor "audio"
+                    printer.Debug $"Moving %s{fileCountMsg audioFileNames.Length} to \"%s{fullMoveToDir}\"..."
 
-                printer.Debug $"Moving %s{fileCountMsg audioFileNames.Length} to \"%s{fullMoveToDir}\"..."
+                    let results = moveAudioFiles audioFileNames fullMoveToDir overwrite
 
-                let results = moveAudioFiles audioFileNames fullMoveToDir overwrite
+                    printer.Info $"Moved %s{fileCountMsg results.Successes.Length} in %s{watch.ElapsedFriendly}."
+                    results.Successes |> List.iter printer.Debug
 
-                printer.Info $"Moved %s{fileCountMsg results.Successes.Length} in %s{watch.ElapsedFriendly}."
-                results.Successes |> List.iter printer.Debug
+                    if List.isNotEmpty results.Failures then
+                        printer.Warning $"However, %s{fileCountMsg results.Failures.Length} could not be moved:"
+                        results.Failures |> List.iter printer.Error
 
-                if List.isNotEmpty results.Failures then
-                    printer.Warning $"However, %s{fileCountMsg results.Failures.Length} could not be moved:"
-                    results.Failures |> List.iter printer.Error
-
-                moveImageFile collectionName subFolderName workingDirInfo fullMoveToDir
-                              audioFileNames.Length overwrite
-                |> function
-                | Ok msg -> printer.Info msg
-                | Error err -> printer.Error $"Error moving the image file: %s{err}."
+                    moveImageFile collectionName subFolderName workingDirInfo fullMoveToDir
+                                  audioFileNames.Length overwrite
+                    |> function
+                    | Ok msg -> printer.Info msg
+                    | Error err -> printer.Error $"Error moving the image file: %s{err}."
