@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 25.0.1706.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CCVTAC.FSharp", "CCVTAC.FSharp\CCVTAC.FSharp.fsproj", "{44860E27-2F04-428C-8444-C774627A019F}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CCVTAC.Main", "CCVTAC.Main\CCVTAC.Main.fsproj", "{44860E27-2F04-428C-8444-C774627A019F}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CCVTAC.FSharp.Tests", "CCVTAC.FSharp.Tests\CCVTAC.FSharp.Tests.fsproj", "{D9BD0637-C4C1-435B-B202-1447FD85DCDE}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CCVTAC.Tests", "CCVTAC.Tests\CCVTAC.Tests.fsproj", "{D9BD0637-C4C1-435B-B202-1447FD85DCDE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
