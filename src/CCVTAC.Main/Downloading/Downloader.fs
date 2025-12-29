@@ -46,7 +46,7 @@ module Downloader =
         | None   -> ()
 
         // No MediaType indicates that this is a supplemental metadata-only download.
-        // TODO: Add a union type to more clearly indicate this difference.
+        // TODO: Perhaps add a union type to more clearly indicate this difference.
         match mediaType with
         | Some mt ->
             if userSettings.SplitChapters then
