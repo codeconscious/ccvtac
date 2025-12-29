@@ -68,9 +68,6 @@ You can copy and paste the sample settings file below to a JSON file named `sett
   // Count of entries to show for `history` command.
   "historyDisplayCount": 20,
 
-  // The directory to which the log file should be saved.
-  "logDirectory": "/Users/me/Downloads",
-
   // The audio formats (codec) audio should be extracted to.
   // Options: best, aac, alac, flac, m4a, mp3, opus, vorbis, wav.
   // Not all options are available for all videos.
