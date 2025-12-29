@@ -10,7 +10,7 @@ module Detectors =
     /// If casting fails, the default value is returned instead.
     let tryCast<'a> (text: string) : 'a option =
         try
-            // If T is string, return the text directly
+            // If 'a is string, return the text directly.
             if typeof<'a> = typeof<string> then
                 Some (box text :?> 'a)
             else

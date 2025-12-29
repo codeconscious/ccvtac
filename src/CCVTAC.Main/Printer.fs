@@ -112,7 +112,7 @@ type Printer(showDebug: bool) =
         Printer.EmptyLines(defaultArg appendLines 0uy)
 
     member private this.Errors(headerMessage: string, errors: string seq) =
-        // Create an array with headerMessage followed by the items in errors
+        // Create an array with headerMessage followed by the items in errors.
         let items = seq { yield headerMessage; yield! errors } |> Seq.toArray
         this.Errors(items, 0uy)
 
@@ -139,7 +139,6 @@ type Printer(showDebug: bool) =
         if Numerics.isZero count
         then ()
         else
-            // Write count blank lines. The original wrote (count - 1) extra NewLines inside WriteLine call.
             let repeats = int count - 1
             if repeats <= 0
             then AnsiConsole.WriteLine()
