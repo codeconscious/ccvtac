@@ -30,7 +30,6 @@ module Directories =
             Directory.GetFiles(directoryName, allFilesSearchPattern, EnumerationOptions())
             |> Array.filter (fun filePath -> not (ignoreFiles |> Array.exists filePath.EndsWith)))
 
-    /// Empties a specified directory and reports the count of deleted files.
     let deleteAllFiles workingDirectory
         : Result<ResultMessageCollection, string> =
 
@@ -65,7 +64,6 @@ module Directories =
             printer.Warning $"However, %s{String.fileLabel results.Failures.Length} could not be deleted:"
             results.Failures |> List.iter printer.Error
 
-    /// Warn the user if there are any files in the specified directory.
     let warnIfAnyFiles showMax dirName =
         match getDirectoryFileNames dirName None with
         | Error errMsg -> Error errMsg

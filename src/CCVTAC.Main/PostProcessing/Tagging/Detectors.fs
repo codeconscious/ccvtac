@@ -1,6 +1,5 @@
 namespace CCVTAC.Main.PostProcessing.Tagging
 
-open CCVTAC.Main
 open CCVTAC.Main.Settings.Settings
 open CCVTAC.Main.PostProcessing
 open System
@@ -32,8 +31,8 @@ module Detectors =
             raise (ArgumentException($"\"{fieldName}\" is an invalid video metadata field name."))
 
     /// Finds and returns the first instance of text matching a given detection scheme pattern,
-    /// parsing into T if necessary.
-    /// <returns>A match of type 'a if there was a match; otherwise, the default value provided.</returns>
+    /// parsing to type 'a if necessary.
+    /// <returns>A match of type 'a if there was a match; otherwise, the default value provided, if any.</returns>
     let detectSingle<'a>
         (videoMetadata: VideoMetadata)
         (patterns: TagDetectionPattern seq)
@@ -55,7 +54,7 @@ module Detectors =
     /// Finds and returns all instances of text matching a given detection scheme pattern,
     /// concatenating them into a single string (using a custom separator), then casting
     /// to type 'a if necessary.
-    /// <returns>A match of type 'a if there were any matches; otherwise, the default value provided.</returns>
+    /// <returns>A match of type 'a if there were any matches; otherwise, the default value provided, if any.</returns>
     let detectMultiple<'a>
         (data: VideoMetadata)
         (patterns: TagDetectionPattern seq)

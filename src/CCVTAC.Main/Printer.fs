@@ -37,7 +37,7 @@ type Printer(showDebug: bool) =
         | Ok _ -> []
         | Error errors -> errors
 
-    /// Show or hide debug messages.
+    /// Toggle showing or hiding debug messages.
     member this.ShowDebug(show: bool) =
         minimumLogLevel <- (if show then Level.Debug else Level.Info)
 
