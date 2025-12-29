@@ -2,18 +2,18 @@
 
 CCVTAC (CodeConscious Video-to-Audio Converter) is a small .NET-powered CLI tool written in F# that acts as a wrapper around [yt-dlp](https://github.com/yt-dlp/yt-dlp) to enable easier download and extractions of audio from YouTube videos, playlists, and channels, plus do some automatic post-processing (tagging, renaming, and moving).
 
-While I maintain it for my own use, feel free to use it yourself! However, please note that it's geared to my own personal use cases and that no warranties or guarantees are provided.
+Feel free to use it yourself, but please note that it's geared to my personal use case and that no warranties or guarantees are provided.
 
 [![Build and test](https://github.com/codeconscious/ccvtac/actions/workflows/build-test.yml/badge.svg)](https://github.com/codeconscious/ccvtac/actions/workflows/build-test.yml)
 
 ## Features
 
 - Converts YouTube videos, playlists, and channels to local audio files (via [yt-dlp](https://github.com/yt-dlp/yt-dlp))
-- Writes ID3 tags to files where possible using available or regex-detected metadata
-- Adds video metadata (channel name and URL, video URL, etc.) to files' Comment tags
-- Auto-renames files via custom regex patterns (to remove media IDs, etc.)
+- Writes ID3 tags to files where possible using available metadata via regex-based detection
+- Logs video metadata (channel name and URL, video URL, etc.) to files' Comment tags
+- Auto-renames files via custom regex patterns (to remove video IDs, etc.)
 - Optionally writes video thumbnails to files as artwork (if [mogrify](https://imagemagick.org/script/mogrify.php) is installed)
-- Customized behavior via a user settings file — e.g., chapter splitting, image embedding, directories
+- Customizable behavior via a settings file
 - Saves entered URLs to a local history file
 
 ## Prerequisites
@@ -37,21 +37,21 @@ While I maintain it for my own use, feel free to use it yourself! However, pleas
 
 ### Settings
 
-A valid settings file is mandatory to use this application.
+A valid JSON settings file is mandatory to use this application.
 
 By default, the application will look for a file named `settings.json` in its directory. However, you can manually specify an existing file path using the `-s` option, such as `dotnet run -- -s <PATH_TO_YOUR_FILE>`.
 
-If your `settings.json` file does not exist, one will be created in the application directory with default settings. At minimum, you will need to enter (1) an existing directory for temporary working files, (2) an existing directory to which the final audio files should be moved, and (3) a path to your history file. The other settings have sensible defaults. Some settings require familiarity with regular expressions (regex).
+> [!TIP]
+> The `--` is necessary to indicate that the command and arguments are for this program and not for `dotnet`.
 
-#### Starter file with comments
-
-You can copy and paste the sample settings file below to a JSON file named `settings.json` to get started. You will, in particular, need to update the three directories at the top. You can leave the commented lines as-is, as they will be ignored.
+If your `settings.json` file does not exist, a default one will be created. At minimum, you will need to enter (1) an existing directory for temporary working files, (2) an existing directory to which the final audio files should be moved, and (3) a path to your history file. The other settings have sensible defaults. Some settings require familiarity with regular expressions (regex).
 
 <details>
-  <summary>Click here to expand!</summary>
+  <summary>Click to see a sample settings file</summary>
 
-> [!IMPORTANT]
-> When entering regular expressions in the JSON, you must enter two backslashes for each one you want to include. For example, to match a whitespace character, use `\\s` instead of `\s`.
+The sample below contains explanations and some example values as well.
+
+**Important:** When entering regular expressions, you must double-up backslashes. For example, to match a whitespace character, use `\\s` instead of `\s`.
 
 ```js
 {
@@ -199,22 +199,22 @@ List of commands:
 - `\help` to see this list of commands
 - `\quit` or `\q` to quit
 - `\history` to see the URLs you most recently entered
-- `\update-downloader` or `\update-dl` to update yt-dlp using the command in your settings (If you start experiencing constant download errors, try this command)
+- `\update-downloader` or `\update-dl` to update yt-dlp using the command in your settings (If you start experiencing constant download errors, try this command to ensure you have the latest version)
 - Modify the current session only (without updating the settings file):
   - `\split` toggles chapter splitting
   - `\images` toggles image embedding
   - `\quiet` toggles quiet mode
-  - `\format-` followed by a supported audio format (e.g., `\format-m4a`) changes the format
-  - `\quality-` followed by a supported audio quality (e.g., `\quality-0`) changes the audio quality
+  - `\format-` followed by a supported audio format (e.g., `\format-m4a`) changes the audio format for the current session only
+  - `\quality-` followed by a supported audio quality (e.g., `\quality-0`) changes the audio quality for the current session only
 
 ## Reporting issues
 
-If you run into any issues, feel free to create an issue on GitHub. Please provide as much information as possible (i.e., entered URLs, system information, yt-dlp version, etc.).
+If you run into any issues, feel free to create an issue on GitHub. Please provide as much information as possible (i.e., entered URLs or comments, system information, yt-dlp version, etc.) and I'll try to take a look.
 
 ## History
 
 The first incarnation of this application was written in C#. However, after picking up [F#](https://fsharp.org/) out of curiosity about it and functional programming (FP) in 2024 and subsequently using it successfully to create other tools (mainly [Audio Tag Tools](https://github.com/codeconscious/audio-tag-tools/)) in an FP style, I become curious about F#'s OOP capabilities as well.
 
-As an experiment to both test OOP-style F# and LLMs more, I rewrote this application in OOP F#, using LLMs only for the rough initial conversion (which greatly reduced the overall time and labor necessary at the cost of requiring a *lot* of manual cleanup). Ultimately, I was surprised how much I preferred the F# code over the C# (and how much less code there was too), so I decided to keep this tool in F# permanently.
+As an experiment, I rewrote this application in OOP F#, using LLMs solely for the rough initial conversion (which greatly reduced the overall time and labor necessary at the cost of requiring a *lot* of manual cleanup). Ultimately, I was surprised how much I preferred the F# code over the C# (including how much less code there was too), so I decided to keep this tool in F# permanently.
 
-Due to this background, the code is not particularly idiomatic F#, but it is perfectly viable in its current blended-style form. That said, I'll probably tweak it over time to gradually to introduce more FP.
+Due to this background, the code is not particularly idiomatic F#, but it is perfectly viable in its current blended-style form. That said, I'll probably tweak it over time to gradually to introduce more FP, mainly for practice.
