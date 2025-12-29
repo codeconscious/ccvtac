@@ -1,16 +1,16 @@
 namespace CCVTAC.Main.PostProcessing
 
+open CCVTAC.Main
 open CCVTAC.Main.IoUtilities
+open CCVTAC.Main.PostProcessing
 open CCVTAC.Main.PostProcessing.Tagging
 open CCVTAC.Main.Settings.Settings
-open CCVTAC.Main
-open CCVTAC.Main.PostProcessing
+open TaggingSets
 open System
 open System.IO
 open System.Text.Json
 open System.Text.RegularExpressions
 open Startwatch.Library
-open TaggingSets
 
 module Mover =
 
@@ -37,7 +37,8 @@ module Mover =
         (audioFiles: FileInfo list)
         (moveToDir: string)
         (overwrite: bool)
-        : {| Successes: string list; Failures: string list |} =
+        : {| Successes: string list
+             Failures: string list |} =
 
         let successes, failures = ResizeArray<string>(), ResizeArray<string>()
 
@@ -75,7 +76,7 @@ module Mover =
         with exn ->
             Error $"Error copying the image file: %s{exn.Message}"
 
-    let private getParsedVideoJson (taggingSet: TaggingSet) : Result<VideoMetadata, string> =
+    let private getParsedVideoJson taggingSet : Result<VideoMetadata, string> =
         try
             let json = File.ReadAllText taggingSet.JsonFilePath
             match JsonSerializer.Deserialize<VideoMetadata> json with
