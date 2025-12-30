@@ -7,7 +7,7 @@ type CollectionMetadata =
       [<property: JsonPropertyName("title")>] Title: string
       [<property: JsonPropertyName("availability")>] Availability: string
       [<property: JsonPropertyName("description")>] Description: string
-      [<property: JsonPropertyName("tags")>] Tags: obj list
+      [<property: JsonPropertyName("tags")>] Tags: string list
       [<property: JsonPropertyName("modified_date")>] ModifiedDate: string
       [<property: JsonPropertyName("view_count")>] ViewCount: int option
       [<property: JsonPropertyName("playlist_count")>] PlaylistCount: int option
