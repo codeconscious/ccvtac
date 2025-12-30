@@ -138,6 +138,11 @@ module List =
     let caseInsensitiveContains text (lst: string list) : bool =
         lst |> List.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))
 
+    let toOption lst =
+        if List.isEmpty lst
+        then None
+        else Some lst
+
 [<RequireQualifiedAccess>]
 module Array =
 
@@ -151,3 +156,8 @@ module Array =
 
     let caseInsensitiveContains text (arr: string array) : bool =
         arr |> Array.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))
+
+    let toOption arr =
+        if Array.isEmpty arr
+        then None
+        else Some arr
