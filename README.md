@@ -1,26 +1,26 @@
 # CCVTAC
 
-CCVTAC (CodeConscious Video-to-Audio Converter) is a small .NET-powered CLI tool that acts as a wrapper around [yt-dlp](https://github.com/yt-dlp/yt-dlp) to enable easier download and extractions of audio from YouTube videos, playlists, and channels, plus do some automatic post-processing (tagging, renaming, and moving).
+CCVTAC (CodeConscious Video-to-Audio Converter) is a small .NET-powered CLI tool written in F# that acts as a wrapper around [yt-dlp](https://github.com/yt-dlp/yt-dlp) to enable easier download and extractions of audio from YouTube videos, playlists, and channels, plus do some automatic post-processing (tagging, renaming, and moving).
 
-While I maintain it for my own use, feel free to use it yourself! However, please note it's geared to my own personal use cases and that no warranties or guarantees are provided.
+Feel free to use it yourself, but please note that it's geared to my personal use case and that no warranties or guarantees are provided.
 
 [![Build and test](https://github.com/codeconscious/ccvtac/actions/workflows/build-test.yml/badge.svg)](https://github.com/codeconscious/ccvtac/actions/workflows/build-test.yml)
 
 ## Features
 
 - Converts YouTube videos, playlists, and channels to local audio files (via [yt-dlp](https://github.com/yt-dlp/yt-dlp))
-- Writes ID3 tags to files where possible using available or regex-detected metadata
-- Adds video metadata (channel name and URL, video URL, etc.) to files' Comment tags
-- Auto-renames files via custom regex patterns (to remove media IDs, etc.)
+- Writes ID3 tags to files where possible using available metadata via regex-based detection
+- Logs video metadata (channel name and URL, video URL, etc.) to files' Comments tags
+- Auto-renames files via custom regex patterns (to remove video IDs, etc.)
 - Optionally writes video thumbnails to files as artwork (if [mogrify](https://imagemagick.org/script/mogrify.php) is installed)
-- Customized behavior via a user settings file — e.g., chapter splitting, image embedding, directories
+- Customizable behavior via a settings file
 - Saves entered URLs to a local history file
 
 ## Prerequisites
 
 - [.NET 10 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp)
-- [ffmpeg](https://ffmpeg.org/) (for yt-dlp artwork extraction)
+- [ffmpeg](https://ffmpeg.org/) (for yt-dlp artwork extraction and conversion)
 - Optional: [mogrify](https://imagemagick.org/script/mogrify.php) (for auto-trimming album art)
 
 ## Screenshots
@@ -37,18 +37,21 @@ While I maintain it for my own use, feel free to use it yourself! However, pleas
 
 ### Settings
 
-A valid settings file is mandatory to use this application.
+A valid JSON settings file is mandatory to use this application.
 
 By default, the application will look for a file named `settings.json` in its directory. However, you can manually specify an existing file path using the `-s` option, such as `dotnet run -- -s <PATH_TO_YOUR_FILE>`.
 
-If your `settings.json` file does not exist, one will be created in the application directory with default settings. At minimum, you will need to enter (1) an existing directory for temporary working files, (2) an existing directory to which the final audio files should be moved, and (3) a path to your history file. The other settings have sensible defaults. Some settings require familiarity with regular expressions (regex).
+> [!TIP]
+> The `--` is necessary to indicate that the command and arguments are for this program and not for `dotnet`.
 
-#### Starter file with comments
-
-You can copy and paste the sample settings file below to a JSON file named `settings.json` to get started. You will, in particular, need to update the three directories at the top. You can leave the commented lines as-is, as they will be ignored.
+If your `settings.json` file does not exist, a default one will be created. At minimum, you will need to enter (1) an existing directory for temporary working files, (2) an existing directory to which the final audio files should be moved, and (3) a path to your history file. The other settings have sensible defaults. Some settings require familiarity with regular expressions (regex).
 
 <details>
-  <summary>Click here to expand!</summary>
+  <summary>Click to see a sample settings file</summary>
+
+The sample below contains explanations and some example values as well.
+
+**Important:** When entering regular expressions, you must double-up backslashes. For example, to match a whitespace character, use `\\s` instead of `\s`.
 
 ```js
 {
@@ -65,13 +68,10 @@ You can copy and paste the sample settings file below to a JSON file named `sett
   // Count of entries to show for `history` command.
   "historyDisplayCount": 20,
 
-  // The directory to which the log file should be saved.
-  "logDirectory": "/Users/me/Downloads",
-
   // The audio formats (codec) audio should be extracted to.
   // Options: best, aac, alac, flac, m4a, mp3, opus, vorbis, wav.
   // Not all options are available for all videos.
-  "audioFormats": ["best"],
+  "audioFormats": ["m4a", "best"],
 
   // The audio quality to use, with 10 being the lowest and 0 being the highest.
   "audioQuality": 0,
@@ -105,7 +105,14 @@ You can copy and paste the sample settings file below to a JSON file named `sett
 
   // The full command you use to update your local yt-dlp installation.
   // This is a sample entry.
-  "downloaderUpdateCommand": "pip install --upgrade yt-dlp",
+  "downloaderUpdateCommand": "pip install --upgrade yt-dlp", 
+
+  // Arbitrary yt-dlp options to be included in all yt-dlp commands.
+  // Use with caution, as some options could disrupt operation of this program.
+  // Intended to be used only when necessary to resolve download issues.
+  // For example, see https://github.com/yt-dlp/yt-dlp/wiki/EJS,
+  // upon which this sample is based.
+  "downloaderAdditionalOptions": "--remote-components ejs:github",
 
   // Channel names for which the video thumbnail should
   // never be embedded in the audio file.
@@ -125,7 +132,7 @@ You can copy and paste the sample settings file below to a JSON file named `sett
   // These require familiarity with regular expressions (regex).
   "tagDetectionPatterns": {
 
-    // Currently supports 5 tags: this one (Title) and its siblings listed below.
+    // Currently supports 5 tags: this one (title) and its siblings listed below.
     "title": [
       {
         // A regex pattern for searching in the video metadata field specified below.
@@ -139,7 +146,7 @@ You can copy and paste the sample settings file below to a JSON file named `sett
         // Which video metadata field should be searched, `title` or `description`?
         "searchField": "description",
 
-        // An arbitrary summary to the rule. If quiet mode is off, this name will appear
+        // An arbitrary summary of the rule. If quiet mode is off, this name will appear
         // in the output when this pattern is matched.
         "summary": "Topic style"
       }
@@ -184,7 +191,7 @@ You can copy and paste the sample settings file below to a JSON file named `sett
 
 ### Using the application
 
-Once your settings file is ready, run the application with `dotnet run` within the `CCVTAC.Console` directory. Alternatively, pass `-h` or `--help` for instructions (e.g., `dotnet run -- --help`).
+Once your settings file is ready, run the application with `dotnet run` within the `CCVTAC.Console` directory, optionally passing the path to your settings file using `-s`. Alternatively, pass `-h` or `--help` for instructions (e.g., `dotnet run -- --help`).
 
 When the application is running, enter at least one YouTube media URL (video, playlist, or channel) or command at the prompt and press Enter. No spaces between items are necessary.
 
@@ -192,14 +199,26 @@ List of commands:
 - `\help` to see this list of commands
 - `\quit` or `\q` to quit
 - `\history` to see the URLs you most recently entered
-- `\update-downloader` or `\update-dl` to update yt-dlp using the command in your settings (If you start experiencing constant download errors, try this command)
+- `\update-downloader` or `\update-dl` to update yt-dlp using the command in your settings (Note: If you start experiencing constant download errors, try this command to ensure you have the latest version)
 - Modify the current session only (without updating the settings file):
   - `\split` toggles chapter splitting
   - `\images` toggles image embedding
   - `\quiet` toggles quiet mode
-  - `\format-` followed by a supported audio format (e.g., `\format-m4a`) changes the format
+  - `\format-` followed by a supported audio format (e.g., `\format-m4a`) changes the audio format
   - `\quality-` followed by a supported audio quality (e.g., `\quality-0`) changes the audio quality
+
+Enter `\commands` in the application to see this summary.
 
 ## Reporting issues
 
-If you run into any issues, feel free to create an issue on GitHub. Please provide as much information as possible (i.e., entered URLs, system information, yt-dlp version, etc.).
+If you run into any issues, feel free to create an issue on GitHub. Please provide as much information as possible (i.e., entered URLs or comments, system information, yt-dlp version, etc.) and I'll try to take a look.
+
+However, do keep in mind that this is ultimately a hobby project for myself, so I cannot guarantee every issue will be fixed.
+
+## History
+
+The first incarnation of this application was written in C#. However, after picking up [F#](https://fsharp.org/) out of curiosity about it and functional programming (FP) in 2024 and successfully using it to create other tools (mainly [Audio Tag Tools](https://github.com/codeconscious/audio-tag-tools/)) in an FP style, I become curious about F#'s OOP capabilities as well.
+
+As an experiment, I rewrote this application in OOP-style F#, using LLMs solely for the rough initial conversion (which greatly reduced the overall time and labor necessary at the cost of requiring a *lot* of manual cleanup). Ultimately, I was surprised how much I preferred the F# code over the C#, so I decided to keep this tool in F#.
+
+Due to this background, the code is not particularly idiomatic F#, but it is perfectly viable in its current blended-style form. That said, I'll probably tweak it over time to gradually to introduce more FP, mainly for practice.
