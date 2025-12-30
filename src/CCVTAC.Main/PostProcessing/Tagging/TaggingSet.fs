@@ -25,23 +25,40 @@ module TaggingSets = // TODO: Perform instantiation in a more idiomatic way.
         let validateSome (x: 'a option) errorMsg : Validation<unit, string list> =
             if x.IsSome then Ok () else Error [[errorMsg]]
 
+        let validateExactlyOne (xs: 'a list) noneErrorMsg multipleErrorMsg : Validation<unit,string list> =
+            if List.hasOne xs
+            then Ok ()
+            elif List.hasMultiple xs
+            then Error [[multipleErrorMsg]]
+            else Error [[noneErrorMsg]]
+
         let hasSupportedAudioExtension (file: string) =
             match Path.GetExtension file with
             | Null -> false
             | NonNull (ext: string) -> Seq.caseInsensitiveContains ext Files.audioFileExtensions
 
         let jsonFileExt = ".json"
-        let imageFileExt = ".jpg"
+        let imageFileExts = [".jpg"; ".jpeg"]
 
         let files' = files |> List.ofSeq
-        let audioFiles = files' |> List.filter hasSupportedAudioExtension
-        let jsonFile   = files' |> List.tryFind (String.endsWithIgnoreCase jsonFileExt)
-        let imageFile  = files' |> List.tryFind (String.endsWithIgnoreCase imageFileExt)
 
-        Validation.map3 (fun _ _ _ -> audioFiles, jsonFile, imageFile)
+        let audioFiles =
+            files'
+            |> List.filter hasSupportedAudioExtension
+
+        let jsonFile =
+            files'
+            |> List.tryFind (String.endsWithIgnoreCase jsonFileExt)
+
+        let imageFiles =
+            imageFileExts
+            |> List.map (fun i -> files' |> List.tryFind (String.endsWithIgnoreCase i))
+            |> List.choose id
+
+        Validation.map3 (fun _ _ _ -> audioFiles, jsonFile, imageFiles[0])
             (validateNonEmpty audioFiles "No supported audio files were found by extension.")
             (validateSome jsonFile "No JSON file was found.")
-            (validateSome imageFile "No image file was found.")
+            (validateExactlyOne imageFiles "No image file was found." "Multiple image files were found.")
 
     /// Create a collection of TaggingSets from a collection of file paths related to several video IDs.
     /// Files that don't match the requirements will be ignored.
@@ -62,7 +79,7 @@ module TaggingSets = // TODO: Perform instantiation in a more idiomatic way.
             |> List.map (fun (videoId, matches) -> videoId, matches |> List.map _.Groups[0].Value)
             |> List.map (fun (videoId, files) ->
                 match extractFilesByType files with
-                | Ok (audioFiles, Some jsonFile, Some imageFile) ->
+                | Ok (audioFiles, Some jsonFile, imageFile) ->
                      Ok { ResourceId = videoId
                           AudioFilePaths = audioFiles |> Seq.toList
                           JsonFilePath = jsonFile
