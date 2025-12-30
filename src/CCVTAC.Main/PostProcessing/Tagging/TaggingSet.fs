@@ -2,11 +2,12 @@ namespace CCVTAC.Main.PostProcessing.Tagging
 
 open CCVTAC.Main
 open CCVTAC.Main.IoUtilities
+open FsToolkit.ErrorHandling
 open System.IO
 open System.Text.RegularExpressions
 
 /// Contains all the data necessary for tagging a related set of files.
-module TaggingSets =
+module TaggingSets = // TODO: Perform instantiation in a more idiomatic way.
 
     type TaggingSet =
         { ResourceId: string
@@ -18,6 +19,12 @@ module TaggingSets =
         List.concat [taggingSet.AudioFilePaths; [taggingSet.JsonFilePath; taggingSet.ImageFilePath]]
 
     let private extractFilesByType (files: string seq) =
+        let validateNonEmpty (xs: 'a list) errorMsg : Validation<unit, string list> =
+            if List.isNotEmpty xs then Ok () else Error [[errorMsg]]
+
+        let validateSome (x: 'a option) errorMsg : Validation<unit, string list> =
+            if x.IsSome then Ok () else Error [[errorMsg]]
+
         let hasSupportedAudioExtension (file: string) =
             match Path.GetExtension file with
             | Null -> false
@@ -26,36 +33,40 @@ module TaggingSets =
         let jsonFileExt = ".json"
         let imageFileExt = ".jpg"
 
-        let audioFiles = files
-                         |> Seq.filter hasSupportedAudioExtension
-                         |> Seq.toOption
-        let jsonFile   = files |> Seq.tryFind (String.endsWithIgnoreCase jsonFileExt)
-        let imageFile  = files |> Seq.tryFind (String.endsWithIgnoreCase imageFileExt)
+        let files' = files |> List.ofSeq
+        let audioFiles = files' |> List.filter hasSupportedAudioExtension
+        let jsonFile   = files' |> List.tryFind (String.endsWithIgnoreCase jsonFileExt)
+        let imageFile  = files' |> List.tryFind (String.endsWithIgnoreCase imageFileExt)
 
-        (audioFiles, jsonFile, imageFile)
+        Validation.map3 (fun _ _ _ -> audioFiles, jsonFile, imageFile)
+            (validateNonEmpty audioFiles "No supported audio files were found by extension.")
+            (validateSome jsonFile "No JSON file was found.")
+            (validateSome imageFile "No image file was found.")
 
     /// Create a collection of TaggingSets from a collection of file paths related to several video IDs.
     /// Files that don't match the requirements will be ignored.
-    let createSets filePaths : TaggingSet list =
+    let createSets filePaths = // : Result<TaggingSet list, string list> =
         if Seq.isEmpty filePaths then
-            []
+            Error [["No filepaths to create a tagging set were provided."]]
         else
             // Regex group 0 is the full filename, and group 1 contains the video ID.
             let fileNamesWithVideoIdsRegex =
                 Regex(@".+\[([\w_\-]{11})\](?:.*)?\.(\w+)", RegexOptions.Compiled)
 
             filePaths
-            |> Seq.map fileNamesWithVideoIdsRegex.Match
-            |> Seq.filter _.Success
-            |> Seq.map (fun m -> m.Captures |> Seq.cast<Match> |> Seq.head)
-            |> Seq.groupBy _.Groups[1].Value
-            |> Seq.map (fun (videoId, matches) -> videoId, matches |> Seq.map _.Groups[0].Value)
-            |> Seq.choose (fun (videoId, files) ->
-                match extractFilesByType files with
-                | Some audioFiles, Some jsonFile, Some imageFile ->
-                    Some { ResourceId = videoId
-                           AudioFilePaths = audioFiles |> Seq.toList
-                           JsonFilePath = jsonFile
-                           ImageFilePath = imageFile }
-                | _ -> None)
             |> List.ofSeq
+            |> List.map fileNamesWithVideoIdsRegex.Match
+            |> List.filter _.Success
+            |> List.map (fun m -> m.Captures |> Seq.cast<Match> |> Seq.head)
+            |> List.groupBy _.Groups[1].Value
+            |> List.map (fun (videoId, matches) -> videoId, matches |> List.map _.Groups[0].Value)
+            |> List.map (fun (videoId, files) ->
+                match extractFilesByType files with
+                | Ok (audioFiles, Some jsonFile, Some imageFile) ->
+                     Ok { ResourceId = videoId
+                          AudioFilePaths = audioFiles |> Seq.toList
+                          JsonFilePath = jsonFile
+                          ImageFilePath = imageFile }
+                | Ok _ -> Error [$"Something went wrong creating a tagging set using the files for video ID %s{videoId}."]
+                | Error msgs -> Error (msgs |> List.collect id))
+            |> List.sequenceResultA

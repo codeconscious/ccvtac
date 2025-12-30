@@ -42,11 +42,14 @@ module PostProcessor =
     let private generateTaggingSets dir : Result<TaggingSet list, string> =
         try
             let taggingSets = createSets <| Directory.GetFiles dir
-            if List.isEmpty taggingSets
-            then Error $"No tagging sets were created using files in working directory \"%s{dir}\". Are all file extensions correct?"
-            else Ok taggingSets
+            match taggingSets with
+            | Error msgs ->
+                ($"Error(s) creating tagging sets in working directory \"%s{dir}\"" :: (msgs |> List.collect id))
+                |> String.concat String.newLine
+                |> Error
+            | Ok ts -> Ok ts
         with exn ->
-            Error $"Error reading working files in \"{dir}\": %s{exn.Message}"
+            Error $"Error reading working files in \"{dir}\" for tagging set creation: %s{exn.Message}"
 
     let run settings mediaType (printer: Printer) : unit =
         let watch = Watch()
