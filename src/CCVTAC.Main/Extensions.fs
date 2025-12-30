@@ -119,6 +119,11 @@ module Seq =
     let caseInsensitiveContains text (xs: string seq) : bool =
         xs |> Seq.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))
 
+    let toOption seq =
+        if Seq.isEmpty seq
+        then None
+        else Some seq
+
 [<RequireQualifiedAccess>]
 module List =
 
