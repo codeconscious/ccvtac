@@ -85,8 +85,8 @@ module MediaTypeWithIdsTests =
 
     [<Fact>]
     let ``Detects channel URL type 2 with encoded Japanese characters`` () =
-        let url = "https://www.youtube.com/@%E3%81%8A%E3%81%91%E3%83%91%E3%83%A9H"
-        let expectedId = "www.youtube.com/@%E3%81%8A%E3%81%91%E3%83%91%E3%83%A9H"
+        let url = "https://www.youtube.com/@%E3%81%8A%E3%81%E3%81%8A%E3%81%E3%81%8A%E3%81%E3%81%8A%E3%81"
+        let expectedId = "www.youtube.com/@%E3%81%8A%E3%81%E3%81%8A%E3%81%E3%81%8A%E3%81%E3%81%8A%E3%81"
         let result = mediaTypeWithIds url
 
         match result with
@@ -97,8 +97,8 @@ module MediaTypeWithIdsTests =
 
     [<Fact>]
     let ``Detects channel videos URL with encoded Japanese characters`` () =
-        let url = "https://www.youtube.com/@%E3%81%8A%91%E3%83%A9H/videos"
-        let expectedId = "www.youtube.com/@%E3%81%8A%91%E3%83%A9H/videos"
+        let url = "https://www.youtube.com/@%E3%81%8A%91%E3%83%A9HJ/videos"
+        let expectedId = "www.youtube.com/@%E3%81%8A%91%E3%83%A9HJ/videos"
         let result = mediaTypeWithIds url
 
         match result with
@@ -109,7 +109,7 @@ module MediaTypeWithIdsTests =
 
     [<Fact>]
     let ``Detects unsupported channel URL type 2 with unencoded Japanese characters`` () =
-        let url = "https://www.youtube.com/@日本語"
+        let url = "https://www.youtube.com/@日本の文字"
         let result = mediaTypeWithIds url
 
         match result with
@@ -118,7 +118,7 @@ module MediaTypeWithIdsTests =
 
     [<Fact>]
     let ``Detects unsupported channel videos URL with unencoded Japanese characters`` () =
-        let url = "https://www.youtube.com/@日本語/videos"
+        let url = "https://www.youtube.com/@日本語の文字/videos"
         let result = mediaTypeWithIds url
 
         match result with

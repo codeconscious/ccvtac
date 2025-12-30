@@ -10,7 +10,7 @@ Feel free to use it yourself, but please note that it's geared to my personal us
 
 - Converts YouTube videos, playlists, and channels to local audio files (via [yt-dlp](https://github.com/yt-dlp/yt-dlp))
 - Writes ID3 tags to files where possible using available metadata via regex-based detection
-- Logs video metadata (channel name and URL, video URL, etc.) to files' Comment tags
+- Logs video metadata (channel name and URL, video URL, etc.) to files' Comments tags
 - Auto-renames files via custom regex patterns (to remove video IDs, etc.)
 - Optionally writes video thumbnails to files as artwork (if [mogrify](https://imagemagick.org/script/mogrify.php) is installed)
 - Customizable behavior via a settings file
@@ -191,7 +191,7 @@ The sample below contains explanations and some example values as well.
 
 ### Using the application
 
-Once your settings file is ready, run the application with `dotnet run` within the `CCVTAC.Console` directory. Alternatively, pass `-h` or `--help` for instructions (e.g., `dotnet run -- --help`).
+Once your settings file is ready, run the application with `dotnet run` within the `CCVTAC.Console` directory, optionally passing the path to your settings file using `-s`. Alternatively, pass `-h` or `--help` for instructions (e.g., `dotnet run -- --help`).
 
 When the application is running, enter at least one YouTube media URL (video, playlist, or channel) or command at the prompt and press Enter. No spaces between items are necessary.
 
@@ -199,22 +199,26 @@ List of commands:
 - `\help` to see this list of commands
 - `\quit` or `\q` to quit
 - `\history` to see the URLs you most recently entered
-- `\update-downloader` or `\update-dl` to update yt-dlp using the command in your settings (If you start experiencing constant download errors, try this command to ensure you have the latest version)
+- `\update-downloader` or `\update-dl` to update yt-dlp using the command in your settings (Note: If you start experiencing constant download errors, try this command to ensure you have the latest version)
 - Modify the current session only (without updating the settings file):
   - `\split` toggles chapter splitting
   - `\images` toggles image embedding
   - `\quiet` toggles quiet mode
-  - `\format-` followed by a supported audio format (e.g., `\format-m4a`) changes the audio format for the current session only
-  - `\quality-` followed by a supported audio quality (e.g., `\quality-0`) changes the audio quality for the current session only
+  - `\format-` followed by a supported audio format (e.g., `\format-m4a`) changes the audio format
+  - `\quality-` followed by a supported audio quality (e.g., `\quality-0`) changes the audio quality
+
+Enter `\commands` in the application to see this summary.
 
 ## Reporting issues
 
 If you run into any issues, feel free to create an issue on GitHub. Please provide as much information as possible (i.e., entered URLs or comments, system information, yt-dlp version, etc.) and I'll try to take a look.
 
+However, do keep in mind that this is ultimately a hobby project for myself, so I cannot guarantee every issue will be fixed.
+
 ## History
 
-The first incarnation of this application was written in C#. However, after picking up [F#](https://fsharp.org/) out of curiosity about it and functional programming (FP) in 2024 and subsequently using it successfully to create other tools (mainly [Audio Tag Tools](https://github.com/codeconscious/audio-tag-tools/)) in an FP style, I become curious about F#'s OOP capabilities as well.
+The first incarnation of this application was written in C#. However, after picking up [F#](https://fsharp.org/) out of curiosity about it and functional programming (FP) in 2024 and successfully using it to create other tools (mainly [Audio Tag Tools](https://github.com/codeconscious/audio-tag-tools/)) in an FP style, I become curious about F#'s OOP capabilities as well.
 
-As an experiment, I rewrote this application in OOP F#, using LLMs solely for the rough initial conversion (which greatly reduced the overall time and labor necessary at the cost of requiring a *lot* of manual cleanup). Ultimately, I was surprised how much I preferred the F# code over the C# (including how much less code there was too), so I decided to keep this tool in F# permanently.
+As an experiment, I rewrote this application in OOP-style F#, using LLMs solely for the rough initial conversion (which greatly reduced the overall time and labor necessary at the cost of requiring a *lot* of manual cleanup). Ultimately, I was surprised how much I preferred the F# code over the C#, so I decided to keep this tool in F#.
 
 Due to this background, the code is not particularly idiomatic F#, but it is perfectly viable in its current blended-style form. That said, I'll probably tweak it over time to gradually to introduce more FP, mainly for practice.

@@ -110,7 +110,7 @@ module Seq =
 
     let isNotEmpty seq = not (Seq.isEmpty seq)
 
-    let doesNotContain x seq = not (Seq.contains x seq)
+    let doesNotContain x seq = not <| Seq.contains x seq
 
     let hasOne seq = seq |> Seq.length |> Numerics.isOne
 
@@ -119,17 +119,12 @@ module Seq =
     let caseInsensitiveContains text (xs: string seq) : bool =
         xs |> Seq.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))
 
-    let toOption seq =
-        if Seq.isEmpty seq
-        then None
-        else Some seq
-
 [<RequireQualifiedAccess>]
 module List =
 
     let isNotEmpty lst = not (List.isEmpty lst)
 
-    let doesNotContain x lst = not (List.contains x lst)
+    let doesNotContain x lst = not <| List.contains x lst
 
     let hasOne lst = lst |> List.length |> Numerics.isOne
 
@@ -138,17 +133,12 @@ module List =
     let caseInsensitiveContains text (lst: string list) : bool =
         lst |> List.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))
 
-    let toOption lst =
-        if List.isEmpty lst
-        then None
-        else Some lst
-
 [<RequireQualifiedAccess>]
 module Array =
 
-    let isNotEmpty arr = not (Array.isEmpty arr)
+    let isNotEmpty arr = not <| Array.isEmpty arr
 
-    let doesNotContain x arr = not (Array.contains x arr)
+    let doesNotContain x arr = not <| Array.contains x arr
 
     let hasOne arr = arr |> Array.length |> Numerics.isOne
 
@@ -156,8 +146,3 @@ module Array =
 
     let caseInsensitiveContains text (arr: string array) : bool =
         arr |> Array.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))
-
-    let toOption arr =
-        if Array.isEmpty arr
-        then None
-        else Some arr

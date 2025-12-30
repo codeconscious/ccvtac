@@ -15,11 +15,7 @@ module Deleter =
             try Ok (Directory.GetFiles(workingDirectory, $"*{metadata.Id}*"))
             with exn -> Error $"Error collecting filenames: {exn.Message}"
 
-    let private deleteAll
-        (fileNames: string array)
-        (printer: Printer)
-        : unit =
-
+    let private deleteAll (fileNames: string array) (printer: Printer) : unit =
         fileNames
         |> Array.iter (fun fileName ->
             try

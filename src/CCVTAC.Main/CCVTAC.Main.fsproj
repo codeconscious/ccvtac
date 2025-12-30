@@ -39,7 +39,6 @@
     <Compile Include="ResultTracker.fs" />
     <Compile Include="Orchestrator.fs" />
     <Compile Include="Program.fs" />
-    <Content Include="settings.json" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CodeConscious.Startwatch" Version="1.0.0" />

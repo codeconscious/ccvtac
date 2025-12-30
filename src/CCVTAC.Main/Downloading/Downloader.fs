@@ -22,8 +22,8 @@ module Downloader =
         let formatArg =
             match audioFormat with
             | None -> String.Empty
-            | Some f when f = "best" -> String.Empty
-            | Some f -> $"-f {f}"
+            | Some format when format = "best" -> String.Empty
+            | Some format -> $"-f {format}"
 
         let mutable args =
             match mediaType with
@@ -108,7 +108,6 @@ module Downloader =
         loop [] userSettings.AudioFormats
 
     let downloadMetadata (printer: Printer) userSettings (SupplementaryUrl url) : Result<string, string list> =
-
         match url with
         | None -> Ok "No supplementary metadata link found."
         | Some url' ->

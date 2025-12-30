@@ -20,7 +20,6 @@ module Runner =
     /// <param name="otherSuccessExitCodes">Additional exit codes, other than 0, that can be treated as non-failures</param>
     /// <param name="printer"></param>
     let runTool toolSettings otherSuccessExitCodes (printer: Printer) : Result<ToolResult, string> =
-
         let watch = Watch()
         printer.Info $"Running {toolSettings.CommandWithArgs}..."
 
