@@ -110,7 +110,7 @@ module Seq =
 
     let isNotEmpty seq = not (Seq.isEmpty seq)
 
-    let doesNotContain x seq = not <| Seq.contains x seq
+    let doesNotContain x seq = not (Seq.contains x seq)
 
     let hasOne seq = seq |> Seq.length |> Numerics.isOne
 
@@ -129,7 +129,7 @@ module List =
 
     let isNotEmpty lst = not (List.isEmpty lst)
 
-    let doesNotContain x lst = not <| List.contains x lst
+    let doesNotContain x lst = not (List.contains x lst)
 
     let hasOne lst = lst |> List.length |> Numerics.isOne
 
@@ -146,9 +146,9 @@ module List =
 [<RequireQualifiedAccess>]
 module Array =
 
-    let isNotEmpty arr = not <| Array.isEmpty arr
+    let isNotEmpty arr = not (Array.isEmpty arr)
 
-    let doesNotContain x arr = not <| Array.contains x arr
+    let doesNotContain x arr = not (Array.contains x arr)
 
     let hasOne arr = arr |> Array.length |> Numerics.isOne
 
