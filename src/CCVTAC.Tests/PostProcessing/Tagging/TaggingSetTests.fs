@@ -31,36 +31,6 @@ module TaggingSetInstantiationTests =
         Assert.Equal(expected, actual)
 
     [<Fact>]
-    let ``parses playlist files`` () =
-        let dir = Path.Combine("user", "Downloads", "Audio", "tmp")
-
-        let videoId = "__FuYW30t7E"
-        let fileNameBase = $"""{Path.Combine(dir, "Video Name")} [{videoId}]"""
-        let audioFile = $"{fileNameBase}.m4a"
-        let jsonFile = $"{fileNameBase}.info.json"
-        let imageFile = $"{fileNameBase}.jpg"
-
-        let playlistId = "OLAK5uy_ljoU26IjmfmI__eBcG_r0GzH-K3GaJy3s"
-        let playlistNameBase = $"""{Path.Combine(dir, "Playlist Name")} [{playlistId}]"""
-        let playlistJsonFile = $"{playlistNameBase}.info.json"
-        let playlistImageFile = $"{playlistNameBase}.jpg"
-
-        let expected : Result<TaggingSet list, string list list> =
-          Ok [
-              {
-                ResourceId = videoId
-                AudioFilePaths = [audioFile]
-                JsonFilePath = jsonFile
-                ImageFilePath = imageFile
-              }
-          ]
-
-        let files = [audioFile; jsonFile; imageFile; playlistJsonFile; playlistImageFile]
-        let actual = createSets files
-
-        Assert.Equal(expected, actual)
-
-    [<Fact>]
     let ``parses multiple files from playlist`` () =
         let dir = Path.Combine("user", "Downloads", "Audio", "tmp")
 
