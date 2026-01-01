@@ -39,7 +39,7 @@ module TaggingSetInstantiationTests =
         let imageFile = $"{fileNameBase}.jpg"
 
         let expected : Result<TaggingSet list, string list list> =
-            Error [["No supported audio files were found by extension."]]
+            Error [[$"No supported audio files were found for video ID {videoId}."]]
 
         let files = [jsonFile; imageFile]
         let actual = createSets files
@@ -55,7 +55,7 @@ module TaggingSetInstantiationTests =
         let imageFile = $"{fileNameBase}.jpg"
 
         let expected : Result<TaggingSet list, string list list> =
-          Error [["No JSON file was found."]]
+          Error [[$"No JSON file was found for video ID {videoId}."]]
 
         let files = [audioFile; imageFile]
         let actual = createSets files
@@ -71,7 +71,7 @@ module TaggingSetInstantiationTests =
         let jsonFile = $"{fileNameBase}.json"
 
         let expected : Result<TaggingSet list, string list list> =
-          Error [["No image file was found."]]
+          Error [[$"No image file was found for video ID {videoId}."]]
 
         let files = [audioFile; jsonFile]
         let actual = createSets files
@@ -86,7 +86,7 @@ module TaggingSetInstantiationTests =
         let audioFile = $"{fileNameBase}.m4a"
 
         let expected : Result<TaggingSet list, string list list> =
-          Error [["No JSON file was found."; "No image file was found."]]
+          Error [[$"No JSON file was found for video ID {videoId}."; $"No image file was found for video ID {videoId}."]]
 
         let files = [audioFile]
         let actual = createSets files
@@ -198,13 +198,13 @@ module TaggingSetInstantiationTests =
 
         let expected : Result<TaggingSet list, string list list> =
             Error
-              [["No supported audio files were found by extension."]
-               ["No JSON file was found."]
-               ["No image file was found."]
-               ["No supported audio files were found by extension."
-                "No JSON file was found."]
-               ["No supported audio files were found by extension."
-                "No image file was found."]]
+              [[$"No supported audio files were found for video ID {videoId2}."]
+               [$"No JSON file was found for video ID {videoId3}."]
+               [$"No image file was found for video ID {videoId4}."]
+               [$"No supported audio files were found for video ID {videoId5}."
+                $"No JSON file was found for video ID {videoId5}."]
+               [$"No supported audio files were found for video ID {videoId6}."
+                $"No image file was found for video ID {videoId6}."]]
 
         let files = [
             audioFile1; jsonFile1; imageFile1

@@ -18,7 +18,7 @@ module TaggingSets = // TODO: Perform instantiation in a more idiomatic way.
     let allFiles taggingSet =
         List.concat [taggingSet.AudioFilePaths; [taggingSet.JsonFilePath; taggingSet.ImageFilePath]]
 
-    let private extractFilesByType (files: string seq) =
+    let private extractFilesByType videoId (files: string seq) =
         let validateNonEmpty (xs: 'a list) errorMsg : Validation<unit, string list> =
             if List.isNotEmpty xs then Ok () else Error [[errorMsg]]
 
@@ -56,9 +56,11 @@ module TaggingSets = // TODO: Perform instantiation in a more idiomatic way.
             |> List.choose id
 
         Validation.map3 (fun _ _ _ -> audioFiles, jsonFile, imageFiles[0])
-            (validateNonEmpty audioFiles "No supported audio files were found by extension.")
-            (validateSome jsonFile "No JSON file was found.")
-            (validateExactlyOne imageFiles "No image file was found." "Multiple image files were found.")
+            (validateNonEmpty audioFiles $"No supported audio files were found for video ID {videoId}.")
+            (validateSome jsonFile $"No JSON file was found for video ID {videoId}.")
+            (validateExactlyOne imageFiles
+                 $"No image file was found for video ID {videoId}."
+                 $"Multiple image files were found for video ID {videoId}.")
 
     /// Create a collection of TaggingSets from a collection of file paths related to several video IDs.
     /// Files that don't match the requirements will be ignored.
@@ -78,7 +80,7 @@ module TaggingSets = // TODO: Perform instantiation in a more idiomatic way.
             |> List.groupBy _.Groups[1].Value
             |> List.map (fun (videoId, matches) -> videoId, matches |> List.map _.Groups[0].Value)
             |> List.map (fun (videoId, files) ->
-                match extractFilesByType files with
+                match extractFilesByType videoId files with
                 | Ok (audioFiles, Some jsonFile, imageFile) ->
                      Ok { ResourceId = videoId
                           AudioFilePaths = audioFiles |> Seq.toList
