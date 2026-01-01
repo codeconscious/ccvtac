@@ -31,6 +31,69 @@ module TaggingSetInstantiationTests =
         Assert.Equal(expected, actual)
 
     [<Fact>]
+    let ``fails for video files when audio file is missing`` () =
+        let videoId = "__FuYW30t7E"
+        let dir = Path.Combine("user", "Downloads", "Audio", "tmp")
+        let fileNameBase = $"""{Path.Combine(dir, "Video Name")} [{videoId}]"""
+        let jsonFile = $"{fileNameBase}.info.json"
+        let imageFile = $"{fileNameBase}.jpg"
+
+        let expected : Result<TaggingSet list, string list list> =
+            Error [["No supported audio files were found by extension."]]
+
+        let files = [jsonFile; imageFile]
+        let actual = createSets files
+
+        Assert.Equal(expected, actual)
+
+    [<Fact>]
+    let ``fails for video files when JSON is missing`` () =
+        let videoId = "__FuYW30t7E"
+        let dir = Path.Combine("user", "Downloads", "Audio", "tmp")
+        let fileNameBase = $"""{Path.Combine(dir, "Video Name")} [{videoId}]"""
+        let audioFile = $"{fileNameBase}.m4a"
+        let imageFile = $"{fileNameBase}.jpg"
+
+        let expected : Result<TaggingSet list, string list list> =
+          Error [["No JSON file was found."]]
+
+        let files = [audioFile; imageFile]
+        let actual = createSets files
+
+        Assert.Equal(expected, actual)
+
+    [<Fact>]
+    let ``fails for video files when image file is missing`` () =
+        let videoId = "__FuYW30t7E"
+        let dir = Path.Combine("user", "Downloads", "Audio", "tmp")
+        let fileNameBase = $"""{Path.Combine(dir, "Video Name")} [{videoId}]"""
+        let audioFile = $"{fileNameBase}.m4a"
+        let jsonFile = $"{fileNameBase}.json"
+
+        let expected : Result<TaggingSet list, string list list> =
+          Error [["No image file was found."]]
+
+        let files = [audioFile; jsonFile]
+        let actual = createSets files
+
+        Assert.Equal(expected, actual)
+
+    [<Fact>]
+    let ``fails for video files when JSON and image files are missing`` () =
+        let videoId = "__FuYW30t7E"
+        let dir = Path.Combine("user", "Downloads", "Audio", "tmp")
+        let fileNameBase = $"""{Path.Combine(dir, "Video Name")} [{videoId}]"""
+        let audioFile = $"{fileNameBase}.m4a"
+
+        let expected : Result<TaggingSet list, string list list> =
+          Error [["No JSON file was found."; "No image file was found."]]
+
+        let files = [audioFile]
+        let actual = createSets files
+
+        Assert.Equal(expected, actual)
+
+    [<Fact>]
     let ``parses multiple files from playlist`` () =
         let dir = Path.Combine("user", "Downloads", "Audio", "tmp")
 
