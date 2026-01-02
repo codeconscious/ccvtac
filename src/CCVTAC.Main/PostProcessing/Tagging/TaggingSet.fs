@@ -6,7 +6,7 @@ open FsToolkit.ErrorHandling
 open System.IO
 open System.Text.RegularExpressions
 
-/// Contains all the data necessary for tagging a related set of files.
+/// Contains all the data necessary to tag audio files.
 module TaggingSets = // TODO: Perform instantiation in a more idiomatic way.
 
     type TaggingSet =
@@ -26,11 +26,11 @@ module TaggingSets = // TODO: Perform instantiation in a more idiomatic way.
             if x.IsSome then Ok () else Error [[errorMsg]]
 
         let validateExactlyOne (xs: 'a list) noneErrorMsg multipleErrorMsg : Validation<unit,string list> =
-            if List.hasOne xs
-            then Ok ()
+            if List.isEmpty xs
+            then Error [[noneErrorMsg]]
             elif List.hasMultiple xs
             then Error [[multipleErrorMsg]]
-            else Error [[noneErrorMsg]]
+            else Ok ()
 
         let hasSupportedAudioExtension (file: string) =
             match Path.GetExtension file with
@@ -41,23 +41,18 @@ module TaggingSets = // TODO: Perform instantiation in a more idiomatic way.
         let imageFileExts = [".jpg"; ".jpeg"]
 
         let files' = files |> List.ofSeq
-
-        let audioFiles =
-            files'
-            |> List.filter hasSupportedAudioExtension
-
-        let jsonFile =
-            files'
-            |> List.tryFind (String.endsWithIgnoreCase jsonFileExt)
-
+        let audioFiles = files' |> List.filter hasSupportedAudioExtension
+        let jsonFile   = files' |> List.tryFind (String.endsWithIgnoreCase jsonFileExt)
         let imageFiles =
             imageFileExts
             |> List.map (fun i -> files' |> List.tryFind (String.endsWithIgnoreCase i))
             |> List.choose id
 
         Validation.map3 (fun _ _ _ -> audioFiles, jsonFile, imageFiles[0])
-            (validateNonEmpty audioFiles $"No supported audio files were found for video ID {videoId}.")
-            (validateSome jsonFile $"No JSON file was found for video ID {videoId}.")
+            (validateNonEmpty audioFiles
+                 $"No supported audio files were found for video ID {videoId}.")
+            (validateSome jsonFile
+                 $"No JSON file was found for video ID {videoId}.")
             (validateExactlyOne imageFiles
                  $"No image file was found for video ID {videoId}."
                  $"Multiple image files were found for video ID {videoId}.")
