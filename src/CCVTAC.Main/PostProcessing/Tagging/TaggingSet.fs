@@ -18,7 +18,9 @@ module TaggingSets = // TODO: Perform instantiation in a more idiomatic way.
     let allFiles taggingSet =
         List.concat [taggingSet.AudioFilePaths; [taggingSet.JsonFilePath; taggingSet.ImageFilePath]]
 
-    let private extractFilesByType videoId (files: string seq) =
+    let private extractFilesByType (videoId: string) (files: string seq)
+        : Validation<(string list * string option * string), string list> =
+
         let validateNonEmpty (xs: 'a list) errorMsg : Validation<unit, string list> =
             if List.isNotEmpty xs then Ok () else Error [[errorMsg]]
 
