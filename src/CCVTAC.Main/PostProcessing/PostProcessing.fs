@@ -90,7 +90,7 @@ module PostProcessor =
                     match Directories.deleteAllFiles workingDirectory with
                     | Ok results -> Directories.printDeletionResults printer results
                     | Error e -> printer.Error e
-            | Error e ->
-                printer.Error($"Tagging error(s) preventing further post-processing: {e}")
+            | Error err ->
+                printer.Error($"Tagging error preventing further post-processing: {err}")
 
         printer.Info $"Post-processing done in %s{watch.ElapsedFriendly}."

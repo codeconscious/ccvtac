@@ -86,10 +86,10 @@ module TaggingSetInstantiationTests =
         let audioFile = $"{fileNameBase}.m4a"
 
         let expected : Result<TaggingSet list, string list list> =
-          Error [[$"No JSON file was found for video ID {videoId}."; $"No image file was found for video ID {videoId}."]]
+          Error [[$"No JSON file was found for video ID {videoId}."
+                  $"No image file was found for video ID {videoId}."]]
 
-        let files = [audioFile]
-        let actual = createSets files
+        let actual = createSets [audioFile]
 
         Assert.Equal(expected, actual)
 
@@ -147,10 +147,10 @@ module TaggingSetInstantiationTests =
         Assert.Equal(expected, actual)
 
     [<Fact>]
-    let ``fails with multiple errors when multiple files from playlists are missing metadata`` () =
+    let ``fails with multiple errors when multiple files from playlists are missing their metadata files`` () =
         let dir = Path.Combine("user", "Downloads", "Audio", "tmp")
 
-        // Valid, so is not included in the error output.
+        // Valid, so is not included in the expected error output.
         let videoId1 = "__FuYW30t7E"
         let fileNameBase1 = $"""{Path.Combine(dir, "Video Name 1")} [{videoId1}]"""
         let audioFile1 = $"{fileNameBase1}.m4a"
@@ -203,6 +203,7 @@ module TaggingSetInstantiationTests =
             imageFile5
             jsonFile6
         ]
+
         let actual = createSets files
 
         Assert.Equal(expected, actual)
@@ -221,7 +222,6 @@ module TaggingSetInstantiationTests =
         let jsonFile = $"{fileNameBase}.info.json"
         let imageFile = $"{fileNameBase}.jpg"
 
-
         let expected : Result<TaggingSet list, string list list> =
           Ok [
               {
@@ -232,7 +232,7 @@ module TaggingSetInstantiationTests =
               }
           ]
 
-        let files =  audioFiles @ [jsonFile; imageFile ]
+        let files = audioFiles @ [jsonFile; imageFile ]
         let actual = createSets files
 
         Assert.Equal(expected, actual)
