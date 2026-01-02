@@ -115,11 +115,6 @@ module TaggingSetInstantiationTests =
         let jsonFile3 = $"{fileNameBase3}.info.json"
         let imageFile3 = $"{fileNameBase3}.jpg"
 
-        let playlistId = "OLAK5uy_ljoU26IjmfmI__eBcG_r0GzH-K3GaJy3s"
-        let playlistNameBase = $"""{Path.Combine(dir, "Playlist Name")} [{playlistId}]"""
-        let playlistJsonFile = $"{playlistNameBase}.info.json"
-        let playlistImageFile = $"{playlistNameBase}.jpg"
-
         let expected : Result<TaggingSet list, string list list> =
           Ok [
               {
@@ -146,7 +141,6 @@ module TaggingSetInstantiationTests =
             audioFile1; jsonFile1; imageFile1
             audioFile2; jsonFile2; imageFile2
             audioFile3; jsonFile3; imageFile3
-            playlistJsonFile; playlistImageFile
         ]
         let actual = createSets files
 
@@ -191,11 +185,6 @@ module TaggingSetInstantiationTests =
         let fileNameBase6 = $"""{Path.Combine(dir, "Video Name 6")} [{videoId6}]"""
         let jsonFile6 = $"{fileNameBase6}.info.json"
 
-        let playlistId = "OLAK5uy_ljoU26IjmfmI__eBcG_r0GzH-K3GaJy3s"
-        let playlistNameBase = $"""{Path.Combine(dir, "Playlist Name")} [{playlistId}]"""
-        let playlistJsonFile = $"{playlistNameBase}.info.json"
-        let playlistImageFile = $"{playlistNameBase}.jpg"
-
         let expected : Result<TaggingSet list, string list list> =
             Error
               [[$"No supported audio files were found for video ID {videoId2}."]
@@ -213,7 +202,6 @@ module TaggingSetInstantiationTests =
             audioFile4; jsonFile4
             imageFile5
             jsonFile6
-            playlistJsonFile; playlistImageFile
         ]
         let actual = createSets files
 
