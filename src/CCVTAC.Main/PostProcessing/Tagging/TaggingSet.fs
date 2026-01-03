@@ -19,13 +19,10 @@ module TaggingSets = // TODO: Perform instantiation in a more idiomatic way.
         List.concat [taggingSet.AudioFilePaths; [taggingSet.JsonFilePath; taggingSet.ImageFilePath]]
 
     let private extractFilesByType (videoId: string) (files: string seq)
-        : Validation<(string list * string option * string), string list> =
+        : Validation<(string list * string * string), string list> =
 
         let validateNonEmpty (xs: 'a list) errorMsg : Validation<unit, string list> =
             if List.isNotEmpty xs then Ok () else Error [[errorMsg]]
-
-        let validateSome (x: 'a option) errorMsg : Validation<unit, string list> =
-            if x.IsSome then Ok () else Error [[errorMsg]]
 
         let validateExactlyOne (xs: 'a list) noneErrorMsg multipleErrorMsg : Validation<unit,string list> =
             if List.isEmpty xs
@@ -44,17 +41,20 @@ module TaggingSets = // TODO: Perform instantiation in a more idiomatic way.
 
         let files' = List.ofSeq files
         let audioFiles = files' |> List.filter hasSupportedAudioExtension
-        let jsonFile   = files' |> List.tryFind (String.endsWithIgnoreCase jsonFileExt)
+        let jsonFiles =
+            files'
+            |> List.filter (String.endsWithIgnoreCase jsonFileExt)
         let imageFiles =
             imageFileExts
             |> List.map (fun i -> files' |> List.tryFind (String.endsWithIgnoreCase i))
             |> List.choose id
 
-        Validation.map3 (fun _ _ _ -> audioFiles, jsonFile, imageFiles[0])
+        Validation.map3 (fun _ _ _ -> audioFiles, jsonFiles[0], imageFiles[0])
             (validateNonEmpty audioFiles
                  $"No supported audio files were found for video ID {videoId}.")
-            (validateSome jsonFile
-                 $"No JSON file was found for video ID {videoId}.")
+            (validateExactlyOne jsonFiles
+                 $"No JSON file was found for video ID {videoId}."
+                 $"Multiple JSON files were found for video ID {videoId}.")
             (validateExactlyOne imageFiles
                  $"No image file was found for video ID {videoId}."
                  $"Multiple image files were found for video ID {videoId}.")
@@ -78,11 +78,10 @@ module TaggingSets = // TODO: Perform instantiation in a more idiomatic way.
             |> List.map (fun (videoId, matches) -> videoId, matches |> List.map _.Groups[0].Value)
             |> List.map (fun (videoId, files) ->
                 match extractFilesByType videoId files with
-                | Ok (audioFiles, Some jsonFile, imageFile) ->
+                | Ok (audioFiles, jsonFile, imageFile) ->
                      Ok { ResourceId = videoId
                           AudioFilePaths = List.ofSeq audioFiles
                           JsonFilePath = jsonFile
                           ImageFilePath = imageFile }
-                | Ok _ -> Error [$"Something went wrong creating a tagging set using the files for video ID %s{videoId}."]
                 | Error msgs -> Error (msgs |> List.collect id))
             |> List.sequenceResultA
