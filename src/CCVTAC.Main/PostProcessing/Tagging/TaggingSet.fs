@@ -42,7 +42,7 @@ module TaggingSets = // TODO: Perform instantiation in a more idiomatic way.
         let jsonFileExt = ".json"
         let imageFileExts = [".jpg"; ".jpeg"]
 
-        let files' = files |> List.ofSeq
+        let files' = List.ofSeq files
         let audioFiles = files' |> List.filter hasSupportedAudioExtension
         let jsonFile   = files' |> List.tryFind (String.endsWithIgnoreCase jsonFileExt)
         let imageFiles =
@@ -80,7 +80,7 @@ module TaggingSets = // TODO: Perform instantiation in a more idiomatic way.
                 match extractFilesByType videoId files with
                 | Ok (audioFiles, Some jsonFile, imageFile) ->
                      Ok { ResourceId = videoId
-                          AudioFilePaths = audioFiles |> Seq.toList
+                          AudioFilePaths = List.ofSeq audioFiles
                           JsonFilePath = jsonFile
                           ImageFilePath = imageFile }
                 | Ok _ -> Error [$"Something went wrong creating a tagging set using the files for video ID %s{videoId}."]
