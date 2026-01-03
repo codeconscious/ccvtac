@@ -7,6 +7,12 @@ open Xunit
 module TaggingSetInstantiationTests =
 
     [<Fact>]
+    let ``error when no files are provided`` () =
+        let expected = Error [["No filepaths to create a tagging set were provided."]]
+        let actual = createSets []
+        Assert.Equal(expected, actual)
+
+    [<Fact>]
     let ``parses video files`` () =
         let videoId = "__FuYW30t7E"
         let dir = Path.Combine("user", "Downloads", "Audio", "tmp")
