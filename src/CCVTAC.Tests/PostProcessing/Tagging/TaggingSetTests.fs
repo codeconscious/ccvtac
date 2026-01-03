@@ -153,6 +153,23 @@ module TaggingSetInstantiationTests =
         Assert.Equal(expected, actual)
 
     [<Fact>]
+    let ``fails when multiple JSON files are found`` () =
+        let videoId = "__FuYW30t7E"
+        let dir = Path.Combine("user", "Downloads", "Audio", "tmp")
+        let fileNameBase = $"""{Path.Combine(dir, "Video Name")} [{videoId}]"""
+        let audioFile = $"{fileNameBase}.m4a"
+        let jsonFile1 = $"{fileNameBase}.info.json"
+        let jsonFile2 = $"{fileNameBase}_2.info.json"
+        let imageFile = $"{fileNameBase}.jpg"
+
+        let expected = Error [[$"Multiple JSON files were found for video ID {videoId}."]]
+
+        let files = [audioFile; jsonFile1; jsonFile2; imageFile]
+        let actual = createSets files
+
+        Assert.Equal(expected, actual)
+
+    [<Fact>]
     let ``fails with multiple errors when multiple files from playlists are missing their metadata files`` () =
         let dir = Path.Combine("user", "Downloads", "Audio", "tmp")
 
