@@ -6,33 +6,39 @@ open FsToolkit.ErrorHandling
 open System.IO
 open System.Text.RegularExpressions
 
-/// Contains all the data necessary to tag audio files.
-module TaggingSets = // TODO: Perform instantiation in a more idiomatic way.
-
-    type TaggingSet =
-        { ResourceId: string
+/// Contains the names of all files related to tagging audio files.
+type TaggingSet =
+    private
+        { VideoId: string
           AudioFilePaths: string list
           JsonFilePath: string
           ImageFilePath: string }
 
-    let allFiles taggingSet =
-        List.concat [taggingSet.AudioFilePaths; [taggingSet.JsonFilePath; taggingSet.ImageFilePath]]
+module TaggingSet =
+    // Accessors
+    let resourceId ts     = ts.VideoId
+    let audioFilePaths ts = ts.AudioFilePaths
+    let jsonFilePath ts   = ts.JsonFilePath
+    let imageFilePath ts  = ts.ImageFilePath
 
-    let private extractFilesByType (videoId: string) (files: string seq)
-        : Validation<(string list * string * string), string list> =
+    let allFiles ts =
+        List.concat [ ts.AudioFilePaths; [ ts.JsonFilePath; ts.ImageFilePath ]]
 
+    let private create (videoId, files) =
         let validateNonEmpty (xs: 'a list) errorMsg : Validation<unit, string list> =
-            if List.isNotEmpty xs then Ok () else Error [[errorMsg]]
+            if List.isNotEmpty xs
+            then Ok ()
+            else Error [[errorMsg]]
 
-        let validateExactlyOne (xs: 'a list) noneErrorMsg multipleErrorMsg : Validation<unit,string list> =
+        let validateExactlyOne (xs: 'a list) emptyErrorMsg multipleErrorMsg : Validation<unit, string list> =
             if List.isEmpty xs
-            then Error [[noneErrorMsg]]
+            then Error [[emptyErrorMsg]]
             elif List.hasMultiple xs
             then Error [[multipleErrorMsg]]
             else Ok ()
 
-        let hasSupportedAudioExtension (file: string) =
-            match Path.GetExtension file with
+        let hasSupportedAudioExtension (fileName: string) =
+            match Path.GetExtension fileName with
             | Null -> false
             | NonNull (ext: string) -> Seq.caseInsensitiveContains ext Files.audioFileExtensions
 
@@ -41,23 +47,31 @@ module TaggingSets = // TODO: Perform instantiation in a more idiomatic way.
 
         let files' = List.ofSeq files
         let audioFiles = files' |> List.filter hasSupportedAudioExtension
-        let jsonFiles =
-            files'
-            |> List.filter (String.endsWithIgnoreCase jsonFileExt)
+        let jsonFiles  = files' |> List.filter (String.endsWithIgnoreCase jsonFileExt)
         let imageFiles =
             imageFileExts
-            |> List.map (fun i -> files' |> List.tryFind (String.endsWithIgnoreCase i))
+            |> List.map (fun ext -> files' |> List.tryFind (String.endsWithIgnoreCase ext))
             |> List.choose id
 
-        Validation.map3 (fun _ _ _ -> audioFiles, jsonFiles[0], imageFiles[0])
-            (validateNonEmpty audioFiles
-                 $"No supported audio files were found for video ID {videoId}.")
-            (validateExactlyOne jsonFiles
-                 $"No JSON file was found for video ID {videoId}."
-                 $"Multiple JSON files were found for video ID {videoId}.")
-            (validateExactlyOne imageFiles
-                 $"No image file was found for video ID {videoId}."
-                 $"Multiple image files were found for video ID {videoId}.")
+        let validationResult =
+            Validation.map3
+                (fun _ _ _ -> audioFiles, jsonFiles[0], imageFiles[0])
+                (validateNonEmpty audioFiles
+                     $"No supported audio files were found for video ID {videoId}.")
+                (validateExactlyOne jsonFiles
+                     $"No JSON file was found for video ID {videoId}."
+                     $"Multiple JSON files were found for video ID {videoId}.")
+                (validateExactlyOne imageFiles
+                     $"No image file was found for video ID {videoId}."
+                     $"Multiple image files were found for video ID {videoId}.")
+
+        match validationResult with
+        | Ok (a, j, i) ->
+            Ok { VideoId = videoId
+                 AudioFilePaths = List.ofSeq a
+                 JsonFilePath = j
+                 ImageFilePath = i }
+        | Error msgs -> Error (msgs |> List.collect id)
 
     /// Create a collection of TaggingSets from a collection of file paths related to several video IDs.
     /// Files that don't match the requirements will be ignored.
@@ -74,14 +88,7 @@ module TaggingSets = // TODO: Perform instantiation in a more idiomatic way.
             |> List.map fileNamesWithVideoIdsRegex.Match
             |> List.filter _.Success
             |> List.map (fun m -> m.Captures |> Seq.cast<Match> |> Seq.head)
-            |> List.groupBy _.Groups[1].Value
+            |> List.groupBy _.Groups[1].Value // By video ID
             |> List.map (fun (videoId, matches) -> videoId, matches |> List.map _.Groups[0].Value)
-            |> List.map (fun (videoId, files) ->
-                match extractFilesByType videoId files with
-                | Ok (audioFiles, jsonFile, imageFile) ->
-                     Ok { ResourceId = videoId
-                          AudioFilePaths = List.ofSeq audioFiles
-                          JsonFilePath = jsonFile
-                          ImageFilePath = imageFile }
-                | Error msgs -> Error (msgs |> List.collect id))
+            |> List.map create
             |> List.sequenceResultA

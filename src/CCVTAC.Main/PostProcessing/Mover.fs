@@ -5,7 +5,7 @@ open CCVTAC.Main.IoUtilities
 open CCVTAC.Main.PostProcessing
 open CCVTAC.Main.PostProcessing.Tagging
 open CCVTAC.Main.Settings.Settings
-open TaggingSets
+open TaggingSet
 open System
 open System.IO
 open System.Text.Json
@@ -78,15 +78,15 @@ module Mover =
 
     let private getParsedVideoJson taggingSet : Result<VideoMetadata, string> =
         try
-            let json = File.ReadAllText taggingSet.JsonFilePath
+            let json = File.ReadAllText (TaggingSet.jsonFilePath taggingSet)
             match JsonSerializer.Deserialize<VideoMetadata> json with
-            | Null -> Error $"Deserialized JSON was null for \"%s{taggingSet.JsonFilePath}\""
+            | Null -> Error $"Deserialized JSON was null for \"%s{TaggingSet.jsonFilePath taggingSet}\""
             | NonNull v -> Ok v
         with
         | :? JsonException as exn ->
-            Error $"Error deserializing JSON from file \"%s{taggingSet.JsonFilePath}\": %s{exn.Message}"
+            Error $"Error deserializing JSON from file \"%s{TaggingSet.jsonFilePath taggingSet}\": %s{exn.Message}"
         | exn ->
-            Error $"Error reading JSON file \"%s{taggingSet.JsonFilePath}\": %s{exn.Message}."
+            Error $"Error reading JSON file \"%s{TaggingSet.jsonFilePath taggingSet}\": %s{exn.Message}."
 
     let private getSafeSubDirectoryName (collectionData: CollectionMetadata option) taggingSet : string =
         let workingName =

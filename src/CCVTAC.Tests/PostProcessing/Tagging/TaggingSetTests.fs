@@ -1,6 +1,7 @@
 module TaggingSetTests
 
-open CCVTAC.Main.PostProcessing.Tagging.TaggingSets
+open CCVTAC.Main.PostProcessing.Tagging.TaggingSet
+open CCVTAC.Main.PostProcessing.Tagging
 open System.IO
 open Xunit
 
@@ -21,20 +22,16 @@ module TaggingSetInstantiationTests =
         let jsonFile = $"{fileNameBase}.info.json"
         let imageFile = $"{fileNameBase}.jpg"
 
-        let expected =
-          Ok [
-              {
-                ResourceId = videoId
-                AudioFilePaths = [audioFile]
-                JsonFilePath = jsonFile
-                ImageFilePath = imageFile
-              }
-          ]
-
         let files = [audioFile; jsonFile; imageFile]
         let actual = createSets files
 
-        Assert.Equal(expected, actual)
+        match actual with
+        | Ok ts ->
+            Assert.Equal(videoId, TaggingSet.resourceId ts[0])
+            Assert.Equal<string list>([audioFile], TaggingSet.audioFilePaths ts[0])
+            Assert.Equal(jsonFile, TaggingSet.jsonFilePath ts[0])
+            Assert.Equal(imageFile, TaggingSet.imageFilePath ts[0])
+        | Error errs -> failwith $"%A{errs}"
 
     [<Fact>]
     let ``fails for video files when audio file is missing`` () =
@@ -118,28 +115,6 @@ module TaggingSetInstantiationTests =
         let jsonFile3 = $"{fileNameBase3}.info.json"
         let imageFile3 = $"{fileNameBase3}.jpg"
 
-        let expected =
-          Ok [
-              {
-                ResourceId = videoId1
-                AudioFilePaths = [audioFile1]
-                JsonFilePath = jsonFile1
-                ImageFilePath = imageFile1
-              }
-              {
-                ResourceId = videoId2
-                AudioFilePaths = [audioFile2]
-                JsonFilePath = jsonFile2
-                ImageFilePath = imageFile2
-              }
-              {
-                ResourceId = videoId3
-                AudioFilePaths = [audioFile3]
-                JsonFilePath = jsonFile3
-                ImageFilePath = imageFile3
-              }
-          ]
-
         let files = [
             audioFile1; jsonFile1; imageFile1
             audioFile2; jsonFile2; imageFile2
@@ -148,7 +123,26 @@ module TaggingSetInstantiationTests =
 
         let actual = createSets files
 
-        Assert.Equal(expected, actual)
+        match actual with
+        | Ok ts ->
+            // Set 1
+            Assert.Equal(videoId1, TaggingSet.resourceId ts[0])
+            Assert.Equal<string list>([audioFile1], TaggingSet.audioFilePaths ts[0])
+            Assert.Equal(jsonFile1, TaggingSet.jsonFilePath ts[0])
+            Assert.Equal(imageFile1, TaggingSet.imageFilePath ts[0])
+
+            // Set 2
+            Assert.Equal(videoId2, TaggingSet.resourceId ts[1])
+            Assert.Equal<string list>([audioFile2], TaggingSet.audioFilePaths ts[1])
+            Assert.Equal(jsonFile2, TaggingSet.jsonFilePath ts[1])
+            Assert.Equal(imageFile2, TaggingSet.imageFilePath ts[1])
+
+            // Set 3
+            Assert.Equal(videoId3, TaggingSet.resourceId ts[2])
+            Assert.Equal<string list>([audioFile3], TaggingSet.audioFilePaths ts[2])
+            Assert.Equal(jsonFile3, TaggingSet.jsonFilePath ts[2])
+            Assert.Equal(imageFile3, TaggingSet.imageFilePath ts[2])
+        | Error errs -> failwith $"%A{errs}"
 
     [<Fact>]
     let ``fails when multiple JSON files are found`` () =
@@ -243,17 +237,13 @@ module TaggingSetInstantiationTests =
         let jsonFile = $"{fileNameBase}.info.json"
         let imageFile = $"{fileNameBase}.jpg"
 
-        let expected =
-          Ok [
-              {
-                ResourceId = videoId
-                AudioFilePaths = audioFiles
-                JsonFilePath = jsonFile
-                ImageFilePath = imageFile
-              }
-          ]
-
         let files = audioFiles @ [jsonFile; imageFile ]
         let actual = createSets files
 
-        Assert.Equal(expected, actual)
+        match actual with
+        | Ok ts ->
+            Assert.Equal(videoId, TaggingSet.resourceId ts[0])
+            Assert.Equal<string list>(audioFiles, TaggingSet.audioFilePaths ts[0])
+            Assert.Equal(jsonFile, TaggingSet.jsonFilePath ts[0])
+            Assert.Equal(imageFile, TaggingSet.imageFilePath ts[0])
+        | Error errs -> failwith $"%A{errs}"
