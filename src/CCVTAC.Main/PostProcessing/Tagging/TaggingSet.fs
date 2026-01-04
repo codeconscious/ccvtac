@@ -31,11 +31,10 @@ module TaggingSet =
             else Error [[errorMsg]]
 
         let validateExactlyOne (xs: 'a list) emptyErrorMsg multipleErrorMsg : Validation<unit, string list> =
-            if List.isEmpty xs
-            then Error [[emptyErrorMsg]]
-            elif List.hasMultiple xs
-            then Error [[multipleErrorMsg]]
-            else Ok ()
+            match xs with
+            | []  -> Error [[emptyErrorMsg]]
+            | [_] -> Ok ()
+            | _   -> Error [[multipleErrorMsg]]
 
         let hasSupportedAudioExtension (fileName: string) =
             match Path.GetExtension fileName with
@@ -73,7 +72,7 @@ module TaggingSet =
                  ImageFilePath = i }
         | Error msgs -> Error (msgs |> List.collect id)
 
-    /// Create a collection of TaggingSets from a collection of file paths related to several video IDs.
+    /// Creates a collection of TaggingSets from a collection of file paths related to several video IDs.
     /// Files that don't match the requirements will be ignored.
     let createSets filePaths : Result<TaggingSet list, string list list> =
         if Seq.isEmpty filePaths then
