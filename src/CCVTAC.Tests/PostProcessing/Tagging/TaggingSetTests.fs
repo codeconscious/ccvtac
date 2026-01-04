@@ -21,7 +21,7 @@ module TaggingSetInstantiationTests =
         let jsonFile = $"{fileNameBase}.info.json"
         let imageFile = $"{fileNameBase}.jpg"
 
-        let expected : Result<TaggingSet list, string list list> =
+        let expected =
           Ok [
               {
                 ResourceId = videoId
@@ -44,8 +44,7 @@ module TaggingSetInstantiationTests =
         let jsonFile = $"{fileNameBase}.info.json"
         let imageFile = $"{fileNameBase}.jpg"
 
-        let expected : Result<TaggingSet list, string list list> =
-            Error [[$"No supported audio files were found for video ID {videoId}."]]
+        let expected = Error [[$"No supported audio files were found for video ID {videoId}."]]
 
         let files = [jsonFile; imageFile]
         let actual = createSets files
@@ -60,8 +59,7 @@ module TaggingSetInstantiationTests =
         let audioFile = $"{fileNameBase}.m4a"
         let imageFile = $"{fileNameBase}.jpg"
 
-        let expected : Result<TaggingSet list, string list list> =
-          Error [[$"No JSON file was found for video ID {videoId}."]]
+        let expected = Error [[$"No JSON file was found for video ID {videoId}."]]
 
         let files = [audioFile; imageFile]
         let actual = createSets files
@@ -76,8 +74,7 @@ module TaggingSetInstantiationTests =
         let audioFile = $"{fileNameBase}.m4a"
         let jsonFile = $"{fileNameBase}.json"
 
-        let expected : Result<TaggingSet list, string list list> =
-          Error [[$"No image file was found for video ID {videoId}."]]
+        let expected = Error [[$"No image file was found for video ID {videoId}."]]
 
         let files = [audioFile; jsonFile]
         let actual = createSets files
@@ -91,7 +88,7 @@ module TaggingSetInstantiationTests =
         let fileNameBase = $"""{Path.Combine(dir, "Video Name")} [{videoId}]"""
         let audioFile = $"{fileNameBase}.m4a"
 
-        let expected : Result<TaggingSet list, string list list> =
+        let expected =
           Error [[$"No JSON file was found for video ID {videoId}."
                   $"No image file was found for video ID {videoId}."]]
 
@@ -121,7 +118,7 @@ module TaggingSetInstantiationTests =
         let jsonFile3 = $"{fileNameBase3}.info.json"
         let imageFile3 = $"{fileNameBase3}.jpg"
 
-        let expected : Result<TaggingSet list, string list list> =
+        let expected =
           Ok [
               {
                 ResourceId = videoId1
@@ -148,6 +145,7 @@ module TaggingSetInstantiationTests =
             audioFile2; jsonFile2; imageFile2
             audioFile3; jsonFile3; imageFile3
         ]
+
         let actual = createSets files
 
         Assert.Equal(expected, actual)
@@ -208,7 +206,7 @@ module TaggingSetInstantiationTests =
         let fileNameBase6 = $"""{Path.Combine(dir, "Video Name 6")} [{videoId6}]"""
         let jsonFile6 = $"{fileNameBase6}.info.json"
 
-        let expected : Result<TaggingSet list, string list list> =
+        let expected =
             Error
               [[$"No supported audio files were found for video ID {videoId2}."]
                [$"No JSON file was found for video ID {videoId3}."]
@@ -245,7 +243,7 @@ module TaggingSetInstantiationTests =
         let jsonFile = $"{fileNameBase}.info.json"
         let imageFile = $"{fileNameBase}.jpg"
 
-        let expected : Result<TaggingSet list, string list list> =
+        let expected =
           Ok [
               {
                 ResourceId = videoId
