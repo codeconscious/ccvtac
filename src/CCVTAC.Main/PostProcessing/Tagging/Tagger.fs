@@ -6,7 +6,7 @@ open CCVTAC.Main.PostProcessing
 open CCVTAC.Main.PostProcessing.Tagging
 open CCVTAC.Main.Downloading.Downloading
 open Startwatch.Library
-open TaggingSets
+open TaggingSet
 open MetadataUtilities
 open System
 open System.IO
@@ -181,7 +181,7 @@ module Tagger =
         (printer: Printer)
         : unit =
 
-        printer.Debug $"""Found %s{String.fileLabelWithDescriptor "audio" taggingSet.AudioFilePaths.Length} with resource ID %s{taggingSet.ResourceId}."""
+        printer.Debug $"""Found %s{String.fileLabelWithDescriptor "audio" taggingSet.AudioFilePaths.Length} with resource ID %s{taggingSet.VideoId}."""
 
         match parseVideoJson taggingSet with
         | Ok videoData ->

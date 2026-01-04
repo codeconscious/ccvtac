@@ -11,6 +11,7 @@
     <Compile Include="TagDetectionTests.fs" />
     <Compile Include="ExtensionsTests.fs" />
     <Compile Include="RenamerTests.fs" />
+    <Compile Include="PostProcessing\Tagging\TaggingSetTests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
