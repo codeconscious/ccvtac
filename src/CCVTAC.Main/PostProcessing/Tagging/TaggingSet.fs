@@ -49,8 +49,7 @@ module TaggingSet =
         let jsonFiles  = files' |> List.filter (String.endsWithIgnoreCase jsonFileExt)
         let imageFiles =
             imageFileExts
-            |> List.map (fun ext -> files' |> List.tryFind (String.endsWithIgnoreCase ext))
-            |> List.choose id
+            |> List.collect (fun ext -> files' |> List.filter (String.endsWithIgnoreCase ext))
 
         let validationResult =
             Validation.map3
