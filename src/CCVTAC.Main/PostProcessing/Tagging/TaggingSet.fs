@@ -22,7 +22,7 @@ module TaggingSet =
     let imageFilePath ts  = ts.ImageFilePath
 
     let allFiles ts =
-        List.concat [ ts.AudioFilePaths; [ ts.JsonFilePath; ts.ImageFilePath ]]
+        ts.AudioFilePaths @ [ts.JsonFilePath; ts.ImageFilePath]
 
     let private create (videoId, files) =
         let validateNonEmpty (xs: 'a list) errorMsg : Validation<unit, string list> =
