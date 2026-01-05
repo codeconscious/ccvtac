@@ -49,8 +49,7 @@ module TaggingSet =
         let jsonFiles  = files' |> List.filter (String.endsWithIgnoreCase jsonFileExt)
         let imageFiles =
             imageFileExts
-            |> List.map (fun ext -> files' |> List.tryFind (String.endsWithIgnoreCase ext))
-            |> List.choose id
+            |> List.collect (fun ext -> files' |> List.filter (String.endsWithIgnoreCase ext))
 
         let validationResult =
             Validation.map3
@@ -74,9 +73,9 @@ module TaggingSet =
 
     /// Creates a collection of TaggingSets from a collection of file paths related to several video IDs.
     /// Files that don't match the requirements will be ignored.
-    let createSets filePaths : Result<TaggingSet list, string list list> =
+    let createSets filePaths : Result<TaggingSet list, string list> =
         if Seq.isEmpty filePaths then
-            Error [["No filepaths to create a tagging set were provided."]]
+            Error ["No filepaths to create a tagging set were provided."]
         else
             // Regex group 0 is the full filename, and group 1 contains the video ID.
             let fileNamesWithVideoIdsRegex =
@@ -91,3 +90,4 @@ module TaggingSet =
             |> List.map (fun (videoId, matches) -> videoId, matches |> List.map _.Groups[0].Value)
             |> List.map create
             |> List.sequenceResultA
+            |> Result.mapError (List.collect id)
