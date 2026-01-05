@@ -24,7 +24,7 @@ module TaggingSet =
     let allFiles ts =
         ts.AudioFilePaths @ [ts.JsonFilePath; ts.ImageFilePath]
 
-    let private create (videoId, files) =
+    let private create (videoId, files) : Result<TaggingSet, string list> =
         let ensureNotEmpty (xs: 'a list) errorMsg : Validation<'a list, string list> =
             if List.isNotEmpty xs
             then Ok xs
@@ -48,17 +48,15 @@ module TaggingSet =
         let imageFiles = [".jpg"; ".jpeg"] |> List.collect (fun ext -> files' |> List.filter (String.endsWithIgnoreCase ext))
 
         Validation.map3
-            (fun a j i -> a, j, i)
+            (fun a j i ->
+                { VideoId = videoId
+                  AudioFilePaths = a |> List.ofSeq
+                  JsonFilePath = j
+                  ImageFilePath = i })
             (ensureNotEmpty   audioFiles $"No supported audio files found for video ID {videoId}.")
             (ensureExactlyOne jsonFiles  $"No JSON file found for video ID {videoId}."  $"Multiple JSON files found for video ID {videoId}.")
             (ensureExactlyOne imageFiles $"No image file found for video ID {videoId}." $"Multiple image files found for video ID {videoId}.")
-        |> function
-        | Ok (a, j, i) ->
-            Ok { VideoId = videoId
-                 AudioFilePaths = a |> List.ofSeq
-                 JsonFilePath = j
-                 ImageFilePath = i }
-        | Error msgs -> Error (msgs |> List.collect id)
+        |> Result.mapError (List.collect id)
 
     /// Creates a collection of TaggingSets from a collection of file paths related to several video IDs.
     /// Files that don't match the requirements will be ignored.
