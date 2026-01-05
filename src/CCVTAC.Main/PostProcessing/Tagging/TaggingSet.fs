@@ -16,7 +16,7 @@ type TaggingSet =
 
 module TaggingSet =
     // Accessors
-    let resourceId ts     = ts.VideoId
+    let videoId ts        = ts.VideoId
     let audioFilePaths ts = ts.AudioFilePaths
     let jsonFilePath ts   = ts.JsonFilePath
     let imageFilePath ts  = ts.ImageFilePath

@@ -27,7 +27,7 @@ module TaggingSetInstantiationTests =
 
         match actual with
         | Ok ts ->
-            Assert.Equal(videoId, TaggingSet.resourceId ts[0])
+            Assert.Equal(videoId, TaggingSet.videoId ts[0])
             Assert.Equal<string list>([audioFile], TaggingSet.audioFilePaths ts[0])
             Assert.Equal(jsonFile, TaggingSet.jsonFilePath ts[0])
             Assert.Equal(imageFile, TaggingSet.imageFilePath ts[0])
@@ -126,19 +126,19 @@ module TaggingSetInstantiationTests =
         match actual with
         | Ok ts ->
             // Set 1
-            Assert.Equal(videoId1, TaggingSet.resourceId ts[0])
+            Assert.Equal(videoId1, TaggingSet.videoId ts[0])
             Assert.Equal<string list>([audioFile1], TaggingSet.audioFilePaths ts[0])
             Assert.Equal(jsonFile1, TaggingSet.jsonFilePath ts[0])
             Assert.Equal(imageFile1, TaggingSet.imageFilePath ts[0])
 
             // Set 2
-            Assert.Equal(videoId2, TaggingSet.resourceId ts[1])
+            Assert.Equal(videoId2, TaggingSet.videoId ts[1])
             Assert.Equal<string list>([audioFile2], TaggingSet.audioFilePaths ts[1])
             Assert.Equal(jsonFile2, TaggingSet.jsonFilePath ts[1])
             Assert.Equal(imageFile2, TaggingSet.imageFilePath ts[1])
 
             // Set 3
-            Assert.Equal(videoId3, TaggingSet.resourceId ts[2])
+            Assert.Equal(videoId3, TaggingSet.videoId ts[2])
             Assert.Equal<string list>([audioFile3], TaggingSet.audioFilePaths ts[2])
             Assert.Equal(jsonFile3, TaggingSet.jsonFilePath ts[2])
             Assert.Equal(imageFile3, TaggingSet.imageFilePath ts[2])
@@ -242,7 +242,7 @@ module TaggingSetInstantiationTests =
 
         match actual with
         | Ok ts ->
-            Assert.Equal(videoId, TaggingSet.resourceId ts[0])
+            Assert.Equal(videoId, TaggingSet.videoId ts[0])
             Assert.Equal<string list>(audioFiles, TaggingSet.audioFilePaths ts[0])
             Assert.Equal(jsonFile, TaggingSet.jsonFilePath ts[0])
             Assert.Equal(imageFile, TaggingSet.imageFilePath ts[0])
