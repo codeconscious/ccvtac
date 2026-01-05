@@ -36,20 +36,19 @@ module TaggingSet =
             | [_] -> Ok ()
             | _   -> Error [[multipleErrorMsg]]
 
-        let hasSupportedAudioExtension (fileName: string) =
+        let hasSupportedAudioExt (fileName: string) =
             match Path.GetExtension fileName with
             | Null -> false
             | NonNull (ext: string) -> Seq.caseInsensitiveContains ext Files.audioFileExtensions
 
-        let jsonFileExt = ".json"
-        let imageFileExts = [".jpg"; ".jpeg"]
-
         let files' = List.ofSeq files
-        let audioFiles = files' |> List.filter hasSupportedAudioExtension
-        let jsonFiles  = files' |> List.filter (String.endsWithIgnoreCase jsonFileExt)
+
+        let audioFiles = files' |> List.filter hasSupportedAudioExt
+        let jsonFiles  = files' |> List.filter (String.endsWithIgnoreCase ".json")
         let imageFiles =
-            imageFileExts
-            |> List.collect (fun ext -> files' |> List.filter (String.endsWithIgnoreCase ext))
+            [".jpg"; ".jpeg"]
+            |> List.collect (fun ext ->
+                files' |> List.filter (String.endsWithIgnoreCase ext))
 
         let validationResult =
             Validation.map3
@@ -66,7 +65,7 @@ module TaggingSet =
         match validationResult with
         | Ok (a, j, i) ->
             Ok { VideoId = videoId
-                 AudioFilePaths = List.ofSeq a
+                 AudioFilePaths = a |> List.ofSeq
                  JsonFilePath = j
                  ImageFilePath = i }
         | Error msgs -> Error (msgs |> List.collect id)
