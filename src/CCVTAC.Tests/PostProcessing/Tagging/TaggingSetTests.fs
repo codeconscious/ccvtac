@@ -41,7 +41,7 @@ module TaggingSetInstantiationTests =
         let jsonFile = $"{fileNameBase}.info.json"
         let imageFile = $"{fileNameBase}.jpg"
 
-        let expected = Error [$"No supported audio files were found for video ID {videoId}."]
+        let expected = Error [$"No supported audio files found for video ID {videoId}."]
 
         let files = [jsonFile; imageFile]
         let actual = createSets files
@@ -56,7 +56,7 @@ module TaggingSetInstantiationTests =
         let audioFile = $"{fileNameBase}.m4a"
         let imageFile = $"{fileNameBase}.jpg"
 
-        let expected = Error [$"No JSON file was found for video ID {videoId}."]
+        let expected = Error [$"No JSON file found for video ID {videoId}."]
 
         let files = [audioFile; imageFile]
         let actual = createSets files
@@ -71,7 +71,7 @@ module TaggingSetInstantiationTests =
         let audioFile = $"{fileNameBase}.m4a"
         let jsonFile = $"{fileNameBase}.json"
 
-        let expected = Error [$"No image file was found for video ID {videoId}."]
+        let expected = Error [$"No image file found for video ID {videoId}."]
 
         let files = [audioFile; jsonFile]
         let actual = createSets files
@@ -86,8 +86,8 @@ module TaggingSetInstantiationTests =
         let audioFile = $"{fileNameBase}.m4a"
 
         let expected =
-          Error [$"No JSON file was found for video ID {videoId}."
-                 $"No image file was found for video ID {videoId}."]
+          Error [$"No JSON file found for video ID {videoId}."
+                 $"No image file found for video ID {videoId}."]
 
         let actual = createSets [audioFile]
 
@@ -154,7 +154,7 @@ module TaggingSetInstantiationTests =
         let jsonFile2 = $"{fileNameBase}_2.info.json"
         let imageFile = $"{fileNameBase}.jpg"
 
-        let expected = Error [$"Multiple JSON files were found for video ID {videoId}."]
+        let expected = Error [$"Multiple JSON files found for video ID {videoId}."]
 
         let files = [audioFile; jsonFile1; jsonFile2; imageFile]
         let actual = createSets files
@@ -202,13 +202,13 @@ module TaggingSetInstantiationTests =
 
         let expected =
             Error
-                [ $"No supported audio files were found for video ID {videoId2}."
-                  $"No JSON file was found for video ID {videoId3}."
-                  $"No image file was found for video ID {videoId4}."
-                  $"No supported audio files were found for video ID {videoId5}."
-                  $"No JSON file was found for video ID {videoId5}."
-                  $"No supported audio files were found for video ID {videoId6}."
-                  $"No image file was found for video ID {videoId6}." ]
+                [ $"No supported audio files found for video ID {videoId2}."
+                  $"No JSON file found for video ID {videoId3}."
+                  $"No image file found for video ID {videoId4}."
+                  $"No supported audio files found for video ID {videoId5}."
+                  $"No JSON file found for video ID {videoId5}."
+                  $"No supported audio files found for video ID {videoId6}."
+                  $"No image file found for video ID {videoId6}." ]
 
         let files = [
             audioFile1; jsonFile1; imageFile1
@@ -222,7 +222,6 @@ module TaggingSetInstantiationTests =
         let actual = createSets files
 
         Assert.Equal(expected, actual)
-
 
     [<Fact>]
     let ``parses split video files`` () =

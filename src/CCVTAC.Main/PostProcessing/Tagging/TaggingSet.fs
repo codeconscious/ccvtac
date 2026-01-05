@@ -25,15 +25,15 @@ module TaggingSet =
         ts.AudioFilePaths @ [ts.JsonFilePath; ts.ImageFilePath]
 
     let private create (videoId, files) =
-        let validateNonEmpty (xs: 'a list) errorMsg : Validation<unit, string list> =
+        let ensureNotEmpty (xs: 'a list) errorMsg : Validation<'a list, string list> =
             if List.isNotEmpty xs
-            then Ok ()
+            then Ok xs
             else Error [[errorMsg]]
 
-        let validateExactlyOne (xs: 'a list) emptyErrorMsg multipleErrorMsg : Validation<unit, string list> =
+        let ensureExactlyOne (xs: 'a list) emptyErrorMsg multipleErrorMsg : Validation<'a, string list> =
             match xs with
             | []  -> Error [[emptyErrorMsg]]
-            | [_] -> Ok ()
+            | [x] -> Ok x
             | _   -> Error [[multipleErrorMsg]]
 
         let hasSupportedAudioExt (fileName: string) =
@@ -45,24 +45,14 @@ module TaggingSet =
 
         let audioFiles = files' |> List.filter hasSupportedAudioExt
         let jsonFiles  = files' |> List.filter (String.endsWithIgnoreCase ".json")
-        let imageFiles =
-            [".jpg"; ".jpeg"]
-            |> List.collect (fun ext ->
-                files' |> List.filter (String.endsWithIgnoreCase ext))
+        let imageFiles = [".jpg"; ".jpeg"] |> List.collect (fun ext -> files' |> List.filter (String.endsWithIgnoreCase ext))
 
-        let validationResult =
-            Validation.map3
-                (fun _ _ _ -> audioFiles, jsonFiles[0], imageFiles[0])
-                (validateNonEmpty audioFiles
-                     $"No supported audio files were found for video ID {videoId}.")
-                (validateExactlyOne jsonFiles
-                     $"No JSON file was found for video ID {videoId}."
-                     $"Multiple JSON files were found for video ID {videoId}.")
-                (validateExactlyOne imageFiles
-                     $"No image file was found for video ID {videoId}."
-                     $"Multiple image files were found for video ID {videoId}.")
-
-        match validationResult with
+        Validation.map3
+            (fun a j i -> a, j, i)
+            (ensureNotEmpty   audioFiles $"No supported audio files found for video ID {videoId}.")
+            (ensureExactlyOne jsonFiles  $"No JSON file found for video ID {videoId}."  $"Multiple JSON files found for video ID {videoId}.")
+            (ensureExactlyOne imageFiles $"No image file found for video ID {videoId}." $"Multiple image files found for video ID {videoId}.")
+        |> function
         | Ok (a, j, i) ->
             Ok { VideoId = videoId
                  AudioFilePaths = a |> List.ofSeq
