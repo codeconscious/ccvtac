@@ -39,7 +39,8 @@ module TaggingSet =
         let hasSupportedAudioExt (fileName: string) =
             match Path.GetExtension fileName with
             | Null -> false
-            | NonNull (ext: string) -> Files.audioFileExts |> Seq.caseInsensitiveContains ext
+            | NonNull empty when String.hasNoText empty -> false
+            | NonNull ext -> Files.audioFileExts |> List.caseInsensitiveContains ext
 
         let files' = List.ofSeq files
 
