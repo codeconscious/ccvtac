@@ -16,13 +16,13 @@ type TaggingSet =
 
 module TaggingSet =
     // Accessors
-    let videoId ts    = ts.VideoId
-    let audioFiles ts = ts.AudioFiles
-    let jsonFile ts   = ts.JsonFile
-    let imageFile ts  = ts.ImageFile
+    let videoId t    = t.VideoId
+    let audioFiles t = t.AudioFiles
+    let jsonFile t   = t.JsonFile
+    let imageFile t  = t.ImageFile
 
-    let allFiles ts =
-        ts.AudioFiles @ [ts.JsonFile; ts.ImageFile]
+    let allFiles t =
+        t.AudioFiles @ [t.JsonFile; t.ImageFile]
 
     let private create v a j i =
         { VideoId    = v
@@ -57,7 +57,7 @@ module TaggingSet =
 
         Validation.map3
             (fun a j i -> create videoId a j i)
-            (ensureNotEmpty   audioFiles
+            (ensureNotEmpty audioFiles
                 $"No supported audio files found for video ID {videoId}.")
             (ensureExactlyOne jsonFiles
                 $"No JSON file found for video ID {videoId}."
