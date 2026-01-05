@@ -25,16 +25,16 @@ module TaggingSet =
         ts.AudioFiles @ [ts.JsonFile; ts.ImageFile]
 
     let private create (videoId, files) : Result<TaggingSet, string list> =
-        let ensureNotEmpty (xs: 'a list) errorMsg : Validation<'a list, string list> =
+        let ensureNotEmpty xs errorMsg : Validation<'a list, string> =
             if List.isNotEmpty xs
             then Ok xs
-            else Error [[errorMsg]]
+            else Error [errorMsg]
 
-        let ensureExactlyOne (xs: 'a list) emptyErrorMsg multipleErrorMsg : Validation<'a, string list> =
+        let ensureExactlyOne xs emptyErrorMsg multipleErrorMsg : Validation<'a, string> =
             match xs with
-            | []  -> Error [[emptyErrorMsg]]
+            | []  -> Error [emptyErrorMsg]
             | [x] -> Ok x
-            | _   -> Error [[multipleErrorMsg]]
+            | _   -> Error [multipleErrorMsg]
 
         let hasSupportedAudioExt (fileName: string) =
             match Path.GetExtension fileName with
@@ -56,7 +56,6 @@ module TaggingSet =
             (ensureNotEmpty   audioFiles $"No supported audio files found for video ID {videoId}.")
             (ensureExactlyOne jsonFiles  $"No JSON file found for video ID {videoId}."  $"Multiple JSON files found for video ID {videoId}.")
             (ensureExactlyOne imageFiles $"No image file found for video ID {videoId}." $"Multiple image files found for video ID {videoId}.")
-        |> Result.mapError (List.collect id)
 
     /// Creates a collection of TaggingSets from a collection of file paths related to several video IDs.
     /// Files that don't match the requirements will be ignored.
