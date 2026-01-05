@@ -24,7 +24,13 @@ module TaggingSet =
     let allFiles ts =
         ts.AudioFiles @ [ts.JsonFile; ts.ImageFile]
 
-    let private create (videoId, files) : Result<TaggingSet, string list> =
+    let private createValidated (videoId, files) : Result<TaggingSet, string list> =
+        let create v a j i =
+          { VideoId    = v
+            AudioFiles = a |> List.ofSeq
+            JsonFile   = j
+            ImageFile  = i }
+
         let ensureNotEmpty xs errorMsg : Validation<'a list, string> =
             if List.isNotEmpty xs
             then Ok xs
@@ -43,17 +49,12 @@ module TaggingSet =
             | NonNull ext -> Files.audioFileExts |> List.caseInsensitiveContains ext
 
         let files' = List.ofSeq files
-
         let audioFiles = files' |> List.filter hasSupportedAudioExt
         let jsonFiles  = files' |> List.filter (String.endsWith ".json")
         let imageFiles = [".jpg"; ".jpeg"] |> List.collect (fun ext -> files' |> List.filter (String.endsWith ext))
 
         Validation.map3
-            (fun a j i ->
-                { VideoId    = videoId
-                  AudioFiles = a |> List.ofSeq
-                  JsonFile   = j
-                  ImageFile  = i })
+            (fun a j i -> create videoId a j i)
             (ensureNotEmpty   audioFiles $"No supported audio files found for video ID {videoId}.")
             (ensureExactlyOne jsonFiles  $"No JSON file found for video ID {videoId}."  $"Multiple JSON files found for video ID {videoId}.")
             (ensureExactlyOne imageFiles $"No image file found for video ID {videoId}." $"Multiple image files found for video ID {videoId}.")
@@ -75,6 +76,6 @@ module TaggingSet =
             |> List.map (fun m -> m.Captures |> Seq.cast<Match> |> Seq.head)
             |> List.groupBy _.Groups[1].Value // By video ID
             |> List.map (fun (videoId, matches) -> videoId, matches |> List.map _.Groups[0].Value)
-            |> List.map create
+            |> List.map createValidated
             |> List.sequenceResultA
             |> Result.mapError (List.collect id)
