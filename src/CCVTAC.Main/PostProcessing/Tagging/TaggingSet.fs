@@ -45,8 +45,8 @@ module TaggingSet =
         let files' = List.ofSeq files
 
         let audioFiles = files' |> List.filter hasSupportedAudioExt
-        let jsonFiles  = files' |> List.filter (String.endsWithIgnoreCase ".json")
-        let imageFiles = [".jpg"; ".jpeg"] |> List.collect (fun ext -> files' |> List.filter (String.endsWithIgnoreCase ext))
+        let jsonFiles  = files' |> List.filter (String.endsWith ".json")
+        let imageFiles = [".jpg"; ".jpeg"] |> List.collect (fun ext -> files' |> List.filter (String.endsWith ext))
 
         Validation.map3
             (fun a j i ->

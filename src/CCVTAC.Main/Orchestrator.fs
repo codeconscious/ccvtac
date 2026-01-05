@@ -168,7 +168,7 @@ module Orchestrator =
             Ok { NextAction = NextAction.Continue; UpdatedSettings = Some newSettings }
 
         // Update audio formats
-        elif command |> String.startsWithIgnoreCase Commands.updateAudioFormatPrefix then
+        elif command |> String.startsWith Commands.updateAudioFormatPrefix then
             let format = command.Replace(Commands.updateAudioFormatPrefix, String.Empty).ToLowerInvariant()
             if String.hasNoText format then
                 Error "You must append one or more supported audio formats separated by commas (e.g., \"m4a,opus,best\")."
@@ -181,7 +181,7 @@ module Orchestrator =
                     Ok { NextAction = NextAction.Continue; UpdatedSettings = Some newSettings }
 
         // Update audio quality
-        elif command |> String.startsWithIgnoreCase Commands.updateAudioQualityPrefix then
+        elif command |> String.startsWith Commands.updateAudioQualityPrefix then
             let inputQuality = command.Replace(Commands.updateAudioQualityPrefix, String.Empty)
             if String.hasNoText inputQuality then
                 Error "You must enter a number representing an audio quality between 10 (lowest) and 0 (highest)."
@@ -294,4 +294,3 @@ module Orchestrator =
                 | None -> ()
 
         results.PrintSessionSummary()
-

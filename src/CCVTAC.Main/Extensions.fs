@@ -42,10 +42,12 @@ module String =
     let equalIgnoringCase x y =
         String.Equals(x, y, StringComparison.OrdinalIgnoreCase)
 
-    let startsWithIgnoreCase startText (text: string)  =
+    /// Checks whether a string begins with a specified substring. Case is ignored.
+    let startsWith startText (text: string)  =
         text.StartsWith(startText, StringComparison.InvariantCultureIgnoreCase)
 
-    let endsWithIgnoreCase endText (text: string) =
+    /// Checks whether a string ends with a specified substring. Case is ignored.
+    let endsWith endText (text: string) =
         text.EndsWith(endText, StringComparison.InvariantCultureIgnoreCase)
 
     /// Pluralize text using a specified count.
