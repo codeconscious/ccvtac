@@ -13,6 +13,8 @@ module Files =
 
     let imageFileExts = [".jpg"; ".jpeg"]
 
+    let filterByExt ext fs = fs |> List.filter (String.endsWith ext)
+
     let readAllText (filePath: string) : Result<string, string> =
         ofTry (fun _ -> File.ReadAllText filePath)
 

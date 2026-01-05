@@ -48,12 +48,11 @@ module TaggingSet =
             | NonNull empty when String.hasNoText empty -> false
             | NonNull ext -> Files.audioFileExts |> List.caseInsensitiveContains ext
 
-        let files' = List.ofSeq files
-        let audioFiles = files' |> List.filter hasSupportedAudioExt
-        let jsonFiles  = files' |> List.filter (String.endsWith Files.jsonFileExt)
+        let audioFiles = files |> List.filter hasSupportedAudioExt
+        let jsonFiles  = files |> Files.filterByExt Files.jsonFileExt
         let imageFiles =
             Files.imageFileExts
-            |> List.collect (fun ext -> files' |> List.filter (String.endsWith ext))
+            |> List.collect (fun ext -> files |> Files.filterByExt ext)
 
         Validation.map3
             (fun a j i -> create videoId a j i)
