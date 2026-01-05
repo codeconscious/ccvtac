@@ -18,21 +18,21 @@ module Tagger =
 
     let private parseVideoJson taggingSet : Result<VideoMetadata, string> =
         try
-            let json = File.ReadAllText taggingSet.JsonFilePath
+            let json = File.ReadAllText taggingSet.JsonFile
             match JsonSerializer.Deserialize<VideoMetadata> json with
-            | Null -> Error $"Deserialized JSON was null for \"%s{taggingSet.JsonFilePath}\"."
+            | Null -> Error $"Deserialized JSON was null for \"%s{taggingSet.JsonFile}\"."
             | NonNull v -> Ok v
         with
         | :? JsonException as exn -> Error $"%s{exn.Message}%s{String.newLine}%s{exn.StackTrace}"
-        | exn -> Error $"Error reading JSON file \"%s{taggingSet.JsonFilePath}\": %s{exn.Message}."
+        | exn -> Error $"Error reading JSON file \"%s{taggingSet.JsonFile}\": %s{exn.Message}."
 
     /// If a video was split into sub-videos, then the original video is unneeded and should be deleted.
     let private deleteSourceFile taggingSet (printer: Printer) : TaggingSet =
-        if not (List.hasMultiple taggingSet.AudioFilePaths) then
+        if not (List.hasMultiple taggingSet.AudioFiles) then
             taggingSet
         else
             let largestFileInfo =
-                taggingSet.AudioFilePaths
+                taggingSet.AudioFiles
                 |> Seq.map FileInfo
                 |> Seq.sortByDescending _.Length
                 |> Seq.head
@@ -41,7 +41,7 @@ module Tagger =
                 File.Delete largestFileInfo.FullName
                 printer.Debug $"Deleted pre-split source file \"%s{largestFileInfo.Name}\""
                 { taggingSet with
-                    AudioFilePaths = taggingSet.AudioFilePaths
+                    AudioFiles = taggingSet.AudioFiles
                                      |> List.except [largestFileInfo.FullName] }
             with exn ->
                 printer.Error $"Error deleting pre-split source file \"%s{largestFileInfo.Name}\": %s{exn.Message}"
@@ -181,25 +181,25 @@ module Tagger =
         (printer: Printer)
         : unit =
 
-        printer.Debug $"""Found %s{String.fileLabelWithDescriptor "audio" taggingSet.AudioFilePaths.Length} with resource ID %s{taggingSet.VideoId}."""
+        printer.Debug $"""Found %s{String.fileLabelWithDescriptor "audio" taggingSet.AudioFiles.Length} with resource ID %s{taggingSet.VideoId}."""
 
         match parseVideoJson taggingSet with
         | Ok videoData ->
             let finalTaggingSet = deleteSourceFile taggingSet printer
 
             let imagePath =
-                if embedImages && List.isNotEmpty finalTaggingSet.AudioFilePaths then
-                    Some finalTaggingSet.ImageFilePath
+                if embedImages && List.isNotEmpty finalTaggingSet.AudioFiles then
+                    Some finalTaggingSet.ImageFile
                 else
                     None
 
-            for audioPath in finalTaggingSet.AudioFilePaths do
+            for audioPath in finalTaggingSet.AudioFiles do
                 try
                     tagSingleFile settings videoData audioPath imagePath collectionJson printer
                 with exn ->
                     printer.Error $"Error tagging file: %s{exn.Message}"
         | Error err ->
-            printer.Error $"Error deserializing video metadata from \"%s{taggingSet.JsonFilePath}\": {err}"
+            printer.Error $"Error deserializing video metadata from \"%s{taggingSet.JsonFile}\": {err}"
 
     let run
         (settings: UserSettings)

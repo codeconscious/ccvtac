@@ -10,19 +10,19 @@ open System.Text.RegularExpressions
 type TaggingSet =
     private
         { VideoId: string
-          AudioFilePaths: string list
-          JsonFilePath: string
-          ImageFilePath: string }
+          AudioFiles: string list
+          JsonFile: string
+          ImageFile: string }
 
 module TaggingSet =
     // Accessors
-    let videoId ts        = ts.VideoId
-    let audioFilePaths ts = ts.AudioFilePaths
-    let jsonFilePath ts   = ts.JsonFilePath
-    let imageFilePath ts  = ts.ImageFilePath
+    let videoId ts    = ts.VideoId
+    let audioFiles ts = ts.AudioFiles
+    let jsonFile ts   = ts.JsonFile
+    let imageFile ts  = ts.ImageFile
 
     let allFiles ts =
-        ts.AudioFilePaths @ [ts.JsonFilePath; ts.ImageFilePath]
+        ts.AudioFiles @ [ts.JsonFile; ts.ImageFile]
 
     let private create (videoId, files) : Result<TaggingSet, string list> =
         let ensureNotEmpty (xs: 'a list) errorMsg : Validation<'a list, string list> =
@@ -49,10 +49,10 @@ module TaggingSet =
 
         Validation.map3
             (fun a j i ->
-                { VideoId = videoId
-                  AudioFilePaths = a |> List.ofSeq
-                  JsonFilePath = j
-                  ImageFilePath = i })
+                { VideoId    = videoId
+                  AudioFiles = a |> List.ofSeq
+                  JsonFile   = j
+                  ImageFile  = i })
             (ensureNotEmpty   audioFiles $"No supported audio files found for video ID {videoId}.")
             (ensureExactlyOne jsonFiles  $"No JSON file found for video ID {videoId}."  $"Multiple JSON files found for video ID {videoId}.")
             (ensureExactlyOne imageFiles $"No image file found for video ID {videoId}." $"Multiple image files found for video ID {videoId}.")
