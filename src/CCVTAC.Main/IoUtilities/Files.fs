@@ -9,6 +9,10 @@ module Files =
     let audioFileExts =
         [".aac"; ".alac"; ".flac"; ".m4a"; ".mp3"; ".ogg"; ".vorbis"; ".opus"; ".wav"]
 
+    let jsonFileExt = ".json"
+
+    let imageFileExts = [".jpg"; ".jpeg"]
+
     let readAllText (filePath: string) : Result<string, string> =
         ofTry (fun _ -> File.ReadAllText filePath)
 
