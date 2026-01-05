@@ -24,13 +24,13 @@ module TaggingSet =
     let allFiles ts =
         ts.AudioFiles @ [ts.JsonFile; ts.ImageFile]
 
-    let private createValidated (videoId, files) : Result<TaggingSet, string list> =
-        let create v a j i =
-          { VideoId    = v
-            AudioFiles = a |> List.ofSeq
-            JsonFile   = j
-            ImageFile  = i }
+    let private create v a j i =
+        { VideoId    = v
+          AudioFiles = a |> List.ofSeq
+          JsonFile   = j
+          ImageFile  = i }
 
+    let private createValidated (videoId, files) : Result<TaggingSet, string list> =
         let ensureNotEmpty xs errorMsg : Validation<'a list, string> =
             if List.isNotEmpty xs
             then Ok xs
@@ -55,9 +55,14 @@ module TaggingSet =
 
         Validation.map3
             (fun a j i -> create videoId a j i)
-            (ensureNotEmpty   audioFiles $"No supported audio files found for video ID {videoId}.")
-            (ensureExactlyOne jsonFiles  $"No JSON file found for video ID {videoId}."  $"Multiple JSON files found for video ID {videoId}.")
-            (ensureExactlyOne imageFiles $"No image file found for video ID {videoId}." $"Multiple image files found for video ID {videoId}.")
+            (ensureNotEmpty   audioFiles
+                $"No supported audio files found for video ID {videoId}.")
+            (ensureExactlyOne jsonFiles
+                $"No JSON file found for video ID {videoId}."
+                $"Multiple JSON files found for video ID {videoId}.")
+            (ensureExactlyOne imageFiles
+                $"No image file found for video ID {videoId}."
+                $"Multiple image files found for video ID {videoId}.")
 
     /// Creates a collection of TaggingSets from a collection of file paths related to several video IDs.
     /// Files that don't match the requirements will be ignored.
