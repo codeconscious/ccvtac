@@ -66,7 +66,8 @@ module TaggingSet =
                 $"Multiple image files found for video ID {videoId}.")
 
     /// Creates a collection of TaggingSets from a collection of file paths related to several video IDs.
-    /// Files that don't match the requirements will be ignored.
+    /// Any extra, unnecessary files will be ignored.
+    /// Any validation errors will be accumulated and return in an Error.
     let createSets filePaths : Result<TaggingSet list, string list> =
         if Seq.isEmpty filePaths then
             Error ["No filepaths to create a tagging set were provided."]
