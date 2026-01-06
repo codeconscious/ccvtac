@@ -148,3 +148,20 @@ module Array =
 
     let caseInsensitiveContains text (arr: string array) : bool =
         arr |> Array.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))
+
+/// Operations for regular expressions.
+[<RequireQualifiedAccess>]
+module Rgx =
+    open System.Text.RegularExpressions
+
+    let trySuccessMatch (rgx: Regex) txt =
+        let result = rgx.Match txt
+        match result.Success with
+        | false -> None
+        | true  -> Some result
+
+    let capturesToSeq (m: Match) : Match seq =
+        m.Captures |> Seq.cast<Match>
+
+    let fstCapture (m: Match) =
+        m |> capturesToSeq |> Seq.head

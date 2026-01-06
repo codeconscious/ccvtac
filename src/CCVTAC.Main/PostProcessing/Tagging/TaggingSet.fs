@@ -73,16 +73,18 @@ module TaggingSet =
             Error ["No filepaths to create a tagging set were provided."]
         else
             // Regex group 0 is the full filename, and group 1 contains the video ID.
-            let fileNamesWithVideoIdsRegex =
+            let fileNamesHavingVideoIdsRegex =
                 Regex(@".+\[([\w_\-]{11})\](?:.*)?\.(\w+)", RegexOptions.Compiled)
+
+            let extractFileNames (x, matches: Match list) : 'a * string list =
+                x, matches |> List.map _.Groups[0].Value
 
             filePaths
             |> List.ofSeq
-            |> List.map fileNamesWithVideoIdsRegex.Match
-            |> List.filter _.Success
-            |> List.map (fun m -> m.Captures |> Seq.cast<Match> |> Seq.head)
+            |> List.choose (Rgx.trySuccessMatch fileNamesHavingVideoIdsRegex)
+            |> List.map Rgx.fstCapture
             |> List.groupBy _.Groups[1].Value // By video ID
-            |> List.map (fun (videoId, matches) -> videoId, matches |> List.map _.Groups[0].Value)
+            |> List.map extractFileNames
             |> List.map createValidated
             |> List.sequenceResultA
             |> Result.mapError (List.collect id)
