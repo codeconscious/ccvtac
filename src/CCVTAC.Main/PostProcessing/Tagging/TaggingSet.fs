@@ -89,7 +89,6 @@ module TaggingSet =
             |> List.choose isRelevantFile
             |> List.map fileNameFromMatch
             |> List.groupBy _.Groups[1].Value // By video ID
-            |> List.map extractFileNames
-            |> List.map createValidated
+            |> List.map (extractFileNames >> createValidated)
             |> List.sequenceResultA
             |> Result.mapError (List.collect id)
