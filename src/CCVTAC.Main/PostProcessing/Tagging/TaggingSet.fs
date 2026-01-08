@@ -79,7 +79,7 @@ module TaggingSet =
 
                 Rgx.trySuccessMatch fileNamesHavingVideoIdsRegex fileName
 
-            let fileNameFromMatch = Rgx.fstCapture
+            let extractFileNameMatch = Rgx.fstCapture
 
             let extractFileNames (x, matches: Match list) : 'a * string list =
                 x, matches |> List.map _.Groups[0].Value
@@ -87,7 +87,7 @@ module TaggingSet =
             filePaths
             |> List.ofSeq
             |> List.choose isRelevantFile
-            |> List.map fileNameFromMatch
+            |> List.map extractFileNameMatch
             |> List.groupBy _.Groups[1].Value // By video ID
             |> List.map (extractFileNames >> createValidated)
             |> List.sequenceResultA
