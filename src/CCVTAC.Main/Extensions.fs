@@ -42,10 +42,12 @@ module String =
     let equalIgnoringCase x y =
         String.Equals(x, y, StringComparison.OrdinalIgnoreCase)
 
-    let startsWithIgnoreCase startText (text: string)  =
+    /// Checks whether a string begins with a specified substring. Case is ignored.
+    let startsWith startText (text: string)  =
         text.StartsWith(startText, StringComparison.InvariantCultureIgnoreCase)
 
-    let endsWithIgnoreCase endText (text: string) =
+    /// Checks whether a string ends with a specified substring. Case is ignored.
+    let endsWith endText (text: string) =
         text.EndsWith(endText, StringComparison.InvariantCultureIgnoreCase)
 
     /// Pluralize text using a specified count.
@@ -146,3 +148,20 @@ module Array =
 
     let caseInsensitiveContains text (arr: string array) : bool =
         arr |> Array.exists (fun x -> String.Equals(x, text, StringComparison.OrdinalIgnoreCase))
+
+/// Operations for regular expressions.
+[<RequireQualifiedAccess>]
+module Rgx =
+    open System.Text.RegularExpressions
+
+    let trySuccessMatch (rgx: Regex) txt =
+        let result = rgx.Match txt
+        match result.Success with
+        | false -> None
+        | true  -> Some result
+
+    let capturesToSeq (m: Match) : Match seq =
+        m.Captures |> Seq.cast<Match>
+
+    let fstCapture (m: Match) =
+        m |> capturesToSeq |> Seq.head

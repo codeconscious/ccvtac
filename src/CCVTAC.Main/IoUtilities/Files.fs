@@ -5,8 +5,15 @@ open CCVTAC.Main
 
 module Files =
 
-    let audioFileExtensions =
-        [ ".aac"; ".alac"; ".flac"; ".m4a"; ".mp3"; ".ogg"; ".vorbis"; ".opus"; ".wav" ]
+    /// Extensions of the supported audio file types.
+    let audioFileExts =
+        [".aac"; ".alac"; ".flac"; ".m4a"; ".mp3"; ".ogg"; ".vorbis"; ".opus"; ".wav"]
+
+    let jsonFileExt = ".json"
+
+    let imageFileExts = [".jpg"; ".jpeg"]
+
+    let filterByExt ext fs = fs |> List.filter (String.endsWith ext)
 
     let readAllText (filePath: string) : Result<string, string> =
         ofTry (fun _ -> File.ReadAllText filePath)

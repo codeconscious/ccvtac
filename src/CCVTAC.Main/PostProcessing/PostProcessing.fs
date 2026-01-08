@@ -9,7 +9,7 @@ open System.Linq
 open System.Text.Json
 open System.Text.RegularExpressions
 open Startwatch.Library
-open TaggingSets
+open TaggingSet
 
 module PostProcessor =
 
@@ -42,11 +42,14 @@ module PostProcessor =
     let private generateTaggingSets dir : Result<TaggingSet list, string> =
         try
             let taggingSets = createSets <| Directory.GetFiles dir
-            if List.isEmpty taggingSets
-            then Error $"No tagging sets were created using files in working directory \"%s{dir}\". Are all file extensions correct?"
-            else Ok taggingSets
+            match taggingSets with
+            | Ok ts -> Ok ts
+            | Error msgs ->
+                $"Error(s) creating tagging sets in working directory \"%s{dir}\"" :: msgs
+                |> String.concat String.newLine
+                |> Error
         with exn ->
-            Error $"Error reading working files in \"{dir}\": %s{exn.Message}"
+            Error $"Error reading working files in \"{dir}\" for tagging set creation: %s{exn.Message}"
 
     let run settings mediaType (printer: Printer) : unit =
         let watch = Watch()
@@ -87,7 +90,7 @@ module PostProcessor =
                     match Directories.deleteAllFiles workingDirectory with
                     | Ok results -> Directories.printDeletionResults printer results
                     | Error e -> printer.Error e
-            | Error e ->
-                printer.Error($"Tagging error(s) preventing further post-processing: {e}")
+            | Error err ->
+                printer.Error($"Tagging error preventing further post-processing: {err}")
 
         printer.Info $"Post-processing done in %s{watch.ElapsedFriendly}."
