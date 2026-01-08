@@ -78,15 +78,15 @@ module Mover =
 
     let private getParsedVideoJson taggingSet : Result<VideoMetadata, string> =
         try
-            let json = File.ReadAllText (TaggingSet.jsonFile taggingSet)
+            let json = File.ReadAllText (jsonFile taggingSet)
             match JsonSerializer.Deserialize<VideoMetadata> json with
-            | Null -> Error $"Deserialized JSON was null for \"%s{TaggingSet.jsonFile taggingSet}\""
+            | Null -> Error $"Deserialized JSON was null for \"%s{jsonFile taggingSet}\""
             | NonNull v -> Ok v
         with
         | :? JsonException as exn ->
-            Error $"Error deserializing JSON from file \"%s{TaggingSet.jsonFile taggingSet}\": %s{exn.Message}"
+            Error $"Error deserializing JSON from file \"%s{jsonFile taggingSet}\": %s{exn.Message}"
         | exn ->
-            Error $"Error reading JSON file \"%s{TaggingSet.jsonFile taggingSet}\": %s{exn.Message}."
+            Error $"Error reading JSON file \"%s{jsonFile taggingSet}\": %s{exn.Message}."
 
     let private getSafeSubDirectoryName (collectionData: CollectionMetadata option) taggingSet : string =
         let workingName =
