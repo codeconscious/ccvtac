@@ -1,5 +1,6 @@
 namespace CCVTAC.Main
 
+open CCFSharpUtils.Library
 open System
 open System.Collections.Generic
 open System.Linq
@@ -136,7 +137,7 @@ type Printer(showDebug: bool) =
 
     /// Prints the requested number of blank lines.
     static member EmptyLines(count: byte) =
-        if Numerics.isZero count
+        if Num.isZero count
         then ()
         else
             let repeats = int count - 1

@@ -1,9 +1,10 @@
 namespace CCVTAC.Main.Settings
 
+open CCVTAC.Main
+open CCFSharpUtils.Library
+open Spectre.Console
 open System
 open System.Text.Json.Serialization
-open CCVTAC.Main
-open Spectre.Console
 
 module Settings =
 

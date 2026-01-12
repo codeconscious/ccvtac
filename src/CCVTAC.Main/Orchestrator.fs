@@ -7,6 +7,7 @@ open CCVTAC.Main.PostProcessing
 open CCVTAC.Main.Settings
 open CCVTAC.Main.Settings.Settings
 open CCVTAC.Main.Settings.Settings.LiveUpdating
+open CCFSharpUtils.Library
 open Startwatch.Library
 open System
 
@@ -120,10 +121,10 @@ module Orchestrator =
         (printer: Printer)
         : Result<BatchResults, string> =
 
-        let checkCommand = List.caseInsensitiveContains command
+        let checkCommand = List.containsIgnoreCase command
 
         // Help
-        if String.equalIgnoringCase Commands.helpCommand command then
+        if String.equalIgnoreCase Commands.helpCommand command then
             for kvp in Commands.summary do
                 printer.Info(kvp.Key)
                 printer.Info $"    %s{kvp.Value}"
@@ -168,7 +169,7 @@ module Orchestrator =
             Ok { NextAction = NextAction.Continue; UpdatedSettings = Some newSettings }
 
         // Update audio formats
-        elif command |> String.startsWith Commands.updateAudioFormatPrefix then
+        elif command |> String.startsWithIgnoreCase Commands.updateAudioFormatPrefix then
             let format = command.Replace(Commands.updateAudioFormatPrefix, String.Empty).ToLowerInvariant()
             if String.hasNoText format then
                 Error "You must append one or more supported audio formats separated by commas (e.g., \"m4a,opus,best\")."
@@ -181,7 +182,7 @@ module Orchestrator =
                     Ok { NextAction = NextAction.Continue; UpdatedSettings = Some newSettings }
 
         // Update audio quality
-        elif command |> String.startsWith Commands.updateAudioQualityPrefix then
+        elif command |> String.startsWithIgnoreCase Commands.updateAudioQualityPrefix then
             let inputQuality = command.Replace(Commands.updateAudioQualityPrefix, String.Empty)
             if String.hasNoText inputQuality then
                 Error "You must enter a number representing an audio quality between 10 (lowest) and 0 (highest)."

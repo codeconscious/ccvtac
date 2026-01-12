@@ -5,9 +5,10 @@ open CCVTAC.Main.IoUtilities
 open CCVTAC.Main.Settings
 open CCVTAC.Main.Settings.Settings
 open Settings.IO
+open CCFSharpUtils.Library
+open Spectre.Console
 open System
 open System.IO
-open Spectre.Console
 
 module Program =
 
@@ -24,13 +25,13 @@ module Program =
     let main args : int =
         let printer = Printer(showDebug = true)
 
-        if Array.isNotEmpty args && Array.caseInsensitiveContains args[0] helpFlags then
+        if Array.isNotEmpty args && Array.containsIgnoreCase args[0] helpFlags then
             printer.Info Help.helpText
             int ExitCodes.Success
         else
             let settingsPath =
                 FileInfo <|
-                    if Array.hasMultiple args && Array.caseInsensitiveContains args[0] settingsFileFlags then
+                    if Array.hasMultiple args && Array.containsIgnoreCase args[0] settingsFileFlags then
                         args[1] // Expected to be a settings file path.
                     else
                         defaultSettingsFileName

@@ -3,6 +3,7 @@ namespace CCVTAC.Main.IoUtilities
 open CCVTAC.Main
 open CCFSharpUtils.Library
 open System.IO
+open System.Text
 
 module Directories =
 
@@ -12,7 +13,7 @@ module Directories =
     /// Counts the number of audio files in a directory.
     let audioFileCount (directory: string) (includedExtensions: string list) =
         DirectoryInfo(directory).EnumerateFiles()
-        |> Seq.filter (fun f -> List.caseInsensitiveContains f.Extension includedExtensions)
+        |> Seq.filter (fun f -> List.containsIgnoreCase f.Extension includedExtensions)
         |> Seq.length
 
     /// Returns the filenames in a given directory, optionally ignoring specific filenames.
@@ -72,7 +73,7 @@ module Directories =
             if Array.isEmpty fileNames then
                 Ok ()
             else
-                SB($"Unexpectedly found {String.fileLabel fileNames.Length} in working directory \"{dirName}\":{String.newLine}")
+                StringBuilder($"Unexpectedly found {String.fileLabel fileNames.Length} in working directory \"{dirName}\":{String.newLine}")
                     .AppendLine
                         (fileNames
                          |> Array.truncate showMax

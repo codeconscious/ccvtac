@@ -1,8 +1,9 @@
 namespace CCVTAC.Main.PostProcessing
 
+open CCVTAC.Main
+open CCFSharpUtils.Library
 open System
 open System.Text
-open CCVTAC.Main
 
 module MetadataUtilities =
 
@@ -20,7 +21,7 @@ module MetadataUtilities =
         sprintf "%s/%s/%s" m d y
 
     let generateComment (v: VideoMetadata) (c: CollectionMetadata option) : string =
-        let sb = SB()
+        let sb = StringBuilder()
         sb.AppendLine("CCVTAC SOURCE DATA:") |> ignore
         sb.AppendLine $"■ Downloaded: {DateTime.Now}" |> ignore
         sb.AppendLine $"■ URL: %s{v.WebpageUrl}" |> ignore
