@@ -29,7 +29,7 @@ module Mover =
             let playlistImages = images |> List.filter (fun i -> isPlaylistImage i.FullName)
             if not (List.isEmpty playlistImages)
             then Some playlistImages[0]
-            elif audioFileCount > 1 && images.Length = 1
+            elif audioFileCount > 1 && List.hasOne images
             then Some images[0]
             else None
 

@@ -1,6 +1,7 @@
 namespace CCVTAC.Main.IoUtilities
 
 open CCVTAC.Main
+open CCFSharpUtils.Library
 open System.IO
 
 module Directories =
