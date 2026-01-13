@@ -34,7 +34,7 @@ type ResultTracker<'a>(printer: Printer) =
         | Ok _ ->
             successCount <- successCount + 1UL
         | Error e ->
-            let msg = if e |> List.isNotEmpty then List.head e else String.Empty
+            let msg = match e with [] -> String.Empty | _ -> List.head e
             if not (failures.TryAdd(input, msg)) then
                 failures[input] <- msg
 
