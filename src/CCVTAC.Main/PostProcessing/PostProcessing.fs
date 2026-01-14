@@ -3,14 +3,14 @@ namespace CCVTAC.Main.PostProcessing
 open CCVTAC.Main
 open CCVTAC.Main.IoUtilities
 open CCVTAC.Main.PostProcessing.Tagging
+open CCVTAC.Main.PostProcessing.Tagging.TaggingSet
 open CCVTAC.Main.Settings.Settings
 open CCFSharpUtils.Library
+open Startwatch.Library
 open System.IO
 open System.Linq
 open System.Text.Json
 open System.Text.RegularExpressions
-open Startwatch.Library
-open TaggingSet
 
 module PostProcessor =
 
