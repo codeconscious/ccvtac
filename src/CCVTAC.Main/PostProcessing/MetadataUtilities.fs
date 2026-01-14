@@ -54,7 +54,8 @@ module MetadataUtilities =
             match v.PlaylistIndex with
                 | Some index -> if index > 0u then sb.AppendLine $"■ Playlist index: %d{index}" |> ignore
                 | None -> ()
-            sb.AppendLine($"■ Playlist description: %s{String.textOrEmpty c'.Description}") |> ignore
+            if String.hasText c'.Description then
+                sb.AppendLine($"■ Playlist description: %s{c'.Description}") |> ignore
         | None -> ()
 
         sb.ToString()
