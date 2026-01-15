@@ -43,7 +43,7 @@ module MetadataUtilities =
         if v.UploadDate.Length = 8 then
             sb.AppendLine $"■ Uploaded: %s{formattedUploadDate v.UploadDate}" |> ignore
 
-        let description = String.textOrFallback "None." v.Description
+        let description = String.textElse "None." v.Description
         sb.AppendLine $"■ Video description: %s{description}" |> ignore
 
         match c with
