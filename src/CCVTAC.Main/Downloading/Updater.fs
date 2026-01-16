@@ -1,8 +1,9 @@
 namespace CCVTAC.Main.Downloading
 
-open CCVTAC.Main.ExternalTools
 open CCVTAC.Main
+open CCVTAC.Main.ExternalTools
 open CCVTAC.Main.Settings.Settings
+open CCFSharpUtils.Library
 
 module Updater =
 

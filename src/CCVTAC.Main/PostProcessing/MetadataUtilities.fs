@@ -1,8 +1,9 @@
 namespace CCVTAC.Main.PostProcessing
 
+open CCVTAC.Main
+open CCFSharpUtils.Library
 open System
 open System.Text
-open CCVTAC.Main
 
 module MetadataUtilities =
 
@@ -20,7 +21,7 @@ module MetadataUtilities =
         sprintf "%s/%s/%s" m d y
 
     let generateComment (v: VideoMetadata) (c: CollectionMetadata option) : string =
-        let sb = SB()
+        let sb = StringBuilder()
         sb.AppendLine("CCVTAC SOURCE DATA:") |> ignore
         sb.AppendLine $"■ Downloaded: {DateTime.Now}" |> ignore
         sb.AppendLine $"■ URL: %s{v.WebpageUrl}" |> ignore
@@ -42,7 +43,7 @@ module MetadataUtilities =
         if v.UploadDate.Length = 8 then
             sb.AppendLine $"■ Uploaded: %s{formattedUploadDate v.UploadDate}" |> ignore
 
-        let description = String.textOrFallback "None." v.Description
+        let description = String.textElse "None." v.Description
         sb.AppendLine $"■ Video description: %s{description}" |> ignore
 
         match c with
@@ -53,7 +54,8 @@ module MetadataUtilities =
             match v.PlaylistIndex with
                 | Some index -> if index > 0u then sb.AppendLine $"■ Playlist index: %d{index}" |> ignore
                 | None -> ()
-            sb.AppendLine($"■ Playlist description: %s{String.textOrEmpty c'.Description}") |> ignore
+            if String.hasText c'.Description then
+                sb.AppendLine($"■ Playlist description: %s{c'.Description}") |> ignore
         | None -> ()
 
         sb.ToString()

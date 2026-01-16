@@ -5,6 +5,7 @@ open CCVTAC.Main.Settings.Settings
 open CCVTAC.Main.PostProcessing
 open CCVTAC.Main.PostProcessing.Tagging
 open CCVTAC.Main.Downloading.Downloading
+open CCFSharpUtils.Library
 open Startwatch.Library
 open TaggingSet
 open MetadataUtilities
@@ -60,7 +61,7 @@ module Tagger =
                 printer.Error $"Error writing image to the audio file: %s{exn.Message}"
 
     let private releaseYear userSettings videoMetadata : uint32 option =
-        if userSettings.IgnoreUploadYearUploaders |> List.caseInsensitiveContains videoMetadata.Uploader then
+        if userSettings.IgnoreUploadYearUploaders |> List.containsIgnoreCase videoMetadata.Uploader then
             None
         elif videoMetadata.UploadDate.Length <> 4 then
             None
@@ -181,7 +182,7 @@ module Tagger =
         (printer: Printer)
         : unit =
 
-        printer.Debug $"""Found %s{String.fileLabelWithDescriptor "audio" taggingSet.AudioFiles.Length} with resource ID %s{taggingSet.VideoId}."""
+        printer.Debug $"""Found %s{String.fileLabelWithDesc "audio" taggingSet.AudioFiles.Length} with resource ID %s{taggingSet.VideoId}."""
 
         match parseVideoJson taggingSet with
         | Ok videoData ->

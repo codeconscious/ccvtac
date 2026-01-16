@@ -3,6 +3,7 @@ namespace CCVTAC.Main.PostProcessing
 open CCVTAC.Main
 open CCVTAC.Main.IoUtilities
 open CCVTAC.Main.Settings.Settings
+open CCFSharpUtils.Library
 open System
 open System.IO
 open System.Text
@@ -18,7 +19,7 @@ module Renamer =
         | "KC" -> NormalizationForm.FormKC
         | _    -> NormalizationForm.FormC
 
-    let updateTextViaPatterns isQuietMode (printer: Printer) (sb: SB) (renamePattern: RenamePattern) =
+    let updateTextViaPatterns isQuietMode (printer: Printer) (sb: StringBuilder) (renamePattern: RenamePattern) =
         let regex = Regex renamePattern.RegexPattern
 
         let matches =
@@ -55,7 +56,7 @@ module Renamer =
                             then m.Groups[i + 1].Value.Trim()
                             else String.Empty
                         (searchFor, replaceWith))
-                    |> Seq.fold (fun (sb': SB) -> sb'.Replace) (SB renamePattern.ReplaceWithPattern)
+                    |> Seq.fold (fun (sb': StringBuilder) -> sb'.Replace) (StringBuilder renamePattern.ReplaceWithPattern)
                     |> _.ToString()
 
                 sb.Insert(m.Index, replacementText) |> ignore
@@ -68,20 +69,20 @@ module Renamer =
 
         let audioFiles =
             workingDirInfo.EnumerateFiles()
-            |> Seq.filter (fun f -> List.caseInsensitiveContains f.Extension Files.audioFileExts)
+            |> Seq.filter (fun f -> List.containsIgnoreCase f.Extension Files.audioFileExts)
             |> List.ofSeq
 
         if List.isEmpty audioFiles then
             printer.Warning "No audio files to rename were found."
         else
-            printer.Debug $"""Renaming %s{String.fileLabelWithDescriptor "audio" audioFiles.Length}..."""
+            printer.Debug $"""Renaming %s{String.fileLabelWithDesc "audio" audioFiles.Length}..."""
 
             for audioFile in audioFiles do
                 let newFileName =
                     userSettings.RenamePatterns
                     |> List.fold
-                        (fun (sb: SB) -> updateTextViaPatterns userSettings.QuietMode printer sb)
-                        (SB audioFile.Name)
+                        (fun (sb: StringBuilder) -> updateTextViaPatterns userSettings.QuietMode printer sb)
+                        (StringBuilder audioFile.Name)
                     |> _.ToString()
 
                 try

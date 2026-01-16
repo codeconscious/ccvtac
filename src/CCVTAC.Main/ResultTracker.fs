@@ -1,5 +1,6 @@
 namespace CCVTAC.Main
 
+open CCFSharpUtils.Library
 open System
 open System.Collections.Generic
 
@@ -33,13 +34,13 @@ type ResultTracker<'a>(printer: Printer) =
         | Ok _ ->
             successCount <- successCount + 1UL
         | Error e ->
-            let msg = if e.Length > 0 then List.head e else String.Empty
+            let msg = match e with [] -> String.Empty | _ -> List.head e
             if not (failures.TryAdd(input, msg)) then
                 failures[input] <- msg
 
     /// Prints any failures for the current batch.
     member _.PrintBatchFailures() : unit =
-        if Numerics.isZero failures.Count then
+        if Num.isZero failures.Count then
             printer.Debug "No failures in batch."
         else
             let failureLabel = String.pluralize "failure" "failures" failures.Count

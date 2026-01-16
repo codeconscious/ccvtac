@@ -1,7 +1,8 @@
 namespace CCVTAC.Main.IoUtilities
 
-open System.IO
 open CCVTAC.Main
+open CCFSharpUtils.Library
+open System.IO
 
 module Files =
 
@@ -13,7 +14,7 @@ module Files =
 
     let imageFileExts = [".jpg"; ".jpeg"]
 
-    let filterByExt ext fs = fs |> List.filter (String.endsWith ext)
+    let filterByExt ext fs = fs |> List.filter (String.endsWithIgnoreCase ext)
 
     let readAllText (filePath: string) : Result<string, string> =
         ofTry (fun _ -> File.ReadAllText filePath)

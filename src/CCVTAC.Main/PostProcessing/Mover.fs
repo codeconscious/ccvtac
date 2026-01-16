@@ -1,3 +1,4 @@
+
 namespace CCVTAC.Main.PostProcessing
 
 open CCVTAC.Main
@@ -5,6 +6,7 @@ open CCVTAC.Main.IoUtilities
 open CCVTAC.Main.PostProcessing
 open CCVTAC.Main.PostProcessing.Tagging
 open CCVTAC.Main.Settings.Settings
+open CCFSharpUtils.Library
 open TaggingSet
 open System
 open System.IO
@@ -27,9 +29,9 @@ module Mover =
             None
         else
             let playlistImages = images |> List.filter (fun i -> isPlaylistImage i.FullName)
-            if not (List.isEmpty playlistImages)
+            if List.isNotEmpty playlistImages
             then Some playlistImages[0]
-            elif audioFileCount > 1 && images.Length = 1
+            elif audioFileCount > 1 && List.hasOne images
             then Some images[0]
             else None
 
@@ -130,13 +132,13 @@ module Mover =
 
                 let audioFileNames =
                     workingDirInfo.EnumerateFiles()
-                    |> Seq.filter (fun f -> List.caseInsensitiveContains f.Extension Files.audioFileExts)
+                    |> Seq.filter (fun f -> List.containsIgnoreCase f.Extension Files.audioFileExts)
                     |> List.ofSeq
 
                 if audioFileNames.IsEmpty then
                     printer.Error "No audio filenames to move were found."
                 else
-                    let fileCountMsg = String.fileLabelWithDescriptor "audio"
+                    let fileCountMsg = String.fileLabelWithDesc "audio"
 
                     printer.Debug $"Moving %s{fileCountMsg audioFileNames.Length} to \"%s{fullMoveToDir}\"..."
 

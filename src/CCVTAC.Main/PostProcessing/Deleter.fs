@@ -1,6 +1,7 @@
 namespace CCVTAC.Main.PostProcessing
 
 open CCVTAC.Main
+open CCFSharpUtils.Library
 open System.IO
 
 module Deleter =
@@ -35,7 +36,7 @@ module Deleter =
         let collectionFileNames =
             match getCollectionFiles collectionMetadata workingDirectory with
             | Ok files ->
-                printer.Debug $"""Found {String.fileLabelWithDescriptor "collection" files.Length}."""
+                printer.Debug $"""Found {String.fileLabelWithDesc "collection" files.Length}."""
                 files
             | Error err ->
                 printer.Warning err
@@ -46,6 +47,6 @@ module Deleter =
         if Array.isEmpty allFileNames then
             printer.Warning "No files to delete were found."
         else
-            printer.Debug $"""Deleting {String.fileLabelWithDescriptor "temporary" allFileNames.Length}..."""
+            printer.Debug $"""Deleting {String.fileLabelWithDesc "temporary" allFileNames.Length}..."""
             deleteAll allFileNames printer
             printer.Info "Deleted temporary files."

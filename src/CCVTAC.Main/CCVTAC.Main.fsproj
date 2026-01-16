@@ -8,7 +8,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Shared.fs" />
-    <Compile Include="Extensions.fs" />
     <Compile Include="Printer.fs" />
     <Compile Include="IoUtilities\Directories.fs" />
     <Compile Include="IoUtilities\Files.fs" />
@@ -41,6 +40,7 @@
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="CCFSharpUtils" Version="0.1.5" />
     <PackageReference Include="CodeConscious.Startwatch" Version="1.0.0" />
     <PackageReference Include="FSharpPlus" Version="1.8.0" />
     <PackageReference Include="FsToolkit.ErrorHandling" Version="5.1.0" />

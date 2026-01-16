@@ -9,12 +9,12 @@
   <ItemGroup>
     <Compile Include="DownloadEntityTests.fs" />
     <Compile Include="TagDetectionTests.fs" />
-    <Compile Include="ExtensionsTests.fs" />
     <Compile Include="RenamerTests.fs" />
     <Compile Include="PostProcessing\Tagging\TaggingSetTests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="CCFSharpUtils" Version="0.1.5" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">

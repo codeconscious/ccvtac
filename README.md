@@ -221,4 +221,4 @@ The first incarnation of this application was written in C#. However, after pick
 
 As an experiment, I rewrote this application in OOP-style F#, using LLMs solely for the rough initial conversion (which greatly reduced the overall time and labor necessary at the cost of requiring a *lot* of manual cleanup). Ultimately, I was surprised how much I preferred the F# code over the C#, so I decided to keep this tool in F#.
 
-Due to this background, the code is not particularly idiomatic F#, but it is perfectly viable in its current blended-style form. That said, I'll probably tweak it over time to gradually to introduce more FP, mainly for practice.
+Due to this background, the code is not particularly idiomatic F#, but it is certainly perfectly viable in its current blended-style form. That said, I'll probably tweak it over time to gradually to introduce more idiomatic F# code.

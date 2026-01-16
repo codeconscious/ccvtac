@@ -2,6 +2,7 @@ namespace CCVTAC.Main.PostProcessing.Tagging
 
 open CCVTAC.Main
 open CCVTAC.Main.IoUtilities
+open CCFSharpUtils.Library
 open FsToolkit.ErrorHandling
 open System.IO
 open System.Text.RegularExpressions
@@ -46,7 +47,7 @@ module TaggingSet =
             match Path.GetExtension fileName with
             | Null -> false
             | NonNull empty when String.hasNoText empty -> false
-            | NonNull ext -> Files.audioFileExts |> List.caseInsensitiveContains ext
+            | NonNull ext -> Files.audioFileExts |> List.containsIgnoreCase ext
 
         let audioFiles = files |> List.filter hasSupportedAudioExt
         let jsonFiles  = files |> Files.filterByExt Files.jsonFileExt
