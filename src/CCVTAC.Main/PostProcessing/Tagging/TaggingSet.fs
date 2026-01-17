@@ -92,4 +92,4 @@ module TaggingSet =
             |> List.groupBy _.Groups[1].Value // By video ID
             |> List.map (extractFileNames >> createValidated)
             |> List.sequenceResultA
-            |> Result.mapError (List.collect id)
+            |! (List.collect id)
