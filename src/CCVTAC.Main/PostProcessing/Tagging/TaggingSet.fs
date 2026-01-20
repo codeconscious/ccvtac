@@ -1,6 +1,5 @@
 namespace CCVTAC.Main.PostProcessing.Tagging
 
-open CCVTAC.Main
 open CCVTAC.Main.IoUtilities
 open CCFSharpUtils.Library
 open FsToolkit.ErrorHandling
@@ -92,4 +91,4 @@ module TaggingSet =
             |> List.groupBy _.Groups[1].Value // By video ID
             |> List.map (extractFileNames >> createValidated)
             |> List.sequenceResultA
-            |! (List.collect id)
+            |! List.collect id
