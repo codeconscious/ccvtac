@@ -242,11 +242,11 @@ module Orchestrator =
             batchResults.RegisterResult(input.Text, result)
 
             match result with
-            | Error e ->
-                printer.Error e
-            | Ok r ->
-                nextAction <- r.NextAction
-                match r.UpdatedSettings with
+            | Error err ->
+                printer.Error err
+            | Ok result ->
+                nextAction <- result.NextAction
+                match result.UpdatedSettings with
                     | None -> ()
                     | Some us -> currentSettings <- us
                 if nextAction <> NextAction.Continue then
