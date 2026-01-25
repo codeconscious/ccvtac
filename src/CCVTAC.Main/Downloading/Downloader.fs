@@ -95,12 +95,12 @@ module Downloader =
                     Error <|
                         $"The \"{format}\" format download was reported as successful, but no audio files were downloaded!"
                         :: match result.Error with
-                            | Some err -> [err]
+                            | Some err -> [$"Error: {err}"]
                             | None -> []
                 | Error err, true ->
                     Error <|
                         [$"The downloader reported failure for \"{format}\", yet audio files were unexpectedly downloaded!"
-                         err]
+                         $"Error: {err}"]
                 | Error err, false ->
                     let newErr = $"A download error was reported for the \"{format}\" format, and no audio files were downloaded. {err}"
                     loop (List.append errors [newErr]) formats
