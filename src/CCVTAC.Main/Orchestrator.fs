@@ -222,12 +222,14 @@ module Orchestrator =
         let watch = Watch()
         let batchResults = ResultTracker<BatchResults> printer
         let mutable nextAction = NextAction.Continue
-        let mutable inputIndex = 0
         let mutable currentSettings = settings
 
-        for input in categorizedInputs do
-            let mutable stop = false
-            inputIndex <- inputIndex + 1
+        use e = (Seq.ofList categorizedInputs).GetEnumerator()
+        let mutable inputIndex = 1
+        let mutable stop = false
+
+        while not stop && e.MoveNext() do
+            let input = e.Current
 
             let result =
                 match input.Category with
@@ -249,6 +251,7 @@ module Orchestrator =
                     | Some us -> currentSettings <- us
                 if nextAction <> NextAction.Continue then
                     stop <- true
+                inputIndex <- inputIndex + 1
 
         if categoryCounts[InputCategory.Url] > 1 then
             printer.Info(sprintf "%sFinished with batch of %d URLs in %s."
@@ -256,6 +259,13 @@ module Orchestrator =
                             categoryCounts[InputCategory.Url]
                             watch.ElapsedFriendly)
             batchResults.PrintBatchFailures()
+
+        if inputIndex < categorizedInputs.Length then
+            let unprocessedInputs =
+                categorizedInputs[inputIndex-1..]
+                |> List.map (fun x -> $"• {x.Text}")
+                |> String.concat String.newLine
+            printer.Warning($"Some inputs were not yet processed: {String.newLine}{unprocessedInputs}")
 
         { NextAction = nextAction
           UpdatedSettings = Some currentSettings }
@@ -288,8 +298,10 @@ module Orchestrator =
                 let categorizedInputs = categorizeInputs splitInputs
                 let categoryCounts = countCategories categorizedInputs
                 summarizeInput categorizedInputs categoryCounts printer
+
                 let batchResult = processBatch categorizedInputs categoryCounts currentSettings results history printer
                 nextAction <- batchResult.NextAction
+
                 match batchResult.UpdatedSettings with
                 | Some s -> currentSettings <- s
                 | None -> ()
