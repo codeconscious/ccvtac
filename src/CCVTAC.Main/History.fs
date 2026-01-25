@@ -30,9 +30,7 @@ type History(filePath: string, displayCount: int) =
         try
             let lines =
                 File.ReadAllLines this.FilePath
-                |> Seq.rev
-                |> Seq.truncate this.DisplayCount
-                |> Seq.rev
+                |> Seq.takeLast this.DisplayCount
                 |> Seq.toList
 
             let historyData =

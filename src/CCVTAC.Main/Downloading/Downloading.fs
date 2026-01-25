@@ -1,6 +1,6 @@
 ﻿namespace CCVTAC.Main.Downloading
 
-open System.Text.RegularExpressions
+open CCFSharpUtils.Library
 
 module Downloading =
 
@@ -17,24 +17,19 @@ module Downloading =
     type Urls = { Primary: PrimaryUrl
                   Metadata: SupplementaryUrl }
 
-    let private (|RegexMatch|_|) pattern input =
-        match Regex.Match(input, pattern) with
-        | m when m.Success -> Some (List.tail [for g in m.Groups -> g.Value])
-        | _ -> None
-
     let mediaTypeWithIds url : Result<MediaType,string> =
         match url with
-        | RegexMatch @"(?<=v=|v\=)([\w-]{11})(?:&list=([\w_-]+))" [videoId; playlistId] ->
+        | Rgx.MatchGroups @"(?<=v=|v\=)([\w-]{11})(?:&list=([\w_-]+))" [videoId; playlistId] ->
             Ok (PlaylistVideo (videoId, playlistId))
-        | RegexMatch @"^([\w-]{11})$" [id]
-        | RegexMatch @"(?<=v=|v\\=)([\w-]{11})" [id]
-        | RegexMatch @"(?<=youtu\.be/)(.{11})" [id] ->
+        | Rgx.MatchGroups @"^([\w-]{11})$" [id]
+        | Rgx.MatchGroups @"(?<=v=|v\\=)([\w-]{11})" [id]
+        | Rgx.MatchGroups @"(?<=youtu\.be/)(.{11})" [id] ->
             Ok (Video id)
-        | RegexMatch @"(?<=list=)(P[\w\-]+)" [id] ->
+        | Rgx.MatchGroups @"(?<=list=)(P[\w\-]+)" [id] ->
             Ok (StandardPlaylist id)
-        | RegexMatch @"(?<=list=)(O[\w\-]+)" [id] ->
+        | Rgx.MatchGroups @"(?<=list=)(O[\w\-]+)" [id] ->
             Ok (ReleasePlaylist id)
-        | RegexMatch @"((?:www\.)?youtube\.com\/(?:channel\/|c\/|user\/|@)(?:[A-Za-z0-9\-@%\/]+))" [id] ->
+        | Rgx.MatchGroups @"((?:www\.)?youtube\.com\/(?:channel\/|c\/|user\/|@)(?:[A-Za-z0-9\-@%\/]+))" [id] ->
             Ok (Channel id)
         | _ ->
             Error $"Unable to determine media type of URL \"{url}\". (Might it contain invalid characters?)"

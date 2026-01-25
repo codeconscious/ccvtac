@@ -24,8 +24,7 @@ module Renamer =
 
         let matches =
             regex.Matches(sb.ToString())
-            |> Seq.cast<Match>
-            |> Seq.filter _.Success
+            |> Rgx.successMatches
             |> Seq.rev
             |> Seq.toList
 
@@ -46,8 +45,8 @@ module Renamer =
 
                 // Build replacement text by replacing %<n> placeholders with group captures.
                 let replacementText =
-                    m.Groups
-                    |> Seq.cast<Group>
+                    m
+                    |> Rgx.groups
                     |> Seq.mapi (fun i _ ->
                         let searchFor = sprintf "%%<%d>s" (i + 1)
                         let replaceWith =
@@ -56,7 +55,9 @@ module Renamer =
                             then m.Groups[i + 1].Value.Trim()
                             else String.Empty
                         (searchFor, replaceWith))
-                    |> Seq.fold (fun (sb': StringBuilder) -> sb'.Replace) (StringBuilder renamePattern.ReplaceWithPattern)
+                    |> Seq.fold
+                           (fun (sb': StringBuilder) -> sb'.Replace)
+                           (StringBuilder renamePattern.ReplaceWithPattern)
                     |> _.ToString()
 
                 sb.Insert(m.Index, replacementText) |> ignore
@@ -88,7 +89,7 @@ module Renamer =
                 try
                     let destinationPath =
                         Path.Combine(workingDirectory, newFileName)
-                        |> _.Normalize(toNormalizationForm userSettings.NormalizationForm)
+                            .Normalize(toNormalizationForm userSettings.NormalizationForm)
 
                     File.Move(audioFile.FullName, destinationPath)
 
