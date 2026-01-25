@@ -40,7 +40,7 @@
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="CCFSharpUtils" Version="0.1.12" />
+    <PackageReference Include="CCFSharpUtils" Version="0.1.14" />
     <PackageReference Include="CodeConscious.Startwatch" Version="1.0.0" />
     <PackageReference Include="FSharpPlus" Version="1.9.1" />
     <PackageReference Include="FsToolkit.ErrorHandling" Version="5.1.0" />
