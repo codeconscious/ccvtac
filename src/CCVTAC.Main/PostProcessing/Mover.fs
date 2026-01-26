@@ -93,8 +93,8 @@ module Mover =
     let private getSafeSubDirectoryName (collectionData: CollectionMetadata option) taggingSet : string =
         let workingName =
             match collectionData with
-            | Some metadata when String.hasText metadata.Uploader &&
-                                 String.hasText metadata.Title -> metadata.Uploader
+            | Some metadata when String.allHaveText [metadata.Uploader; metadata.Title] ->
+                metadata.Uploader
             | _ ->
                 match getParsedVideoJson taggingSet with
                 | Ok v -> v.Uploader
@@ -121,7 +121,7 @@ module Mover =
         | None -> printer.Error "No tagging sets provided"
         | Some firstTaggingSet ->
             let subFolderName = getSafeSubDirectoryName maybeCollectionData firstTaggingSet
-            let collectionName = maybeCollectionData |> Option.map _.Title |> Option.defaultValue String.Empty
+            let collectionName = maybeCollectionData |> Option.mapElse _.Title String.Empty
             let fullMoveToDir = Path.Combine(settings.MoveToDirectory, subFolderName, collectionName)
 
             match Directories.ensureDirectoryExists fullMoveToDir with
