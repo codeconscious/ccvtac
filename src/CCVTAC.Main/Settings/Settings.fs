@@ -84,7 +84,7 @@ module Settings =
             | false -> "OFF"
 
         let simplePluralize label count =
-            String.pluralize label $"{label}s" count
+            String.pluralizeS label count
             |> sprintf "%d %s" count
 
         let tagDetectionPatternCount (patterns: TagDetectionPatterns) =
@@ -129,7 +129,7 @@ module Settings =
 
         Printer.PrintTable table
 
-    module Validation =
+    module Validation' =
         open System.IO
 
         let validate settings =
@@ -163,16 +163,17 @@ module Settings =
                 Ok settings
 
     module IO =
+        open Validation'
         open System.IO
         open System.Text.Json
         open System.Text.Unicode
         open System.Text.Encodings.Web
-        open Validation
 
         let deserialize<'a> (json: string) : Result<'a, string> =
             let options = JsonSerializerOptions()
             options.AllowTrailingCommas <- true
             options.ReadCommentHandling <- JsonCommentHandling.Skip
+            options.AllowDuplicateProperties <- false
             try
                 match JsonSerializer.Deserialize<'a>(json, options) with
                 | null -> Error "Could not deserialize the settings JSON"
@@ -208,7 +209,7 @@ module Settings =
             writeFile fileInfo defaultSettings
 
     module LiveUpdating =
-        open Validation
+        open Validation'
 
         let toggleSplitChapters settings =
             { settings with SplitChapters = not settings.SplitChapters }
