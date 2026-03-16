@@ -24,6 +24,8 @@ module TaggingSet =
     let allFiles t =
         t.AudioFiles @ [t.JsonFile; t.ImageFile]
 
+    let videoIdFromMatch (m : Match) = m.Groups[1].Value
+
     let private create v a j i =
         { VideoId    = v
           AudioFiles = a |> List.ofSeq
@@ -88,7 +90,7 @@ module TaggingSet =
             |> List.ofSeq
             |> List.choose isRelevantFile
             |> List.map extractFileNameMatch
-            |> List.groupBy _.Groups[1].Value // By video ID
+            |> List.groupBy videoIdFromMatch
             |> List.map (extractFileNames >> createValidated)
             |> List.sequenceResultA
             |! List.collect id
