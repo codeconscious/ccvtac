@@ -79,7 +79,7 @@ module TaggingSet =
                 let fileNamesHavingVideoIdsRegex =
                     Regex(@".+\[([\w_\-]{11})\](?:.*)?\.(\w+)", RegexOptions.Compiled)
 
-                Rgx.trySuccessMatch fileNamesHavingVideoIdsRegex fileName
+                fileName |> Rgx.trySuccessMatch fileNamesHavingVideoIdsRegex
 
             let extractFileNameMatch = Rgx.fstCapture
 
