@@ -24,8 +24,6 @@ module TaggingSet =
     let allFiles t =
         t.AudioFiles @ [t.JsonFile; t.ImageFile]
 
-    let videoIdFromMatch (m : Match) = m.Groups[1].Value
-
     let private create v a j i =
         { VideoId    = v
           AudioFiles = a |> List.ofSeq
@@ -81,15 +79,17 @@ module TaggingSet =
 
                 fileName |> Rgx.trySuccessMatch fileNamesHavingVideoIdsRegex
 
-            let extractFileNameMatch = Rgx.fstCapture
+            let fileNameFromMatch = Rgx.fstCapture
 
-            let extractFileNames (x, matches: Match list) : 'a * string list =
-                x, matches |> List.map _.Groups[0].Value
+            let videoIdFromMatch (m : Match) = m.Groups[1].Value
+
+            let extractFileNames (x, ms: Match list) : 'a * string list =
+                x, ms |> List.map _.Groups[0].Value
 
             filePaths
             |> List.ofSeq
             |> List.choose isRelevantFile
-            |> List.map extractFileNameMatch
+            |> List.map fileNameFromMatch
             |> List.groupBy videoIdFromMatch
             |> List.map (extractFileNames >> createValidated)
             |> List.sequenceResultA
