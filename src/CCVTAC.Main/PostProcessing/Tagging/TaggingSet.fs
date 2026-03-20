@@ -86,7 +86,7 @@ module TaggingSet =
             |> List.ofSeq
             |> List.choose isRelevantFile
             |> List.groupBy videoId
-            |> List.map (List.mapSnds fileName)
+            |> List.mapSnds fileName
             |> List.map createValidated
             |> List.sequenceResultA
             |! List.collect id
