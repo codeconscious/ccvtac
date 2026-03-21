@@ -80,13 +80,13 @@ module TaggingSet =
                 fileName |> Rgx.trySuccessMatch fileNamesHavingVideoIdsRgx
 
             let fileName (m: Match) = m.Groups[0].Value
-            let videoId (m: Match) = m.Groups[1].Value
+            let videoId  (m: Match) = m.Groups[1].Value
 
             filePaths
             |> List.ofSeq
             |> List.choose isRelevantFile
             |> List.groupBy videoId
-            |> List.mapSnds fileName
+            |> List.mapSnd fileName
             |> List.map createValidated
             |> List.sequenceResultA
             |! List.collect id
