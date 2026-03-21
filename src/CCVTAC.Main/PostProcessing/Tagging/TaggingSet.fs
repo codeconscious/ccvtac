@@ -30,7 +30,7 @@ module TaggingSet =
           JsonFile   = j
           ImageFile  = i }
 
-    let private createValidated (videoId, files) : Result<TaggingSet, string list> =
+    let private createValidated (videoId, fileNames) : Result<TaggingSet, string list> =
         let ensureNotEmpty xs errorMsg : Validation<'a list, string> =
             if List.isNotEmpty xs
             then Ok xs
@@ -48,11 +48,11 @@ module TaggingSet =
             | NonNull empty when String.hasNoText empty -> false
             | NonNull ext -> Files.audioFileExts |> List.containsIgnoreCase ext
 
-        let audioFiles = files |> List.filter hasSupportedAudioExt
-        let jsonFiles  = files |> Files.filterByExt Files.jsonFileExt
+        let audioFiles = fileNames |> List.filter hasSupportedAudioExt
+        let jsonFiles  = fileNames |> Files.filterByExt Files.jsonFileExt
         let imageFiles =
             Files.imageFileExts
-            |> List.collect (fun ext -> files |> Files.filterByExt ext)
+            |> List.collect (fun ext -> fileNames |> Files.filterByExt ext)
 
         Validation.map3
             (fun a j i -> create videoId a j i)
