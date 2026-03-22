@@ -30,7 +30,7 @@ module TaggingSet =
           JsonFile   = j
           ImageFile  = i }
 
-    let private createValidated (videoId, files) : Result<TaggingSet, string list> =
+    let private createValidated (videoId, fileNames) : Result<TaggingSet, string list> =
         let ensureNotEmpty xs errorMsg : Validation<'a list, string> =
             if List.isNotEmpty xs
             then Ok xs
@@ -48,11 +48,11 @@ module TaggingSet =
             | NonNull empty when String.hasNoText empty -> false
             | NonNull ext -> Files.audioFileExts |> List.containsIgnoreCase ext
 
-        let audioFiles = files |> List.filter hasSupportedAudioExt
-        let jsonFiles  = files |> Files.filterByExt Files.jsonFileExt
+        let audioFiles = fileNames |> List.filter hasSupportedAudioExt
+        let jsonFiles  = fileNames |> Files.filterByExt Files.jsonFileExt
         let imageFiles =
             Files.imageFileExts
-            |> List.collect (fun ext -> files |> Files.filterByExt ext)
+            |> List.collect (fun ext -> fileNames |> Files.filterByExt ext)
 
         Validation.map3
             (fun a j i -> create videoId a j i)
@@ -70,25 +70,23 @@ module TaggingSet =
     /// Any validation errors will be accumulated and return in an Error.
     let createSets filePaths : Result<TaggingSet list, string list> =
         if Seq.isEmpty filePaths then
-            Error ["No filepaths to create a tagging set were provided."]
+            Error ["No file paths to create a tagging set were provided."]
         else
-            let isRelevantFile fileName =
+            let isRelevantFile fileName : Match option =
                 // Regex group 0 is the full filename, and group 1 contains the video ID.
-                let fileNamesHavingVideoIdsRegex =
+                let fileNamesHavingVideoIdsRgx =
                     Regex(@".+\[([\w_\-]{11})\](?:.*)?\.(\w+)", RegexOptions.Compiled)
 
-                Rgx.trySuccessMatch fileNamesHavingVideoIdsRegex fileName
+                fileName |> Rgx.trySuccessMatch fileNamesHavingVideoIdsRgx
 
-            let extractFileNameMatch = Rgx.fstCapture
-
-            let extractFileNames (x, matches: Match list) : 'a * string list =
-                x, matches |> List.map _.Groups[0].Value
+            let fileName (m: Match) = m.Groups[0].Value
+            let videoId  (m: Match) = m.Groups[1].Value
 
             filePaths
             |> List.ofSeq
             |> List.choose isRelevantFile
-            |> List.map extractFileNameMatch
-            |> List.groupBy _.Groups[1].Value // By video ID
-            |> List.map (extractFileNames >> createValidated)
+            |> List.groupBy videoId
+            |> List.mapSnd fileName
+            |> List.map createValidated
             |> List.sequenceResultA
             |! List.collect id

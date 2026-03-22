@@ -29,8 +29,8 @@ module Orchestrator =
         : unit =
 
         if List.hasMultiple categorizedInputs then
-            let urlSummary = String.pluralizeWithCount "URL" "URLs" counts[InputCategory.Url]
-            let cmdSummary = String.pluralizeWithCount "command" "commands" counts[InputCategory.Command]
+            let urlSummary = String.pluralizeSWithCount "URL" counts[InputCategory.Url]
+            let cmdSummary = String.pluralizeSWithCount "command" counts[InputCategory.Command]
 
             printer.Info <|
                 match counts[InputCategory.Url], counts[InputCategory.Command] with
@@ -62,7 +62,7 @@ module Orchestrator =
         | Ok () ->
             if urlIndex > 1 then // Don't sleep for the first URL.
                 settings.SleepSecondsBetweenURLs
-                |> String.pluralize "second" "seconds"
+                |> String.pluralizeS "second"
                 |> fun secondsLabel ->
                     sleep
                         (fun seconds -> $"Sleeping for {seconds} {secondsLabel}...")
