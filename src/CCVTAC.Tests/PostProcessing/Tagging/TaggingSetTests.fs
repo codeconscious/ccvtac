@@ -9,7 +9,7 @@ module TaggingSetInstantiationTests =
 
     [<Fact>]
     let ``error when no files are provided`` () =
-        let expected = Error ["No filepaths to create a tagging set were provided."]
+        let expected = Error ["No file paths to create a tagging set were provided."]
         let actual = createSets []
         Assert.Equal(expected, actual)
 
