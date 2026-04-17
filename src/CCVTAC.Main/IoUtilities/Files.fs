@@ -1,6 +1,5 @@
 namespace CCVTAC.Main.IoUtilities
 
-open CCVTAC.Main
 open CCFSharpUtils
 open System.IO
 
