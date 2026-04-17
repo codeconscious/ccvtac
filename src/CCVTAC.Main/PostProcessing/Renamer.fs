@@ -3,7 +3,7 @@ namespace CCVTAC.Main.PostProcessing
 open CCVTAC.Main
 open CCVTAC.Main.IoUtilities
 open CCVTAC.Main.Settings.Settings
-open CCFSharpUtils.Library
+open CCFSharpUtils
 open System
 open System.IO
 open System.Text

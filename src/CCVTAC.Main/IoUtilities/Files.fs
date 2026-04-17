@@ -1,7 +1,7 @@
 namespace CCVTAC.Main.IoUtilities
 
 open CCVTAC.Main
-open CCFSharpUtils.Library
+open CCFSharpUtils
 open System.IO
 
 module Files =
