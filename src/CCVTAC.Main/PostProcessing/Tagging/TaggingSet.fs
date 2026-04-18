@@ -1,7 +1,8 @@
 namespace CCVTAC.Main.PostProcessing.Tagging
 
 open CCVTAC.Main.IoUtilities
-open CCFSharpUtils.Library
+open CCFSharpUtils
+open CCFSharpUtils.Operators
 open FsToolkit.ErrorHandling
 open System.IO
 open System.Text.RegularExpressions
@@ -89,4 +90,4 @@ module TaggingSet =
             |> List.mapSnd fileName
             |> List.map createValidated
             |> List.sequenceResultA
-            |! List.collect id
+            |!! List.collect id

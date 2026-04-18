@@ -1,6 +1,6 @@
 namespace CCVTAC.Main
 
-open CCFSharpUtils.Library
+open CCFSharpUtils
 open System
 open System.Collections.Generic
 open System.Linq

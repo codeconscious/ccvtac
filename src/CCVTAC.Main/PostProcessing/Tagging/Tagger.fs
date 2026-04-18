@@ -5,7 +5,7 @@ open CCVTAC.Main.Settings.Settings
 open CCVTAC.Main.PostProcessing
 open CCVTAC.Main.PostProcessing.Tagging
 open CCVTAC.Main.Downloading.Downloading
-open CCFSharpUtils.Library
+open CCFSharpUtils
 open Startwatch.Library
 open TaggingSet
 open MetadataUtilities

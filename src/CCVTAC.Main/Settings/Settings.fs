@@ -1,7 +1,7 @@
 namespace CCVTAC.Main.Settings
 
 open CCVTAC.Main
-open CCFSharpUtils.Library
+open CCFSharpUtils
 open Spectre.Console
 open System
 open System.Text.Json.Serialization

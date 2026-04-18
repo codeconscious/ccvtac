@@ -1,6 +1,6 @@
 ﻿namespace CCVTAC.Main.Downloading
 
-open CCFSharpUtils.Library
+open CCFSharpUtils
 
 module Downloading =
 

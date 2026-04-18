@@ -6,7 +6,7 @@ open CCVTAC.Main.IoUtilities
 open CCVTAC.Main.PostProcessing
 open CCVTAC.Main.PostProcessing.Tagging
 open CCVTAC.Main.Settings.Settings
-open CCFSharpUtils.Library
+open CCFSharpUtils
 open TaggingSet
 open System
 open System.IO
