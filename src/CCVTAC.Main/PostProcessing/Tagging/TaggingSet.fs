@@ -37,12 +37,6 @@ module TaggingSet =
             then Ok xs
             else Error [errorMsg]
 
-        let ensureExactlyOne xs emptyErrorMsg multipleErrorMsg : Validation<'a, string> =
-            match xs with
-            | []  -> Error [emptyErrorMsg]
-            | [x] -> Ok x
-            | _   -> Error [multipleErrorMsg]
-
         let hasSupportedAudioExt (fileName: string) =
             match Path.GetExtension fileName with
             | Null -> false
@@ -59,10 +53,10 @@ module TaggingSet =
             (fun a j i -> create videoId a j i)
             (ensureNotEmpty audioFiles
                 $"No supported audio files found for video ID {videoId}.")
-            (ensureExactlyOne jsonFiles
+            (List.ensureOneV jsonFiles
                 $"No JSON file found for video ID {videoId}."
                 $"Multiple JSON files found for video ID {videoId}.")
-            (ensureExactlyOne imageFiles
+            (List.ensureOneV imageFiles
                 $"No image file found for video ID {videoId}."
                 $"Multiple image files found for video ID {videoId}.")
 
