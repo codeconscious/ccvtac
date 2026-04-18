@@ -90,6 +90,8 @@ module TaggingSetInstantiationTests =
                  $"No image file found for video ID {videoId}."]
 
         let actual = createSets [audioFile]
+        printfn "① %A{expected}" |> ignore
+        printfn "② %A{actual}" |> ignore
 
         Assert.Equal(expected, actual)
 
