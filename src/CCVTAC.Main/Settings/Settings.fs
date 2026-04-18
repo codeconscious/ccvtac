@@ -3,6 +3,7 @@ namespace CCVTAC.Main.Settings
 open CCVTAC.Main
 open CCFSharpUtils
 open Spectre.Console
+open FSharpPlus
 open System
 open System.Text.Json.Serialization
 
@@ -185,7 +186,7 @@ module Settings =
                 fileInfo.FullName
                 |> File.ReadAllText
                 |> deserialize<UserSettings>
-                |> Result.bind validate
+                >>= validate
             with
                 | :? FileNotFoundException -> Error $"File \"{fileInfo.FullName}\" was not found."
                 | :? JsonException as e -> Error $"Parse error in \"{fileInfo.FullName}\": {e.Message}"
