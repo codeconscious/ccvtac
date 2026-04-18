@@ -32,11 +32,6 @@ module TaggingSet =
           ImageFile  = i }
 
     let private createValidated (videoId, fileNames) : Result<TaggingSet, string list> =
-        let ensureNotEmpty xs errorMsg : Validation<'a list, string> =
-            if List.isNotEmpty xs
-            then Ok xs
-            else Error [errorMsg]
-
         let hasSupportedAudioExt (fileName: string) =
             match Path.GetExtension fileName with
             | Null -> false
@@ -51,7 +46,7 @@ module TaggingSet =
 
         Validation.map3
             (fun a j i -> create videoId a j i)
-            (ensureNotEmpty audioFiles
+            (List.ensureNotEmptyV audioFiles
                 $"No supported audio files found for video ID {videoId}.")
             (List.ensureOneV jsonFiles
                 $"No JSON file found for video ID {videoId}."
