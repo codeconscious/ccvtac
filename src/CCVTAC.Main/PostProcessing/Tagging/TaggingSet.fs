@@ -44,28 +44,28 @@ module TaggingSet =
             Files.imageFileExts
             |> List.collect (fun ext -> fileNames |> Files.filterByExt ext)
 
-        Validation.map3
-            (fun a j i -> create videoId a j i)
-            (List.ensureNotEmptyV audioFiles
-                $"No supported audio files found for video ID {videoId}.")
-            (List.ensureOneV jsonFiles
-                $"No JSON file found for video ID {videoId}."
-                $"Multiple JSON files found for video ID {videoId}.")
-            (List.ensureOneV imageFiles
-                $"No image file found for video ID {videoId}."
-                $"Multiple image files found for video ID {videoId}.")
+        // Validation.map3
+        //     (fun a j i -> create videoId a j i)
+        //     (List.ensureNotEmptyV audioFiles
+        //         $"No supported audio files found for video ID {videoId}.")
+        //     (List.ensureOneV jsonFiles
+        //         $"No JSON file found for video ID {videoId}."
+        //         $"Multiple JSON files found for video ID {videoId}.")
+        //     (List.ensureOneV imageFiles
+        //         $"No image file found for video ID {videoId}."
+        //         $"Multiple image files found for video ID {videoId}.")
 
-        // validation {
-        //     let! a = List.ensureNotEmptyV audioFiles
-        //                  $"No supported audio files found for video ID {videoId}."
-        //     let! j = List.ensureOneV jsonFiles
-        //                  $"No JSON file found for video ID {videoId}."
-        //                  $"Multiple JSON files found for video ID {videoId}."
-        //     let! i = List.ensureOneV imageFiles
-        //                  $"No image file found for video ID {videoId}."
-        //                  $"Multiple image files found for video ID {videoId}."
-        //     return create videoId a j i
-        // }
+        validation {
+            let! a = List.ensureNotEmptyV audioFiles
+                         $"No supported audio files found for video ID {videoId}."
+            and! j = List.ensureOneV jsonFiles
+                         $"No JSON file found for video ID {videoId}."
+                         $"Multiple JSON files found for video ID {videoId}."
+            and! i = List.ensureOneV imageFiles
+                         $"No image file found for video ID {videoId}."
+                         $"Multiple image files found for video ID {videoId}."
+            return create videoId a j i
+        }
 
     /// Creates a collection of TaggingSets from a collection of file paths related to video IDs.
     /// Irrelevant files are ignored. Validation errors are accumulated and returned in an Error.
