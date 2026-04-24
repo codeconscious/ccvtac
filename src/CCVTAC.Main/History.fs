@@ -1,7 +1,8 @@
 namespace CCVTAC.Main
 
 open CCVTAC.Main.IoUtilities.Files
-open CCFSharpUtils
+open CCFSharpUtils.Collections
+open CCFSharpUtils.Text
 open System
 open System.IO
 open System.Text.Json
@@ -11,7 +12,7 @@ type History(filePath: string, displayCount: int) =
 
     let separator = ';'
 
-    member private _.FilePath = filePath
+    member private _.FileInfo = FileInfo filePath
     member private _.DisplayCount = displayCount
 
     /// Write a URL and its related data to the history file.
@@ -20,16 +21,16 @@ type History(filePath: string, displayCount: int) =
             let serializedTime = JsonSerializer.Serialize(entryTime).Replace("\"", "")
             let text = serializedTime + string separator + url + String.newLine
 
-            match appendToFile this.FilePath text with
+            match appendToFile this.FileInfo text with
             | Ok _      -> printer.Debug $"Added \"%s{url}\" to the history log."
-            | Error err -> printer.Error $"Failed to write \"%s{url}\" to the history log at \"{this.FilePath}\": {err}"
+            | Error err -> printer.Error $"Failed to write \"%s{url}\" to the history log at \"{this.FileInfo}\": {err}"
         with exn ->
             printer.Error $"Could not append URL(s) to history log: {exn.Message}"
 
     member this.ShowRecent(printer: Printer) : unit =
         try
             let lines =
-                File.ReadAllLines this.FilePath
+                File.ReadAllLines this.FileInfo.FullName
                 |> Seq.takeLast this.DisplayCount
                 |> Seq.toList
 

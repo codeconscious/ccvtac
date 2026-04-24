@@ -7,7 +7,8 @@ open CCVTAC.Main.PostProcessing
 open CCVTAC.Main.Settings
 open CCVTAC.Main.Settings.Settings
 open CCVTAC.Main.Settings.Settings.LiveUpdating
-open CCFSharpUtils
+open CCFSharpUtils.Collections
+open CCFSharpUtils.Text
 open Startwatch.Library
 open System
 

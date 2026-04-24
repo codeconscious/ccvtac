@@ -1,6 +1,7 @@
 namespace CCVTAC.Main.IoUtilities
 
 open CCFSharpUtils
+open CCFSharpUtils.Text
 open System.IO
 
 module Files =
@@ -18,5 +19,5 @@ module Files =
     let readAllText (filePath: string) : Result<string, string> =
         ofTry (fun _ -> File.ReadAllText filePath)
 
-    let appendToFile (filePath: string) (text: string) : Result<unit, string> =
-        ofTry (fun _ -> File.AppendAllText(filePath, text))
+    let appendToFile (file: FileInfo) (text: string) : Result<unit, string> =
+        ofTry (fun _ -> File.AppendAllText(file.FullName, text))

@@ -1,8 +1,9 @@
 namespace CCVTAC.Main.PostProcessing.Tagging
 
 open CCVTAC.Main.IoUtilities
-open CCFSharpUtils
+open CCFSharpUtils.Collections
 open CCFSharpUtils.Operators
+open CCFSharpUtils.Text
 open FsToolkit.ErrorHandling
 open System.IO
 open System.Text.RegularExpressions
@@ -32,17 +33,6 @@ module TaggingSet =
           ImageFile  = i }
 
     let private createValidated (videoId, fileNames) : Result<TaggingSet, string list> =
-        let ensureNotEmpty xs errorMsg : Validation<'a list, string> =
-            if List.isNotEmpty xs
-            then Ok xs
-            else Error [errorMsg]
-
-        let ensureExactlyOne xs emptyErrorMsg multipleErrorMsg : Validation<'a, string> =
-            match xs with
-            | []  -> Error [emptyErrorMsg]
-            | [x] -> Ok x
-            | _   -> Error [multipleErrorMsg]
-
         let hasSupportedAudioExt (fileName: string) =
             match Path.GetExtension fileName with
             | Null -> false
@@ -55,39 +45,51 @@ module TaggingSet =
             Files.imageFileExts
             |> List.collect (fun ext -> fileNames |> Files.filterByExt ext)
 
-        Validation.map3
-            (fun a j i -> create videoId a j i)
-            (ensureNotEmpty audioFiles
-                $"No supported audio files found for video ID {videoId}.")
-            (ensureExactlyOne jsonFiles
-                $"No JSON file found for video ID {videoId}."
-                $"Multiple JSON files found for video ID {videoId}.")
-            (ensureExactlyOne imageFiles
-                $"No image file found for video ID {videoId}."
-                $"Multiple image files found for video ID {videoId}.")
+        // Validation.map3
+        //     (fun a j i -> create videoId a j i)
+        //     (List.ensureNotEmptyV audioFiles
+        //         $"No supported audio files found for video ID {videoId}.")
+        //     (List.ensureOneV jsonFiles
+        //         $"No JSON file found for video ID {videoId}."
+        //         $"Multiple JSON files found for video ID {videoId}.")
+        //     (List.ensureOneV imageFiles
+        //         $"No image file found for video ID {videoId}."
+        //         $"Multiple image files found for video ID {videoId}.")
 
-    /// Creates a collection of TaggingSets from a collection of file paths related to several video IDs.
-    /// Any extra, unnecessary files will be ignored.
-    /// Any validation errors will be accumulated and return in an Error.
+        validation {
+            let! a = List.ensureNotEmptyV audioFiles
+                         $"No supported audio files found for video ID {videoId}."
+            and! j = List.ensureOneV jsonFiles
+                         $"No JSON file found for video ID {videoId}."
+                         $"Multiple JSON files found for video ID {videoId}."
+            and! i = List.ensureOneV imageFiles
+                         $"No image file found for video ID {videoId}."
+                         $"Multiple image files found for video ID {videoId}."
+            return create videoId a j i
+        }
+
+    /// Creates a collection of TaggingSets from a collection of file paths related to video IDs.
+    /// Irrelevant files are ignored. Validation errors are accumulated and returned in an Error.
     let createSets filePaths : Result<TaggingSet list, string list> =
         if Seq.isEmpty filePaths then
             Error ["No file paths to create a tagging set were provided."]
         else
-            let isRelevantFile fileName : Match option =
+            let relevantFileInfo fileName =
                 // Regex group 0 is the full filename, and group 1 contains the video ID.
                 let fileNamesHavingVideoIdsRgx =
                     Regex(@".+\[([\w_\-]{11})\](?:.*)?\.(\w+)", RegexOptions.Compiled)
 
-                fileName |> Rgx.trySuccessMatch fileNamesHavingVideoIdsRgx
-
-            let fileName (m: Match) = m.Groups[0].Value
-            let videoId  (m: Match) = m.Groups[1].Value
+                fileName
+                |> Rgx.trySuccessMatch fileNamesHavingVideoIdsRgx
+                |> Option.map (fun m ->
+                    {| FileName = m.Groups[0].Value
+                       VideoId  = m.Groups[1].Value |} )
 
             filePaths
             |> List.ofSeq
-            |> List.choose isRelevantFile
-            |> List.groupBy videoId
-            |> List.mapSnd fileName
+            |> List.choose relevantFileInfo
+            |> List.groupBy _.VideoId
+            |> List.mapSnd _.FileName
             |> List.map createValidated
             |> List.sequenceResultA
             |!! List.collect id

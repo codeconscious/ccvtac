@@ -5,7 +5,8 @@ open CCVTAC.Main.IoUtilities
 open CCVTAC.Main.PostProcessing.Tagging
 open CCVTAC.Main.PostProcessing.Tagging.TaggingSet
 open CCVTAC.Main.Settings.Settings
-open CCFSharpUtils
+open CCFSharpUtils.Collections
+open CCFSharpUtils.Text
 open Startwatch.Library
 open System.IO
 open System.Linq

@@ -3,7 +3,7 @@ module TagDetectionTests
 open CCVTAC.Main.PostProcessing.Tagging
 open CCVTAC.Main.PostProcessing
 open CCVTAC.Main.Settings.Settings
-open CCFSharpUtils
+open CCFSharpUtils.Text
 open System
 open Xunit
 

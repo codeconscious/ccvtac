@@ -1,6 +1,7 @@
 namespace CCVTAC.Main
 
 open CCFSharpUtils
+open CCFSharpUtils.Text
 open System
 open System.Collections.Generic
 
