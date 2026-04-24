@@ -1,8 +1,9 @@
 namespace CCVTAC.Main.PostProcessing.Tagging
 
 open CCVTAC.Main.IoUtilities
-open CCFSharpUtils
+open CCFSharpUtils.Collections
 open CCFSharpUtils.Operators
+open CCFSharpUtils.Text
 open FsToolkit.ErrorHandling
 open System.IO
 open System.Text.RegularExpressions

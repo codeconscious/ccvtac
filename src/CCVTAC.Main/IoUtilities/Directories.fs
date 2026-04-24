@@ -2,6 +2,8 @@ namespace CCVTAC.Main.IoUtilities
 
 open CCVTAC.Main
 open CCFSharpUtils
+open CCFSharpUtils.Collections
+open CCFSharpUtils.Text
 open System.IO
 open System.Text
 
@@ -96,4 +98,3 @@ module Directories =
             |> Ok
         with exn ->
             Error $"Error accessing or creating directory \"%s{dirName}\": %s{exn.Message}"
-

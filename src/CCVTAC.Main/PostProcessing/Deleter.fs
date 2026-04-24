@@ -1,7 +1,7 @@
 namespace CCVTAC.Main.PostProcessing
 
 open CCVTAC.Main
-open CCFSharpUtils
+open CCFSharpUtils.Text
 open System.IO
 
 module Deleter =
