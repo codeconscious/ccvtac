@@ -93,7 +93,6 @@ module TaggingSetInstantiationTests =
 
         Assert.Equal(expected, actual)
 
-
     [<Fact>]
     let ``parses multiple files from playlist`` () =
         let dir = Path.Combine("user", "Downloads", "Audio", "tmp")
