@@ -30,7 +30,9 @@ module Renamer =
             |> Seq.toList
 
         if List.isEmpty matches
-        then sb
+        then
+            printer.Debug "No rename pattern matches found."
+            sb
         else
             if not isQuietMode then
                 let patternSummary =
