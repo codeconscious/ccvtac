@@ -45,17 +45,6 @@ module TaggingSet =
             Files.imageFileExts
             |> List.collect (fun ext -> fileNames |> Files.filterByExt ext)
 
-        // Validation.map3
-        //     (fun a j i -> create videoId a j i)
-        //     (List.ensureNotEmptyV audioFiles
-        //         $"No supported audio files found for video ID {videoId}.")
-        //     (List.ensureOneV jsonFiles
-        //         $"No JSON file found for video ID {videoId}."
-        //         $"Multiple JSON files found for video ID {videoId}.")
-        //     (List.ensureOneV imageFiles
-        //         $"No image file found for video ID {videoId}."
-        //         $"Multiple image files found for video ID {videoId}.")
-
         validation {
             let! a = List.ensureNotEmptyV audioFiles
                          $"No supported audio files found for video ID {videoId}."
