@@ -1,6 +1,7 @@
 namespace CCVTAC.Main.PostProcessing
 
 open CCVTAC.Main
+open CCVTAC.Main.IoUtilities
 open CCVTAC.Main.Settings.Settings
 open CCFSharpUtils.Collections
 open CCFSharpUtils.Text
@@ -11,7 +12,6 @@ open System.Text.RegularExpressions
 open Startwatch.Library
 
 module Renamer =
-    open CCVTAC.Main.IoUtilities
 
     let private toNormalizationForm (form: string) =
         match form.Trim().ToUpperInvariant() with
