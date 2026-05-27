@@ -20,7 +20,7 @@ module Renamer =
         | "KC" -> NormalizationForm.FormKC
         | _    -> NormalizationForm.FormC
 
-    let updateTextViaPatterns isQuietMode (printer: Printer) (sb: StringBuilder) (renamePattern: RenamePattern) =
+    let updateTextViaPatterns isQuietMode (printer: Printer) (sb: StringBuilder) (renamePattern: RenamePattern) : StringBuilder =
         let regex = Regex renamePattern.RegexPattern
 
         let matches =
@@ -36,10 +36,9 @@ module Renamer =
         else
             if not isQuietMode then
                 let patternSummary =
-                    if String.hasText renamePattern.Summary then
-                        $"\"%s{renamePattern.Summary}\""
-                    else
-                        $"`%s{renamePattern.RegexPattern}` (no description)"
+                    if String.hasText renamePattern.Summary
+                    then $"\"%s{renamePattern.Summary}\""
+                    else $"`%s{renamePattern.RegexPattern}` (no description)"
 
                 printer.Debug $"Rename pattern %s{patternSummary} matched × %d{matches.Length}."
 
