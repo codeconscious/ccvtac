@@ -30,41 +30,31 @@ module Renamer =
             |> Seq.rev
             |> Seq.toList
 
-        if List.isEmpty matches
-        then
+        let buildReplacementText (renamePattern: RenamePattern) (m: Match) : string =
+            let sb = SB renamePattern.ReplaceWithPattern
+
+            for i = 1 to m.Groups.Count - 1 do
+                let placeholder = sprintf "%%<%d>s" i
+                let value = if i < m.Groups.Count then m.Groups[i].Value.Trim() else String.Empty
+                sb.Replace(placeholder, value) |> ignore
+
+            sb.ToString()
+
+        match matches with
+        | [] ->
             printer.Debug "No rename pattern matches found."
             sb
-        else
+        | _ ->
             if not isQuietMode then
-                let patternSummary =
+                let patternDesc =
                     if String.hasText renamePattern.Summary
                     then $"\"%s{renamePattern.Summary}\""
                     else $"`%s{renamePattern.RegexPattern}` (no description)"
-
-                printer.Debug $"Rename pattern %s{patternSummary} matched × %d{matches.Length}."
+                printer.Debug $"Rename pattern %s{patternDesc} matched × %d{matches.Length}."
 
             for m in matches do
-                sb.Remove(m.Index, m.Length) |> ignore
-
-                // Build replacement text by replacing %<n> placeholders with group captures.
-                let replacementText =
-                    m
-                    |> Rgx.groups
-                    |> Seq.mapi (fun i _ ->
-                        let groupIndex = i + 1
-                        let searchFor = sprintf "%%<%d>s" groupIndex
-                        let replaceWith =
-                            // Group 0 is the entire match, so we only want groups starting at 1.
-                            if i + 1 < m.Groups.Count
-                            then m.Groups[groupIndex].Value.Trim()
-                            else String.Empty
-                        (searchFor, replaceWith))
-                    |> Seq.fold
-                           (fun (sb': SB) (searchFor, replaceWith) -> sb'.Replace(searchFor, replaceWith))
-                           (SB renamePattern.ReplaceWithPattern)
-                    |> _.ToString()
-
-                sb.Insert(m.Index, replacementText) |> ignore
+                let replacementText = buildReplacementText renamePattern m
+                sb.Remove(m.Index, m.Length).Insert(m.Index, replacementText) |> ignore
 
             sb
 
