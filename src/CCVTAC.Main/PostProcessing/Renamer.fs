@@ -67,9 +67,10 @@ module Renamer =
             |> Seq.filter (fun f -> List.containsIgnoreCase f.Extension Files.audioFileExts)
             |> List.ofSeq
 
-        if List.isEmpty audioFiles then
+        match audioFiles with
+        | [] ->
             printer.Warning "No audio files to rename were found."
-        else
+        | _ ->
             printer.Debug $"""Renaming %s{String.fileLabelWithDesc "audio" audioFiles.Length}..."""
 
             for audioFile in audioFiles do
