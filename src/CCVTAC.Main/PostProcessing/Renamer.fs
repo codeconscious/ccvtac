@@ -3,6 +3,7 @@ namespace CCVTAC.Main.PostProcessing
 open CCVTAC.Main
 open CCVTAC.Main.IoUtilities
 open CCVTAC.Main.Settings.Settings
+open CCFSharpUtils
 open CCFSharpUtils.Collections
 open CCFSharpUtils.Text
 open System
@@ -20,7 +21,7 @@ module Renamer =
         | "KC" -> NormalizationForm.FormKC
         | _    -> NormalizationForm.FormC
 
-    let updateTextViaPatterns isQuietMode (printer: Printer) (sb: StringBuilder) (renamePattern: RenamePattern) : StringBuilder =
+    let updateTextViaPatterns isQuietMode (printer: Printer) (sb: SB) (renamePattern: RenamePattern) : SB =
         let regex = Regex renamePattern.RegexPattern
 
         let matches =
@@ -50,16 +51,17 @@ module Renamer =
                     m
                     |> Rgx.groups
                     |> Seq.mapi (fun i _ ->
-                        let searchFor = sprintf "%%<%d>s" (i + 1)
+                        let groupIndex = i + 1
+                        let searchFor = sprintf "%%<%d>s" groupIndex
                         let replaceWith =
                             // Group 0 is the entire match, so we only want groups starting at 1.
                             if i + 1 < m.Groups.Count
-                            then m.Groups[i + 1].Value.Trim()
+                            then m.Groups[groupIndex].Value.Trim()
                             else String.Empty
                         (searchFor, replaceWith))
                     |> Seq.fold
-                           (fun (sb': StringBuilder) -> sb'.Replace)
-                           (StringBuilder renamePattern.ReplaceWithPattern)
+                           (fun (sb': SB) (searchFor, replaceWith) -> sb'.Replace(searchFor, replaceWith))
+                           (SB renamePattern.ReplaceWithPattern)
                     |> _.ToString()
 
                 sb.Insert(m.Index, replacementText) |> ignore
@@ -84,8 +86,8 @@ module Renamer =
                 let newFileName =
                     userSettings.RenamePatterns
                     |> List.fold
-                        (fun (sb: StringBuilder) -> updateTextViaPatterns userSettings.QuietMode printer sb)
-                        (StringBuilder audioFile.Name)
+                        (fun (sb: SB) -> updateTextViaPatterns userSettings.QuietMode printer sb)
+                        (SB audioFile.Name)
                     |> _.ToString()
 
                 try
