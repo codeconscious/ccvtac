@@ -21,14 +21,10 @@ module Renamer =
         | "KC" -> NormalizationForm.FormKC
         | _    -> NormalizationForm.FormC
 
-    let updateTextViaPatterns isQuietMode (printer: Printer) (sb: SB) (renamePattern: RenamePattern) : SB =
+    let updateTextViaPatterns isQuietMode (printer: Printer) (text: SB) (renamePattern: RenamePattern) : SB =
         let regex = Regex renamePattern.RegexPattern
 
-        let matches =
-            regex.Matches(sb.ToString())
-            |> Rgx.successMatches
-            |> Seq.rev
-            |> Seq.toList
+        let matches = text.ToString() |> regex.Matches |> Rgx.successMatches |> Seq.rev |> Seq.toList
 
         /// Builds replacement text by substituting %<n>s placeholders with captured regex group values.
         /// Group values are trimmed, and indexing starts from 1 (because group 0 is the full match).
@@ -43,7 +39,7 @@ module Renamer =
             sb.ToString()
 
         if List.isEmpty matches then
-            sb
+            text
         else
             if not isQuietMode then
                 let patternDesc =
@@ -54,9 +50,9 @@ module Renamer =
 
             for m in matches do
                 let replacementText = buildReplacementText renamePattern m
-                sb.Remove(m.Index, m.Length).Insert(m.Index, replacementText) |> ignore
+                text.Remove(m.Index, m.Length).Insert(m.Index, replacementText) |> ignore
 
-            sb
+            text
 
     let run userSettings workingDirectory (printer: Printer) : unit =
         let watch = Watch()
