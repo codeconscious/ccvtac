@@ -42,7 +42,6 @@ module Renamer =
 
         match matches with
         | [] ->
-            printer.Debug "No rename pattern matches found."
             sb
         | _ ->
             if not isQuietMode then
@@ -50,7 +49,7 @@ module Renamer =
                     if String.hasText renamePattern.Summary
                     then $"\"%s{renamePattern.Summary}\""
                     else $"`%s{renamePattern.RegexPattern}` (no description)"
-                printer.Debug $"Rename pattern %s{patternDesc} matched × %d{matches.Length}."
+                printer.Debug $"> Rename pattern %s{patternDesc} matched (%d{matches.Length}×)."
 
             for m in matches do
                 let replacementText = buildReplacementText renamePattern m
