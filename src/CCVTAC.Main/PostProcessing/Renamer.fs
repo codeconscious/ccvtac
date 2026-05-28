@@ -42,10 +42,9 @@ module Renamer =
 
             sb.ToString()
 
-        match matches with
-        | [] ->
+        if List.isEmpty matches then
             sb
-        | _ ->
+        else
             if not isQuietMode then
                 let patternDesc =
                     if String.hasText renamePattern.Summary
