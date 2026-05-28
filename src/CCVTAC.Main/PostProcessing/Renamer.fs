@@ -30,6 +30,8 @@ module Renamer =
             |> Seq.rev
             |> Seq.toList
 
+        /// Builds replacement text by substituting %<n>s placeholders with captured regex group values.
+        /// Group values are trimmed, and indexing starts from 1 (because group 0 is the full match).
         let buildReplacementText (renamePattern: RenamePattern) (m: Match) : string =
             let sb = SB renamePattern.ReplaceWithPattern
 
