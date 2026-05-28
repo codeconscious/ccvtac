@@ -36,11 +36,9 @@ module UpdateTextViaPatternsTests =
 
         let actual =
             List.fold
-                (fun sb pattern -> Renamer.updateTextViaPatterns true (Printer false) sb pattern)
+                (fun sb pattern -> Renamer.updateTextViaPattern true (Printer false) sb pattern)
                 fileName
                 patterns
             |> _.ToString()
 
         Assert.Equal(expected, actual)
-
-

@@ -21,10 +21,16 @@ module Renamer =
         | "KC" -> NormalizationForm.FormKC
         | _    -> NormalizationForm.FormC
 
-    let updateTextViaPatterns isQuietMode (printer: Printer) (text: SB) (renamePattern: RenamePattern) : SB =
+    let updateTextViaPattern isQuietMode (printer: Printer) (text: SB) (renamePattern: RenamePattern) : SB =
         let regex = Regex renamePattern.RegexPattern
 
         let matches = text.ToString() |> regex.Matches |> Rgx.successMatches |> Seq.rev |> Seq.toList
+
+        let printSummary: unit =
+            let patternDesc = if String.hasText renamePattern.Summary
+                              then $"\"%s{renamePattern.Summary}\""
+                              else $"`%s{renamePattern.RegexPattern}` (no description)"
+            printer.Debug $"> Rename pattern %s{patternDesc} matched (%d{matches.Length}×)."
 
         /// Builds replacement text by substituting %<n>s placeholders with captured regex group values.
         /// Group values are trimmed, and indexing starts from 1 (because group 0 is the full match).
@@ -41,12 +47,7 @@ module Renamer =
         if List.isEmpty matches then
             text
         else
-            if not isQuietMode then
-                let patternDesc =
-                    if String.hasText renamePattern.Summary
-                    then $"\"%s{renamePattern.Summary}\""
-                    else $"`%s{renamePattern.RegexPattern}` (no description)"
-                printer.Debug $"> Rename pattern %s{patternDesc} matched (%d{matches.Length}×)."
+            if not isQuietMode then printSummary
 
             for m in matches do
                 let replacementText = buildReplacementText renamePattern m
@@ -73,7 +74,7 @@ module Renamer =
                 let newFileName =
                     userSettings.RenamePatterns
                     |> List.fold
-                        (fun (sb: SB) -> updateTextViaPatterns userSettings.QuietMode printer sb)
+                        (fun (sb: SB) -> updateTextViaPattern userSettings.QuietMode printer sb)
                         (SB audioFile.Name)
                     |> _.ToString()
 
