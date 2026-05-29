@@ -26,7 +26,7 @@ module Renamer =
 
         let matches = text.ToString() |> regex.Matches |> Rgx.successMatches |> Seq.rev |> Seq.toList
 
-        let printSummary: unit =
+        let printSummary () =
             let patternDesc = if String.hasText renamePattern.Summary
                               then $"\"%s{renamePattern.Summary}\""
                               else $"`%s{renamePattern.RegexPattern}` (no description)"
@@ -47,7 +47,7 @@ module Renamer =
         if List.isEmpty matches then
             text
         else
-            if not isQuietMode then printSummary
+            if not isQuietMode then printSummary ()
 
             for m in matches do
                 let replacementText = buildReplacementText renamePattern m
