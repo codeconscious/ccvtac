@@ -4,6 +4,8 @@ open CCVTAC.Main
 open CCVTAC.Main.IoUtilities
 open CCVTAC.Main.Settings.Settings
 open CCFSharpUtils
+open CCFSharpUtils.Collections
+open CCFSharpUtils.Text
 open System
 open System.IO
 open System.Text
@@ -19,50 +21,39 @@ module Renamer =
         | "KC" -> NormalizationForm.FormKC
         | _    -> NormalizationForm.FormC
 
-    let updateTextViaPatterns isQuietMode (printer: Printer) (sb: StringBuilder) (renamePattern: RenamePattern) =
+    let updateTextViaPattern isQuietMode (printer: Printer) (text: SB) (renamePattern: RenamePattern) : SB =
         let regex = Regex renamePattern.RegexPattern
 
-        let matches =
-            regex.Matches(sb.ToString())
-            |> Rgx.successMatches
-            |> Seq.rev
-            |> Seq.toList
+        let matches = text.ToString() |> regex.Matches |> Rgx.successMatches |> Seq.rev |> Seq.toList
 
-        if List.isEmpty matches
-        then sb
+        let printSummary () =
+            let patternDesc = if String.hasText renamePattern.Summary
+                              then $"\"%s{renamePattern.Summary}\""
+                              else $"`%s{renamePattern.RegexPattern}` (no description)"
+            printer.Debug $"> Rename pattern %s{patternDesc} matched (%d{matches.Length}×)."
+
+        /// Builds replacement text by substituting %<n>s placeholders with captured regex group values.
+        /// Group values are trimmed, and indexing starts from 1 (because group 0 is the full match).
+        let buildReplacementText (renamePattern: RenamePattern) (m: Match) : string =
+            let sb = SB renamePattern.ReplaceWithPattern
+
+            for i = 1 to m.Groups.Count - 1 do
+                let placeholder = sprintf "%%<%d>s" i
+                let value = if i < m.Groups.Count then m.Groups[i].Value.Trim() else String.Empty
+                sb.Replace(placeholder, value) |> ignore
+
+            sb.ToString()
+
+        if List.isEmpty matches then
+            text
         else
-            if not isQuietMode then
-                let patternSummary =
-                    if String.hasText renamePattern.Summary then
-                        $"\"%s{renamePattern.Summary}\""
-                    else
-                        $"`%s{renamePattern.RegexPattern}` (no description)"
-
-                printer.Debug $"Rename pattern %s{patternSummary} matched × %d{matches.Length}."
+            if not isQuietMode then printSummary ()
 
             for m in matches do
-                sb.Remove(m.Index, m.Length) |> ignore
+                let replacementText = buildReplacementText renamePattern m
+                text.Remove(m.Index, m.Length).Insert(m.Index, replacementText) |> ignore
 
-                // Build replacement text by replacing %<n> placeholders with group captures.
-                let replacementText =
-                    m
-                    |> Rgx.groups
-                    |> Seq.mapi (fun i _ ->
-                        let searchFor = sprintf "%%<%d>s" (i + 1)
-                        let replaceWith =
-                            // Group 0 is the entire match, so we only want groups starting at 1.
-                            if i + 1 < m.Groups.Count
-                            then m.Groups[i + 1].Value.Trim()
-                            else String.Empty
-                        (searchFor, replaceWith))
-                    |> Seq.fold
-                           (fun (sb': StringBuilder) -> sb'.Replace)
-                           (StringBuilder renamePattern.ReplaceWithPattern)
-                    |> _.ToString()
-
-                sb.Insert(m.Index, replacementText) |> ignore
-
-            sb
+            text
 
     let run userSettings workingDirectory (printer: Printer) : unit =
         let watch = Watch()
@@ -82,8 +73,8 @@ module Renamer =
                 let newFileName =
                     userSettings.RenamePatterns
                     |> List.fold
-                        (fun (sb: StringBuilder) -> updateTextViaPatterns userSettings.QuietMode printer sb)
-                        (StringBuilder audioFile.Name)
+                        (fun acc -> updateTextViaPattern userSettings.QuietMode printer acc)
+                        (SB audioFile.Name)
                     |> _.ToString()
 
                 try

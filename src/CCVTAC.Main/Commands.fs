@@ -1,6 +1,6 @@
 namespace CCVTAC.Main
 
-open CCFSharpUtils
+open CCFSharpUtils.Text
 open System
 
 module Commands =

@@ -1,7 +1,8 @@
 namespace CCVTAC.Main.ExternalTools
 
 open CCVTAC.Main
-open CCFSharpUtils
+open CCFSharpUtils.Collections
+open CCFSharpUtils.Text
 open Startwatch.Library
 open System
 open System.Diagnostics

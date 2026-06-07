@@ -7,7 +7,8 @@ open CCVTAC.Main.PostProcessing
 open CCVTAC.Main.Settings
 open CCVTAC.Main.Settings.Settings
 open CCVTAC.Main.Settings.Settings.LiveUpdating
-open CCFSharpUtils
+open CCFSharpUtils.Collections
+open CCFSharpUtils.Text
 open Startwatch.Library
 open System
 
@@ -292,9 +293,10 @@ module Orchestrator =
             let input = printer.GetInput prompt
             let splitInputs = splitInputText input
 
-            if List.isEmpty splitInputs then
+            match splitInputs with
+            | [] ->
                 printer.Error $"Invalid input. Enter only URLs or commands beginning with \"%c{Commands.prefix}\"."
-            else
+            | _ ->
                 let categorizedInputs = categorizeInputs splitInputs
                 let categoryCounts = countCategories categorizedInputs
                 summarizeInput categorizedInputs categoryCounts printer

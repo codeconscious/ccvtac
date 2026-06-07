@@ -52,13 +52,11 @@ module InputHelper =
         inputs
         |> List.map (fun input ->
             { Text = input
-              Category = if input[0] = Commands.prefix
-                         then InputCategory.Command
-                         else InputCategory.Url })
+              Category = if input[0] = Commands.prefix then Command else Url })
 
     let countCategories (inputs: CategorizedInput list) : CategoryCounts =
         inputs
         |> List.groupBy _.Category
-        |> List.map (fun (k, grp) -> k, grp |> Seq.length)
+        |> List.map (fun (category, items) -> category, Seq.length items)
         |> Map.ofSeq
         |> CategoryCounts

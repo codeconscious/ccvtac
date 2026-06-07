@@ -5,7 +5,8 @@ open CCVTAC.Main.IoUtilities
 open CCVTAC.Main.Settings
 open CCVTAC.Main.Settings.Settings
 open Settings.IO
-open CCFSharpUtils
+open CCFSharpUtils.Collections
+open CCFSharpUtils.Text
 open Spectre.Console
 open System
 open System.IO

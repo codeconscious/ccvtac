@@ -7,6 +7,8 @@ open CCVTAC.Main.PostProcessing
 open CCVTAC.Main.PostProcessing.Tagging
 open CCVTAC.Main.Settings.Settings
 open CCFSharpUtils
+open CCFSharpUtils.Collections
+open CCFSharpUtils.Text
 open TaggingSet
 open System
 open System.IO
