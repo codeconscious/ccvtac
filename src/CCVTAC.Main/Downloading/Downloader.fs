@@ -7,6 +7,7 @@ open CCVTAC.Main.IoUtilities.Directories
 open CCVTAC.Main.Downloading.Downloading
 open CCVTAC.Main.ExternalTools
 open CCVTAC.Main.Settings.Settings
+open CCFSharpUtils.Text
 open FsToolkit.ErrorHandling
 open System
 
@@ -76,8 +77,11 @@ module Downloader =
 
         let rec loop errors attemptsRemaining audioFormats =
             if attemptsRemaining = 0 then
-                Error (List.append errors [$"Gave up after {maximumAttempts} attempts."])
+                Error (List.append errors [$"Gave up after {maximumAttempts} failed attempts."])
             else
+                if attemptsRemaining < maximumAttempts then
+                    printfn $"""{String.pluralizeSWithCount "attempt" attemptsRemaining} remaining..."""
+
                 match audioFormats with
                 | [] ->
                     Error errors
