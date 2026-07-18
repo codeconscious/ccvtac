@@ -102,7 +102,7 @@ module Downloader =
                                 | None -> []
                     | Ok result, false ->
                         let newErr =
-                                $"The \"{format}\" format download was reported as successful, but no audio files were downloaded!"
+                                $"While the downloader finished successfully, no audio files were downloaded the \"{format}\" format."
                                 :: match result.Error with
                                     | Some err -> [err]
                                     | None -> []
