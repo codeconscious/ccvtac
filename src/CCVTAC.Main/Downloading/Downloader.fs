@@ -76,15 +76,10 @@ module Downloader =
             printer.Info "Please wait for multiple videos to be downloaded..."
 
         let rec loop errors attemptsRemaining audioFormats =
-            if attemptsRemaining = 0 then
-                Error (List.append errors [$"Gave up after {maximumAttempts} failed attempts."])
-            else
-                if attemptsRemaining < maximumAttempts then
-                    printfn $"""{String.pluralizeSWithCount "attempt" attemptsRemaining} remaining..."""
-
-                match audioFormats with
+            let rec attemptLoop errors attemptsRemaining remainingAudioFormats =
+                match remainingAudioFormats with
                 | [] ->
-                    Error errors
+                    loop errors (attemptsRemaining - 1) audioFormats
                 | format :: formats ->
                     let args = generateDownloadArgs (Some format) userSettings (Some mediaType) (Some [url])
                     let commandWithArgs = $"{programName} {args}"
@@ -100,21 +95,29 @@ module Downloader =
                             :: match result.Error with
                                 | Some err -> [$"However, a minor issue was reported: {err}"]
                                 | None -> []
-                    | Ok result, false ->
+                    | Ok result, _ ->
                         let newErr =
-                                $"While the downloader finished successfully, no audio files were downloaded the \"{format}\" format."
-                                :: match result.Error with
-                                    | Some err -> [err]
-                                    | None -> []
-                        loop (List.append errors newErr) (attemptsRemaining - 1) formats
+                            $"While the downloader finished successfully, no audio files were downloaded the \"{format}\" format."
+                            :: match result.Error with
+                                | Some err -> [err]
+                                | None -> []
+                        attemptLoop (List.append errors newErr) attemptsRemaining formats
                     | Error err, true ->
                         let newErr =
                             [$"The downloader reported failure for \"{format}\", yet audio files were unexpectedly downloaded!"
                              err]
-                        loop (List.append errors newErr) (attemptsRemaining - 1) formats
+                        attemptLoop (List.append errors newErr) attemptsRemaining formats
                     | Error err, false ->
                         let newErr = [$"A download error was reported for the \"{format}\" format, and no audio files were downloaded. {err}"]
-                        loop (List.append errors newErr) (attemptsRemaining - 1) formats
+                        attemptLoop (List.append errors newErr) attemptsRemaining formats
+
+            if attemptsRemaining = 0 then
+                Error (List.append errors [$"Gave up after {maximumAttempts} failed attempts."])
+            else
+                if attemptsRemaining < maximumAttempts then
+                    printfn $"""{String.pluralizeSWithCount "attempt" attemptsRemaining} remaining..."""
+
+                attemptLoop errors attemptsRemaining audioFormats
 
         loop [] maximumAttempts userSettings.AudioFormats
 
