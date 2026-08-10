@@ -7,6 +7,8 @@ open CCVTAC.Main.IoUtilities.Directories
 open CCVTAC.Main.Downloading.Downloading
 open CCVTAC.Main.ExternalTools
 open CCVTAC.Main.Settings.Settings
+open CCFSharpUtils
+open CCFSharpUtils.Text
 open FsToolkit.ErrorHandling
 open System
 
@@ -69,43 +71,55 @@ module Downloader =
     let downloadMedia (printer: Printer) (mediaType: MediaType) userSettings (PrimaryUrl url)
         : Result<string list, string list> =
 
+        // One attempt refers to a set of attempted downloads for all audio formats.
+        let maximumAttempts = 3
+
         if not mediaType.IsVideo && not mediaType.IsPlaylistVideo then
-            printer.Info("Please wait for multiple videos to be downloaded...")
+            printer.Info "Please wait for multiple videos to be downloaded..."
 
-        let rec loop errors audioFormats =
-            match audioFormats with
-            | [] ->
-                Error errors
-            | format :: formats ->
-                let args = generateDownloadArgs (Some format) userSettings (Some mediaType) (Some [url])
-                let commandWithArgs = $"{programName} {args}"
-                let downloadSettings = ToolSettings.create commandWithArgs userSettings.WorkingDirectory
+        let buildErrorMessage mainMsg maybeErr =
+            match maybeErr with
+            | Some err -> [mainMsg; err]
+            | None     -> [mainMsg]
 
-                let downloadResult = runTool downloadSettings [1] printer
-                let filesDownloaded = audioFileCount userSettings.WorkingDirectory Files.audioFileExts > 0
+        let attemptAudioFormat format errors =
+            let args = generateDownloadArgs (Some format) userSettings (Some mediaType) (Some [url])
+            let commandWithArgs = $"{programName} {args}"
+            let downloadSettings = ToolSettings.create commandWithArgs userSettings.WorkingDirectory
 
-                match downloadResult, filesDownloaded with
-                | Ok result, true ->
-                    Ok <|
-                        $"Successfully downloaded the \"{format}\" format."
-                        :: match result.Error with
-                            | Some err -> [$"However, a minor issue was reported: {err}"]
-                            | None -> []
-                | Ok result, false ->
-                    Error <|
-                        $"The \"{format}\" format download was reported as successful, but no audio files were downloaded!"
-                        :: match result.Error with
-                            | Some err -> [err]
-                            | None -> []
-                | Error err, true ->
-                    Error <|
-                        [$"The downloader reported failure for \"{format}\", yet audio files were unexpectedly downloaded!"
-                         err]
-                | Error err, false ->
-                    let newErr = $"A download error was reported for the \"{format}\" format, and no audio files were downloaded. {err}"
-                    loop (List.append errors [newErr]) formats
+            let downloadResult = runTool downloadSettings [1] printer
+            let anyFilesDownloaded = Num.isPos <| audioFileCount userSettings.WorkingDirectory Files.audioFileExts
 
-        loop [] userSettings.AudioFormats
+            match downloadResult, anyFilesDownloaded with
+            | Ok result, true ->
+                Ok (
+                    $"Successfully downloaded the \"{format}\" format."
+                    :: match result.Error with Some err -> [$"However, a minor issue was reported: {err}"] | None -> []
+                )
+            | Ok result, false ->
+                let msg = $"While the downloader finished successfully, no audio files were downloaded in the \"{format}\" format."
+                Error (errors @ buildErrorMessage msg result.Error)
+            | Error err, true ->
+                let msg = $"The downloader reported failure for \"{format}\", yet audio files were unexpectedly downloaded!"
+                Error (errors @ buildErrorMessage msg (Some err))
+            | Error err, false ->
+                let msg = $"A download error was reported for the \"{format}\" format, and no audio files were downloaded. {err}"
+                Error (errors @ [msg])
+
+        let rec retryLoop errors attemptsRemaining audioFormats =
+            if Num.isZero attemptsRemaining then
+                Error (errors @ [$"Gave up after {maximumAttempts} failed attempts."])
+            else
+                match audioFormats with
+                | [] ->
+                    // All formats attempted, retry with full list
+                    retryLoop errors (attemptsRemaining - 1) userSettings.AudioFormats
+                | format :: remainingFormats ->
+                    match attemptAudioFormat format errors with
+                    | Ok msgs    -> Ok msgs
+                    | Error errs -> retryLoop errs attemptsRemaining remainingFormats
+
+        retryLoop [] maximumAttempts userSettings.AudioFormats
 
     let downloadMetadata (printer: Printer) userSettings (SupplementaryUrl url) : Result<string, string list> =
         match url with
