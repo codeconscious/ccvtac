@@ -59,7 +59,7 @@ module Orchestrator =
         match Directories.warnIfAnyFiles 10 settings.WorkingDirectory with
         | Error err ->
             printer.Error err
-            Ok { NextAction = NextAction.QuitDueToErrors; UpdatedSettings = None }
+            Ok { NextAction = QuitDueToErrors; UpdatedSettings = None }
         | Ok () ->
             if batchSize > 1 then
                 printer.Info $"Processing item %d{urlIndex} of %d{batchSize}..."
@@ -82,10 +82,10 @@ module Orchestrator =
                 | Error errs ->
                     errs
                     |> List.map (sprintf "Media download error: %s")
-                    |> String.concat String.newLine
+                    |> String.concat String.nl
                     |> Error
                 | Ok message ->
-                    printer.Debug "Media download(s) successful!"
+                    printer.Debug "Download successful."
                     if String.hasText message then printer.Info message
                     PostProcessor.run settings mediaType printer
 
@@ -95,9 +95,7 @@ module Orchestrator =
                         else String.Empty
 
                     printer.Info $"Processed '%s{url}'%s{groupClause} in %s{jobWatch.ElapsedFriendly}."
-
-                    Ok { NextAction = NextAction.Continue
-                         UpdatedSettings = None }
+                    Ok { NextAction = Continue; UpdatedSettings = None }
 
     let summarizeToggle settingName setting =
         sprintf "%s was toggled to %s for this session." settingName (if setting then "ON" else "OFF")
@@ -212,73 +210,60 @@ module Orchestrator =
         let inputTime = DateTime.Now
         let watch = Watch()
         let batchResults = ResultTracker<BatchResults> printer
-        let mutable nextAction = NextAction.Continue
-        let mutable currentSettings = settings
 
-        let sleep (category: InputCategory) =
+        let printSleep (category: InputCategory) =
             if category.IsUrl then
-                settings.SleepSecondsBetweenURLs
-                    |> String.pluralizeS "second"
-                    |> fun secondsLabel ->
-                        sleep
-                            (fun seconds -> $"Sleeping for {seconds} {secondsLabel}...")
-                            (fun seconds -> $"Slept for {seconds} {secondsLabel}.")
-                            settings.SleepSecondsBetweenURLs
-                    |> fun msg -> printer.Info($"{String.newLine}{msg}", appendLines = 1uy)
+                let seconds = settings.SleepSecondsBetweenURLs
+                let label = String.pluralizeS "second" seconds
+                sleep
+                    (fun s -> $"Sleeping for {s} {label}...")
+                    (fun s -> $"Slept for {s} {label}.")
+                    seconds
+                |> fun msg -> printer.Info($"{String.nl}{msg}", appendLines = 1uy)
 
-        use e = (Seq.ofList categorizedInputs).GetEnumerator()
-        let _ = e.MoveNext()
+        let processInput category text index =
+            match category with
+            | Command -> processCommand text settings history printer
+            | Url -> processUrl text settings resultTracker history inputTime categoryCounts[Url] index printer
 
-        let mutable inputIndex = 1
-        let mutable stop = false
+        let rec loop inputs settings' nextAction' index =
+            match inputs with
+            | [] -> (nextAction', settings', index)
+            | input :: rest when nextAction' = NextAction.Continue ->
+                let result = processInput input.Category input.Text index
+                batchResults.RegisterResult(input.Text, result)
 
-        while not stop do
-            let input = e.Current
+                match result with
+                | Error err ->
+                    printer.Error err
+                    if List.isNotEmpty rest then
+                        printSleep input.Category
+                    loop rest settings' nextAction' (index + 1)
+                | Ok processResult ->
+                    if List.isNotEmpty rest then
+                        printSleep input.Category
+                    let settings'' = processResult.UpdatedSettings |> Option.defaultValue settings'
+                    let nextAction'' = processResult.NextAction
+                    loop rest settings'' nextAction'' (index + 1)
+            | _ ->
+                (nextAction', settings', index)
 
-            let result =
-                match input.Category with
-                | InputCategory.Command ->
-                    processCommand input.Text currentSettings history printer
-                | InputCategory.Url ->
-                    processUrl input.Text currentSettings resultTracker history inputTime
-                               categoryCounts[InputCategory.Url] inputIndex printer
+        let (finalNextAction, finalSettings, processedCount) =
+            loop categorizedInputs settings Continue 1
 
-            batchResults.RegisterResult(input.Text, result)
-
-            match result with
-            | Error err ->
-                printer.Error err
-                if e.MoveNext()
-                    then sleep input.Category
-                    else stop <- true
-            | Ok result ->
-                if e.MoveNext()
-                    then sleep input.Category
-                    else stop <- true
-                nextAction <- result.NextAction
-                match result.UpdatedSettings with
-                    | None -> ()
-                    | Some us -> currentSettings <- us
-                if nextAction <> NextAction.Continue then
-                    stop <- true
-                inputIndex <- inputIndex + 1
-
-        if categoryCounts[InputCategory.Url] > 1 then
-            printer.Info(sprintf "%sFinished with batch of %d URLs in %s."
-                            String.newLine
-                            categoryCounts[InputCategory.Url]
-                            watch.ElapsedFriendly)
+        if categoryCounts[Url] > 1 then
+            printer.Info(sprintf "%sFinished with batch of %d URLs in %s." String.nl categoryCounts[Url] watch.ElapsedFriendly)
             batchResults.PrintBatchFailures()
 
-        if inputIndex < categorizedInputs.Length then
+        if processedCount <= categorizedInputs.Length then
             let unprocessedInputs =
-                categorizedInputs[inputIndex-1..]
+                categorizedInputs[processedCount-1..]
                 |> List.map (fun x -> $"• {x.Text}")
-                |> String.concat String.newLine
-            printer.Warning($"Some inputs were not yet processed: {String.newLine}{unprocessedInputs}")
+                |> String.concat String.nl
+            printer.Warning($"Some inputs were not yet processed: {String.nl}{unprocessedInputs}")
 
-        { NextAction = nextAction
-          UpdatedSettings = Some currentSettings }
+        { NextAction = finalNextAction
+          UpdatedSettings = Some finalSettings }
 
     /// Ensures the download environment is ready, then initiates the input and download process.
     let start (settings: UserSettings) (printer: Printer) : unit =
