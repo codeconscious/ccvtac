@@ -61,16 +61,6 @@ module Orchestrator =
             printer.Error err
             Ok { NextAction = NextAction.QuitDueToErrors; UpdatedSettings = None }
         | Ok () ->
-            if urlIndex > 1 then // Don't sleep for the first URL.
-                settings.SleepSecondsBetweenURLs
-                |> String.pluralizeS "second"
-                |> fun secondsLabel ->
-                    sleep
-                        (fun seconds -> $"Sleeping for {seconds} {secondsLabel}...")
-                        (fun seconds -> $"Slept for {seconds} {secondsLabel}.")
-                        settings.SleepSecondsBetweenURLs
-                |> fun msg -> printer.Info($"{String.newLine}{msg}", appendLines = 1uy)
-
             if batchSize > 1 then
                 printer.Info $"Processing item %d{urlIndex} of %d{batchSize}..."
 
@@ -225,11 +215,24 @@ module Orchestrator =
         let mutable nextAction = NextAction.Continue
         let mutable currentSettings = settings
 
+        let sleep (category: InputCategory) =
+            if category.IsUrl then
+                settings.SleepSecondsBetweenURLs
+                    |> String.pluralizeS "second"
+                    |> fun secondsLabel ->
+                        sleep
+                            (fun seconds -> $"Sleeping for {seconds} {secondsLabel}...")
+                            (fun seconds -> $"Slept for {seconds} {secondsLabel}.")
+                            settings.SleepSecondsBetweenURLs
+                    |> fun msg -> printer.Info($"{String.newLine}{msg}", appendLines = 1uy)
+
         use e = (Seq.ofList categorizedInputs).GetEnumerator()
+        let _ = e.MoveNext()
+
         let mutable inputIndex = 1
         let mutable stop = false
 
-        while not stop && e.MoveNext() do
+        while not stop do
             let input = e.Current
 
             let result =
@@ -245,7 +248,13 @@ module Orchestrator =
             match result with
             | Error err ->
                 printer.Error err
+                if e.MoveNext()
+                    then sleep input.Category
+                    else stop <- true
             | Ok result ->
+                if e.MoveNext()
+                    then sleep input.Category
+                    else stop <- true
                 nextAction <- result.NextAction
                 match result.UpdatedSettings with
                     | None -> ()
