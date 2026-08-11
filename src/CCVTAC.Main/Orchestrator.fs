@@ -208,7 +208,7 @@ module Orchestrator =
         : BatchResults =
 
         let inputTime = DateTime.Now
-        let watch = Watch()
+        let batchWatch = Watch()
         let batchResults = ResultTracker<BatchResults> printer
 
         let printSleep (category: InputCategory) =
@@ -228,23 +228,22 @@ module Orchestrator =
 
         let rec loop inputs settings' nextAction' index =
             match inputs with
-            | [] -> (nextAction', settings', index)
-            | input :: rest when nextAction' = NextAction.Continue ->
+            | [] ->
+                (nextAction', settings', index)
+            | input :: remainingInputs when nextAction' = Continue ->
                 let result = processInput input.Category input.Text index
                 batchResults.RegisterResult(input.Text, result)
 
                 match result with
                 | Error err ->
                     printer.Error err
-                    if List.isNotEmpty rest then
-                        printSleep input.Category
-                    loop rest settings' nextAction' (index + 1)
+                    if List.isNotEmpty remainingInputs then printSleep input.Category
+                    loop remainingInputs settings' nextAction' (index + 1)
                 | Ok processResult ->
-                    if List.isNotEmpty rest then
-                        printSleep input.Category
-                    let settings'' = processResult.UpdatedSettings |> Option.defaultValue settings'
-                    let nextAction'' = processResult.NextAction
-                    loop rest settings'' nextAction'' (index + 1)
+                    if List.isNotEmpty remainingInputs then printSleep input.Category
+                    let newSettings = processResult.UpdatedSettings |> Option.defaultValue settings'
+                    let newNextAction = processResult.NextAction
+                    loop remainingInputs newSettings newNextAction (index + 1)
             | _ ->
                 (nextAction', settings', index)
 
@@ -252,7 +251,7 @@ module Orchestrator =
             loop categorizedInputs settings Continue 1
 
         if categoryCounts[Url] > 1 then
-            printer.Info(sprintf "%sFinished with batch of %d URLs in %s." String.nl categoryCounts[Url] watch.ElapsedFriendly)
+            printer.Info(sprintf "%sFinished with batch of %d URLs in %s." String.nl categoryCounts[Url] batchWatch.ElapsedFriendly)
             batchResults.PrintBatchFailures()
 
         if processedCount <= categorizedInputs.Length then
@@ -260,7 +259,7 @@ module Orchestrator =
                 categorizedInputs[processedCount-1..]
                 |> List.map (fun x -> $"• {x.Text}")
                 |> String.concat String.nl
-            printer.Warning($"Some inputs were not yet processed: {String.nl}{unprocessedInputs}")
+            printer.Warning $"Some inputs were not yet processed: {String.nl}{unprocessedInputs}"
 
         { NextAction = finalNextAction
           UpdatedSettings = Some finalSettings }
