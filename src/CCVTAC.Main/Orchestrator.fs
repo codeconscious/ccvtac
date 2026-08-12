@@ -221,7 +221,7 @@ module Orchestrator =
                     seconds
                 |> fun msg -> printer.Info($"{String.nl}{msg}", appendLines = 1uy)
 
-        let processInput category text index =
+        let processInput category text index : Result<BatchResults,string> =
             match category with
             | Command -> processCommand text settings history printer
             | Url -> processUrl text settings resultTracker history inputTime categoryCounts[Url] index printer
@@ -251,7 +251,12 @@ module Orchestrator =
             loop categorizedInputs settings Continue 1
 
         if categoryCounts[Url] > 1 then
-            printer.Info(sprintf "%sFinished with batch of %d URLs in %s." String.nl categoryCounts[Url] batchWatch.ElapsedFriendly)
+            printer.Info(
+                sprintf "%sFinished with batch of %d URLs in %s."
+                    String.nl
+                    categoryCounts[Url]
+                    batchWatch.ElapsedFriendly
+                )
             batchResults.PrintBatchFailures()
 
         if processedCount <= categorizedInputs.Length then
