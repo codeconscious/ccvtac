@@ -161,7 +161,7 @@ module Tagger =
             if settings.EmbedImages
                && settings.DoNotEmbedImageUploaders |> List.doesNotContain videoData.Uploader
             then
-                printer.Info "Embedding artwork..."
+                printer.Debug "Embedding artwork..."
                 writeImageToFile taggedFile path printer
             else
                 printer.Debug "Skipping artwork embedding."
