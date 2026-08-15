@@ -30,11 +30,11 @@ module Orchestrator =
         : unit =
 
         if List.hasMultiple categorizedInputs then
-            let urlSummary = String.pluralizeSWithCount "URL" counts[InputCategory.Url]
-            let cmdSummary = String.pluralizeSWithCount "command" counts[InputCategory.Command]
+            let urlSummary = String.pluralizeSWithCount "URL" counts[Url]
+            let cmdSummary = String.pluralizeSWithCount "command" counts[Command]
 
             printer.Info <|
-                match counts[InputCategory.Url], counts[InputCategory.Command] with
+                match counts[Url], counts[Command] with
                 | u, c when u > 0 && c > 0 -> $"Batch of %s{urlSummary} and %s{cmdSummary} entered:"
                 | u, _ when u > 0 ->          $"Batch of %s{urlSummary} entered:"
                 | _, c when c > 0 ->          $"Batch of %s{cmdSummary} entered:"
