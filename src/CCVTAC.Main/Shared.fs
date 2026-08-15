@@ -6,7 +6,7 @@ open Spectre.Console
 [<AutoOpen>]
 module Shared =
 
-    type ResultMessageCollection = { Successes: string list; Failures: string list }
+    type ResultMessages = { Successes: string list; Failures: string list }
 
     let sleep workingMsgFn doneMsgFn seconds : string =
         let rec loop remaining (ctx: StatusContext) =
@@ -17,10 +17,9 @@ module Shared =
 
         AnsiConsole
             .Status()
-            .Start((workingMsgFn seconds), fun ctx ->
+            .Start(workingMsgFn seconds, fun ctx ->
                 ctx.Spinner(Spinner.Known.Star)
                    .SpinnerStyle(Style.Parse "blue")
                 |> loop seconds)
 
         doneMsgFn seconds
-

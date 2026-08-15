@@ -35,7 +35,7 @@ module Directories =
             |> Array.filter (fun filePath -> not (ignoreFiles |> Array.exists filePath.EndsWith)))
 
     let deleteAllFiles workingDirectory
-        : Result<ResultMessageCollection, string> =
+        : Result<ResultMessages, string> =
 
         let delete fileNames =
             let successes, failures = ResizeArray<string>(), ResizeArray<string>()
@@ -60,7 +60,7 @@ module Directories =
         then deleteAllFiles dirName
         else Error "Will not delete the files."
 
-    let printDeletionResults (printer: Printer) (results: ResultMessageCollection) : unit =
+    let printDeletionResults (printer: Printer) (results: ResultMessages) : unit =
         printer.Info $"Deleted %s{String.fileLabel results.Successes.Length}."
         results.Successes |> List.iter printer.Debug
 
