@@ -7,20 +7,23 @@ open CCFSharpUtils.Text
 
 module Updater =
 
+    let successExitCode = 0
+
     let run userSettings (printer: Printer) : Result<unit, string> =
         if String.hasNoText userSettings.DownloaderUpdateCommand then
             printer.Info "No downloader update command provided, so will skip."
             Ok ()
         else
-            let toolSettings = ToolSettings.create userSettings.DownloaderUpdateCommand userSettings.WorkingDirectory
+            let toolSettings = ToolSettings.create userSettings.DownloaderUpdateCommand
+                                                   userSettings.WorkingDirectory
 
             match Runner.runTool toolSettings [] printer with
             | Ok result ->
-                if result.ExitCode <> 0 then
-                    printer.Warning "Tool updated with minor issues."
+                if result.ExitCode <> successExitCode then
                     match result.Error with
-                    | Some w -> printer.Warning w
-                    | None -> ()
+                    | Some w -> $"Update completed with minor issues: {w}"
+                    | None   ->  "Update completed with minor unspecified issues."
+                    |> printer.Warning
                 printer.EmptyLines 1uy
                 Ok ()
             | Error err ->
