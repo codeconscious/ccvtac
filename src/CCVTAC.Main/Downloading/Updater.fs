@@ -24,5 +24,5 @@ module Updater =
                 printer.EmptyLines 1uy
                 Ok ()
             | Error err ->
-                printer.Error $"Failure updating: {err}"
+                printer.Error($"Failure updating: {err}", ?appendLines = Some 1uy)
                 Error err
