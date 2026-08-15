@@ -8,7 +8,6 @@ open CCVTAC.Main.Downloading.Downloading
 open CCVTAC.Main.ExternalTools
 open CCVTAC.Main.Settings.Settings
 open CCFSharpUtils
-open CCFSharpUtils.Text
 open FsToolkit.ErrorHandling
 open System
 
@@ -37,7 +36,7 @@ module Downloader =
                   "--write-thumbnail --convert-thumbnails jpg"
                   writeJsonArg
                   trimFileNamesArg
-                  "--retries 2" ]
+                  "--retries 3" ]
             |> Set.ofList
 
         if userSettings.QuietMode then
