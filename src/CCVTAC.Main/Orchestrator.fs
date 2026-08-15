@@ -284,10 +284,10 @@ module Orchestrator =
 
         let results = ResultTracker<string> printer
         let history = History(settings.HistoryFile, settings.HistoryDisplayCount)
-        let mutable nextAction = NextAction.Continue
+        let mutable nextAction = Continue
         let mutable currentSettings = settings
 
-        while nextAction = NextAction.Continue do
+        while nextAction = Continue do
             let input = printer.GetInput prompt
             let splitInputs = splitInputText input
 
