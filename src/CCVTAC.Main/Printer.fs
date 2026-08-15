@@ -136,15 +136,18 @@ type Printer(showDebug: bool) =
         this.Print(Level.Debug, message, ?appendLineBreak = appendLineBreak, ?prependLines = prependLines,
                    ?appendLines = appendLines, ?processMarkup = processMarkup)
 
+    member this.EmptyLines(count: byte) = Printer.EmptyLines count
+
     /// Prints the requested number of blank lines.
     static member EmptyLines(count: byte) =
-        if Num.isZero count
-        then ()
-        else
+        if Num.isPos count
+        then
             let repeats = int count - 1
             if repeats < 1
             then AnsiConsole.WriteLine()
-            else Enumerable.Repeat(String.newLine, repeats) |> String.Concat |> AnsiConsole.WriteLine
+            else Enumerable.Repeat(String.newLine, repeats)
+                 |> String.Concat
+                 |> AnsiConsole.WriteLine
 
     member this.GetInput(prompt: string) : string =
         Printer.EmptyLines 1uy
