@@ -224,7 +224,7 @@ module Orchestrator =
         let processInput category text index : Result<BatchResults,string> =
             match category with
             | Command -> processCommand text settings history printer
-            | Url -> processUrl text settings resultTracker history inputTime categoryCounts[Url] index printer
+            | Url -> processUrl text settings resultTracker history inputTime categorizedInputs.Length index printer
 
         let rec loop inputs settings' nextAction' index =
             match inputs with
