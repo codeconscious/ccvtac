@@ -16,13 +16,15 @@ module Updater =
             let toolSettings = ToolSettings.create userSettings.DownloaderUpdateCommand
                                                    userSettings.WorkingDirectory
 
-            match Runner.runTool toolSettings [] printer with
-            | Ok result ->
-                if result.ExitCode <> successExitCode then
-                    match result.Error with
-                    | Some w -> $"Update completed with minor issues: {w}"
-                    | None   ->  "Update completed with minor unspecified issues."
+            let executionResult = Runner.runTool toolSettings [] printer
+
+            match executionResult with
+            | Ok details ->
+                if details.ExitCode <> successExitCode then
+                    match details.Error with
+                    | Some errMsg -> $"Update completed with minor issues: {errMsg}"
+                    | None        ->  "Update completed with minor unspecified issues."
                     |> printer.Warning
                 printer.EmptyLines 1uy
-            | Error err ->
-                printer.Error($"Failure updating: {err}", ?appendLines = Some 1uy)
+            | Error msg ->
+                printer.Error($"Failure updating: {msg}", ?appendLines = Some 1uy)
