@@ -115,47 +115,47 @@ module Orchestrator =
         // Help
         if String.equalIgnoreCase Commands.helpCommand command then
             for kvp in Commands.summary do
-                printer.Info(kvp.Key)
+                printer.Info kvp.Key
                 printer.Info $"    %s{kvp.Value}"
-            Ok { NextAction = NextAction.Continue; UpdatedSettings = None }
+            Ok { NextAction = Continue; UpdatedSettings = None }
 
         // Quit
         elif checkCommand Commands.quitCommands then
-            Ok { NextAction = NextAction.QuitAtUserRequest; UpdatedSettings = None }
+            Ok { NextAction = QuitAtUserRequest; UpdatedSettings = None }
 
         // History
         elif checkCommand Commands.history then
             history.ShowRecent printer
-            Ok { NextAction = NextAction.Continue; UpdatedSettings = None }
+            Ok { NextAction = Continue; UpdatedSettings = None }
 
         // Update downloader
         elif checkCommand Commands.updateDownloader then
             Updater.run settings printer |> ignore
-            Ok { NextAction = NextAction.Continue; UpdatedSettings = None }
+            Ok { NextAction = Continue; UpdatedSettings = None }
 
         // Settings summary
         elif checkCommand Commands.settingsSummary then
             Settings.printSummary settings printer None
-            Ok { NextAction = NextAction.Continue; UpdatedSettings = None }
+            Ok { NextAction = Continue; UpdatedSettings = None }
 
         // Toggle split chapters
         elif checkCommand Commands.splitChapterToggles then
             let newSettings = toggleSplitChapters settings
             printer.Info(summarizeToggle "Split Chapters" newSettings.SplitChapters)
-            Ok { NextAction = NextAction.Continue; UpdatedSettings = Some newSettings }
+            Ok { NextAction = Continue; UpdatedSettings = Some newSettings }
 
         // Toggle embed images
         elif checkCommand Commands.embedImagesToggles then
             let newSettings = toggleEmbedImages settings
             printer.Info(summarizeToggle "Embed Images" newSettings.EmbedImages)
-            Ok { NextAction = NextAction.Continue; UpdatedSettings = Some newSettings }
+            Ok { NextAction = Continue; UpdatedSettings = Some newSettings }
 
         // Toggle quiet mode
         elif checkCommand Commands.quietModeToggles then
             let newSettings = toggleQuietMode settings
             printer.Info(summarizeToggle "Quiet Mode" newSettings.QuietMode)
             printer.ShowDebug(not newSettings.QuietMode)
-            Ok { NextAction = NextAction.Continue; UpdatedSettings = Some newSettings }
+            Ok { NextAction = Continue; UpdatedSettings = Some newSettings }
 
         // Update audio formats
         elif command |> String.startsWithIgnoreCase Commands.updateAudioFormatPrefix then
@@ -168,7 +168,7 @@ module Orchestrator =
                 | Error err -> Error err
                 | Ok newSettings ->
                     printer.Info(summarizeUpdate "Audio Formats" (String.Join(", ", newSettings.AudioFormats)))
-                    Ok { NextAction = NextAction.Continue; UpdatedSettings = Some newSettings }
+                    Ok { NextAction = Continue; UpdatedSettings = Some newSettings }
 
         // Update audio quality
         elif command |> String.startsWithIgnoreCase Commands.updateAudioQualityPrefix then
@@ -184,7 +184,7 @@ module Orchestrator =
                         Error err
                     | Ok updatedSettings ->
                         printer.Info(summarizeUpdate "Audio Quality" (updatedSettings.AudioQuality.ToString()))
-                        Ok { NextAction = NextAction.Continue; UpdatedSettings = Some updatedSettings }
+                        Ok { NextAction = Continue; UpdatedSettings = Some updatedSettings }
                 | _ ->
                     Error $"\"%s{inputQuality}\" is an invalid quality value."
 
