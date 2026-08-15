@@ -9,10 +9,9 @@ module Updater =
 
     let successExitCode = 0
 
-    let run userSettings (printer: Printer) : Result<unit, string> =
+    let run userSettings (printer: Printer) : unit =
         if String.hasNoText userSettings.DownloaderUpdateCommand then
             printer.Info "No downloader update command provided, so will skip."
-            Ok ()
         else
             let toolSettings = ToolSettings.create userSettings.DownloaderUpdateCommand
                                                    userSettings.WorkingDirectory
@@ -25,7 +24,5 @@ module Updater =
                     | None   ->  "Update completed with minor unspecified issues."
                     |> printer.Warning
                 printer.EmptyLines 1uy
-                Ok ()
             | Error err ->
                 printer.Error($"Failure updating: {err}", ?appendLines = Some 1uy)
-                Error err

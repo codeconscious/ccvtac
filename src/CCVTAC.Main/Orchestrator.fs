@@ -128,9 +128,9 @@ module Orchestrator =
             history.ShowRecent printer
             Ok { NextAction = Continue; UpdatedSettings = None }
 
-        // Update downloader
+        // Update media downloader
         elif checkCommand Commands.updateDownloader then
-            Updater.run settings printer |> ignore
+            Updater.run settings printer
             Ok { NextAction = Continue; UpdatedSettings = None }
 
         // Settings summary
