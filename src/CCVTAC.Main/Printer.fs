@@ -136,6 +136,8 @@ type Printer(showDebug: bool) =
         this.Print(Level.Debug, message, ?appendLineBreak = appendLineBreak, ?prependLines = prependLines,
                    ?appendLines = appendLines, ?processMarkup = processMarkup)
 
+    member this.EmptyLine() = Printer.EmptyLines 1uy
+
     member this.EmptyLines(count: byte) = Printer.EmptyLines count
 
     /// Prints the requested number of blank lines.

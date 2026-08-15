@@ -25,6 +25,6 @@ module Updater =
                     | Some errMsg -> $"Update completed with minor issues: {errMsg}"
                     | None        ->  "Update completed with minor unspecified issues."
                     |> printer.Warning
-                printer.EmptyLines 1uy
+                printer.EmptyLine()
             | Error msg ->
                 printer.Error($"Failure updating: {msg}", ?appendLines = Some 1uy)
