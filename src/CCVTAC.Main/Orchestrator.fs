@@ -43,7 +43,7 @@ module Orchestrator =
             for input in categorizedInputs do
                 printer.Info $" • %s{input.Text}"
 
-            Printer.EmptyLines 1uy
+            printer.EmptyLine()
 
     let processUrl
         (url: string)
