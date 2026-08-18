@@ -34,8 +34,7 @@ module Directories =
             Directory.GetFiles(directoryName, allFilesSearchPattern, EnumerationOptions())
             |> Array.filter (fun filePath -> not (ignoreFiles |> Array.exists filePath.EndsWith)))
 
-    let deleteAllFiles workingDirectory
-        : Result<ResultMessages, string> =
+    let deleteAllFiles workingDirectory : Result<ResultMessages, string> =
 
         let delete fileNames =
             let successes, failures = ResizeArray<string>(), ResizeArray<string>()
@@ -68,7 +67,7 @@ module Directories =
             printer.Warning $"However, %s{String.fileLabel results.Failures.Length} could not be deleted:"
             results.Failures |> List.iter printer.Error
 
-    let warnIfAnyFiles showMax dirName =
+    let warnIfAnyFiles showMax dirName : Result<unit, string> =
         match getDirectoryFileNames dirName None with
         | Error errMsg -> Error errMsg
         | Ok fileNames ->
@@ -85,7 +84,7 @@ module Directories =
                     if fileNames.Length > showMax
                     then sb.AppendLine $"... plus {fileNames.Length - showMax} more."
                     else sb
-                |> _.AppendLine("This sometimes occurs due to the same video appearing twice in playlists.")
+                // |> _.AppendLine("This sometimes occurs due to the same video appearing twice in playlists.")
                 |> _.ToString()
                 |> Error
 

@@ -226,24 +226,43 @@ module Orchestrator =
             | Command -> processCommand text settings history printer
             | Url -> processUrl text settings resultTracker history inputTime categorizedInputs.Length index printer
 
+        let deleteLeftOverFiles dir =
+            match Directories.warnIfAnyFiles 10 dir with
+            | Ok () -> Ok ()
+            | Error filesFoundErr ->
+                printer.Error filesFoundErr
+                Directories.deleteAllFiles dir |> function
+                | Ok results ->
+                    Directories.printDeletionResults printer results
+                    Ok ()
+                | Error deletionError ->
+                    printer.Error deletionError
+                    printer.Info "Aborting..."
+                    Error "Could not delete files"
+
         let rec loop inputs settings' nextAction' index =
             match inputs with
             | [] ->
                 (nextAction', settings', index)
             | input :: remainingInputs when nextAction' = Continue ->
-                let result = processInput input.Category input.Text index
-                batchResults.RegisterResult(input.Text, result)
+                let processResult = processInput input.Category input.Text index
+                batchResults.RegisterResult(input.Text, processResult)
 
-                match result with
-                | Error err ->
-                    printer.Error err
-                    if List.isNotEmpty remainingInputs then printSleep input.Category
-                    loop remainingInputs settings' nextAction' (index + 1)
-                | Ok processResult ->
-                    if List.isNotEmpty remainingInputs then printSleep input.Category
-                    let newSettings = processResult.UpdatedSettings |> Option.defaultValue settings'
-                    let newNextAction = processResult.NextAction
-                    loop remainingInputs newSettings newNextAction (index + 1)
+                // Deleting the files here might make debugging issues a bit tougher.
+                match deleteLeftOverFiles settings.WorkingDirectory with
+                | Error _ ->
+                    (QuitDueToErrors, settings', index)
+                | Ok () ->
+                    match processResult with
+                    | Error err ->
+                        printer.Error err
+                        if List.isNotEmpty remainingInputs then printSleep input.Category
+                        loop remainingInputs settings' nextAction' (index + 1)
+                    | Ok processResult ->
+                        if List.isNotEmpty remainingInputs then printSleep input.Category
+                        let newSettings = processResult.UpdatedSettings |> Option.defaultValue settings'
+                        let newNextAction = processResult.NextAction
+                        loop remainingInputs newSettings newNextAction (index + 1)
             | _ ->
                 (nextAction', settings', index)
 
