@@ -139,7 +139,8 @@ module Downloader =
             let urls =
                 { Primary = PrimaryUrl rawUrls[0]
                   Metadata = SupplementaryUrl <| if rawUrls.Length = 2 then Some rawUrls[1] else None }
-            let! _ = downloadMedia printer mediaType userSettings urls.Primary
+            let! warnings = downloadMedia printer mediaType userSettings urls.Primary
+            warnings |> List.iter printer.Info
             let! metadataDownloadResult = downloadMetadata printer userSettings urls.Metadata
             return! Ok metadataDownloadResult
         }
