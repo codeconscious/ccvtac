@@ -226,19 +226,19 @@ module Orchestrator =
             | Command -> processCommand text settings history printer
             | Url -> processUrl text settings resultTracker history inputTime categorizedInputs.Length index printer
 
-        let deleteLeftoverFiles dirName : Result<unit,string> =
+        let deleteLeftoverFiles dirName : Result<string,string> =
             match Directories.warnIfAnyFiles 10 dirName with
-            | Ok () -> Ok ()
+            | Ok () -> Ok "No leftover files found."
             | Error filesFoundErr ->
-                printer.Error filesFoundErr
+                printer.Error filesFoundErr // Might not need this.
                 Directories.deleteAllFiles dirName |> function
                 | Ok results ->
                     Directories.printDeletionResults printer results
-                    Ok ()
+                    Ok "Files deleted successfully."
                 | Error deletionError ->
                     Error $"Error deleting leftover files after download: {deletionError}"
 
-        let rec loop inputs settings' nextAction' index =
+        let rec loop inputs settings' nextAction' index : NextAction * UserSettings * int =
             match inputs with
             | [] ->
                 (nextAction', settings', index)
@@ -248,9 +248,11 @@ module Orchestrator =
 
                 // Deleting the files here might make debugging issues a bit tougher.
                 match deleteLeftoverFiles settings.WorkingDirectory with
-                | Error _ ->
+                | Error errMsg ->
+                    printer.Error errMsg
                     (QuitDueToErrors, settings', index)
-                | Ok () ->
+                | Ok message ->
+                    printer.Debug message
                     match processResult with
                     | Error err ->
                         printer.Error err
