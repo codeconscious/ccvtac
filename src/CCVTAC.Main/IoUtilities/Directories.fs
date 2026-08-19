@@ -19,14 +19,10 @@ module Directories =
         |> Seq.length
 
     /// Returns the filenames in a given directory, optionally ignoring specific filenames.
-    let private getDirectoryFileNames
-        dirName
-        (ignoreFilesOpt: string seq option)
-        : Result<string array, string> =
-
-        let ignoreFiles =
+    let private getDirectoryFileNames dirName ignoreFilesOpt : Result<string array, string> =
+        let ignoreFiles : string list =
             ignoreFilesOpt
-            |> Option.defaultValue Seq.empty
+            |> Option.defaultValue List.empty
             |> Seq.distinct
             |> Seq.toList
 
