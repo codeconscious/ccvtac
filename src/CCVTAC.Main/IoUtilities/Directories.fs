@@ -28,11 +28,11 @@ module Directories =
             customIgnoreFiles
             |> Option.defaultValue Seq.empty
             |> Seq.distinct
-            |> Seq.toArray
+            |> Seq.toList
 
         ofTry (fun _ ->
             Directory.GetFiles(directoryName, allFilesSearchPattern, EnumerationOptions())
-            |> Array.filter (fun filePath -> not (ignoreFiles |> Array.exists filePath.EndsWith)))
+            |> Array.filter (fun filePath -> not (ignoreFiles |> List.exists filePath.EndsWith)))
 
     let deleteAllFiles workingDirectory : Result<ResultMessages, string> =
         let delete fileNames =
