@@ -199,7 +199,7 @@ module Orchestrator =
     /// Processes a single user request, from input to downloading and file post-processing.
     /// Returns the next action the application should take (e.g., continue or quit).
     let processBatch
-        (categorizedInputs: CategorizedInput list)
+        (inputs: CategorizedInput list)
         (categoryCounts: CategoryCounts)
         (settings: UserSettings)
         (resultTracker: ResultTracker<string>)
@@ -224,7 +224,7 @@ module Orchestrator =
         let processInput category text index : Result<BatchResults,string> =
             match category with
             | Command -> processCommand text settings history printer
-            | Url -> processUrl text settings resultTracker history inputTime categorizedInputs.Length index printer
+            | Url -> processUrl text settings resultTracker history inputTime inputs.Length index printer
 
         let deleteLeftoverFiles dirName : Result<string,string> =
             match Directories.warnIfAnyFiles 10 dirName with
@@ -267,7 +267,7 @@ module Orchestrator =
                 (nextAction', settings', index)
 
         let (finalNextAction, finalSettings, processedCount) =
-            loop categorizedInputs settings Continue 1
+            loop inputs settings Continue 1
 
         if categoryCounts[Url] > 1 then
             printer.Info(
@@ -278,9 +278,9 @@ module Orchestrator =
                 )
             batchResults.PrintBatchFailures()
 
-        if processedCount <= categorizedInputs.Length then
+        if processedCount <= inputs.Length then
             let unprocessedInputs =
-                categorizedInputs[processedCount-1..]
+                inputs[processedCount-1..]
                 |> List.map (fun x -> $"• {x.Text}")
                 |> String.concat String.nl
             printer.Warning $"Some inputs were not yet processed: {String.nl}{unprocessedInputs}"
