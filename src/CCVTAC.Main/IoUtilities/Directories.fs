@@ -35,7 +35,6 @@ module Directories =
             |> Array.filter (fun filePath -> not (ignoreFiles |> Array.exists filePath.EndsWith)))
 
     let deleteAllFiles workingDirectory : Result<ResultMessages, string> =
-
         let delete fileNames =
             let successes, failures = ResizeArray<string>(), ResizeArray<string>()
 
@@ -46,12 +45,11 @@ module Directories =
                 with exn ->
                     failures.Add $"• Error deleting \"%s{fileName}\": %s{exn.Message}"
 
-            { Successes = successes |> Seq.toList |> List.rev
-              Failures  = failures  |> Seq.toList |> List.rev }
+            { Successes = List.ofSeq successes
+              Failures  = List.ofSeq failures }
 
-        match getDirectoryFileNames workingDirectory None with
-        | Error errMsg -> Error errMsg
-        | Ok fileNames -> Ok (delete fileNames)
+        getDirectoryFileNames workingDirectory None
+        |> Result.map delete
 
     /// Ask the user to confirm the deletion of files in the specified directory.
     let askToDeleteAllFiles dirName (printer: Printer) =
