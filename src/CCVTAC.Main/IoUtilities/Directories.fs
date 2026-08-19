@@ -13,25 +13,25 @@ module Directories =
     let private allFilesSearchPattern = "*"
 
     /// Counts the number of audio files in a directory.
-    let audioFileCount (directory: string) (includedExtensions: string list) =
-        DirectoryInfo(directory).EnumerateFiles()
+    let audioFileCount dirName includedExtensions =
+        DirectoryInfo(dirName).EnumerateFiles()
         |> Seq.filter (fun f -> List.containsIgnoreCase f.Extension includedExtensions)
         |> Seq.length
 
     /// Returns the filenames in a given directory, optionally ignoring specific filenames.
     let private getDirectoryFileNames
-        (directoryName: string)
-        (customIgnoreFiles: string seq option)
+        dirName
+        (ignoreFilesOpt: string seq option)
         : Result<string array, string> =
 
         let ignoreFiles =
-            customIgnoreFiles
+            ignoreFilesOpt
             |> Option.defaultValue Seq.empty
             |> Seq.distinct
             |> Seq.toList
 
         ofTry (fun _ ->
-            Directory.GetFiles(directoryName, allFilesSearchPattern, EnumerationOptions())
+            Directory.GetFiles(dirName, allFilesSearchPattern, EnumerationOptions())
             |> Array.filter (fun filePath -> not (ignoreFiles |> List.exists filePath.EndsWith)))
 
     let deleteAllFiles workingDirectory : Result<ResultMessages, string> =
