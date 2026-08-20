@@ -322,7 +322,7 @@ module Orchestrator =
                 nextAction <- batchResult.NextAction
 
                 match batchResult.UpdatedSettings with
-                | Some s -> currentSettings <- s
+                | Some newSettings -> currentSettings <- newSettings
                 | None -> ()
 
         results.PrintSessionSummary()

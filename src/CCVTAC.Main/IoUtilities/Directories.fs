@@ -58,7 +58,7 @@ module Directories =
         results.Successes |> List.iter printer.Debug
 
         if List.isNotEmpty results.Failures then
-            printer.Warning $"However, %s{String.fileLabel results.Failures.Length} could not be deleted:"
+            printer.Error $"%s{String.fileLabel results.Failures.Length} could not be deleted:"
             results.Failures |> List.iter printer.Error
 
     let warnIfAnyFiles showMax dirName : Result<unit, string> =
