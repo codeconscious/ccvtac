@@ -112,7 +112,7 @@ module Settings =
             ("Rename patterns", settings.RenamePatterns.Length |> simplePluralize "pattern")
         ]
 
-    let printSummary settings (printer: Printer) headerOpt : unit =
+    let printSummary (printer: Printer) settings headerOpt : unit =
         match headerOpt with
         | Some h when String.hasText h -> printer.Info h
         | _ -> ()

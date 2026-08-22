@@ -48,7 +48,7 @@ module Directories =
         |> Result.map delete
 
     /// Ask the user to confirm the deletion of files in the specified directory.
-    let askToDeleteAllFiles dirName (printer: Printer) =
+    let askToDeleteAllFiles (printer: Printer) dirName =
         if printer.AskToBool("Delete all temporary files?", "Yes", "No")
         then deleteAllFiles dirName
         else Error "Will not delete the files."

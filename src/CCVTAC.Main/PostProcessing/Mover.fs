@@ -107,11 +107,11 @@ module Mover =
         safeName.Replace(topicSuffix, String.Empty)
 
     let run
+        (printer: Printer)
         (taggingSets: TaggingSet seq)
         (maybeCollectionData: CollectionMetadata option)
         (settings: UserSettings)
         (overwrite: bool)
-        (printer: Printer)
         : unit =
 
         printer.Debug "Starting move..."

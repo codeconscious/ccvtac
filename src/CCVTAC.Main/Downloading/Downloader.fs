@@ -86,7 +86,7 @@ module Downloader =
             let commandWithArgs = $"{programName} {args}"
             let downloadSettings = ToolSettings.create commandWithArgs userSettings.WorkingDirectory
 
-            let downloadResult = runTool downloadSettings [1] printer
+            let downloadResult = runTool printer downloadSettings [1]
             let anyFilesDownloaded = Num.isPos <| audioFileCount userSettings.WorkingDirectory Files.audioFileExts
 
             match downloadResult, anyFilesDownloaded with
@@ -127,13 +127,13 @@ module Downloader =
             let args = generateDownloadArgs None userSettings None (Some [url'])
             let commandWithArgs = $"{programName} {args}"
             let downloadSettings = ToolSettings.create commandWithArgs userSettings.WorkingDirectory
-            let metadataDownloadResult = runTool downloadSettings [1] printer
+            let metadataDownloadResult = runTool printer downloadSettings [1]
 
             match metadataDownloadResult with
             | Ok _ -> Ok "Supplementary metadata download completed OK."
             | Error err -> Error [$"Supplementary metadata download failed: {err}"]
 
-    let run (mediaType: MediaType) userSettings (printer: Printer) : Result<string, string list> =
+    let run (printer: Printer) (mediaType: MediaType) userSettings : Result<string, string list> =
         result {
             let rawUrls = generateDownloadUrl mediaType
             let urls =

@@ -9,14 +9,14 @@ module Updater =
 
     let successExitCode = 0
 
-    let run userSettings (printer: Printer) : unit =
+    let run (printer: Printer) userSettings : unit =
         if String.hasNoText userSettings.DownloaderUpdateCommand then
             printer.Info "No downloader update command provided, so will skip."
         else
             let toolSettings = ToolSettings.create userSettings.DownloaderUpdateCommand
                                                    userSettings.WorkingDirectory
 
-            let executionResult = Runner.runTool toolSettings [] printer
+            let executionResult = Runner.runTool printer toolSettings []
 
             match executionResult with
             | Ok details ->

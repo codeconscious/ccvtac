@@ -28,7 +28,7 @@ module Tagger =
         | exn -> Error $"Error reading JSON file \"%s{taggingSet.JsonFile}\": %s{exn.Message}."
 
     /// If a video was split into sub-videos, then the original video is unneeded and should be deleted.
-    let private deleteSourceFile taggingSet (printer: Printer) : TaggingSet =
+    let private deleteSourceFile (printer: Printer)  taggingSet : TaggingSet =
         if not (List.hasMultiple taggingSet.AudioFiles) then
             taggingSet
         else
@@ -48,7 +48,7 @@ module Tagger =
                 printer.Error $"Error deleting pre-split source file \"%s{largestFileInfo.Name}\": %s{exn.Message}"
                 taggingSet
 
-    let private writeImageToFile (taggedFile: TaggedFile) imageFilePath (printer: Printer) =
+    let private writeImageToFile (printer: Printer) (taggedFile: TaggedFile) imageFilePath =
         if String.hasNoText imageFilePath then
             printer.Error "No image file path was provided, so cannot add an image to the file."
         else
@@ -71,12 +71,12 @@ module Tagger =
             | _ -> None
 
     let private tagSingleFile
+        (printer: Printer)
         (settings: UserSettings)
         (videoData: VideoMetadata)
         (audioFilePath: string)
         (imageFilePath: string option)
         (collectionData: CollectionMetadata option)
-        (printer: Printer)
         : unit =
 
         let audioFileName = Path.GetFileName audioFilePath
@@ -162,7 +162,7 @@ module Tagger =
                && settings.DoNotEmbedImageUploaders |> List.doesNotContain videoData.Uploader
             then
                 printer.Debug "Embedding artwork..."
-                writeImageToFile taggedFile path printer
+                writeImageToFile printer taggedFile path
             else
                 printer.Debug "Skipping artwork embedding."
         | None ->
@@ -175,18 +175,18 @@ module Tagger =
             printer.Error $"Failed to save tags: ${exn.Message}"
 
     let private processTaggingSet
+        (printer: Printer)
         (settings: UserSettings)
         (taggingSet: TaggingSet)
         (collectionJson: CollectionMetadata option)
         (embedImages: bool)
-        (printer: Printer)
         : unit =
 
         printer.Debug $"""Found %s{String.fileLabelWithDesc "audio" taggingSet.AudioFiles.Length} with resource ID %s{taggingSet.VideoId}."""
 
         match parseVideoJson taggingSet with
         | Ok videoData ->
-            let finalTaggingSet = deleteSourceFile taggingSet printer
+            let finalTaggingSet = deleteSourceFile printer taggingSet
 
             let imagePath =
                 if embedImages && List.isNotEmpty finalTaggingSet.AudioFiles then
@@ -196,18 +196,18 @@ module Tagger =
 
             for audioPath in finalTaggingSet.AudioFiles do
                 try
-                    tagSingleFile settings videoData audioPath imagePath collectionJson printer
+                    tagSingleFile printer settings videoData audioPath imagePath collectionJson
                 with exn ->
                     printer.Error $"Error tagging file: %s{exn.Message}"
         | Error err ->
             printer.Error $"Error deserializing video metadata from \"%s{taggingSet.JsonFile}\": {err}"
 
     let run
+        (printer: Printer)
         (settings: UserSettings)
         (taggingSets: TaggingSet seq)
         (collectionJson: CollectionMetadata option)
         (mediaType: MediaType)
-        (printer: Printer)
         : Result<string, string> =
 
         printer.Debug "Adding file tags..."
@@ -216,6 +216,6 @@ module Tagger =
         let embedImages = settings.EmbedImages && (mediaType.IsVideo || mediaType.IsPlaylistVideo)
 
         for taggingSet in taggingSets do
-            processTaggingSet settings taggingSet collectionJson embedImages printer
+            processTaggingSet printer settings taggingSet collectionJson embedImages
 
         Ok $"Tagging done in %s{watch.ElapsedFriendly}."

@@ -51,7 +51,7 @@ module Program =
                     printer.Error err
                     int ExitCodes.ArgError
                 | Ok settings ->
-                    printSummary settings printer (Some "Settings loaded OK.")
+                    printSummary printer settings (Some "Settings loaded OK.")
                     printer.ShowDebug(not settings.QuietMode)
 
                     // Catch Ctrl-C (SIGINT)
@@ -62,11 +62,11 @@ module Program =
                         | Ok () -> ()
                         | Error warnResult ->
                             printer.Error warnResult
-                            match Directories.askToDeleteAllFiles settings.WorkingDirectory printer with
+                            match Directories.askToDeleteAllFiles printer settings.WorkingDirectory with
                             | Error err -> printer.Error err
                             | Ok results -> Directories.printDeletionResults printer results)
                     try
-                        Orchestrator.start settings printer
+                        Orchestrator.start printer settings
                         int ExitCodes.Success
                     with exn ->
                         printer.Critical $"Fatal error: %s{exn.Message}"

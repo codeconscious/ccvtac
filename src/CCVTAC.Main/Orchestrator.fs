@@ -24,9 +24,9 @@ module Orchestrator =
           UpdatedSettings: UserSettings option }
 
     let summarizeInput
+        (printer: Printer)
         (categorizedInputs: CategorizedInput list)
         (counts: CategoryCounts)
-        (printer: Printer)
         : unit =
 
         if List.hasMultiple categorizedInputs then
@@ -46,6 +46,7 @@ module Orchestrator =
             printer.EmptyLine()
 
     let processUrl
+        (printer: Printer)
         (url: string)
         (settings: UserSettings)
         (resultTracker: ResultTracker<string>)
@@ -53,7 +54,6 @@ module Orchestrator =
         (urlInputTime: DateTime)
         (batchSize: int)
         (urlIndex: int)
-        (printer: Printer)
         : Result<BatchResults, string> =
 
         match Directories.warnIfAnyFiles 10 settings.WorkingDirectory with
@@ -75,7 +75,7 @@ module Orchestrator =
                 printer.Info $"%s{mediaType.GetType().Name} URL '%s{url}' detected."
                 history.Append(url, urlInputTime, printer)
 
-                let downloadResult = Downloader.run mediaType settings printer
+                let downloadResult = Downloader.run printer mediaType settings
                 resultTracker.RegisterResult(url, downloadResult)
 
                 match downloadResult with
@@ -87,7 +87,7 @@ module Orchestrator =
                 | Ok message ->
                     printer.Debug "Download successful."
                     if String.hasText message then printer.Info message
-                    PostProcessor.run settings mediaType printer
+                    PostProcessor.run printer settings mediaType
 
                     let groupClause =
                         if batchSize > 1
@@ -104,10 +104,10 @@ module Orchestrator =
         sprintf "%s was updated to \"%s\" for this session." settingName setting
 
     let processCommand
+        (printer: Printer)
         (command: string)
         (settings: UserSettings)
         (history: History)
-        (printer: Printer)
         : Result<BatchResults, string> =
 
         let checkCommand = List.containsIgnoreCase command
@@ -130,12 +130,12 @@ module Orchestrator =
 
         // Update media downloader
         elif checkCommand Commands.updateDownloader then
-            Updater.run settings printer
+            Updater.run printer settings
             Ok { NextAction = Continue; UpdatedSettings = None }
 
         // Settings summary
         elif checkCommand Commands.settingsSummary then
-            Settings.printSummary settings printer None
+            Settings.printSummary printer settings None
             Ok { NextAction = Continue; UpdatedSettings = None }
 
         // Toggle split chapters
@@ -199,12 +199,12 @@ module Orchestrator =
     /// Processes a single user request, from input to downloading and file post-processing.
     /// Returns the next action the application should take (e.g., continue or quit).
     let processBatch
+        (printer: Printer)
         (inputs: CategorizedInput list)
         (categoryCounts: CategoryCounts)
         (settings: UserSettings)
         (resultTracker: ResultTracker<string>)
         (history: History)
-        (printer: Printer)
         : BatchResults =
 
         let inputTime = DateTime.Now
@@ -223,8 +223,8 @@ module Orchestrator =
 
         let processInput category text index : Result<BatchResults,string> =
             match category with
-            | Command -> processCommand text settings history printer
-            | Url -> processUrl text settings resultTracker history inputTime inputs.Length index printer
+            | Command -> processCommand printer text settings history
+            | Url -> processUrl printer text settings resultTracker history inputTime inputs.Length index
 
         let deleteLeftoverFiles dirName : Result<string,string> =
             match Directories.warnIfAnyFiles 10 dirName with
@@ -289,13 +289,13 @@ module Orchestrator =
           UpdatedSettings = Some finalSettings }
 
     /// Ensures the download environment is ready, then initiates the input and download process.
-    let start (settings: UserSettings) (printer: Printer) : unit =
+    let start (printer: Printer) (settings: UserSettings) : unit =
         // The working directory should start empty. Give the user a chance to empty it.
         match Directories.warnIfAnyFiles 10 settings.WorkingDirectory with
         | Ok () -> ()
         | Error filesFoundErr ->
             printer.Error filesFoundErr
-            Directories.askToDeleteAllFiles settings.WorkingDirectory printer |> function
+            Directories.askToDeleteAllFiles printer settings.WorkingDirectory |> function
             | Ok results -> Directories.printDeletionResults printer results
             | Error deletionError ->
                 printer.Error deletionError
@@ -316,9 +316,9 @@ module Orchestrator =
             | _ ->
                 let categorizedInputs = categorizeInputs splitInputs
                 let categoryCounts = countCategories categorizedInputs
-                summarizeInput categorizedInputs categoryCounts printer
+                summarizeInput printer categorizedInputs categoryCounts
 
-                let batchResult = processBatch categorizedInputs categoryCounts currentSettings results history printer
+                let batchResult = processBatch printer categorizedInputs categoryCounts currentSettings results history
                 nextAction <- batchResult.NextAction
 
                 match batchResult.UpdatedSettings with

@@ -16,7 +16,7 @@ module Deleter =
             try Ok (Directory.GetFiles(workingDirectory, $"*{metadata.Id}*"))
             with exn -> Error $"Error collecting filenames: {exn.Message}"
 
-    let private deleteAll (fileNames: string array) (printer: Printer) : unit =
+    let private deleteAll  (printer: Printer) (fileNames: string array) : unit =
         fileNames
         |> Array.iter (fun fileName ->
             try
@@ -27,10 +27,10 @@ module Deleter =
         )
 
     let run
+        (printer: Printer)
         (taggingSetFileNames: string seq)
         (collectionMetadata: CollectionMetadata option)
         (workingDirectory: string)
-        (printer: Printer)
         : unit =
 
         let collectionFileNames =
@@ -48,5 +48,5 @@ module Deleter =
             printer.Warning "No files to delete were found."
         else
             printer.Debug $"""Deleting {String.fileLabelWithDesc "temporary" allFileNames.Length}..."""
-            deleteAll allFileNames printer
+            deleteAll printer allFileNames
             printer.Info "Deleted temporary files."
