@@ -26,14 +26,18 @@ module Program =
     let main args : int =
         let printer = Printer(showDebug = true)
 
-        if Array.isNotEmpty args && Array.containsIgnoreCase args[0] helpFlags then
+        match args with
+        | [||] ->
             printer.Info Help.helpText
             int ExitCodes.Success
-        else
+        | [| arg |] when helpFlags |> Array.containsIgnoreCase arg ->
+            printer.Info Help.helpText
+            int ExitCodes.Success
+        | [| flagArg; settingsFileArg |] ->
             let settingsPath =
                 FileInfo <|
-                    if Array.hasMultiple args && Array.containsIgnoreCase args[0] settingsFileFlags then
-                        args[1] // Expected to be a settings file path.
+                    if settingsFileFlags |> Array.containsIgnoreCase flagArg then
+                        settingsFileArg
                     else
                         defaultSettingsFileName
 
@@ -73,3 +77,6 @@ module Program =
                         AnsiConsole.WriteException exn
                         printer.Info "Please help improve this tool by reporting this error and any relevant URLs at https://github.com/codeconscious/ccvtac/issues."
                         int ExitCodes.OperationError
+        | _ ->
+            printer.Info Help.helpText
+            int ExitCodes.Success
