@@ -24,7 +24,7 @@ module Tagger =
             | Null -> Error $"Deserialized JSON was null for \"%s{taggingSet.JsonFile}\"."
             | NonNull v -> Ok v
         with
-        | :? JsonException as exn -> Error $"%s{exn.Message}%s{String.newLine}%s{exn.StackTrace}"
+        | :? JsonException as exn -> Error $"%s{exn.Message}%s{String.nl}%s{exn.StackTrace}"
         | exn -> Error $"Error reading JSON file \"%s{taggingSet.JsonFile}\": %s{exn.Message}."
 
     /// If a video was split into sub-videos, then the original video is unneeded and should be deleted.

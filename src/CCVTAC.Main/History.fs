@@ -19,7 +19,7 @@ type History(filePath: string, displayCount: int) =
     member this.Append(url: string, entryTime: DateTime, printer: Printer) : unit =
         try
             let serializedTime = JsonSerializer.Serialize(entryTime).Replace("\"", "")
-            let text = serializedTime + string separator + url + String.newLine
+            let text = serializedTime + string separator + url + String.nl
 
             match appendToFile this.FileInfo text with
             | Ok _      -> printer.Debug $"Added \"%s{url}\" to the history log."
@@ -54,7 +54,7 @@ type History(filePath: string, displayCount: int) =
 
             for dateTime, urls in historyData do
                 let formattedTime = sprintf "%s" (dateTime.ToString("yyyy-MM-dd HH:mm:ss"))
-                let joinedUrls = String.Join(String.newLine, urls)
+                let joinedUrls = String.Join(String.nl, urls)
                 table.AddRow(formattedTime, joinedUrls) |> ignore
 
             printer.PrintTable table

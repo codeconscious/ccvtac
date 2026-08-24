@@ -55,13 +55,13 @@ module Program =
                     int ExitCodes.ArgError
                 | Ok settings ->
                     printer.Info "Settings loaded OK."
-                    Settings.summarizeAsTable settings |> printer.PrintTable
+                    Settings.toTable settings |> printer.PrintTable
 
                     printer.ShowDebug(not settings.QuietMode)
 
                     // Catch Ctrl-C (SIGINT)
                     Console.CancelKeyPress.Add(fun _ ->
-                        printer.Warning($"{String.newLine}Quitting at user's request.")
+                        printer.Warning($"{String.nl}Quitting at user's request.")
 
                         match Directories.warnIfAnyFiles 10 settings.WorkingDirectory with
                         | Ok () -> ()

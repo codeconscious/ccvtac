@@ -112,7 +112,7 @@ module Settings =
             ("Rename patterns", settings.RenamePatterns.Length |> simplePluralize "pattern")
         ]
 
-    let summarizeAsTable settings : Table =
+    let toTable settings : Table =
         let table = Table()
         table.Expand() |> ignore
         table.Border <- TableBorder.HeavyEdge
@@ -155,7 +155,7 @@ module Settings =
             | { AudioFormats = fmt } when not (fmt |> List.forall validAudioFormat) ->
                 let formats = String.Join(", ", fmt)
                 let approved = supportedAudioFormats |> String.concat ", "
-                Error $"Audio formats (\"%s{formats}\") include an unsupported audio format.{String.newLine}Only the following supported formats: {approved}."
+                Error $"Audio formats (\"%s{formats}\") include an unsupported audio format.{String.nl}Only the following supported formats: {approved}."
             | _ ->
                 Ok settings
 

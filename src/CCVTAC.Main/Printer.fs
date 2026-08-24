@@ -147,7 +147,7 @@ type Printer(showDebug: bool) =
             let repeats = int count - 1
             if repeats < 1
             then AnsiConsole.WriteLine()
-            else Enumerable.Repeat(String.newLine, repeats)
+            else Enumerable.Repeat(String.nl, repeats)
                  |> String.Concat
                  |> AnsiConsole.WriteLine
 

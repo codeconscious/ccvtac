@@ -82,7 +82,7 @@ let emptyVideoMetadata = {
     Type = String.Empty
 }
 
-let newLine = String.newLine
+let newLine = String.nl
 
 [<Fact>]
 let ``Tag detection patterns detect metadata in video metadata`` () =

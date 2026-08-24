@@ -5,7 +5,6 @@ open CCFSharpUtils
 open CCFSharpUtils.Collections
 open CCFSharpUtils.Text
 open System.IO
-open System.Text
 
 module Directories =
 
@@ -68,12 +67,12 @@ module Directories =
             if Array.isEmpty fileNames then
                 Ok ()
             else
-                StringBuilder($"Unexpectedly found {String.fileLabel fileNames.Length} in working directory \"{dirName}\":{String.newLine}")
+                SB($"Unexpectedly found {String.fileLabel fileNames.Length} in working directory \"{dirName}\":{String.nl}")
                     .AppendLine
                         (fileNames
                          |> Array.truncate showMax
                          |> Array.map (sprintf "• %s")
-                         |> String.concat String.newLine)
+                         |> String.concat String.nl)
                 |> fun sb ->
                     if fileNames.Length > showMax
                     then sb.AppendLine $"... plus {fileNames.Length - showMax} more."
