@@ -36,10 +36,9 @@ module Program =
         | [| flagArg; settingsFileArg |] ->
             let settingsPath =
                 FileInfo <|
-                    if settingsFileFlags |> Array.containsIgnoreCase flagArg then
-                        settingsFileArg
-                    else
-                        defaultSettingsFileName
+                    if settingsFileFlags |> Array.containsIgnoreCase flagArg
+                    then settingsFileArg
+                    else defaultSettingsFileName
 
             if not settingsPath.Exists then
                 match writeDefaultFile settingsPath with
@@ -55,7 +54,9 @@ module Program =
                     printer.Error err
                     int ExitCodes.ArgError
                 | Ok settings ->
-                    printSummary printer settings (Some "Settings loaded OK.")
+                    printer.Info "Settings loaded OK."
+                    Settings.makeSummaryTable printer settings |> Printer.PrintTable
+
                     printer.ShowDebug(not settings.QuietMode)
 
                     // Catch Ctrl-C (SIGINT)
