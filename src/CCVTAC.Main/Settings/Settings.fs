@@ -112,7 +112,7 @@ module Settings =
             ("Rename patterns", settings.RenamePatterns.Length |> simplePluralize "pattern")
         ]
 
-    let makeSummaryTable (printer: Printer) settings : Table =
+    let summarizeAsTable settings : Table =
         let table = Table()
         table.Expand() |> ignore
         table.Border <- TableBorder.HeavyEdge

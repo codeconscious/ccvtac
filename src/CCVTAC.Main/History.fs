@@ -57,6 +57,6 @@ type History(filePath: string, displayCount: int) =
                 let joinedUrls = String.Join(String.newLine, urls)
                 table.AddRow(formattedTime, joinedUrls) |> ignore
 
-            Printer.PrintTable table
+            printer.PrintTable table
         with exn ->
             printer.Error $"Could not display history: %s{exn.Message}"

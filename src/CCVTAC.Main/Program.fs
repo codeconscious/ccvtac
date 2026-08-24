@@ -55,7 +55,7 @@ module Program =
                     int ExitCodes.ArgError
                 | Ok settings ->
                     printer.Info "Settings loaded OK."
-                    Settings.makeSummaryTable printer settings |> Printer.PrintTable
+                    Settings.summarizeAsTable settings |> printer.PrintTable
 
                     printer.ShowDebug(not settings.QuietMode)
 

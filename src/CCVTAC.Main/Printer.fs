@@ -96,7 +96,7 @@ type Printer(showDebug: bool) =
 
             Printer.EmptyLines appendLines
 
-    static member PrintTable(table: Table) =
+    member this.PrintTable(table: Table) =
         AnsiConsole.Write table
 
     member this.Critical(message: string, ?appendLineBreak: bool, ?prependLines: byte, ?appendLines: byte, ?processMarkup: bool) =

@@ -135,7 +135,7 @@ module Orchestrator =
 
         // Settings summary
         elif checkCommand Commands.settingsSummary then
-            Settings.makeSummaryTable printer settings |> Printer.PrintTable
+            Settings.summarizeAsTable settings |> printer.PrintTable
             Ok { NextAction = Continue; UpdatedSettings = None }
 
         // Toggle split chapters
