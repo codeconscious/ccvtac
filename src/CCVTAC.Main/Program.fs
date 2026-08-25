@@ -55,7 +55,7 @@ module Program =
                     int ExitCodes.ArgError
                 | Ok settings ->
                     printer.Info "Settings loaded OK."
-                    Settings.toTable settings |> printer.PrintTable
+                    settings |> toTable |> printer.PrintTable
 
                     printer.ShowDebug(not settings.QuietMode)
 
@@ -68,7 +68,7 @@ module Program =
                         | Error warnResult ->
                             printer.Error warnResult
                             match Directories.askToDeleteAllFiles printer settings.WorkingDirectory with
-                            | Error err -> printer.Error err
+                            | Error err  -> printer.Error err
                             | Ok results -> Directories.printDeletionResults printer results)
                     try
                         Orchestrator.start printer settings

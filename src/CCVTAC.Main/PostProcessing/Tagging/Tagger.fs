@@ -28,7 +28,7 @@ module Tagger =
         | exn -> Error $"Error reading JSON file \"%s{taggingSet.JsonFile}\": %s{exn.Message}."
 
     /// If a video was split into sub-videos, then the original video is unneeded and should be deleted.
-    let private deleteSourceFile (printer: Printer)  taggingSet : TaggingSet =
+    let private deleteSourceFile (printer: Printer) taggingSet : TaggingSet =
         if not (List.hasMultiple taggingSet.AudioFiles) then
             taggingSet
         else
