@@ -7,24 +7,24 @@ open CCFSharpUtils.Text
 
 module Updater =
 
-    let run userSettings (printer: Printer) : Result<unit, string> =
+    let successExitCode = 0
+
+    let run (printer: Printer) userSettings : unit =
         if String.hasNoText userSettings.DownloaderUpdateCommand then
-            printer.Info("No downloader update command provided, so will skip.")
-            Ok()
+            printer.Info "No downloader update command provided, so will skip."
         else
-            let toolSettings = ToolSettings.create userSettings.DownloaderUpdateCommand userSettings.WorkingDirectory
+            let toolSettings = ToolSettings.create userSettings.DownloaderUpdateCommand
+                                                   userSettings.WorkingDirectory
 
-            match Runner.runTool toolSettings [] printer with
-            | Ok result ->
-                if result.ExitCode <> 0 then
-                    printer.Warning("Tool updated with minor issues.")
+            let executionResult = Runner.runTool printer toolSettings []
 
-                    match result.Error with
-                    | Some w -> printer.Warning w
-                    | None -> ()
-
-                Ok()
-
-            | Error err ->
-                printer.Error $"Failure updating: {err}"
-                Error err
+            match executionResult with
+            | Ok details ->
+                if details.ExitCode <> successExitCode then
+                    match details.Error with
+                    | Some errMsg -> $"Update completed with minor issues: {errMsg}"
+                    | None        ->  "Update completed with minor unspecified issues."
+                    |> printer.Warning
+                printer.EmptyLine()
+            | Error msg ->
+                printer.Error($"Failure updating: {msg}", ?appendLines = Some 1uy)

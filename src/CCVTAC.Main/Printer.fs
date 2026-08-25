@@ -96,7 +96,7 @@ type Printer(showDebug: bool) =
 
             Printer.EmptyLines appendLines
 
-    static member PrintTable(table: Table) =
+    member this.PrintTable(table: Table) =
         AnsiConsole.Write table
 
     member this.Critical(message: string, ?appendLineBreak: bool, ?prependLines: byte, ?appendLines: byte, ?processMarkup: bool) =
@@ -136,15 +136,20 @@ type Printer(showDebug: bool) =
         this.Print(Level.Debug, message, ?appendLineBreak = appendLineBreak, ?prependLines = prependLines,
                    ?appendLines = appendLines, ?processMarkup = processMarkup)
 
+    member this.EmptyLine() = Printer.EmptyLines 1uy
+
+    member this.EmptyLines(count: byte) = Printer.EmptyLines count
+
     /// Prints the requested number of blank lines.
     static member EmptyLines(count: byte) =
-        if Num.isZero count
-        then ()
-        else
+        if Num.isPos count
+        then
             let repeats = int count - 1
             if repeats < 1
             then AnsiConsole.WriteLine()
-            else Enumerable.Repeat(String.newLine, repeats) |> String.Concat |> AnsiConsole.WriteLine
+            else Enumerable.Repeat(String.nl, repeats)
+                 |> String.Concat
+                 |> AnsiConsole.WriteLine
 
     member this.GetInput(prompt: string) : string =
         Printer.EmptyLines 1uy

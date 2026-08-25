@@ -26,16 +26,19 @@ module Program =
     let main args : int =
         let printer = Printer(showDebug = true)
 
-        if Array.isNotEmpty args && Array.containsIgnoreCase args[0] helpFlags then
+        match args with
+        | [||] ->
             printer.Info Help.helpText
             int ExitCodes.Success
-        else
+        | [| arg |] when helpFlags |> Array.containsIgnoreCase arg ->
+            printer.Info Help.helpText
+            int ExitCodes.Success
+        | [| flagArg; settingsFileArg |] ->
             let settingsPath =
                 FileInfo <|
-                    if Array.hasMultiple args && Array.containsIgnoreCase args[0] settingsFileFlags then
-                        args[1] // Expected to be a settings file path.
-                    else
-                        defaultSettingsFileName
+                    if settingsFileFlags |> Array.containsIgnoreCase flagArg
+                    then settingsFileArg
+                    else defaultSettingsFileName
 
             if not settingsPath.Exists then
                 match writeDefaultFile settingsPath with
@@ -51,25 +54,30 @@ module Program =
                     printer.Error err
                     int ExitCodes.ArgError
                 | Ok settings ->
-                    printSummary settings printer (Some "Settings loaded OK.")
+                    printer.Info "Settings loaded OK."
+                    settings |> toTable |> printer.PrintTable
+
                     printer.ShowDebug(not settings.QuietMode)
 
                     // Catch Ctrl-C (SIGINT)
                     Console.CancelKeyPress.Add(fun _ ->
-                        printer.Warning($"{String.newLine}Quitting at user's request.")
+                        printer.Warning($"{String.nl}Quitting at user's request.")
 
                         match Directories.warnIfAnyFiles 10 settings.WorkingDirectory with
                         | Ok () -> ()
                         | Error warnResult ->
                             printer.Error warnResult
-                            match Directories.askToDeleteAllFiles settings.WorkingDirectory printer with
-                            | Error err -> printer.Error err
+                            match Directories.askToDeleteAllFiles printer settings.WorkingDirectory with
+                            | Error err  -> printer.Error err
                             | Ok results -> Directories.printDeletionResults printer results)
                     try
-                        Orchestrator.start settings printer
+                        Orchestrator.start printer settings
                         int ExitCodes.Success
                     with exn ->
                         printer.Critical $"Fatal error: %s{exn.Message}"
                         AnsiConsole.WriteException exn
                         printer.Info "Please help improve this tool by reporting this error and any relevant URLs at https://github.com/codeconscious/ccvtac/issues."
                         int ExitCodes.OperationError
+        | _ ->
+            printer.Info Help.helpText
+            int ExitCodes.Success

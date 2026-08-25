@@ -24,17 +24,17 @@ module Orchestrator =
           UpdatedSettings: UserSettings option }
 
     let summarizeInput
+        (printer: Printer)
         (categorizedInputs: CategorizedInput list)
         (counts: CategoryCounts)
-        (printer: Printer)
         : unit =
 
         if List.hasMultiple categorizedInputs then
-            let urlSummary = String.pluralizeSWithCount "URL" counts[InputCategory.Url]
-            let cmdSummary = String.pluralizeSWithCount "command" counts[InputCategory.Command]
+            let urlSummary = String.pluralizeSWithCount "URL" counts[Url]
+            let cmdSummary = String.pluralizeSWithCount "command" counts[Command]
 
             printer.Info <|
-                match counts[InputCategory.Url], counts[InputCategory.Command] with
+                match counts[Url], counts[Command] with
                 | u, c when u > 0 && c > 0 -> $"Batch of %s{urlSummary} and %s{cmdSummary} entered:"
                 | u, _ when u > 0 ->          $"Batch of %s{urlSummary} entered:"
                 | _, c when c > 0 ->          $"Batch of %s{cmdSummary} entered:"
@@ -43,9 +43,10 @@ module Orchestrator =
             for input in categorizedInputs do
                 printer.Info $" • %s{input.Text}"
 
-            Printer.EmptyLines 1uy
+            printer.EmptyLine()
 
     let processUrl
+        (printer: Printer)
         (url: string)
         (settings: UserSettings)
         (resultTracker: ResultTracker<string>)
@@ -53,7 +54,6 @@ module Orchestrator =
         (urlInputTime: DateTime)
         (batchSize: int)
         (urlIndex: int)
-        (printer: Printer)
         : Result<BatchResults, string> =
 
         match Directories.warnIfAnyFiles 10 settings.WorkingDirectory with
@@ -75,7 +75,7 @@ module Orchestrator =
                 printer.Info $"%s{mediaType.GetType().Name} URL '%s{url}' detected."
                 history.Append(url, urlInputTime, printer)
 
-                let downloadResult = Downloader.run mediaType settings printer
+                let downloadResult = Downloader.run printer mediaType settings
                 resultTracker.RegisterResult(url, downloadResult)
 
                 match downloadResult with
@@ -87,7 +87,7 @@ module Orchestrator =
                 | Ok message ->
                     printer.Debug "Download successful."
                     if String.hasText message then printer.Info message
-                    PostProcessor.run settings mediaType printer
+                    PostProcessor.run printer settings mediaType
 
                     let groupClause =
                         if batchSize > 1
@@ -104,10 +104,10 @@ module Orchestrator =
         sprintf "%s was updated to \"%s\" for this session." settingName setting
 
     let processCommand
+        (printer: Printer)
         (command: string)
         (settings: UserSettings)
         (history: History)
-        (printer: Printer)
         : Result<BatchResults, string> =
 
         let checkCommand = List.containsIgnoreCase command
@@ -115,47 +115,47 @@ module Orchestrator =
         // Help
         if String.equalIgnoreCase Commands.helpCommand command then
             for kvp in Commands.summary do
-                printer.Info(kvp.Key)
+                printer.Info kvp.Key
                 printer.Info $"    %s{kvp.Value}"
-            Ok { NextAction = NextAction.Continue; UpdatedSettings = None }
+            Ok { NextAction = Continue; UpdatedSettings = None }
 
         // Quit
         elif checkCommand Commands.quitCommands then
-            Ok { NextAction = NextAction.QuitAtUserRequest; UpdatedSettings = None }
+            Ok { NextAction = QuitAtUserRequest; UpdatedSettings = None }
 
         // History
         elif checkCommand Commands.history then
             history.ShowRecent printer
-            Ok { NextAction = NextAction.Continue; UpdatedSettings = None }
+            Ok { NextAction = Continue; UpdatedSettings = None }
 
-        // Update downloader
+        // Update media downloader
         elif checkCommand Commands.updateDownloader then
-            Updater.run settings printer |> ignore
-            Ok { NextAction = NextAction.Continue; UpdatedSettings = None }
+            Updater.run printer settings
+            Ok { NextAction = Continue; UpdatedSettings = None }
 
         // Settings summary
         elif checkCommand Commands.settingsSummary then
-            Settings.printSummary settings printer None
-            Ok { NextAction = NextAction.Continue; UpdatedSettings = None }
+            Settings.toTable settings |> printer.PrintTable
+            Ok { NextAction = Continue; UpdatedSettings = None }
 
         // Toggle split chapters
         elif checkCommand Commands.splitChapterToggles then
             let newSettings = toggleSplitChapters settings
             printer.Info(summarizeToggle "Split Chapters" newSettings.SplitChapters)
-            Ok { NextAction = NextAction.Continue; UpdatedSettings = Some newSettings }
+            Ok { NextAction = Continue; UpdatedSettings = Some newSettings }
 
         // Toggle embed images
         elif checkCommand Commands.embedImagesToggles then
             let newSettings = toggleEmbedImages settings
             printer.Info(summarizeToggle "Embed Images" newSettings.EmbedImages)
-            Ok { NextAction = NextAction.Continue; UpdatedSettings = Some newSettings }
+            Ok { NextAction = Continue; UpdatedSettings = Some newSettings }
 
         // Toggle quiet mode
         elif checkCommand Commands.quietModeToggles then
             let newSettings = toggleQuietMode settings
             printer.Info(summarizeToggle "Quiet Mode" newSettings.QuietMode)
             printer.ShowDebug(not newSettings.QuietMode)
-            Ok { NextAction = NextAction.Continue; UpdatedSettings = Some newSettings }
+            Ok { NextAction = Continue; UpdatedSettings = Some newSettings }
 
         // Update audio formats
         elif command |> String.startsWithIgnoreCase Commands.updateAudioFormatPrefix then
@@ -168,7 +168,7 @@ module Orchestrator =
                 | Error err -> Error err
                 | Ok newSettings ->
                     printer.Info(summarizeUpdate "Audio Formats" (String.Join(", ", newSettings.AudioFormats)))
-                    Ok { NextAction = NextAction.Continue; UpdatedSettings = Some newSettings }
+                    Ok { NextAction = Continue; UpdatedSettings = Some newSettings }
 
         // Update audio quality
         elif command |> String.startsWithIgnoreCase Commands.updateAudioQualityPrefix then
@@ -184,7 +184,7 @@ module Orchestrator =
                         Error err
                     | Ok updatedSettings ->
                         printer.Info(summarizeUpdate "Audio Quality" (updatedSettings.AudioQuality.ToString()))
-                        Ok { NextAction = NextAction.Continue; UpdatedSettings = Some updatedSettings }
+                        Ok { NextAction = Continue; UpdatedSettings = Some updatedSettings }
                 | _ ->
                     Error $"\"%s{inputQuality}\" is an invalid quality value."
 
@@ -199,12 +199,12 @@ module Orchestrator =
     /// Processes a single user request, from input to downloading and file post-processing.
     /// Returns the next action the application should take (e.g., continue or quit).
     let processBatch
-        (categorizedInputs: CategorizedInput list)
+        (printer: Printer)
+        (inputs: CategorizedInput list)
         (categoryCounts: CategoryCounts)
         (settings: UserSettings)
         (resultTracker: ResultTracker<string>)
         (history: History)
-        (printer: Printer)
         : BatchResults =
 
         let inputTime = DateTime.Now
@@ -223,32 +223,51 @@ module Orchestrator =
 
         let processInput category text index : Result<BatchResults,string> =
             match category with
-            | Command -> processCommand text settings history printer
-            | Url -> processUrl text settings resultTracker history inputTime categoryCounts[Url] index printer
+            | Command -> processCommand printer text settings history
+            | Url -> processUrl printer text settings resultTracker history inputTime inputs.Length index
 
-        let rec loop inputs settings' nextAction' index =
+        let deleteLeftoverFiles dirName : Result<string,string> =
+            match Directories.warnIfAnyFiles 10 dirName with
+            | Ok () -> Ok "No leftover files found."
+            | Error filesFoundErr ->
+                printer.Error filesFoundErr // Might not need this.
+                Directories.deleteAllFiles dirName |> function
+                | Ok results ->
+                    Directories.printDeletionResults printer results
+                    Ok "Files deleted successfully."
+                | Error deletionError ->
+                    Error $"Error deleting leftover files after download: {deletionError}"
+
+        let rec loop inputs settings' nextAction' index : NextAction * UserSettings * int =
             match inputs with
             | [] ->
                 (nextAction', settings', index)
             | input :: remainingInputs when nextAction' = Continue ->
-                let result = processInput input.Category input.Text index
-                batchResults.RegisterResult(input.Text, result)
+                let processResult = processInput input.Category input.Text index
+                batchResults.RegisterResult(input.Text, processResult)
 
-                match result with
-                | Error err ->
-                    printer.Error err
-                    if List.isNotEmpty remainingInputs then printSleep input.Category
-                    loop remainingInputs settings' nextAction' (index + 1)
-                | Ok processResult ->
-                    if List.isNotEmpty remainingInputs then printSleep input.Category
-                    let newSettings = processResult.UpdatedSettings |> Option.defaultValue settings'
-                    let newNextAction = processResult.NextAction
-                    loop remainingInputs newSettings newNextAction (index + 1)
+                // Deleting the files here might make debugging issues a bit tougher.
+                match deleteLeftoverFiles settings.WorkingDirectory with
+                | Error errMsg ->
+                    printer.Error errMsg
+                    (QuitDueToErrors, settings', index)
+                | Ok message ->
+                    printer.Debug message
+                    match processResult with
+                    | Error err ->
+                        printer.Error err
+                        if List.isNotEmpty remainingInputs then printSleep input.Category
+                        loop remainingInputs settings' nextAction' (index + 1)
+                    | Ok processResult ->
+                        if List.isNotEmpty remainingInputs then printSleep input.Category
+                        let newSettings = processResult.UpdatedSettings |> Option.defaultValue settings'
+                        let newNextAction = processResult.NextAction
+                        loop remainingInputs newSettings newNextAction (index + 1)
             | _ ->
                 (nextAction', settings', index)
 
         let (finalNextAction, finalSettings, processedCount) =
-            loop categorizedInputs settings Continue 1
+            loop inputs settings Continue 1
 
         if categoryCounts[Url] > 1 then
             printer.Info(
@@ -259,9 +278,9 @@ module Orchestrator =
                 )
             batchResults.PrintBatchFailures()
 
-        if processedCount <= categorizedInputs.Length then
+        if processedCount <= inputs.Length then
             let unprocessedInputs =
-                categorizedInputs[processedCount-1..]
+                inputs[processedCount-1..]
                 |> List.map (fun x -> $"• {x.Text}")
                 |> String.concat String.nl
             printer.Warning $"Some inputs were not yet processed: {String.nl}{unprocessedInputs}"
@@ -270,13 +289,13 @@ module Orchestrator =
           UpdatedSettings = Some finalSettings }
 
     /// Ensures the download environment is ready, then initiates the input and download process.
-    let start (settings: UserSettings) (printer: Printer) : unit =
+    let start (printer: Printer) (settings: UserSettings) : unit =
         // The working directory should start empty. Give the user a chance to empty it.
         match Directories.warnIfAnyFiles 10 settings.WorkingDirectory with
         | Ok () -> ()
         | Error filesFoundErr ->
             printer.Error filesFoundErr
-            Directories.askToDeleteAllFiles settings.WorkingDirectory printer |> function
+            Directories.askToDeleteAllFiles printer settings.WorkingDirectory |> function
             | Ok results -> Directories.printDeletionResults printer results
             | Error deletionError ->
                 printer.Error deletionError
@@ -284,10 +303,10 @@ module Orchestrator =
 
         let results = ResultTracker<string> printer
         let history = History(settings.HistoryFile, settings.HistoryDisplayCount)
-        let mutable nextAction = NextAction.Continue
+        let mutable nextAction = Continue
         let mutable currentSettings = settings
 
-        while nextAction = NextAction.Continue do
+        while nextAction = Continue do
             let input = printer.GetInput prompt
             let splitInputs = splitInputText input
 
@@ -297,13 +316,13 @@ module Orchestrator =
             | _ ->
                 let categorizedInputs = categorizeInputs splitInputs
                 let categoryCounts = countCategories categorizedInputs
-                summarizeInput categorizedInputs categoryCounts printer
+                summarizeInput printer categorizedInputs categoryCounts
 
-                let batchResult = processBatch categorizedInputs categoryCounts currentSettings results history printer
+                let batchResult = processBatch printer categorizedInputs categoryCounts currentSettings results history
                 nextAction <- batchResult.NextAction
 
                 match batchResult.UpdatedSettings with
-                | Some s -> currentSettings <- s
+                | Some newSettings -> currentSettings <- newSettings
                 | None -> ()
 
         results.PrintSessionSummary()

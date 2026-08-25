@@ -8,7 +8,6 @@ open CCVTAC.Main.Downloading.Downloading
 open CCVTAC.Main.ExternalTools
 open CCVTAC.Main.Settings.Settings
 open CCFSharpUtils
-open CCFSharpUtils.Text
 open FsToolkit.ErrorHandling
 open System
 
@@ -37,7 +36,7 @@ module Downloader =
                   "--write-thumbnail --convert-thumbnails jpg"
                   writeJsonArg
                   trimFileNamesArg
-                  "--retries 2" ]
+                  "--retries 3" ]
             |> Set.ofList
 
         if userSettings.QuietMode then
@@ -87,7 +86,7 @@ module Downloader =
             let commandWithArgs = $"{programName} {args}"
             let downloadSettings = ToolSettings.create commandWithArgs userSettings.WorkingDirectory
 
-            let downloadResult = runTool downloadSettings [1] printer
+            let downloadResult = runTool printer downloadSettings [1]
             let anyFilesDownloaded = Num.isPos <| audioFileCount userSettings.WorkingDirectory Files.audioFileExts
 
             match downloadResult, anyFilesDownloaded with
@@ -128,19 +127,20 @@ module Downloader =
             let args = generateDownloadArgs None userSettings None (Some [url'])
             let commandWithArgs = $"{programName} {args}"
             let downloadSettings = ToolSettings.create commandWithArgs userSettings.WorkingDirectory
-            let metadataDownloadResult = runTool downloadSettings [1] printer
+            let metadataDownloadResult = runTool printer downloadSettings [1]
 
             match metadataDownloadResult with
             | Ok _ -> Ok "Supplementary metadata download completed OK."
             | Error err -> Error [$"Supplementary metadata download failed: {err}"]
 
-    let run (mediaType: MediaType) userSettings (printer: Printer) : Result<string, string list> =
+    let run (printer: Printer) (mediaType: MediaType) userSettings : Result<string, string list> =
         result {
             let rawUrls = generateDownloadUrl mediaType
             let urls =
                 { Primary = PrimaryUrl rawUrls[0]
                   Metadata = SupplementaryUrl <| if rawUrls.Length = 2 then Some rawUrls[1] else None }
-            let! _ = downloadMedia printer mediaType userSettings urls.Primary
+            let! warnings = downloadMedia printer mediaType userSettings urls.Primary
+            warnings |> List.iter printer.Info
             let! metadataDownloadResult = downloadMetadata printer userSettings urls.Metadata
             return! Ok metadataDownloadResult
         }

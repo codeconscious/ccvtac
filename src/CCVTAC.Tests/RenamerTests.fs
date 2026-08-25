@@ -3,8 +3,8 @@ module RenamerTests
 open CCVTAC.Main
 open CCVTAC.Main.Settings.Settings
 open CCVTAC.Main.PostProcessing
+open CCFSharpUtils
 open System
-open System.Text
 open Xunit
 
 module UpdateTextViaPatternsTests =
@@ -30,13 +30,13 @@ module UpdateTextViaPatternsTests =
                   Summary = "Remove trailing spaces before the file extension" }
             ]
 
-        let fileName = StringBuilder "ARTIST「TITLE」（1923）　　　 (字幕)  [5B1rB894B1U].m4a"
+        let fileName = SB "ARTIST「TITLE」（1923）　　　 (字幕)  [5B1rB894B1U].m4a"
 
         let expected = "ARTIST - TITLE [1923].m4a"
 
         let actual =
             List.fold
-                (fun sb pattern -> Renamer.updateTextViaPattern true (Printer false) sb pattern)
+                (fun sb pattern -> Renamer.updateTextViaPattern (Printer false) true sb pattern)
                 fileName
                 patterns
             |> _.ToString()

@@ -48,12 +48,12 @@ module PostProcessor =
             | Ok ts -> Ok ts
             | Error msgs ->
                 $"Error(s) creating tagging sets in working directory \"%s{dir}\"" :: msgs
-                |> String.concat String.newLine
+                |> String.concat String.nl
                 |> Error
         with exn ->
             Error $"Error reading working files in \"{dir}\" for tagging set creation: %s{exn.Message}"
 
-    let run settings mediaType (printer: Printer) : unit =
+    let run (printer: Printer) settings mediaType : unit =
         let watch = Watch()
         let workingDirectory = settings.WorkingDirectory
 
@@ -73,16 +73,16 @@ module PostProcessor =
                     Some cm
 
             if settings.EmbedImages then
-                ImageProcessor.run workingDirectory printer
+                ImageProcessor.run printer workingDirectory
 
-            match Tagger.run settings taggingSets collectionJson mediaType printer with
+            match Tagger.run printer settings taggingSets collectionJson mediaType with
             | Ok msg ->
                 printer.Info msg
-                Renamer.run settings workingDirectory printer
-                Mover.run taggingSets collectionJson settings true printer
+                Renamer.run printer settings workingDirectory
+                Mover.run printer taggingSets collectionJson settings true
 
                 let allTaggingSetFiles = taggingSets |> List.collect allFiles
-                Deleter.run allTaggingSetFiles collectionJson workingDirectory printer
+                Deleter.run printer allTaggingSetFiles collectionJson workingDirectory
 
                 match Directories.warnIfAnyFiles 20 workingDirectory with
                 | Ok _ -> ()

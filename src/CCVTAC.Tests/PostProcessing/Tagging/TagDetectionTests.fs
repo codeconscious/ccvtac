@@ -82,8 +82,6 @@ let emptyVideoMetadata = {
     Type = String.Empty
 }
 
-let newLine = String.newLine
-
 [<Fact>]
 let ``Tag detection patterns detect metadata in video metadata`` () =
     let testArtist = "Test Artist Name (日本語入り）"
@@ -95,7 +93,7 @@ let ``Tag detection patterns detect metadata in video metadata`` () =
     let videoMetadata = {
         emptyVideoMetadata with
             Title = $"{testArtist}「{testTitle}」"
-            Description = $"album: {testAlbum}{newLine}℗ %d{testYear}{newLine}Composed by: {testComposer}" }
+            Description = $"album: {testAlbum}{String.nl}℗ %d{testYear}{String.nl}Composed by: {testComposer}" }
 
     let artistPattern = {
         RegexPattern = "^(.+?)「(.+)」"

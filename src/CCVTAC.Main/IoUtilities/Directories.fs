@@ -5,7 +5,6 @@ open CCFSharpUtils
 open CCFSharpUtils.Collections
 open CCFSharpUtils.Text
 open System.IO
-open System.Text
 
 module Directories =
 
@@ -13,30 +12,24 @@ module Directories =
     let private allFilesSearchPattern = "*"
 
     /// Counts the number of audio files in a directory.
-    let audioFileCount (directory: string) (includedExtensions: string list) =
-        DirectoryInfo(directory).EnumerateFiles()
+    let audioFileCount dirName includedExtensions =
+        DirectoryInfo(dirName).EnumerateFiles()
         |> Seq.filter (fun f -> List.containsIgnoreCase f.Extension includedExtensions)
         |> Seq.length
 
     /// Returns the filenames in a given directory, optionally ignoring specific filenames.
-    let private getDirectoryFileNames
-        (directoryName: string)
-        (customIgnoreFiles: string seq option)
-        : Result<string array, string> =
-
-        let ignoreFiles =
-            customIgnoreFiles
-            |> Option.defaultValue Seq.empty
+    let private getDirectoryFileNames dirName ignoreFilesOpt : Result<string array, string> =
+        let ignoreFiles : string list =
+            ignoreFilesOpt
+            |> Option.defaultValue List.empty
             |> Seq.distinct
-            |> Seq.toArray
+            |> Seq.toList
 
         ofTry (fun _ ->
-            Directory.GetFiles(directoryName, allFilesSearchPattern, EnumerationOptions())
-            |> Array.filter (fun filePath -> not (ignoreFiles |> Array.exists filePath.EndsWith)))
+            Directory.GetFiles(dirName, allFilesSearchPattern, EnumerationOptions())
+            |> Array.filter (fun filePath -> not (ignoreFiles |> List.exists filePath.EndsWith)))
 
-    let deleteAllFiles workingDirectory
-        : Result<ResultMessageCollection, string> =
-
+    let deleteAllFiles workingDirectory : Result<ResultMessages, string> =
         let delete fileNames =
             let successes, failures = ResizeArray<string>(), ResizeArray<string>()
 
@@ -47,45 +40,44 @@ module Directories =
                 with exn ->
                     failures.Add $"• Error deleting \"%s{fileName}\": %s{exn.Message}"
 
-            { Successes = successes |> Seq.toList |> List.rev
-              Failures  = failures  |> Seq.toList |> List.rev }
+            { Successes = List.ofSeq successes
+              Failures  = List.ofSeq failures }
 
-        match getDirectoryFileNames workingDirectory None with
-        | Error errMsg -> Error errMsg
-        | Ok fileNames -> Ok (delete fileNames)
+        getDirectoryFileNames workingDirectory None
+        |> Result.map delete
 
     /// Ask the user to confirm the deletion of files in the specified directory.
-    let askToDeleteAllFiles dirName (printer: Printer) =
+    let askToDeleteAllFiles (printer: Printer) dirName =
         if printer.AskToBool("Delete all temporary files?", "Yes", "No")
         then deleteAllFiles dirName
         else Error "Will not delete the files."
 
-    let printDeletionResults (printer: Printer) (results: ResultMessageCollection) : unit =
+    let printDeletionResults (printer: Printer) (results: ResultMessages) : unit =
         printer.Info $"Deleted %s{String.fileLabel results.Successes.Length}."
         results.Successes |> List.iter printer.Debug
 
         if List.isNotEmpty results.Failures then
-            printer.Warning $"However, %s{String.fileLabel results.Failures.Length} could not be deleted:"
+            printer.Error $"%s{String.fileLabel results.Failures.Length} could not be deleted:"
             results.Failures |> List.iter printer.Error
 
-    let warnIfAnyFiles showMax dirName =
+    let warnIfAnyFiles showMax dirName : Result<unit, string> =
         match getDirectoryFileNames dirName None with
         | Error errMsg -> Error errMsg
         | Ok fileNames ->
             if Array.isEmpty fileNames then
                 Ok ()
             else
-                StringBuilder($"Unexpectedly found {String.fileLabel fileNames.Length} in working directory \"{dirName}\":{String.newLine}")
+                SB($"Unexpectedly found {String.fileLabel fileNames.Length} in working directory \"{dirName}\":{String.nl}")
                     .AppendLine
                         (fileNames
                          |> Array.truncate showMax
                          |> Array.map (sprintf "• %s")
-                         |> String.concat String.newLine)
+                         |> String.concat String.nl)
                 |> fun sb ->
                     if fileNames.Length > showMax
                     then sb.AppendLine $"... plus {fileNames.Length - showMax} more."
                     else sb
-                |> _.AppendLine("This sometimes occurs due to the same video appearing twice in playlists.")
+                // |> _.AppendLine("This sometimes occurs due to the same video appearing twice in playlists.")
                 |> _.ToString()
                 |> Error
 

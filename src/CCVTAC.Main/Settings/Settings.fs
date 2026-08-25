@@ -112,11 +112,7 @@ module Settings =
             ("Rename patterns", settings.RenamePatterns.Length |> simplePluralize "pattern")
         ]
 
-    let printSummary settings (printer: Printer) headerOpt : unit =
-        match headerOpt with
-        | Some h when String.hasText h -> printer.Info h
-        | _ -> ()
-
+    let toTable settings : Table =
         let table = Table()
         table.Expand() |> ignore
         table.Border <- TableBorder.HeavyEdge
@@ -128,7 +124,7 @@ module Settings =
         for description, value in summarize settings do
             table.AddRow(description, value) |> ignore
 
-        Printer.PrintTable table
+        table
 
     module Validation' =
         open System.IO
@@ -159,7 +155,7 @@ module Settings =
             | { AudioFormats = fmt } when not (fmt |> List.forall validAudioFormat) ->
                 let formats = String.Join(", ", fmt)
                 let approved = supportedAudioFormats |> String.concat ", "
-                Error $"Audio formats (\"%s{formats}\") include an unsupported audio format.{String.newLine}Only the following supported formats: {approved}."
+                Error $"Audio formats (\"%s{formats}\") include an unsupported audio format.{String.nl}Only the following supported formats: {approved}."
             | _ ->
                 Ok settings
 
