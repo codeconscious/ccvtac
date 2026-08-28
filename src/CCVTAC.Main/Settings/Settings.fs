@@ -100,6 +100,8 @@ module Settings =
             ("Working directory", settings.WorkingDirectory)
             ("Move-to directory", settings.MoveToDirectory)
             ("History log file", settings.HistoryFile)
+            ("Downloader command", settings.DownloaderCommand)
+            ("Downloader update command", settings.DownloaderUpdateCommand)
             ("Split video chapters", onOrOff settings.SplitChapters)
             ("Embed images", onOrOff settings.EmbedImages)
             ("Quiet mode", onOrOff settings.QuietMode)
