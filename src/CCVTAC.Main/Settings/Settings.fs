@@ -1,6 +1,5 @@
 namespace CCVTAC.Main.Settings
 
-open CCVTAC.Main
 open CCFSharpUtils.Text
 open Spectre.Console
 open FSharpPlus
