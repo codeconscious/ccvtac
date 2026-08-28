@@ -47,6 +47,7 @@ module Settings =
         [<JsonPropertyName("tagDetectionPatterns")>]          TagDetectionPatterns: TagDetectionPatterns
         [<JsonPropertyName("renamePatterns")>]                RenamePatterns: RenamePattern list
         [<JsonPropertyName("normalizationForm")>]             NormalizationForm : string
+        [<JsonPropertyName("downloaderCommand")>]             DownloaderCommand : string
         [<JsonPropertyName("downloaderUpdateCommand")>]       DownloaderUpdateCommand : string
         [<JsonPropertyName("downloaderAdditionalOptions")>]   DownloaderAdditionalOptions : string option
     }
@@ -75,6 +76,7 @@ module Settings =
             }
             RenamePatterns = []
             NormalizationForm = "C" // Recommended for compatibility between Linux and macOS.
+            DownloaderCommand = String.Empty
             DownloaderUpdateCommand = String.Empty
             DownloaderAdditionalOptions = None
         }

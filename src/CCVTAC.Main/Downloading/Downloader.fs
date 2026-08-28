@@ -13,9 +13,6 @@ open System
 
 module Downloader =
 
-    [<Literal>]
-    let private programName = "yt-dlp"
-
     let generateDownloadArgs audioFormat userSettings (mediaType: MediaType option) additionalArgs : string =
         let writeJsonArg = "--write-info-json"
         let trimFileNamesArg = "--trim-filenames 250"
@@ -83,7 +80,7 @@ module Downloader =
 
         let attemptAudioFormat format errors =
             let args = generateDownloadArgs (Some format) userSettings (Some mediaType) (Some [url])
-            let commandWithArgs = $"{programName} {args}"
+            let commandWithArgs = $"{userSettings.DownloaderCommand} {args}"
             let downloadSettings = ToolSettings.create commandWithArgs userSettings.WorkingDirectory
 
             let downloadResult = runTool printer downloadSettings [1]
@@ -125,7 +122,7 @@ module Downloader =
         | None -> Ok "No supplementary metadata link found."
         | Some url' ->
             let args = generateDownloadArgs None userSettings None (Some [url'])
-            let commandWithArgs = $"{programName} {args}"
+            let commandWithArgs = $"{userSettings.DownloaderCommand} {args}"
             let downloadSettings = ToolSettings.create commandWithArgs userSettings.WorkingDirectory
             let metadataDownloadResult = runTool printer downloadSettings [1]
 
