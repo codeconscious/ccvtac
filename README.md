@@ -103,6 +103,10 @@ The sample below contains explanations and some example values as well.
   // Reference: https://en.wikipedia.org/wiki/Unicode_equivalence
   "normalizationForm": "C",
 
+  // The full path or else (if the program name is available in your terminal) name
+  // of yt-dlp on your system.
+  "downloaderCommand": "yt-dlp",
+  
   // The full command you use to update your local yt-dlp installation.
   // This is a sample entry.
   "downloaderUpdateCommand": "pip install --upgrade yt-dlp", 
@@ -215,10 +219,10 @@ If you run into any issues, feel free to create an issue on GitHub. Please provi
 
 However, do keep in mind that this is ultimately a hobby project for myself, so I cannot guarantee every issue will be fixed.
 
-## History
+## Development History
 
 The first incarnation of this application was written in C#. However, after picking up [F#](https://fsharp.org/) out of curiosity about it and functional programming (FP) in 2024 and successfully using it to create other tools (mainly [Audio Tag Tools](https://github.com/codeconscious/audio-tag-tools/)) in an FP style, I become curious about F#'s OOP capabilities as well.
 
-As an experiment, I rewrote this application in OOP-style F#, using LLMs solely for the rough initial conversion (which greatly reduced the overall time and labor necessary at the cost of requiring a *lot* of manual cleanup). Ultimately, I was surprised how much I preferred the F# code over the C#, so I decided to keep this tool in F#.
+As an experiment, I rewrote this application in OOP-style F# using LLMs, which greatly reduced the overall time and labor necessary at the cost of requiring a *lot* of manual cleanup. Ultimately, I was surprised how much I preferred the F# code over the C#, so I decided to keep this tool in F#.
 
 Due to this background, the code is not particularly idiomatic F#, but it is certainly perfectly viable in its current blended-style form. That said, I'll probably tweak it over time to gradually to introduce more idiomatic F# code.

@@ -1,6 +1,5 @@
 namespace CCVTAC.Main.Settings
 
-open CCVTAC.Main
 open CCFSharpUtils.Text
 open Spectre.Console
 open FSharpPlus
@@ -47,6 +46,7 @@ module Settings =
         [<JsonPropertyName("tagDetectionPatterns")>]          TagDetectionPatterns: TagDetectionPatterns
         [<JsonPropertyName("renamePatterns")>]                RenamePatterns: RenamePattern list
         [<JsonPropertyName("normalizationForm")>]             NormalizationForm : string
+        [<JsonPropertyName("downloaderCommand")>]             DownloaderCommand : string
         [<JsonPropertyName("downloaderUpdateCommand")>]       DownloaderUpdateCommand : string
         [<JsonPropertyName("downloaderAdditionalOptions")>]   DownloaderAdditionalOptions : string option
     }
@@ -75,6 +75,7 @@ module Settings =
             }
             RenamePatterns = []
             NormalizationForm = "C" // Recommended for compatibility between Linux and macOS.
+            DownloaderCommand = String.Empty
             DownloaderUpdateCommand = String.Empty
             DownloaderAdditionalOptions = None
         }
@@ -99,6 +100,8 @@ module Settings =
             ("Working directory", settings.WorkingDirectory)
             ("Move-to directory", settings.MoveToDirectory)
             ("History log file", settings.HistoryFile)
+            ("Downloader command", settings.DownloaderCommand)
+            ("Downloader update command", settings.DownloaderUpdateCommand)
             ("Split video chapters", onOrOff settings.SplitChapters)
             ("Embed images", onOrOff settings.EmbedImages)
             ("Quiet mode", onOrOff settings.QuietMode)
