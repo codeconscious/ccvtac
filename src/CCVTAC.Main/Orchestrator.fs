@@ -257,7 +257,7 @@ module Orchestrator =
                         loop remainingInputs settings' nextAction' (index + 1)
                     | Ok processResult ->
                         if List.isNotEmpty remainingInputs then printSleep input.Category
-                        let newSettings = processResult.UpdatedSettings |> Option.defaultValue settings'
+                        let newSettings = defaultArg processResult.UpdatedSettings settings'
                         let newNextAction = processResult.NextAction
                         loop remainingInputs newSettings newNextAction (index + 1)
             | _ ->
