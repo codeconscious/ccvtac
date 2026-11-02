@@ -60,6 +60,7 @@ type Printer(showDebug: bool) =
             let markUp = $"{boldPart}{fgPart}{bgPart}"
             $"[{markUp}]{message}[/]"
 
+    /// This is the method that actually prints and is called by other methods.
     member private this.Print
         (
             logLevel: Level,
