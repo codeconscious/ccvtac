@@ -216,7 +216,9 @@ module Orchestrator =
                     (fun s -> $"Sleeping for {s} {label}...")
                     (fun s -> $"Slept for {s} {label}.")
                     seconds
-                |> fun msg -> printer.Info($"{String.nl}{msg}", appendLines = 1uy)
+                |> fun msg ->
+                    printer.Info($"{String.nl}{msg}")
+                    printer.EmptyLine()
 
         let processInput category text index : Result<BatchResults,string> =
             match category with

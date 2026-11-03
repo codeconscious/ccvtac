@@ -127,8 +127,8 @@ type Printer(showDebug: bool) =
     member this.Warning(message: string) =
         this.Print(Level.Warning, message)
 
-    member this.Info(message: string, ?appendLines: byte) =
-        this.Print(Level.Info, message, ?appendLines = appendLines)
+    member this.Info(message: string) =
+        this.Print(Level.Info, message)
 
     member this.Debug(message: string) =
         this.Print(Level.Debug, message)
