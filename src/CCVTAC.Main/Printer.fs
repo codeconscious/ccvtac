@@ -47,7 +47,7 @@ type Printer(showDebug: bool) =
         if showDebug then Level.Debug else Level.Info
 
     /// Prints the requested number of blank lines.
-    let printEmptyLines (count: byte) : unit =
+    let printEmptyLines count : unit =
         if Num.isPos count
         then
             let repeats = int count - 1
@@ -69,8 +69,8 @@ type Printer(showDebug: bool) =
             .Replace("[", "[[")
             .Replace("]", "]]")
 
-    let addMarkup (message: string) (colors: ColorFormat) : string =
-        match colors.Foreground, colors.Background, colors.Bold with
+    let addMarkup message colorFormat : string =
+        match colorFormat.Foreground, colorFormat.Background, colorFormat.Bold with
         | None, None, false -> message
         | fg, bg, bold ->
             let boldPart = if bold then "bold " else String.Empty
@@ -108,38 +108,38 @@ type Printer(showDebug: bool) =
             printEmptyLines appendLines
 
     /// Toggle showing or hiding debug messages.
-    member this.ShowDebug(show: bool) =
-        minimumLogLevel <- (if show then Level.Debug else Level.Info)
+    member this.ShowDebug(shouldEnable) =
+        minimumLogLevel <- (if shouldEnable then Level.Debug else Level.Info)
 
     member this.PrintTable(table: Table) =
         AnsiConsole.Write table
 
-    member this.Critical(message: string) =
+    member this.Critical(message) =
         print Level.Critical message None
 
-    member this.Error(message: string) =
+    member this.Error(message) =
         print Level.Error message None
 
-    member this.Error(message, printOptions: PrintOptions) =
+    member this.Error(message, printOptions) =
         print Level.Error message (Some printOptions)
 
-    member this.Warning(message: string) =
+    member this.Warning(message) =
         print Level.Warning message None
 
-    member this.Info(message: string) =
+    member this.Info(message) =
         print Level.Info message None
 
-    member this.Debug(message: string) =
+    member this.Debug(message) =
         print Level.Debug message None
 
     member this.EmptyLine() = printEmptyLines 1uy
 
-    member this.GetInput(prompt: string) : string =
+    member this.GetInput(prompt) : string =
         printEmptyLines 1uy
         AnsiConsole.Ask<string>($"[skyblue1]{prompt}[/]")
 
-    static member private Ask(title: string, options: string list) : string =
-        AnsiConsole.Prompt(SelectionPrompt<string>().Title(title).AddChoices(options))
+    static member private Ask(title: string, choices: string list) : string =
+        AnsiConsole.Prompt(SelectionPrompt<string>().Title(title).AddChoices(choices))
 
-    member this.AskToBool(title: string, trueAnswer: string, falseAnswer: string) : bool =
+    member this.AskToBool(title, trueAnswer, falseAnswer) : bool =
         Printer.Ask(title, [ trueAnswer; falseAnswer ]) = trueAnswer
