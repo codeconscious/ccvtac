@@ -54,12 +54,7 @@ type Printer(showDebug: bool) =
                  |> String.Concat
                  |> AnsiConsole.WriteLine
 
-    let extractedErrors (result: Result<'a,'b list>) : 'b list =
-        match result with
-        | Ok _ -> []
-        | Error errors -> errors
-
-    /// Escape text so Spectre markup and format strings are safe.
+    /// Escape text so Spectre.Console markup and format strings are safe.
     let escapeText (text: string) : string =
         text.Replace("{", "{{")
             .Replace("}", "}}")
