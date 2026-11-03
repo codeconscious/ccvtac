@@ -57,11 +57,7 @@ type Printer(showDebug: bool) =
             .Replace("[", "[[")
             .Replace("]", "]]")
 
-    /// Toggle showing or hiding debug messages.
-    member this.ShowDebug(show: bool) =
-        minimumLogLevel <- (if show then Level.Debug else Level.Info)
-
-    static member private AddMarkup(message: string, colors: ColorFormat) : string =
+    let addMarkup (message: string) (colors: ColorFormat) : string =
         match colors.Foreground, colors.Background, colors.Bold with
         | None, None, false -> message
         | fg, bg, bold ->
@@ -98,7 +94,7 @@ type Printer(showDebug: bool) =
             let escapedMessage = escapeText message
 
             if processMarkup then
-                let markedUp = Printer.AddMarkup(escapedMessage, colors[logLevel])
+                let markedUp = addMarkup escapedMessage colors[logLevel]
                 AnsiConsole.Markup markedUp
             else
                 // AnsiConsole.Write uses format strings internally; escapedMessage already duplicates braces
@@ -107,6 +103,10 @@ type Printer(showDebug: bool) =
             if appendLineBreak then AnsiConsole.WriteLine()
 
             emptyLines appendLines
+
+    /// Toggle showing or hiding debug messages.
+    member this.ShowDebug(show: bool) =
+        minimumLogLevel <- (if show then Level.Debug else Level.Info)
 
     member this.PrintTable(table: Table) =
         AnsiConsole.Write table
