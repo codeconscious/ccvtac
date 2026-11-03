@@ -33,7 +33,7 @@ type PrintOptions =
 
 type Printer(showDebug: bool) =
 
-    let colors : Map<Level, Colors> =
+    let colorMap: Map<Level, Colors> =
         [ (Level.Critical, { Foreground = Some "white";  Background = Some "red3"; Bold = true  })
           (Level.Error,    { Foreground = Some "red";    Background = None;        Bold = false })
           (Level.Warning,  { Foreground = Some "yellow"; Background = None;        Bold = false })
@@ -92,7 +92,7 @@ type Printer(showDebug: bool) =
             let escapedMessage = escapeText message
 
             if printOptions.ProcessMarkup then
-                escapedMessage |> addMarkup colors[logLevel] |> AnsiConsole.Markup
+                escapedMessage |> addMarkup colorMap[logLevel] |> AnsiConsole.Markup
             else
                 // AnsiConsole.Write uses format strings internally; escapedMessage already duplicates braces.
                 AnsiConsole.Write escapedMessage
