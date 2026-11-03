@@ -50,16 +50,16 @@ type Printer(showDebug: bool) =
         | Ok _ -> []
         | Error errors -> errors
 
-    /// Toggle showing or hiding debug messages.
-    member this.ShowDebug(show: bool) =
-        minimumLogLevel <- (if show then Level.Debug else Level.Info)
-
     /// Escape text so Spectre markup and format strings are safe.
-    static member private EscapeText(text: string) : string =
+    let escapeText (text: string) : string =
         text.Replace("{", "{{")
             .Replace("}", "}}")
             .Replace("[", "[[")
             .Replace("]", "]]")
+
+    /// Toggle showing or hiding debug messages.
+    member this.ShowDebug(show: bool) =
+        minimumLogLevel <- (if show then Level.Debug else Level.Info)
 
     static member private AddMarkup(message: string, colors: ColorFormat) : string =
         match colors.Foreground, colors.Background, colors.Bold with
@@ -95,7 +95,7 @@ type Printer(showDebug: bool) =
 
             emptyLines prependLines
 
-            let escapedMessage = Printer.EscapeText message
+            let escapedMessage = escapeText message
 
             if processMarkup then
                 let markedUp = Printer.AddMarkup(escapedMessage, colors[logLevel])
