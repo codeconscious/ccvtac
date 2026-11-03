@@ -91,7 +91,7 @@ type Printer(showDebug: bool) =
             ()
         else
             if String.hasNoText message then
-                raise (ArgumentNullException("message", "Message cannot be empty."))
+                raise (ArgumentException("message", "Message cannot be empty."))
 
             emptyLines prependLines
 
