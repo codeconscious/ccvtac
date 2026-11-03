@@ -107,23 +107,6 @@ type Printer(showDebug: bool) =
         this.Print(Level.Error, message, ?appendLineBreak = appendLineBreak, ?prependLines = prependLines,
                    ?appendLines = appendLines, ?processMarkup = processMarkup)
 
-    member this.Errors(errors: string seq, ?appendLines: byte) =
-        if Seq.isEmpty errors then raise (ArgumentException("No errors were provided!", "errors"))
-        for err in errors |> Seq.filter String.hasText do
-            this.Error err
-        Printer.EmptyLines(defaultArg appendLines 0uy)
-
-    member private this.Errors(headerMessage: string, errors: string seq) =
-        // Create an array with headerMessage followed by the items in errors.
-        let items = seq { yield headerMessage; yield! errors } |> Seq.toArray
-        this.Errors(items, 0uy)
-
-    member this.Errors<'a>(failResult: Result<'a, string list>, ?appendLines: byte) =
-        this.Errors(extractedErrors failResult, ?appendLines = appendLines)
-
-    member this.Errors<'a>(headerMessage: string, failingResult: Result<'a, string list>) =
-        this.Errors(headerMessage, extractedErrors failingResult)
-
     member this.Warning(message: string) =
         this.Print(Level.Warning, message)
 
