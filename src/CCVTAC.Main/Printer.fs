@@ -19,6 +19,18 @@ type private ColorFormat =
       Background: string option
       Bold: bool }
 
+type PrintOptions =
+    { AppendLineBreak: bool
+      PrependLines: byte
+      AppendLines: byte
+      ProcessMarkup: bool }
+
+    static member Default =
+        { AppendLineBreak = true
+          PrependLines = 0uy
+          AppendLines = 0uy
+          ProcessMarkup = true }
+
 type Printer(showDebug: bool) =
 
     static let colors : Dictionary<Level, ColorFormat> =
@@ -35,7 +47,7 @@ type Printer(showDebug: bool) =
         if showDebug then Level.Debug else Level.Info
 
     /// Prints the requested number of blank lines.
-    let emptyLines (count: byte) : unit =
+    let printEmptyLines (count: byte) : unit =
         if Num.isPos count
         then
             let repeats = int count - 1
@@ -68,20 +80,11 @@ type Printer(showDebug: bool) =
             $"[{markUp}]{message}[/]"
 
     /// This is the method that actually prints and is called by other methods.
-    member private this.Print
-        (
-            logLevel: Level,
-            message: string,
-            ?appendLineBreak: bool,
-            ?prependLines: byte,
-            ?appendLines: byte,
-            ?processMarkup: bool
-        ) : unit =
-
-        let appendLineBreak = defaultArg appendLineBreak true
-        let prependLines = defaultArg prependLines 0uy
-        let appendLines = defaultArg appendLines 0uy
-        let processMarkup = defaultArg processMarkup true
+    let print logLevel message printOptions : unit =
+        let (appendLineBreak, prependLines, appendLines, processMarkup) =
+            match printOptions with
+            | None -> (true, 0uy, 0uy, true)
+            | Some o -> (o.AppendLineBreak, o.PrependLines, o.AppendLines, o.ProcessMarkup)
 
         if int logLevel > int minimumLogLevel then
             ()
@@ -89,7 +92,7 @@ type Printer(showDebug: bool) =
             if String.hasNoText message then
                 raise (ArgumentException("message", "Message cannot be empty."))
 
-            emptyLines prependLines
+            printEmptyLines prependLines
 
             let escapedMessage = escapeText message
 
@@ -97,12 +100,12 @@ type Printer(showDebug: bool) =
                 let markedUp = addMarkup escapedMessage colors[logLevel]
                 AnsiConsole.Markup markedUp
             else
-                // AnsiConsole.Write uses format strings internally; escapedMessage already duplicates braces
+                // AnsiConsole.Write uses format strings internally; escapedMessage already duplicates braces.
                 AnsiConsole.Write escapedMessage
 
             if appendLineBreak then AnsiConsole.WriteLine()
 
-            emptyLines appendLines
+            printEmptyLines appendLines
 
     /// Toggle showing or hiding debug messages.
     member this.ShowDebug(show: bool) =
@@ -112,25 +115,27 @@ type Printer(showDebug: bool) =
         AnsiConsole.Write table
 
     member this.Critical(message: string) =
-        this.Print(Level.Critical, message)
+        print Level.Critical message None
 
-    member this.Error(message: string, ?appendLineBreak: bool, ?prependLines: byte, ?appendLines: byte, ?processMarkup: bool) =
-        this.Print(Level.Error, message, ?appendLineBreak = appendLineBreak, ?prependLines = prependLines,
-                   ?appendLines = appendLines, ?processMarkup = processMarkup)
+    member this.Error(message: string) =
+        print Level.Error message None
+
+    member this.Error(message, printOptions: PrintOptions) =
+        print Level.Error message (Some printOptions)
 
     member this.Warning(message: string) =
-        this.Print(Level.Warning, message)
+        print Level.Warning message None
 
     member this.Info(message: string) =
-        this.Print(Level.Info, message)
+        print Level.Info message None
 
     member this.Debug(message: string) =
-        this.Print(Level.Debug, message)
+        print Level.Debug message None
 
-    member this.EmptyLine() = emptyLines 1uy
+    member this.EmptyLine() = printEmptyLines 1uy
 
     member this.GetInput(prompt: string) : string =
-        emptyLines 1uy
+        printEmptyLines 1uy
         AnsiConsole.Ask<string>($"[skyblue1]{prompt}[/]")
 
     static member private Ask(title: string, options: string list) : string =

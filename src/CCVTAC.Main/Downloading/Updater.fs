@@ -27,4 +27,5 @@ module Updater =
                     |> printer.Warning
                 printer.EmptyLine()
             | Error msg ->
-                printer.Error($"Failure updating: {msg}", ?appendLines = Some 1uy)
+                let printOptions = { PrintOptions.Default with AppendLines = 1uy }
+                printer.Error($"Failure updating: {msg}", printOptions)
