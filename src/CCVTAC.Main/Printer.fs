@@ -3,7 +3,6 @@ namespace CCVTAC.Main
 open CCFSharpUtils
 open CCFSharpUtils.Text
 open System
-open System.Collections.Generic
 open System.Linq
 open Spectre.Console
 open FSharpPlus
@@ -34,15 +33,13 @@ type PrintOptions =
 
 type Printer(showDebug: bool) =
 
-    static let colors : Dictionary<Level, ColorFormat> =
-        Dictionary()
-        |> fun d ->
-            d.Add(Level.Critical, { Foreground = Some "white";  Background = Some "red3"; Bold = true  })
-            d.Add(Level.Error,    { Foreground = Some "red";    Background = None;        Bold = false })
-            d.Add(Level.Warning,  { Foreground = Some "yellow"; Background = None;        Bold = false })
-            d.Add(Level.Info,     { Foreground = None;          Background = None;        Bold = false })
-            d.Add(Level.Debug,    { Foreground = Some "grey70"; Background = None;        Bold = false })
-            d
+    let colors : Map<Level, ColorFormat> =
+        [ (Level.Critical, { Foreground = Some "white";  Background = Some "red3"; Bold = true  })
+          (Level.Error,    { Foreground = Some "red";    Background = None;        Bold = false })
+          (Level.Warning,  { Foreground = Some "yellow"; Background = None;        Bold = false })
+          (Level.Info,     { Foreground = None;          Background = None;        Bold = false })
+          (Level.Debug,    { Foreground = Some "grey70"; Background = None;        Bold = false }) ]
+        |> Map.ofList
 
     let mutable minimumLogLevel =
         if showDebug then Level.Debug else Level.Info
