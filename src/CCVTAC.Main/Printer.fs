@@ -6,6 +6,7 @@ open System
 open System.Collections.Generic
 open System.Linq
 open Spectre.Console
+open FSharpPlus
 
 type private Level =
     | Critical = 0
@@ -79,33 +80,31 @@ type Printer(showDebug: bool) =
             let markUp = $"{boldPart}{fgPart}{bgPart}"
             $"[{markUp}]{message}[/]"
 
-    /// This is the method that actually prints and is called by other methods.
-    let print logLevel message printOptions : unit =
-        let (appendLineBreak, prependLines, appendLines, processMarkup) =
-            match printOptions with
-            | None -> (true, 0uy, 0uy, true)
-            | Some o -> (o.AppendLineBreak, o.PrependLines, o.AppendLines, o.ProcessMarkup)
-
+    /// This is the method that actually prints and is called by the methods.
+    let print logLevel message maybePrintOptions : unit =
         if int logLevel > int minimumLogLevel then
             ()
         else
+            let printOptions = maybePrintOptions |> option id PrintOptions.Default
+
             if String.hasNoText message then
                 raise (ArgumentException("message", "Message cannot be empty."))
 
-            printEmptyLines prependLines
+            printEmptyLines printOptions.PrependLines
 
             let escapedMessage = escapeText message
 
-            if processMarkup then
+            if printOptions.ProcessMarkup then
                 let markedUp = addMarkup escapedMessage colors[logLevel]
                 AnsiConsole.Markup markedUp
             else
                 // AnsiConsole.Write uses format strings internally; escapedMessage already duplicates braces.
                 AnsiConsole.Write escapedMessage
 
-            if appendLineBreak then AnsiConsole.WriteLine()
+            if printOptions.AppendLineBreak then
+                AnsiConsole.WriteLine()
 
-            printEmptyLines appendLines
+            printEmptyLines printOptions.AppendLines
 
     /// Toggle showing or hiding debug messages.
     member this.ShowDebug(shouldEnable) =
