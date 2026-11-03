@@ -47,7 +47,6 @@ type Printer(showDebug: bool) =
     let mutable minimumLogLevel =
         if showDebug then Level.Debug else Level.Info
 
-    /// Prints the requested number of blank lines.
     let printEmptyLines count : unit =
         if Num.isPos count
         then
@@ -83,7 +82,6 @@ type Printer(showDebug: bool) =
     let ask title (choices: string list) : string =
         AnsiConsole.Prompt(SelectionPrompt<string>().Title(title).AddChoices(choices))
 
-    /// This is the method that actually prints and is called by the methods.
     let print logLevel message maybePrintOptions : unit =
         if logLevel > minimumLogLevel then
             ()
