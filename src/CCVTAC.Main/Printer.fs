@@ -80,6 +80,9 @@ type Printer(showDebug: bool) =
             let markUp = $"{boldPart}{fgPart}{bgPart}"
             $"[{markUp}]{message}[/]"
 
+    let ask title (choices: string list) : string =
+        AnsiConsole.Prompt(SelectionPrompt<string>().Title(title).AddChoices(choices))
+
     /// This is the method that actually prints and is called by the methods.
     let print logLevel message maybePrintOptions : unit =
         if int logLevel > int minimumLogLevel then
@@ -137,8 +140,5 @@ type Printer(showDebug: bool) =
         printEmptyLines 1uy
         AnsiConsole.Ask<string>($"[skyblue1]{prompt}[/]")
 
-    static member private Ask(title: string, choices: string list) : string =
-        AnsiConsole.Prompt(SelectionPrompt<string>().Title(title).AddChoices(choices))
-
-    member this.AskToBool(title, trueAnswer, falseAnswer) : bool =
-        Printer.Ask(title, [ trueAnswer; falseAnswer ]) = trueAnswer
+    member this.AskToBool(question, trueAnswer, falseAnswer) : bool =
+        (ask question [ trueAnswer; falseAnswer ]) = trueAnswer
