@@ -100,9 +100,8 @@ type Printer(showDebug: bool) =
     member this.PrintTable(table: Table) =
         AnsiConsole.Write table
 
-    member this.Critical(message: string, ?appendLineBreak: bool, ?prependLines: byte, ?appendLines: byte, ?processMarkup: bool) =
-        this.Print(Level.Critical, message, ?appendLineBreak = appendLineBreak, ?prependLines = prependLines,
-                   ?appendLines = appendLines, ?processMarkup = processMarkup)
+    member this.Critical(message: string) =
+        this.Print(Level.Critical, message)
 
     member this.Error(message: string, ?appendLineBreak: bool, ?prependLines: byte, ?appendLines: byte, ?processMarkup: bool) =
         this.Print(Level.Error, message, ?appendLineBreak = appendLineBreak, ?prependLines = prependLines,
