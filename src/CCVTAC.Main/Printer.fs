@@ -130,9 +130,8 @@ type Printer(showDebug: bool) =
     member this.Info(message: string, ?appendLines: byte) =
         this.Print(Level.Info, message, ?appendLines = appendLines)
 
-    member this.Debug(message: string, ?appendLineBreak: bool, ?prependLines: byte, ?appendLines: byte, ?processMarkup: bool) =
-        this.Print(Level.Debug, message, ?appendLineBreak = appendLineBreak, ?prependLines = prependLines,
-                   ?appendLines = appendLines, ?processMarkup = processMarkup)
+    member this.Debug(message: string) =
+        this.Print(Level.Debug, message)
 
     member this.EmptyLine() = Printer.EmptyLines 1uy
 
