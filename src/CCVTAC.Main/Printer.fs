@@ -34,6 +34,17 @@ type Printer(showDebug: bool) =
     let mutable minimumLogLevel =
         if showDebug then Level.Debug else Level.Info
 
+    /// Prints the requested number of blank lines.
+    let emptyLines (count: byte) : unit =
+        if Num.isPos count
+        then
+            let repeats = int count - 1
+            if repeats < 1
+            then AnsiConsole.WriteLine()
+            else Enumerable.Repeat(String.nl, repeats)
+                 |> String.Concat
+                 |> AnsiConsole.WriteLine
+
     let extractedErrors (result: Result<'a,'b list>) : 'b list =
         match result with
         | Ok _ -> []
@@ -82,7 +93,7 @@ type Printer(showDebug: bool) =
             if String.hasNoText message then
                 raise (ArgumentNullException("message", "Message cannot be empty."))
 
-            Printer.EmptyLines prependLines
+            emptyLines prependLines
 
             let escapedMessage = Printer.EscapeText message
 
@@ -95,7 +106,7 @@ type Printer(showDebug: bool) =
 
             if appendLineBreak then AnsiConsole.WriteLine()
 
-            Printer.EmptyLines appendLines
+            emptyLines appendLines
 
     member this.PrintTable(table: Table) =
         AnsiConsole.Write table
@@ -116,23 +127,10 @@ type Printer(showDebug: bool) =
     member this.Debug(message: string) =
         this.Print(Level.Debug, message)
 
-    member this.EmptyLine() = Printer.EmptyLines 1uy
-
-    member this.EmptyLines(count: byte) = Printer.EmptyLines count
-
-    /// Prints the requested number of blank lines.
-    static member EmptyLines(count: byte) =
-        if Num.isPos count
-        then
-            let repeats = int count - 1
-            if repeats < 1
-            then AnsiConsole.WriteLine()
-            else Enumerable.Repeat(String.nl, repeats)
-                 |> String.Concat
-                 |> AnsiConsole.WriteLine
+    member this.EmptyLine() = emptyLines 1uy
 
     member this.GetInput(prompt: string) : string =
-        Printer.EmptyLines 1uy
+        emptyLines 1uy
         AnsiConsole.Ask<string>($"[skyblue1]{prompt}[/]")
 
     static member private Ask(title: string, options: string list) : string =
