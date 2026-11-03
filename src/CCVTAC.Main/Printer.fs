@@ -61,7 +61,7 @@ type Printer(showDebug: bool) =
             .Replace("[", "[[")
             .Replace("]", "]]")
 
-    let addMarkup message colors : string =
+    let addMarkup colors message : string =
         match colors.Foreground,
               colors.Background,
               colors.Bold
@@ -92,8 +92,7 @@ type Printer(showDebug: bool) =
             let escapedMessage = escapeText message
 
             if printOptions.ProcessMarkup then
-                let markedUp = addMarkup escapedMessage colors[logLevel]
-                AnsiConsole.Markup markedUp
+                escapedMessage |> addMarkup colors[logLevel] |> AnsiConsole.Markup
             else
                 // AnsiConsole.Write uses format strings internally; escapedMessage already duplicates braces.
                 AnsiConsole.Write escapedMessage
