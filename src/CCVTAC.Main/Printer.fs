@@ -85,7 +85,7 @@ type Printer(showDebug: bool) =
 
     /// This is the method that actually prints and is called by the methods.
     let print logLevel message maybePrintOptions : unit =
-        if int logLevel > int minimumLogLevel then
+        if logLevel > minimumLogLevel then
             ()
         else
             let printOptions = maybePrintOptions |> option id PrintOptions.Default
