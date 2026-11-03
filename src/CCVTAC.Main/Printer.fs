@@ -70,8 +70,12 @@ type Printer(showDebug: bool) =
             .Replace("]", "]]")
 
     let addMarkup message colorFormat : string =
-        match colorFormat.Foreground, colorFormat.Background, colorFormat.Bold with
-        | None, None, false -> message
+        match colorFormat.Foreground,
+              colorFormat.Background,
+              colorFormat.Bold
+        with
+        | None, None, false ->
+            message
         | fg, bg, bold ->
             let boldPart = if bold then "bold " else String.Empty
             let fgPart = defaultArg fg "default"
