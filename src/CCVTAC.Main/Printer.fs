@@ -14,7 +14,7 @@ type private Level =
     | Info = 3
     | Debug = 4
 
-type private ColorFormat =
+type private Colors =
     { Foreground: string option
       Background: string option
       Bold: bool }
@@ -33,7 +33,7 @@ type PrintOptions =
 
 type Printer(showDebug: bool) =
 
-    let colors : Map<Level, ColorFormat> =
+    let colors : Map<Level, Colors> =
         [ (Level.Critical, { Foreground = Some "white";  Background = Some "red3"; Bold = true  })
           (Level.Error,    { Foreground = Some "red";    Background = None;        Bold = false })
           (Level.Warning,  { Foreground = Some "yellow"; Background = None;        Bold = false })
@@ -66,10 +66,10 @@ type Printer(showDebug: bool) =
             .Replace("[", "[[")
             .Replace("]", "]]")
 
-    let addMarkup message colorFormat : string =
-        match colorFormat.Foreground,
-              colorFormat.Background,
-              colorFormat.Bold
+    let addMarkup message colors : string =
+        match colors.Foreground,
+              colors.Background,
+              colors.Bold
         with
         | None, None, false ->
             message
