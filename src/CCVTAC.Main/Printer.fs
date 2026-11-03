@@ -124,9 +124,8 @@ type Printer(showDebug: bool) =
     member this.Errors<'a>(headerMessage: string, failingResult: Result<'a, string list>) =
         this.Errors(headerMessage, extractedErrors failingResult)
 
-    member this.Warning(message: string, ?appendLineBreak: bool, ?prependLines: byte, ?appendLines: byte, ?processMarkup: bool) =
-        this.Print(Level.Warning, message, ?appendLineBreak = appendLineBreak, ?prependLines = prependLines,
-                   ?appendLines = appendLines, ?processMarkup = processMarkup)
+    member this.Warning(message: string) =
+        this.Print(Level.Warning, message)
 
     member this.Info(message: string, ?appendLineBreak: bool, ?prependLines: byte, ?appendLines: byte, ?processMarkup: bool) =
         this.Print(Level.Info, message, ?appendLineBreak = appendLineBreak, ?prependLines = prependLines,
