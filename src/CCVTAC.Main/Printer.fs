@@ -88,7 +88,7 @@ type Printer(showDebug: bool) =
             let printOptions = maybePrintOptions |> option id PrintOptions.Default
 
             if String.hasNoText message then
-                raise (ArgumentException("message", "Message cannot be empty."))
+                raise (ArgumentException(nameof(message), "Message cannot be empty."))
 
             printEmptyLines printOptions.PrependLines
 
