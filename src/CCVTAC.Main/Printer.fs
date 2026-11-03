@@ -142,5 +142,5 @@ type Printer(showDebug: bool) =
         printEmptyLines 1uy
         AnsiConsole.Ask<string>($"[skyblue1]{prompt}[/]")
 
-    member this.AskToBool(question, trueAnswer, falseAnswer) : bool =
-        (ask question [ trueAnswer; falseAnswer ]) = trueAnswer
+    member this.AskToBool(question, yesAnswer, noAnswer) : bool =
+        (ask question [ yesAnswer; noAnswer ]) = yesAnswer
