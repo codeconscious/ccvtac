@@ -192,9 +192,9 @@ module Orchestrator =
         // Unknown command
         else
             Error <|
-                sprintf "\"%s\" is not a valid command. Enter \"%shelp\" to see a list of commands."
+                sprintf "\"%s\" is not a valid command. Enter \"%s\" to see a list of commands."
                     command
-                    (string Commands.prefix)
+                    $"""{(string Commands.prefix)}help"""
 
 
     /// Processes a single user request, from input to downloading and file post-processing.
