@@ -163,9 +163,11 @@ module Orchestrator =
             else
                 let updateResult = updateAudioFormat settings format
                 match updateResult with
-                | Error err -> Error err
+                | Error err ->
+                    Error err
                 | Ok newSettings ->
-                    printer.Info(summarizeUpdate "Audio Formats" (String.Join(", ", newSettings.AudioFormats)))
+                    let audioFormats = String.Join(", ", newSettings.AudioFormats)
+                    printer.Info <| summarizeUpdate "Audio Formats" audioFormats
                     Ok { NextAction = Continue; UpdatedSettings = Some newSettings }
 
         // Update audio quality
