@@ -183,7 +183,8 @@ module Orchestrator =
                     | Error err ->
                         Error err
                     | Ok updatedSettings ->
-                        printer.Info(summarizeUpdate "Audio Quality" (updatedSettings.AudioQuality.ToString()))
+                        let audioQuality = updatedSettings.AudioQuality.ToString()
+                        printer.Info <| summarizeUpdate "Audio Quality" audioQuality
                         Ok { NextAction = Continue; UpdatedSettings = Some updatedSettings }
                 | _ ->
                     Error $"\"%s{inputQuality}\" is an invalid quality value."
