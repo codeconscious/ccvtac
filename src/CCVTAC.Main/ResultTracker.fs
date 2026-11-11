@@ -42,9 +42,6 @@ type ResultTracker<'a>(printer: Printer) =
 
     /// Prints the output for the current application session.
     member _.PrintSessionSummary() : unit =
-        printer.Debug $"successCount   == {successCount}"
-        printer.Debug $"failures.Count == {failures.Count}"
-
         let successSummary = String.plur' "success" Es successCount
         let failureSummary = String.plur' "failure" S failures.Count
 
