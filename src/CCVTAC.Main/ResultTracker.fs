@@ -11,15 +11,6 @@ type ResultTracker<'a>(printer: Printer) =
 
     let failures = Dictionary<string,string>()
 
-    static let combineErrors (errors: string list) =
-        String.Join(" / ", errors)
-
-    member _.AddSuccess() : unit =
-        successCount <- successCount + 1UL
-
-    member _.AddFailure(url: string, error: string) : unit =
-        failures.Add(url, error)
-
     /// Logs the result for a specific corresponding input.
     member _.RegisterResult(input: string, result: Result<'a, string>) : unit =
         match result with
