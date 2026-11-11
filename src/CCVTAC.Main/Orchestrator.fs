@@ -14,10 +14,7 @@ open System
 
 module Orchestrator =
 
-    type NextAction =
-        | Continue
-        | QuitAtUserRequest
-        | QuitDueToErrors
+    type NextAction = Continue | QuitAtUserRequest | QuitDueToErrors
 
     type BatchResults =
         { NextAction: NextAction
