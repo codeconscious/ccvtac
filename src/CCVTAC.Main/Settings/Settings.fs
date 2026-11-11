@@ -86,8 +86,7 @@ module Settings =
             | false -> "OFF"
 
         let simplePluralize label count =
-            String.pluralizeS label count
-            |> sprintf "%d %s" count
+            sprintf "%s" <| String.plur' label S count
 
         let tagDetectionPatternCount (patterns: TagDetectionPatterns) =
             patterns.Title.Length +

@@ -25,13 +25,13 @@ module Orchestrator =
 
     let summarizeInput
         (printer: Printer)
-        (categorizedInputs: CategorizedInput list)
+        (inputs: CategorizedInput list)
         (counts: CategoryCounts)
         : unit =
 
-        if List.hasMultiple categorizedInputs then
-            let urlSummary = String.pluralizeSWithCount "URL" counts[Url]
-            let cmdSummary = String.pluralizeSWithCount "command" counts[Command]
+        if List.hasMultiple inputs then
+            let urlSummary = String.plur' "URL" S counts[Url]
+            let cmdSummary = String.plur' "command" S counts[Command]
 
             printer.Info <|
                 match counts[Url], counts[Command] with
@@ -40,7 +40,7 @@ module Orchestrator =
                 | _, c when c > 0 ->          $"Batch of %s{cmdSummary} entered:"
                 | _, _ ->                      "No URLs or commands were entered!"
 
-            for input in categorizedInputs do
+            for input in inputs do
                 printer.Info $" • %s{input.Text}"
 
             printer.EmptyLine()
@@ -214,13 +214,13 @@ module Orchestrator =
         let printSleep (category: InputCategory) =
             if category.IsUrl then
                 let seconds = settings.SleepSecondsBetweenURLs
-                let label = String.pluralizeS "second" seconds
+                let waitSummary secs = String.plur' "second" S secs
                 sleep
-                    (fun s -> $"Sleeping for {s} {label}...")
-                    (fun s -> $"Slept for {s} {label}.")
+                    (fun remainingSeconds -> $"Sleeping for {waitSummary remainingSeconds}...")
+                    (fun totalSeconds -> $"Slept for {waitSummary totalSeconds}.")
                     seconds
                 |> fun msg ->
-                    printer.Info($"{String.nl}{msg}")
+                    printer.Info $"{String.nl}{msg}"
                     printer.EmptyLine()
 
         let processInput category text index : Result<BatchResults,string> =
@@ -246,6 +246,7 @@ module Orchestrator =
                 (nextAction', settings', index)
             | input :: remainingInputs when nextAction' = Continue ->
                 let processResult = processInput input.Category input.Text index
+
                 batchResults.RegisterResult(input.Text, processResult)
 
                 // Deleting the files here might make debugging issues a bit tougher.
