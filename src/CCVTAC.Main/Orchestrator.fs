@@ -49,6 +49,7 @@ module Orchestrator =
         (printer: Printer)
         (url: string)
         (settings: UserSettings)
+        (resultTracker: ResultTracker<string>)
         (history: History)
         (urlInputTime: DateTime)
         (batchSize: int)
@@ -75,6 +76,7 @@ module Orchestrator =
                 history.Append(url, urlInputTime, printer)
 
                 let downloadResult = Downloader.run printer mediaType settings
+                resultTracker.RegisterResult(url, downloadResult)
 
                 match downloadResult with
                 | Error errs ->
@@ -204,6 +206,7 @@ module Orchestrator =
         (inputs: CategorizedInput list)
         (categoryCounts: CategoryCounts)
         (settings: UserSettings)
+        (resultTracker: ResultTracker<string>)
         (history: History)
         : BatchResults =
 
@@ -226,7 +229,7 @@ module Orchestrator =
         let processInput category text index : Result<BatchResults,string> =
             match category with
             | Command -> processCommand printer text settings history
-            | Url -> processUrl printer text settings history inputTime inputs.Length index
+            | Url -> processUrl printer text settings resultTracker history inputTime inputs.Length index
 
         let deleteLeftoverFiles dirName : Result<string option,string> =
             match Directories.warnIfAnyFiles 10 dirName with
@@ -321,7 +324,7 @@ module Orchestrator =
                 let categoryCounts = countCategories categorizedInputs
                 summarizeInput printer categorizedInputs categoryCounts
 
-                let batchResult = processBatch printer categorizedInputs categoryCounts currentSettings history
+                let batchResult = processBatch printer categorizedInputs categoryCounts currentSettings results history
                 nextAction <- batchResult.NextAction
 
                 match batchResult.UpdatedSettings with
