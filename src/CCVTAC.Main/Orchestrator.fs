@@ -214,14 +214,14 @@ module Orchestrator =
         let printSleep (category: InputCategory) =
             if category.IsUrl then
                 let seconds = settings.SleepSecondsBetweenURLs
-                let waitSummary secs = String.plur' "second" S secs
-                sleep
-                    (fun remainingSeconds -> $"Sleeping for {waitSummary remainingSeconds}...")
-                    (fun totalSeconds -> $"Slept for {waitSummary totalSeconds}.")
-                    seconds
-                |> fun msg ->
-                    printer.Info $"{String.nl}{msg}"
-                    printer.EmptyLine()
+                let secondsMsg secs = String.plur' "second" S secs
+                let sleptMsg =
+                    sleep
+                        (fun remainingSeconds -> $"Sleeping for {secondsMsg remainingSeconds}...")
+                        (fun totalSeconds -> $"Slept for {secondsMsg totalSeconds}.")
+                        seconds
+                printer.Info $"{String.nl}{sleptMsg}"
+                printer.EmptyLine()
 
         let processInput category text index : Result<BatchResults,string> =
             match category with
