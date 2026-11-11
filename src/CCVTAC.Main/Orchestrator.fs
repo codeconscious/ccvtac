@@ -98,10 +98,10 @@ module Orchestrator =
                     Ok { NextAction = Continue; UpdatedSettings = None }
 
     let summarizeToggle settingName setting =
-        sprintf "%s was toggled to %s for this session." settingName (if setting then "ON" else "OFF")
+        sprintf "%s toggled to %s for this session." settingName (if setting then "ON" else "OFF")
 
     let summarizeUpdate settingName setting =
-        sprintf "%s was updated to \"%s\" for this session." settingName setting
+        sprintf "%s updated to \"%s\" for this session." settingName setting
 
     let processCommand
         (printer: Printer)
