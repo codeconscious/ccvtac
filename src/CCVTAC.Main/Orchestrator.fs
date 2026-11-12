@@ -11,6 +11,7 @@ open CCFSharpUtils.Collections
 open CCFSharpUtils.Text
 open Startwatch.Library
 open System
+open System.Globalization
 
 module Orchestrator =
 
@@ -100,6 +101,9 @@ module Orchestrator =
     let summarizeUpdate settingName setting =
         sprintf "%s updated to \"%s\" for this session." settingName setting
 
+    let private extractValue (prefix: string) (command: string) : string =
+        command.Substring(prefix.Length).Trim()
+
     let processCommand
         (printer: Printer)
         (command: string)
@@ -156,7 +160,11 @@ module Orchestrator =
 
         // Update audio formats
         elif command |> String.startsWithIgnoreCase Commands.updateAudioFormatPrefix then
-            let format = command.Replace(Commands.updateAudioFormatPrefix, String.Empty).ToLowerInvariant()
+            let format =
+                command
+                |> extractValue Commands.updateAudioFormatPrefix
+                |> _.ToLowerInvariant()
+
             if String.hasNoText format then
                 Error "You must append one or more supported audio formats separated by commas (e.g., \"m4a,opus,best\")."
             else
@@ -171,22 +179,26 @@ module Orchestrator =
 
         // Update audio quality
         elif command |> String.startsWithIgnoreCase Commands.updateAudioQualityPrefix then
-            let inputQuality = command.Replace(Commands.updateAudioQualityPrefix, String.Empty)
+            let inputQuality = extractValue Commands.updateAudioQualityPrefix command
+            let rangeRule = "Audio quality must be between 10 (lowest) and 0 (highest)."
+
             if String.hasNoText inputQuality then
-                Error "You must enter a number representing an audio quality between 10 (lowest) and 0 (highest)."
+                Error rangeRule
             else
-                match Byte.TryParse inputQuality with
-                | true, quality ->
-                    let updateResult = updateAudioQuality settings quality
-                    match updateResult with
+                match Byte.TryParse(inputQuality, NumberStyles.None, CultureInfo.InvariantCulture) with
+                | true, quality when quality <= 10uy ->
+                    match updateAudioQuality settings quality with
                     | Error err ->
                         Error err
                     | Ok updatedSettings ->
-                        let audioQuality = updatedSettings.AudioQuality.ToString()
-                        printer.Info <| summarizeUpdate "Audio Quality" audioQuality
-                        Ok { NextAction = Continue; UpdatedSettings = Some updatedSettings }
+                        let updatedQuality = updatedSettings.AudioQuality.ToString()
+                        printer.Info <| summarizeUpdate "Audio Quality" updatedQuality
+                        Ok { NextAction = Continue
+                             UpdatedSettings = Some updatedSettings }
+                | true, _ ->
+                    Error rangeRule
                 | _ ->
-                    Error $"\"%s{inputQuality}\" is an invalid quality value."
+                    Error $"\"%s{inputQuality}\" is an invalid quality value. %s{rangeRule}"
 
         // Unknown command
         else
