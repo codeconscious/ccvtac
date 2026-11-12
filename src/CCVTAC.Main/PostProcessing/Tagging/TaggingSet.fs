@@ -11,10 +11,10 @@ open System.Text.RegularExpressions
 /// Contains the names of all files related to tagging audio files.
 type TaggingSet =
     private
-        { VideoId: string
+        { VideoId:    string
           AudioFiles: string list
-          JsonFile: string
-          ImageFile: string }
+          JsonFile:   string
+          ImageFile:  string }
 
 module TaggingSet =
     // Accessors
@@ -35,9 +35,8 @@ module TaggingSet =
     let private createValidated (videoId, fileNames) : Result<TaggingSet, string list> =
         let hasSupportedAudioExt (fileName: string) =
             match Path.GetExtension fileName with
-            | Null -> false
-            | NonNull empty when String.hasNoText empty -> false
-            | NonNull ext -> Files.audioFileExts |> List.containsIgnoreCase ext
+            | ""  -> false
+            | ext -> Files.audioFileExts |> List.containsIgnoreCase ext
 
         let audioFiles = fileNames |> List.filter hasSupportedAudioExt
         let jsonFiles  = fileNames |> Files.filterByExt Files.jsonFileExt
