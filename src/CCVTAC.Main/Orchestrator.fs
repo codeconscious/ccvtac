@@ -291,41 +291,45 @@ module Orchestrator =
         { NextAction = finalNextAction
           UpdatedSettings = Some finalSettings }
 
-    /// Ensures the download environment is ready, then initiates the input and download process.
-    let start (printer: Printer) (settings: UserSettings) : unit =
-        // The working directory should start empty. Give the user a chance to empty it.
-        match Directories.warnIfAnyFiles 10 settings.WorkingDirectory with
-        | Ok () -> ()
-        | Error filesFoundErr ->
-            printer.Error filesFoundErr
-            Directories.askToDeleteAllFiles printer settings.WorkingDirectory |> function
-            | Ok results -> Directories.printDeletionResults printer results
+    let private isWorkingDirectoryReady (printer: Printer) dirName : bool =
+        match Directories.warnIfAnyFiles 10 dirName with
+        | Ok () ->
+            true
+        | Error err ->
+            printer.Error err
+            match Directories.askToDeleteAllFiles printer dirName with
+            | Ok results ->
+                Directories.printDeletionResults printer results
+                true
             | Error deletionError ->
                 printer.Error deletionError
                 printer.Info "Aborting..."
+                false
 
-        let results = ResultTracker<string> printer
-        let history = History(settings.HistoryFile, settings.HistoryDisplayCount)
-        let mutable nextAction = Continue
-        let mutable currentSettings = settings
+    let start (printer: Printer) (settings: UserSettings) : unit =
+        if isWorkingDirectoryReady printer settings.WorkingDirectory then
+            let results = ResultTracker<string> printer
+            let history = History(settings.HistoryFile, settings.HistoryDisplayCount)
+            let mutable nextAction = Continue
+            let mutable currentSettings = settings
 
-        while nextAction = Continue do
-            let input = printer.GetInput prompt
-            let splitInputs = splitInputText input
+            while nextAction = Continue do
+                let input = printer.GetInput prompt
+                let splitInputs = splitInputText input
 
-            match splitInputs with
-            | [] ->
-                printer.Error $"Invalid input. Enter only URLs or commands beginning with \"%c{Commands.prefix}\"."
-            | _ ->
-                let categorizedInputs = categorizeInputs splitInputs
-                let categoryCounts = countCategories categorizedInputs
-                summarizeInput printer categorizedInputs categoryCounts
+                match splitInputs with
+                | [] ->
+                    printer.Error $"Invalid input. Enter only URLs or commands beginning with \"%c{Commands.prefix}\"."
+                | _ ->
+                    let categorizedInputs = categorizeInputs splitInputs
+                    let categoryCounts = countCategories categorizedInputs
+                    summarizeInput printer categorizedInputs categoryCounts
 
-                let batchResult = processBatch printer categorizedInputs categoryCounts currentSettings results history
-                nextAction <- batchResult.NextAction
+                    let batchResult = processBatch printer categorizedInputs categoryCounts currentSettings results history
+                    nextAction <- batchResult.NextAction
 
-                match batchResult.UpdatedSettings with
-                | Some newSettings -> currentSettings <- newSettings
-                | None -> ()
+                    match batchResult.UpdatedSettings with
+                    | Some newSettings -> currentSettings <- newSettings
+                    | None -> ()
 
-        results.PrintSessionSummary()
+            results.PrintSessionSummary()
