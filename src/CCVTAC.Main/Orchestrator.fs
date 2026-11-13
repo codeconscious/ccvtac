@@ -9,6 +9,7 @@ open CCVTAC.Main.Settings.Settings
 open CCVTAC.Main.Settings.Settings.LiveUpdating
 open CCFSharpUtils.Collections
 open CCFSharpUtils.Text
+open FSharpPlus
 open Startwatch.Library
 open System
 open System.Globalization
@@ -260,10 +261,7 @@ module Orchestrator =
                 let processResult = processInput input.Category input.Text index
                 batchResults.RegisterResult(input.Text, processResult)
 
-                // Report processing errors before cleanup so they are not lost if cleanup fails.
-                match processResult with
-                | Error err -> printer.Error err
-                | Ok _ -> ()
+                processResult |> Result.iterError printer.Error
 
                 let cleanupResult =
                     if input.Category.IsUrl
@@ -277,7 +275,6 @@ module Orchestrator =
                 | Ok message ->
                     message |> Option.iter printer.Debug
                     if List.isNotEmpty remainingInputs then printSleep input.Category
-
                     match processResult with
                     | Error _ ->
                         loop remainingInputs settings' nextAction' (index + 1)
