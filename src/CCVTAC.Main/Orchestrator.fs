@@ -268,8 +268,7 @@ module Orchestrator =
                 processResult |> Result.iterError (errorText >> printer.Error)
 
                 match processResult with
-                | Error (Fatal errMsg) ->
-                    printer.Error errMsg // TODO: This might not be needed. Remove if not.
+                | Error (Fatal _) ->
                     // The item was not processed, so `index` (not index + 1) keeps it in the unprocessed list.
                     (QuitDueToErrors, settings, index)
                 | _ ->
