@@ -151,7 +151,7 @@ module Orchestrator =
         match toggle with
         | Some spec ->
             let newSettings = spec.Toggle settings
-            printer.Info(summarizeToggle spec.Label (spec.Read newSettings))
+            printer.Info <| summarizeToggle spec.Label (spec.Read newSettings)
             spec.AfterToggle newSettings
             Ok { NextAction = Continue; UpdatedSettings = Some newSettings }
 
@@ -174,7 +174,7 @@ module Orchestrator =
                 Ok { NextAction = Continue; UpdatedSettings = None }
 
             elif checkCommand Commands.settingsSummary then
-                Settings.toTable settings |> printer.PrintTable
+                printer.PrintTable (toTable settings)
                 Ok { NextAction = Continue; UpdatedSettings = None }
 
             elif command |> String.startsWithIgnoreCase Commands.updateAudioFormatPrefix then
@@ -184,7 +184,7 @@ module Orchestrator =
                     |> _.ToLowerInvariant()
 
                 if String.hasNoText format then
-                    Error "You must append one or more supported audio formats separated by commas (e.g., \"m4a,opus,best\")."
+                    Error "Append one or more supported audio formats separated by commas (e.g., \"m4a,opus,best\")."
                 else
                     match updateAudioFormat settings format with
                     | Error err ->
@@ -220,7 +220,6 @@ module Orchestrator =
                 Error $"\"%s{command}\" is not a valid command. Enter \"%c{Commands.prefix}help\" to see a list of commands."
 
     /// Processes a single user request, from input to downloading and file post-processing.
-    /// Returns the next action the application should take (e.g., continue or quit).
     let processBatch printer (inputs: CategorizedInput list) (categoryCounts: CategoryCounts)
                      settings resultTracker history
                      : BatchResults =
