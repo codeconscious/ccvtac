@@ -258,26 +258,32 @@ module Orchestrator =
                 (nextAction', settings', index)
             | input :: remainingInputs when nextAction' = Continue ->
                 let processResult = processInput input.Category input.Text index
-
                 batchResults.RegisterResult(input.Text, processResult)
 
-                // Deleting the files here might make debugging issues a bit tougher.
-                match deleteLeftoverFiles settings.WorkingDirectory with
+                // Report processing errors before cleanup so they are not lost if cleanup fails.
+                match processResult with
+                | Error err -> printer.Error err
+                | Ok _ -> ()
+
+                let cleanupResult =
+                    if input.Category.IsUrl
+                    then deleteLeftoverFiles settings.WorkingDirectory
+                    else Ok None
+
+                match cleanupResult with
                 | Error errMsg ->
                     printer.Error errMsg
-                    (QuitDueToErrors, settings', index)
+                    (QuitDueToErrors, settings', index + 1)
                 | Ok message ->
                     message |> Option.iter printer.Debug
+                    if List.isNotEmpty remainingInputs then printSleep input.Category
+
                     match processResult with
-                    | Error err ->
-                        printer.Error err
-                        if List.isNotEmpty remainingInputs then printSleep input.Category
+                    | Error _ ->
                         loop remainingInputs settings' nextAction' (index + 1)
-                    | Ok processResult ->
-                        if List.isNotEmpty remainingInputs then printSleep input.Category
-                        let newSettings = defaultArg processResult.UpdatedSettings settings'
-                        let newNextAction = processResult.NextAction
-                        loop remainingInputs newSettings newNextAction (index + 1)
+                    | Ok result ->
+                        let newSettings = defaultArg result.UpdatedSettings settings'
+                        loop remainingInputs newSettings result.NextAction (index + 1)
             | _ ->
                 (nextAction', settings', index)
 
