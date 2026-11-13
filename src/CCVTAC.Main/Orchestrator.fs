@@ -222,7 +222,7 @@ module Orchestrator =
         let batchWatch = Watch()
         let batchResults = ResultTracker<BatchResults> printer
 
-        let printSleep (category: InputCategory) =
+        let printSleep settings (category: InputCategory) =
             if category.IsUrl then
                 let seconds = settings.SleepSecondsBetweenURLs
                 let secondsMsg secs = String.plur' "second" S secs
@@ -234,7 +234,7 @@ module Orchestrator =
                 printer.Info $"{String.nl}{sleptMsg}"
                 printer.EmptyLine()
 
-        let processInput category text index : Result<BatchResults,string> =
+        let processInput settings category text index : Result<BatchResults,string> =
             match category with
             | Command -> processCommand printer text settings history
             | Url -> processUrl printer text settings resultTracker history inputTime inputs.Length index
@@ -251,36 +251,34 @@ module Orchestrator =
                 | Error deletionError ->
                     Error $"Error deleting leftover files after download: {deletionError}"
 
-        let rec loop inputs settings' nextAction' index : NextAction * UserSettings * int =
+        let rec loop inputs currentSettings nextAction' index : NextAction * UserSettings * int =
             match inputs with
-            | [] ->
-                (nextAction', settings', index)
+            | [] -> (nextAction', currentSettings, index)
             | input :: remainingInputs when nextAction' = Continue ->
-                let processResult = processInput input.Category input.Text index
+                let processResult = processInput currentSettings input.Category input.Text index
                 batchResults.RegisterResult(input.Text, processResult)
-
                 processResult |> Result.iterError printer.Error
 
                 let cleanupResult =
                     if input.Category.IsUrl
-                    then deleteLeftoverFiles settings.WorkingDirectory
+                    then deleteLeftoverFiles currentSettings.WorkingDirectory
                     else Ok None
 
                 match cleanupResult with
                 | Error errMsg ->
                     printer.Error errMsg
-                    (QuitDueToErrors, settings', index + 1)
+                    (QuitDueToErrors, currentSettings, index + 1)
                 | Ok message ->
                     message |> Option.iter printer.Debug
-                    if List.isNotEmpty remainingInputs then printSleep input.Category
+                    if List.isNotEmpty remainingInputs then printSleep currentSettings input.Category
                     match processResult with
                     | Error _ ->
-                        loop remainingInputs settings' nextAction' (index + 1)
+                        loop remainingInputs currentSettings nextAction' (index + 1)
                     | Ok result ->
-                        let newSettings = defaultArg result.UpdatedSettings settings'
+                        let newSettings = defaultArg result.UpdatedSettings currentSettings
                         loop remainingInputs newSettings result.NextAction (index + 1)
             | _ ->
-                (nextAction', settings', index)
+                (nextAction', currentSettings, index)
 
         let (finalNextAction, finalSettings, processedCount) =
             loop inputs settings Continue 1
