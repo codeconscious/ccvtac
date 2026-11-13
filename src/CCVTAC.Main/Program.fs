@@ -1,6 +1,7 @@
 namespace CCVTAC.Main
 
 open CCVTAC.Main.IoUtilities
+open CCVTAC.Main.Orchestrator
 open CCVTAC.Main.Settings
 open CCVTAC.Main.Settings.Settings
 open Settings.IO
@@ -68,8 +69,9 @@ module Program =
                 registerCancelHandler printer settings.WorkingDirectory
 
                 try
-                    Orchestrator.start printer settings
-                    int ExitCodes.Success
+                    match Orchestrator.start printer settings with
+                    | QuitDueToErrors -> int ExitCodes.OperationError
+                    | _               -> int ExitCodes.Success
                 with exn ->
                     printer.Critical $"Fatal error: {exn.Message}"
                     AnsiConsole.WriteException exn

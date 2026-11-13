@@ -319,8 +319,10 @@ module Orchestrator =
                 printer.Info "Aborting..."
                 false
 
-    let start (printer: Printer) (settings: UserSettings) : unit =
-        if isWorkingDirectoryReady printer settings.WorkingDirectory then
+    let start (printer: Printer) (settings: UserSettings) : NextAction =
+        if not (isWorkingDirectoryReady printer settings.WorkingDirectory) then
+            QuitDueToErrors
+        else
             let results = ResultTracker<string> printer
             let history = History(settings.HistoryFile, settings.HistoryDisplayCount)
             let mutable nextAction = Continue
@@ -346,3 +348,5 @@ module Orchestrator =
                     | None -> ()
 
             results.PrintSessionSummary()
+            nextAction
+
