@@ -12,15 +12,6 @@ type ResultTracker<'a>(printer: Printer) =
     let failures = Dictionary<string,string>()
 
     /// Logs the result for a specific corresponding input.
-    member _.RegisterResult(input: string, result: Result<'a, string>) : unit =
-        match result with
-        | Ok _ ->
-            successCount <- successCount + 1UL
-        | Error e ->
-            if not (failures.TryAdd(input, e)) then
-                failures[input] <- e
-
-    /// Logs the result for a specific corresponding input.
     member _.RegisterResult(input: string, result: Result<'a, string list>) : unit =
         match result with
         | Ok _ ->
