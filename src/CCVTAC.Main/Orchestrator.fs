@@ -220,13 +220,17 @@ module Orchestrator =
                 Error $"\"%s{command}\" is not a valid command. Enter \"%c{Commands.prefix}help\" to see a list of commands."
 
     /// Processes a single user request, from input to downloading and file post-processing.
-    let processBatch printer (inputs: CategorizedInput list) (categoryCounts: CategoryCounts)
-                     settings resultTracker history
-                     : BatchResults =
+    let processBatch
+        (printer: Printer)
+        (inputs: CategorizedInput list)
+        (categoryCounts: CategoryCounts)
+        (settings: UserSettings)
+        (resultTracker: ResultTracker<string>)
+        (history: History)
+        : BatchResults =
 
         let inputTime = DateTime.Now
         let batchWatch = Watch()
-        let batchResults = ResultTracker<BatchResults> printer
 
         let printSleep currentSettings (inputCategory: InputCategory) =
             if inputCategory.IsUrl then
@@ -264,7 +268,14 @@ module Orchestrator =
             | input :: remainingInputs when nextAction' = Continue ->
                 let processResult = processInput settings input.Category input.Text index
 
-                batchResults.RegisterResult(input.Text, processResult |> Result.mapError errorText)
+                // TODO: Resolve this nasty, temporary workaround.
+                let processResult' =
+                    processResult
+                    |> Result.map _.ToString()
+                    |> Result.mapError (fun err -> List.cons (errorText err) [])
+
+                resultTracker.RegisterResult(input.Text, processResult')
+
                 processResult |> Result.iterError (errorText >> printer.Error)
 
                 match processResult with
@@ -306,7 +317,7 @@ module Orchestrator =
                     categoryCounts[Url]
                     batchWatch.ElapsedFriendly
                 )
-            batchResults.PrintBatchFailures()
+            resultTracker.PrintBatchFailures()
 
         if processedCount <= inputs.Length then
             let unprocessedInputs =
