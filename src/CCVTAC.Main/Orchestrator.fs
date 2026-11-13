@@ -66,10 +66,8 @@ module Orchestrator =
             let jobWatch = Watch()
 
             match Downloading.mediaTypeWithIds url with
-            | Error e ->
-                let errorMsg = $"URL parse error: %s{e}"
-                printer.Error errorMsg
-                Error errorMsg
+            | Error errMsg ->
+                Error $"URL parse error: %s{errMsg}"
             | Ok mediaType ->
                 printer.Info $"%s{mediaType.GetType().Name} URL '%s{url}' detected."
                 history.Append(url, urlInputTime, printer)
