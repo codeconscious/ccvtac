@@ -69,7 +69,7 @@ module Orchestrator =
         (printer: Printer)
         (url: string)
         (settings: UserSettings)
-        (resultTracker: ResultTracker<string>)
+        (resultTracker: ResultTracker)
         (history: History)
         (urlInputTime: DateTime)
         (batchSize: int)
@@ -225,7 +225,7 @@ module Orchestrator =
         (inputs: CategorizedInput list)
         (categoryCounts: CategoryCounts)
         (settings: UserSettings)
-        (resultTracker: ResultTracker<string>)
+        (resultTracker: ResultTracker)
         (history: History)
         : BatchResults =
 
@@ -268,13 +268,9 @@ module Orchestrator =
             | input :: remainingInputs when nextAction' = Continue ->
                 let processResult = processInput settings input.Category input.Text index
 
-                // TODO: Resolve this nasty, temporary workaround.
-                let processResult' =
-                    processResult
-                    |> Result.map _.ToString()
-                    |> Result.mapError (fun err -> List.cons (errorText err) [])
-
-                resultTracker.RegisterResult(input.Text, processResult')
+                resultTracker.RegisterResult(
+                    input.Text,
+                    processResult |> Result.mapError (fun err -> List.cons (errorText err) []))
 
                 processResult |> Result.iterError (errorText >> printer.Error)
 
@@ -348,7 +344,7 @@ module Orchestrator =
         if not (isWorkingDirectoryReady printer settings.WorkingDirectory) then
             QuitDueToErrors
         else
-            let results = ResultTracker<string> printer
+            let results = ResultTracker printer
             let history = History(settings.HistoryFile, settings.HistoryDisplayCount)
 
             let rec repl (currentSettings: UserSettings) : NextAction =
