@@ -220,17 +220,16 @@ module Orchestrator =
         let inputTime = DateTime.Now
         let batchWatch = Watch()
 
-        let printSleep currentSettings (inputCategory: InputCategory) =
-            if inputCategory.IsUrl then
-                let seconds = currentSettings.SleepSecondsBetweenURLs
-                let secondsMsg secs = String.plur' "second" S secs
-                let sleptMsg =
-                    sleep
-                        (fun remainingSeconds -> $"Sleeping for {secondsMsg remainingSeconds}...")
-                        (fun totalSeconds -> $"Slept for {secondsMsg totalSeconds}.")
-                        seconds
-                printer.Info $"{String.nl}{sleptMsg}"
-                printer.EmptyLine()
+        let printSleepCountdown currentSettings =
+            let seconds = currentSettings.SleepSecondsBetweenURLs
+            let secondsMsg secs = String.plur' "second" S secs
+            let sleptMsg =
+                sleep
+                    (fun remainingSeconds -> $"Sleeping for {secondsMsg remainingSeconds}...")
+                    (fun totalSeconds -> $"Slept for {secondsMsg totalSeconds}.")
+                    seconds
+            let printOptions = { PrintOptions.Default with PrependLines = 1uy; AppendLines = 1uy }
+            printer.Info(sleptMsg, printOptions)
 
         let processInput settings inputCategory text index : Result<BatchResults, ProcessError> =
             match inputCategory with
@@ -278,7 +277,10 @@ module Orchestrator =
                         (QuitDueToErrors, settings, index + 1)
                     | Ok message ->
                         message |> Option.iter printer.Debug
-                        if List.isNotEmpty remainingInputs then printSleep settings input.Category
+
+                        let isNextUrl = remainingInputs |> tryHead |> exists _.Category.IsUrl
+                        if input.Category.IsUrl && isNextUrl then
+                            printSleepCountdown settings
 
                         let updatedSettings, nextAction =
                             match processResult with
