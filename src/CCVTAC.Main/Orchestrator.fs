@@ -315,7 +315,7 @@ module Orchestrator =
         { NextAction = finalNextAction
           UpdatedSettings = Some finalSettings }
 
-    let private isWorkingDirectoryReady (printer: Printer) dirName : bool =
+    let private isWorkingDirReady (printer: Printer) dirName =
         match Directories.warnIfAnyFiles maxLeftoverFilesToShow dirName with
         | Ok () ->
             true
@@ -331,7 +331,7 @@ module Orchestrator =
                 false
 
     let start printer settings : NextAction =
-        if not (isWorkingDirectoryReady printer settings.WorkingDirectory) then
+        if not (isWorkingDirReady printer settings.WorkingDirectory) then
             QuitDueToErrors
         else
             let results = ResultTracker printer
