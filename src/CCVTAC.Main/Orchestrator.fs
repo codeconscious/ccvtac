@@ -4,7 +4,6 @@ open CCVTAC.Main.Downloading
 open CCVTAC.Main.InputHelper
 open CCVTAC.Main.IoUtilities
 open CCVTAC.Main.PostProcessing
-open CCVTAC.Main.Settings
 open CCVTAC.Main.Settings.Settings
 open CCVTAC.Main.Settings.Settings.LiveUpdating
 open CCFSharpUtils.Collections
@@ -155,9 +154,9 @@ module Orchestrator =
 
         | None ->
             if String.equalIgnoreCase Commands.helpCommand command then
-                for kvp in Commands.summary do
-                    printer.Info kvp.Key
-                    printer.Info $"    %s{kvp.Value}"
+                for pair in Commands.summary do
+                    printer.Info pair.Key
+                    printer.Info $"    %s{pair.Value}"
                 Ok { NextAction = Continue; UpdatedSettings = None }
 
             elif checkCommand Commands.quitCommands then
