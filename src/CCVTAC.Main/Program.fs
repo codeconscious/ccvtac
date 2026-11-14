@@ -52,15 +52,15 @@ module Program =
             match writeDefaultFile settingsFile with
             | Ok msg ->
                 printer.Info msg
-                int ExitCodes.Success
+                ExitCodes.Success
             | Error err ->
                 printer.Error err
-                int ExitCodes.OperationError
+                ExitCodes.OperationError
         else
             match read settingsFile with
             | Error err ->
                 printer.Error err
-                int ExitCodes.ArgError
+                ExitCodes.ArgError
             | Ok settings ->
                 printer.Info "Settings loaded OK."
                 printer.PrintTable (toTable settings)
@@ -70,13 +70,14 @@ module Program =
 
                 try
                     match Orchestrator.start printer settings with
-                    | QuitDueToErrors -> int ExitCodes.OperationError
-                    | _               -> int ExitCodes.Success
+                    | QuitDueToErrors -> ExitCodes.OperationError
+                    | _               -> ExitCodes.Success
                 with exn ->
                     printer.Critical $"Fatal error: {exn.Message}"
                     AnsiConsole.WriteException exn
                     printer.Info "Please help improve this tool by reporting this error and any relevant data (URLs, etc.) at https://github.com/codeconscious/ccvtac/issues."
-                    int ExitCodes.OperationError
+                    ExitCodes.OperationError
+        |> int
 
     [<EntryPoint>]
     let main args : int =
