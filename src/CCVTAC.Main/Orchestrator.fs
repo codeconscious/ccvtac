@@ -197,7 +197,7 @@ module Orchestrator =
             elif command |> String.startsWithIgnoreCase Commands.updateAudioQualityPrefix then
                 let inputQuality = extractValueFromCommand Commands.updateAudioQualityPrefix command
                 let limit = 10uy
-                let rangeMsg = $"Audio quality must be between %d{limit} (lowest) and 0 (highest)."
+                let rangeMsg = $"Audio quality must be a number between %d{limit} (lowest) and 0 (highest)."
 
                 if String.hasNoText inputQuality then
                     Error rangeMsg
@@ -209,11 +209,7 @@ module Orchestrator =
                             printer.Info <| summarizeUpdate "Audio Quality" (newSettings.AudioQuality.ToString())
                             { NextAction = Continue; UpdatedSettings = Some newSettings }
                         }
-                    | true, _ ->
-                        Error rangeMsg
-                    | _ ->
-                        Error $"\"%s{inputQuality}\" is an invalid quality value. %s{rangeMsg}"
-
+                    | _ -> Error rangeMsg
             else
                 Error $"\"%s{command}\" is not a valid command. Enter \"%c{Commands.prefix}help\" to see a list of commands."
 
