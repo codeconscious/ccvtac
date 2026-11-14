@@ -115,14 +115,14 @@ module Orchestrator =
                     printer.Info $"Processed '%s{url}'%s{groupClause} in %s{jobWatch.ElapsedFriendly}."
                     Ok { NextAction = Continue; UpdatedSettings = None }
 
-    let summarizeToggle (settingName: string) (setting: bool) : string =
+    let summarizeToggle settingName setting : string =
         let state = if setting then "ON" else "OFF"
         $"%s{settingName} toggled to %s{state} for this session."
 
-    let summarizeUpdate (settingName: string) (setting: string) : string =
+    let summarizeUpdate settingName setting : string =
         $"%s{settingName} updated to \"%s{setting}\" for this session."
 
-    let private extractValue (prefix: string) (command: string) : string =
+    let private extractValueFromCommand (prefix: string) (command: string) : string =
         command.Substring(prefix.Length).Trim()
 
     let private toggleSpecs (printer: Printer) : ToggleSpec list =
@@ -180,7 +180,7 @@ module Orchestrator =
             elif command |> String.startsWithIgnoreCase Commands.updateAudioFormatPrefix then
                 let format =
                     command
-                    |> extractValue Commands.updateAudioFormatPrefix
+                    |> extractValueFromCommand Commands.updateAudioFormatPrefix
                     |> _.ToLowerInvariant()
 
                 if String.hasNoText format then
@@ -195,7 +195,7 @@ module Orchestrator =
                         Ok { NextAction = Continue; UpdatedSettings = Some newSettings }
 
             elif command |> String.startsWithIgnoreCase Commands.updateAudioQualityPrefix then
-                let inputQuality = extractValue Commands.updateAudioQualityPrefix command
+                let inputQuality = extractValueFromCommand Commands.updateAudioQualityPrefix command
                 let rangeRule = "Audio quality must be between 10 (lowest) and 0 (highest)."
 
                 if String.hasNoText inputQuality then
