@@ -256,7 +256,7 @@ module Orchestrator =
 
                 resultTracker.RegisterResult(
                     input.Text,
-                    processResult |> Result.mapError (fun err -> List.cons (errorText err) []))
+                    processResult |> Result.mapError (errorText >> List.singleton))
 
                 processResult |> Result.iterError (errorText >> printer.Error)
 
