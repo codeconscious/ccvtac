@@ -204,14 +204,10 @@ module Orchestrator =
                 else
                     match Byte.TryParse(inputQuality, NumberStyles.None, CultureInfo.InvariantCulture) with
                     | true, quality when quality <= limit ->
-                        match updateAudioQuality settings quality with
-                        | Error err ->
-                            Error err
-                        | Ok updatedSettings ->
-                            let updatedQuality = updatedSettings.AudioQuality.ToString()
-                            printer.Info <| summarizeUpdate "Audio Quality" updatedQuality
-                            Ok { NextAction = Continue
-                                 UpdatedSettings = Some updatedSettings }
+                        updateAudioQuality settings quality
+                        |> Result.map (fun newSettings ->
+                            printer.Info <| summarizeUpdate "Audio Quality" (newSettings.AudioQuality.ToString())
+                            { NextAction = Continue; UpdatedSettings = Some newSettings })
                     | true, _ ->
                         Error rangeMsg
                     | _ ->
