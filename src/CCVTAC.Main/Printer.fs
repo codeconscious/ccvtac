@@ -121,6 +121,9 @@ type Printer(showDebug: bool) =
     member this.Warning(message) =
         print Level.Warning message None
 
+    member this.Warning(message, options) =
+        print Level.Warning message (Some options)
+
     member this.Info(message) =
         print Level.Info message None
 

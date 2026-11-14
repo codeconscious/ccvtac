@@ -18,14 +18,15 @@ module Updater =
 
             let executionResult = Runner.runTool printer toolSettings []
 
+            let printOptions = { PrintOptions.Default with AppendLines = 1uy }
+
             match executionResult with
             | Ok details ->
                 if details.ExitCode <> successExitCode then
-                    match details.Error with
-                    | Some errMsg -> $"Update completed with minor issues: {errMsg}"
-                    | None        ->  "Update completed with minor unspecified issues."
-                    |> printer.Warning
-                printer.EmptyLine()
+                    let msg =
+                        match details.Error with
+                        | Some errMsg -> $"Update completed with minor issues: {errMsg}"
+                        | None        ->  "Update completed with minor unspecified issues."
+                    printer.Warning(msg, printOptions)
             | Error msg ->
-                let printOptions = { PrintOptions.Default with AppendLines = 1uy }
                 printer.Error($"Failure updating: {msg}", printOptions)
