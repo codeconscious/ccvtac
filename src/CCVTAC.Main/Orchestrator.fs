@@ -234,13 +234,13 @@ module Orchestrator =
                 printer.Info $"{String.nl}{sleptMsg}"
                 printer.EmptyLine()
 
-        let processInput currentSettings inputCategory text index : Result<BatchResults, ProcessError> =
+        let processInput settings inputCategory text index : Result<BatchResults, ProcessError> =
             match inputCategory with
             | Command ->
-                processCommand printer text currentSettings history
+                processCommand printer text settings history
                 |> Result.mapError Recoverable
             | Url ->
-                processUrl printer text currentSettings resultTracker history inputTime inputs.Length index
+                processUrl printer text settings resultTracker history inputTime inputs.Length index
 
         let deleteLeftoverFiles dirName : Result<string option, string> =
             match Directories.warnIfAnyFiles maxLeftoverFilesToShow dirName with
@@ -337,21 +337,21 @@ module Orchestrator =
             let results = ResultTracker printer
             let history = History(settings.HistoryFile, settings.HistoryDisplayCount)
 
-            let rec repl (currentSettings: UserSettings) : NextAction =
+            let rec repl (settings: UserSettings) : NextAction =
                 let input = printer.GetInput prompt
                 match splitInputText input with
                 | [] ->
                     printer.Error $"Invalid input. Enter only URLs or commands beginning with \"%c{Commands.prefix}\"."
-                    repl currentSettings
+                    repl settings
                 | splitInputs ->
                     let categorizedInputs = categorizeInputs splitInputs
                     let categoryCounts = countCategories categorizedInputs
                     summarizeInput printer categorizedInputs categoryCounts
 
                     let batchResult =
-                        processBatch printer categorizedInputs categoryCounts currentSettings results history
+                        processBatch printer categorizedInputs categoryCounts settings results history
 
-                    let nextSettings = defaultArg batchResult.UpdatedSettings currentSettings
+                    let nextSettings = defaultArg batchResult.UpdatedSettings settings
 
                     match batchResult.NextAction with
                     | Continue -> repl nextSettings
