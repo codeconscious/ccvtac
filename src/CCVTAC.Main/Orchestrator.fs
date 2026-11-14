@@ -196,13 +196,14 @@ module Orchestrator =
 
             elif command |> String.startsWithIgnoreCase Commands.updateAudioQualityPrefix then
                 let inputQuality = extractValueFromCommand Commands.updateAudioQualityPrefix command
-                let rangeRule = "Audio quality must be between 10 (lowest) and 0 (highest)."
+                let limit = 10uy
+                let rangeMsg = $"Audio quality must be between %d{limit} (lowest) and 0 (highest)."
 
                 if String.hasNoText inputQuality then
-                    Error rangeRule
+                    Error rangeMsg
                 else
                     match Byte.TryParse(inputQuality, NumberStyles.None, CultureInfo.InvariantCulture) with
-                    | true, quality when quality <= 10uy ->
+                    | true, quality when quality <= limit ->
                         match updateAudioQuality settings quality with
                         | Error err ->
                             Error err
@@ -212,9 +213,9 @@ module Orchestrator =
                             Ok { NextAction = Continue
                                  UpdatedSettings = Some updatedSettings }
                     | true, _ ->
-                        Error rangeRule
+                        Error rangeMsg
                     | _ ->
-                        Error $"\"%s{inputQuality}\" is an invalid quality value. %s{rangeRule}"
+                        Error $"\"%s{inputQuality}\" is an invalid quality value. %s{rangeMsg}"
 
             else
                 Error $"\"%s{command}\" is not a valid command. Enter \"%c{Commands.prefix}help\" to see a list of commands."
