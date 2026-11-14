@@ -115,14 +115,20 @@ type Printer(showDebug: bool) =
     member this.Error(message) =
         print Level.Error message None
 
-    member this.Error(message, printOptions) =
-        print Level.Error message (Some printOptions)
+    member this.Error(message, options) =
+        print Level.Error message (Some options)
 
     member this.Warning(message) =
         print Level.Warning message None
 
+    member this.Warning(message, options) =
+        print Level.Warning message (Some options)
+
     member this.Info(message) =
         print Level.Info message None
+
+    member this.Info(message, options) =
+        print Level.Info message (Some options)
 
     member this.Debug(message) =
         print Level.Debug message None
