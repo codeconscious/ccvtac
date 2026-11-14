@@ -199,17 +199,14 @@ module Orchestrator =
                 let limit = 10uy
                 let rangeMsg = $"Audio quality must be a number between %d{limit} (lowest) and 0 (highest)."
 
-                if String.hasNoText inputQuality then
-                    Error rangeMsg
-                else
-                    match Byte.TryParse(inputQuality, NumberStyles.None, CultureInfo.InvariantCulture) with
-                    | true, quality when quality <= limit ->
-                        monad {
-                            let! newSettings = updateAudioQuality settings quality
-                            printer.Info <| summarizeUpdate "Audio Quality" (newSettings.AudioQuality.ToString())
-                            { NextAction = Continue; UpdatedSettings = Some newSettings }
-                        }
-                    | _ -> Error rangeMsg
+                match Byte.TryParse(inputQuality, NumberStyles.None, CultureInfo.InvariantCulture) with
+                | true, quality when quality <= limit ->
+                    monad {
+                        let! newSettings = updateAudioQuality settings quality
+                        printer.Info <| summarizeUpdate "Audio Quality" (newSettings.AudioQuality.ToString())
+                        { NextAction = Continue; UpdatedSettings = Some newSettings }
+                    }
+                | _ -> Error rangeMsg
             else
                 Error $"\"%s{command}\" is not a valid command. Enter \"%c{Commands.prefix}help\" to see a list of commands."
 
