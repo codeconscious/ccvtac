@@ -40,12 +40,12 @@
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="CCFSharpUtils" Version="0.4.8" />
+    <PackageReference Include="CCFSharpUtils" Version="0.5.0" />
     <PackageReference Include="CodeConscious.Startwatch" Version="1.0.0" />
     <PackageReference Include="FSharpPlus" Version="1.9.1" />
     <PackageReference Include="FsToolkit.ErrorHandling" Version="5.2.0" />
     <PackageReference Include="Spectre.Console" Version="0.57.2" />
     <PackageReference Include="TagLibSharp" Version="2.3.0" />
-    <PackageReference Update="FSharp.Core" Version="10.1.403" />
+    <PackageReference Update="FSharp.Core" Version="11.0.101" />
   </ItemGroup>
 </Project>

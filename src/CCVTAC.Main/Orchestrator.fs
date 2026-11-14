@@ -175,7 +175,7 @@ module Orchestrator =
                 printer.PrintTable (toTable settings)
                 Ok { NextAction = Continue; UpdatedSettings = None }
 
-            elif command |> String.startsWithIgnoreCase Commands.updateAudioFormatPrefix then
+            elif command |> String.startsWith' Commands.updateAudioFormatPrefix then
                 let format =
                     command
                     |> extractCommandValue Commands.updateAudioFormatPrefix
@@ -191,7 +191,7 @@ module Orchestrator =
                         { NextAction = Continue; UpdatedSettings = Some newSettings }
                     }
 
-            elif command |> String.startsWithIgnoreCase Commands.updateAudioQualityPrefix then
+            elif command |> String.startsWith' Commands.updateAudioQualityPrefix then
                 let inputQuality = extractCommandValue Commands.updateAudioQualityPrefix command
                 let limit = 10uy
                 let rangeMsg = $"Audio quality must be a number between %d{limit} (lowest) and 0 (highest)."
