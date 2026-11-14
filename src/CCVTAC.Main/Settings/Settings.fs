@@ -157,7 +157,7 @@ module Settings =
             | { AudioFormats = fmt } when not (fmt |> List.forall validAudioFormat) ->
                 let formats = String.Join(", ", fmt)
                 let approved = supportedAudioFormats |> String.concat ", "
-                Error $"Audio formats (\"%s{formats}\") include an unsupported audio format.{String.nl}Only the following supported formats: {approved}."
+                Error $"Unsupported audio format(s) (\"%s{formats}\") found. Supported formats: {approved}."
             | _ ->
                 Ok settings
 
