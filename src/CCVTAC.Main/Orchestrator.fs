@@ -97,11 +97,11 @@ module Orchestrator =
 
                 match downloadResult with
                 | Error errs ->
-                    let msg =
+                    let groupedErrs =
                         errs
                         |> List.map (sprintf "Media download error: %s")
                         |> String.concat String.nl
-                    Error (Recoverable msg)
+                    Error (Recoverable groupedErrs)
                 | Ok message ->
                     printer.Debug "Download successful."
                     if String.hasText message then printer.Info message
