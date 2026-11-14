@@ -297,12 +297,12 @@ module Orchestrator =
             loop inputs settings Continue 1
 
         if categoryCounts[Url] > 1 then
-            printer.Info <|
-                sprintf "%sFinished with batch of %d URLs in %s."
-                    String.nl
+            let batchDoneMsg =
+                sprintf "Finished with batch of %d URLs in %s."
                     categoryCounts[Url]
                     batchWatch.ElapsedFriendly
-
+            let printOptions = { PrintOptions.Default with PrependLines = 1uy }
+            printer.Info(batchDoneMsg, printOptions)
             resultTracker.PrintBatchFailures()
 
         if processedCount <= inputs.Length then

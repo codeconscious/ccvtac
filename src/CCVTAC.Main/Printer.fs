@@ -124,6 +124,9 @@ type Printer(showDebug: bool) =
     member this.Info(message) =
         print Level.Info message None
 
+    member this.Info(message, options) =
+        print Level.Info message (Some options)
+
     member this.Debug(message) =
         print Level.Debug message None
 
