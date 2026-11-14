@@ -69,7 +69,6 @@ module Orchestrator =
         (printer: Printer)
         (url: string)
         (settings: UserSettings)
-        (resultTracker: ResultTracker)
         (history: History)
         (urlInputTime: DateTime)
         (batchSize: int)
@@ -93,7 +92,6 @@ module Orchestrator =
                 history.Append(url, urlInputTime, printer)
 
                 let downloadResult = Downloader.run printer mediaType settings
-                resultTracker.RegisterResult(url, downloadResult)
 
                 match downloadResult with
                 | Error errs ->
@@ -240,7 +238,7 @@ module Orchestrator =
                 processCommand printer text settings history
                 |> Result.mapError Recoverable
             | Url ->
-                processUrl printer text settings resultTracker history inputTime inputs.Length index
+                processUrl printer text settings history inputTime inputs.Length index
 
         let deleteLeftoverFiles dirName : Result<string option, string> =
             match Directories.warnIfAnyFiles maxLeftoverFilesToShow dirName with
