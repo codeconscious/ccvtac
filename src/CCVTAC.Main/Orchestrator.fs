@@ -122,7 +122,7 @@ module Orchestrator =
     let summarizeUpdate settingName setting : string =
         $"%s{settingName} updated to \"%s{setting}\" for this session."
 
-    let private extractValueFromCommand (prefix: string) (command: string) : string =
+    let private extractCommandValue (prefix: string) (command: string) : string =
         command.Substring(prefix.Length).Trim()
 
     let private toggleSpecs (printer: Printer) : ToggleSpec list =
@@ -180,22 +180,21 @@ module Orchestrator =
             elif command |> String.startsWithIgnoreCase Commands.updateAudioFormatPrefix then
                 let format =
                     command
-                    |> extractValueFromCommand Commands.updateAudioFormatPrefix
+                    |> extractCommandValue Commands.updateAudioFormatPrefix
                     |> _.ToLowerInvariant()
 
                 if String.hasNoText format then
                     Error "Append one or more supported audio formats separated by commas (e.g., \"m4a,opus,best\")."
                 else
-                    match updateAudioFormat settings format with
-                    | Error err ->
-                        Error err
-                    | Ok newSettings ->
+                    monad {
+                        let! newSettings = updateAudioFormat settings format
                         let audioFormats = String.Join(", ", newSettings.AudioFormats)
                         printer.Info <| summarizeUpdate "Audio Formats" audioFormats
-                        Ok { NextAction = Continue; UpdatedSettings = Some newSettings }
+                        { NextAction = Continue; UpdatedSettings = Some newSettings }
+                    }
 
             elif command |> String.startsWithIgnoreCase Commands.updateAudioQualityPrefix then
-                let inputQuality = extractValueFromCommand Commands.updateAudioQualityPrefix command
+                let inputQuality = extractCommandValue Commands.updateAudioQualityPrefix command
                 let limit = 10uy
                 let rangeMsg = $"Audio quality must be a number between %d{limit} (lowest) and 0 (highest)."
 
