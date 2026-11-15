@@ -79,7 +79,9 @@ module Orchestrator =
             Error (Fatal err)
         | Ok () ->
             if batchSize > 1 then
-                printer.Info $"Processing item %d{urlIndex} of %d{batchSize}..."
+                let options = { PrintOptions.Default with PrependLines = 1uy }
+                let message = $"Processing URL %d{urlIndex} of %d{batchSize}..."
+                printer.Info(message, options)
 
             let jobWatch = Watch()
 
@@ -148,8 +150,12 @@ module Orchestrator =
         match toggle with
         | Some spec ->
             let newSettings = spec.Toggle settings
-            printer.Info <| summarizeToggle spec.Label (spec.Read newSettings)
+
+            let options = { PrintOptions.Default with PrependLines = 1uy }
+            let message = summarizeToggle spec.Label (spec.Read newSettings)
+            printer.Info(message, options)
             spec.AfterToggle newSettings
+
             Ok { NextAction = Continue; UpdatedSettings = Some newSettings }
 
         | None ->
@@ -230,13 +236,13 @@ module Orchestrator =
             let printOptions = { PrintOptions.Default with PrependLines = 1uy; AppendLines = 1uy }
             printer.Info(sleptMsg, printOptions)
 
-        let processInput settings inputCategory text index : Result<BatchResults, ProcessError> =
+        let processInput settings inputCategory text urlPosition : Result<BatchResults, ProcessError> =
             match inputCategory with
             | Command ->
                 processCommand printer text settings history
                 |> Result.mapError Recoverable
             | Url ->
-                processUrl printer text settings history inputTime inputs.Length index
+                processUrl printer text settings history inputTime categoryCounts[Url] urlPosition
 
         let deleteLeftoverFiles dirName : Result<string option, string> =
             match Directories.warnIfAnyFiles maxLeftoverFilesToShow dirName with
@@ -249,10 +255,10 @@ module Orchestrator =
                     Some "Files deleted successfully.")
                 |> Result.mapError (sprintf "Error deleting leftover files after download: %s")
 
-        let rec loop inputs settings nextAction' index : NextAction * UserSettings * int =
+        let rec loop inputs settings nextAction' index urlPosition : NextAction * UserSettings * int =
             match inputs with
             | input :: remainingInputs when nextAction' = Continue ->
-                let processResult = processInput settings input.Category input.Text index
+                let processResult = processInput settings input.Category input.Text urlPosition
 
                 resultTracker.RegisterResult(
                     input.Text,
@@ -262,7 +268,6 @@ module Orchestrator =
 
                 match processResult with
                 | Error (Fatal _) ->
-                    // The item was not processed, so `index` (not index + 1) keeps it in the unprocessed list.
                     (QuitDueToErrors, settings, index)
                 | _ ->
                     let cleanupResult =
@@ -288,12 +293,16 @@ module Orchestrator =
                             | Error _ ->
                                 settings, nextAction'
 
-                        loop remainingInputs updatedSettings nextAction (index + 1)
+                        // Advance the URL position only when the input was a URL.
+                        let nextUrlPosition =
+                            if input.Category.IsUrl then urlPosition + 1 else urlPosition
+
+                        loop remainingInputs updatedSettings nextAction (index + 1) nextUrlPosition
             | _ ->
                 (nextAction', settings, index)
 
-        let (finalNextAction, finalSettings, processedCount) =
-            loop inputs settings Continue 1
+        let finalNextAction, finalSettings, processedCount =
+            loop inputs settings Continue 1 1
 
         if categoryCounts[Url] > 1 then
             let batchDoneMsg =
