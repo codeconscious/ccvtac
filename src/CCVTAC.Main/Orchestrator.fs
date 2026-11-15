@@ -15,7 +15,10 @@ open System.Globalization
 
 module Orchestrator =
 
-    type NextAction = Continue | QuitAtUserRequest | QuitDueToErrors
+    type NextAction = 
+        | Continue 
+        | QuitAtUserRequest 
+        | QuitDueToErrors
 
     type BatchResults =
         { NextAction: NextAction
@@ -37,7 +40,7 @@ module Orchestrator =
     [<Literal>]
     let private maxLeftoverFilesToShow = 10
 
-    let private errorText (error: ProcessError) : string =
+    let private errorText error : string =
         match error with
         | Recoverable msg
         | Fatal msg -> msg
@@ -49,7 +52,7 @@ module Orchestrator =
         : unit =
 
         if List.hasMultiple inputs then
-            let urlSummary = String.plur' "URL" S counts[Url]
+            let urlSummary = String.plur' "URL"     S counts[Url]
             let cmdSummary = String.plur' "command" S counts[Command]
 
             printer.Info <|
