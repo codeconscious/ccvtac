@@ -37,7 +37,8 @@ module Program =
 
     let private registerCancelHandler (printer: Printer) workingDirectory =
         Console.CancelKeyPress.Add(fun _ ->
-            printer.Warning $"{String.nl}Quitting at user's request."
+            let options = { PrintOptions.Default with LinesBefore = 1uy }
+            printer.Warning($"Quitting at user's request.", options)
 
             match Directories.warnIfAnyFiles 10 workingDirectory with
             | Ok () -> ()

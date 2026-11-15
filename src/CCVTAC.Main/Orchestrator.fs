@@ -62,8 +62,6 @@ module Orchestrator =
             for input in inputs do
                 printer.Info $" • %s{input.Text}"
 
-            printer.EmptyLine()
-
     let processUrl
         (printer: Printer)
         (url: string)
@@ -79,7 +77,7 @@ module Orchestrator =
             Error (Fatal err)
         | Ok () ->
             if batchSize > 1 then
-                let options = { PrintOptions.Default with PrependLines = 1uy }
+                let options = { PrintOptions.Default with LinesBefore = 1uy }
                 let message = $"Processing URL %d{urlIndex} of %d{batchSize}..."
                 printer.Info(message, options)
 
@@ -151,9 +149,10 @@ module Orchestrator =
         | Some spec ->
             let newSettings = spec.Toggle settings
 
-            let options = { PrintOptions.Default with PrependLines = 1uy }
             let message = summarizeToggle spec.Label (spec.Read newSettings)
+            let options = { PrintOptions.Default with LinesBefore = 1uy }
             printer.Info(message, options)
+
             spec.AfterToggle newSettings
 
             Ok { NextAction = Continue; UpdatedSettings = Some newSettings }
@@ -233,7 +232,7 @@ module Orchestrator =
                     (fun remainingSeconds -> $"Sleeping for {secondsMsg remainingSeconds}...")
                     (fun totalSeconds -> $"Slept for {secondsMsg totalSeconds}.")
                     seconds
-            let printOptions = { PrintOptions.Default with PrependLines = 1uy; AppendLines = 1uy }
+            let printOptions = { PrintOptions.Default with LinesBefore = 1uy }
             printer.Info(sleptMsg, printOptions)
 
         let processInput settings inputCategory text urlPosition : Result<BatchResults, ProcessError> =
@@ -309,7 +308,7 @@ module Orchestrator =
                 sprintf "Finished with batch of %d URLs in %s."
                     categoryCounts[Url]
                     batchWatch.ElapsedFriendly
-            let printOptions = { PrintOptions.Default with PrependLines = 1uy }
+            let printOptions = { PrintOptions.Default with LinesBefore = 1uy }
             printer.Info(batchDoneMsg, printOptions)
             resultTracker.PrintBatchFailures()
 

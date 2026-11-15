@@ -21,14 +21,14 @@ type private Colors =
 
 type PrintOptions =
     { AppendLineBreak: bool
-      PrependLines: byte
-      AppendLines: byte
+      LinesBefore: byte
+      LinesAfter: byte
       ProcessMarkup: bool }
 
     static member Default =
         { AppendLineBreak = true
-          PrependLines = 0uy
-          AppendLines = 0uy
+          LinesBefore = 0uy
+          LinesAfter = 0uy
           ProcessMarkup = true }
 
 type Printer(showDebug: bool) =
@@ -87,7 +87,7 @@ type Printer(showDebug: bool) =
             if String.hasNoText message then
                 raise (ArgumentException(nameof(message), "Message cannot be empty."))
 
-            printEmptyLines printOptions.PrependLines
+            printEmptyLines printOptions.LinesBefore
 
             let escapedMessage = escapeText message
 
@@ -100,7 +100,7 @@ type Printer(showDebug: bool) =
             if printOptions.AppendLineBreak then
                 AnsiConsole.WriteLine()
 
-            printEmptyLines printOptions.AppendLines
+            printEmptyLines printOptions.LinesAfter
 
     /// Toggle showing or hiding debug messages.
     member this.ShowDebug(shouldEnable) =
@@ -132,8 +132,6 @@ type Printer(showDebug: bool) =
 
     member this.Debug(message) =
         print Level.Debug message None
-
-    member this.EmptyLine() = printEmptyLines 1uy
 
     member this.GetInput(prompt) : string =
         printEmptyLines 1uy
