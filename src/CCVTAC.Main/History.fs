@@ -6,6 +6,7 @@ open CCFSharpUtils.Text
 open System
 open System.IO
 open System.Text.Json
+open FSharpPlus
 open Spectre.Console
 
 type History(filePath: string, displayCount: int) =
@@ -39,9 +40,9 @@ type History(filePath: string, displayCount: int) =
                 |> Seq.choose (fun line ->
                     match line.Split separator with
                     | [| dateText; url |] ->
-                        match DateTime.TryParse dateText with
-                        | true, date -> Some (date, url)
-                        | _ -> None
+                        DateTime.TryParse dateText
+                        |> Option.ofPair
+                        |> Option.map (fun date -> (date, url))
                     | _ -> None)
                 |> Seq.groupBy fst
                 |> Seq.map (fun (dt, pairs) -> dt, pairs |> Seq.map snd |> Seq.toList)

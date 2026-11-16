@@ -7,6 +7,7 @@ open CCVTAC.Main.PostProcessing.Tagging
 open CCVTAC.Main.Downloading.Downloading
 open CCFSharpUtils.Collections
 open CCFSharpUtils.Text
+open FSharpPlus
 open Startwatch.Library
 open MetadataUtilities
 open System
@@ -66,9 +67,8 @@ module Tagger =
         elif videoMetadata.UploadDate.Length <> 4 then
             None
         else
-            match UInt32.TryParse(videoMetadata.UploadDate.Substring(0, 4)) with
-            | true, parsed -> Some parsed
-            | _ -> None
+            UInt32.TryParse(videoMetadata.UploadDate.Substring(0, 4))
+            |> Option.ofPair
 
     let private tagSingleFile
         (printer: Printer)
