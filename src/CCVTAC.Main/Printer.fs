@@ -104,7 +104,7 @@ type Printer(showDebug: bool) =
 
     /// Toggle showing or hiding debug messages.
     member this.ShowDebug(shouldEnable) =
-        minimumLogLevel <- (if shouldEnable then Level.Debug else Level.Info)
+        minimumLogLevel <- if shouldEnable then Level.Debug else Level.Info
 
     member this.PrintTable(table: Table) =
         AnsiConsole.Write table
