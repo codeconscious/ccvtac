@@ -31,6 +31,9 @@ type PrintOptions =
           LinesAfter = 0uy
           ProcessMarkup = true }
 
+    static member DefaultWithLineBefore =
+        { PrintOptions.Default with LinesBefore = 1uy }
+
 type Printer(showDebug: bool) =
 
     let colorMap: Map<Level, Colors> =

@@ -15,9 +15,9 @@ open System.Globalization
 
 module Orchestrator =
 
-    type NextAction = 
-        | Continue 
-        | QuitAtUserRequest 
+    type NextAction =
+        | Continue
+        | QuitAtUserRequest
         | QuitDueToErrors
 
     type BatchResults =
@@ -80,7 +80,7 @@ module Orchestrator =
             Error (Fatal err)
         | Ok () ->
             if batchSize > 1 then
-                let options = { PrintOptions.Default with LinesBefore = 1uy }
+                let options = PrintOptions.DefaultWithLineBefore
                 let message = $"Processing URL %d{urlIndex} of %d{batchSize}..."
                 printer.Info(message, options)
 
@@ -153,7 +153,7 @@ module Orchestrator =
             let newSettings = spec.Toggle settings
 
             let message = summarizeToggle spec.Label (spec.Read newSettings)
-            let options = { PrintOptions.Default with LinesBefore = 1uy }
+            let options = PrintOptions.DefaultWithLineBefore
             printer.Info(message, options)
 
             spec.AfterToggle newSettings
@@ -235,8 +235,8 @@ module Orchestrator =
                     (fun remainingSeconds -> $"Sleeping for {secondsMsg remainingSeconds}...")
                     (fun totalSeconds -> $"Slept for {secondsMsg totalSeconds}.")
                     seconds
-            let printOptions = { PrintOptions.Default with LinesBefore = 1uy }
-            printer.Info(sleptMsg, printOptions)
+            let options = PrintOptions.DefaultWithLineBefore
+            printer.Info(sleptMsg, options)
 
         let processInput settings inputCategory text urlPosition : Result<BatchResults, ProcessError> =
             match inputCategory with
@@ -311,8 +311,8 @@ module Orchestrator =
                 sprintf "Finished with batch of %d URLs in %s."
                     categoryCounts[Url]
                     batchWatch.ElapsedFriendly
-            let printOptions = { PrintOptions.Default with LinesBefore = 1uy }
-            printer.Info(batchDoneMsg, printOptions)
+            let options = PrintOptions.DefaultWithLineBefore
+            printer.Info(batchDoneMsg, options)
             resultTracker.PrintBatchFailures()
 
         if processedCount <= inputs.Length then
