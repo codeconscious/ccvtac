@@ -22,13 +22,11 @@ type private Colors =
 type PrintOptions =
     { AppendLineBreak: bool
       LinesBefore: byte
-      LinesAfter: byte
       ProcessMarkup: bool }
 
     static member Default =
         { AppendLineBreak = true
           LinesBefore = 0uy
-          LinesAfter = 0uy
           ProcessMarkup = true }
 
     static member DefaultWithLineBefore =
@@ -102,8 +100,6 @@ type Printer(showDebug: bool) =
 
             if printOptions.AppendLineBreak then
                 AnsiConsole.WriteLine()
-
-            printEmptyLines printOptions.LinesAfter
 
     /// Toggle showing or hiding debug messages.
     member this.ShowDebug(shouldEnable) =
