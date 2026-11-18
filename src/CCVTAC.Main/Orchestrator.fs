@@ -324,12 +324,10 @@ module Orchestrator =
 
     let private isWorkingDirReady (printer: Printer) dirName : Result<unit, string> =
         let emptyDirAndReport dirName =
-            match Directories.deleteAllFiles dirName with
-                | Ok results ->
-                    Directories.printDeletionResults printer results
-                    printer.Debug "Files deleted."
-                    Ok ()
-                | Error deletionError -> Error deletionError
+            Directories.deleteAllFiles dirName
+            |> map (fun results ->
+                Directories.printDeletionResults printer results
+                printer.Debug "Files deleted.")
 
         match Directories.warnIfAnyFiles Directories.maxFilesToShow dirName with
         | Ok () -> Ok ()

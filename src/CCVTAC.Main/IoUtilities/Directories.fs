@@ -68,7 +68,7 @@ module Directories =
             if Array.isEmpty fileNames then
                 Ok ()
             else
-                SB($"""Found {String.plur' "leftover file" S fileNames.Length} leftover in working directory \"{dirName}\":{String.nl}""")
+                SB($"""Found {String.plur' "leftover file" S fileNames.Length} in working directory "{dirName}":{String.nl}""")
                     .AppendLine
                         (fileNames
                          |> Array.truncate showMax
