@@ -37,7 +37,7 @@ type ResultTracker(printer: Printer) =
         let successSummary = String.plur' "success" Es successCount
         let failureSummary = String.plur' "failure" S failures.Count
 
-        let options = { PrintOptions.Default with LinesBefore = 1uy }
+        let options = PrintOptions.DefaultWithLineBefore
         printer.Info($"Quitting with %s{successSummary} and %s{failureSummary}.", options)
 
         for pair in failures do

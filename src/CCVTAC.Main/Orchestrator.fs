@@ -37,9 +37,6 @@ module Orchestrator =
           Read: UserSettings -> bool
           AfterToggle: UserSettings -> unit }
 
-    [<Literal>]
-    let private maxLeftoverFilesToShow = 10
-
     let private errorText error : string =
         match error with
         | Recoverable msg
@@ -75,7 +72,7 @@ module Orchestrator =
         (urlIndex: int)
         : Result<BatchResults, ProcessError> =
 
-        match Directories.warnIfAnyFiles maxLeftoverFilesToShow settings.WorkingDirectory with
+        match Directories.warnIfAnyFiles Directories.maxFilesToShow settings.WorkingDirectory with
         | Error err ->
             Error (Fatal err)
         | Ok () ->
@@ -100,7 +97,7 @@ module Orchestrator =
                     let groupedErrs =
                         errs
                         |> List.map (sprintf "Media download error: %s")
-                        |> String.concat String.nl
+                        |> String.concatNL
                     Error (Recoverable groupedErrs)
                 | Ok message ->
                     printer.Debug "Download successful."
@@ -247,7 +244,7 @@ module Orchestrator =
                 processUrl printer text settings history inputTime categoryCounts[Url] urlPosition
 
         let deleteLeftoverFiles dirName : Result<string option, string> =
-            match Directories.warnIfAnyFiles maxLeftoverFilesToShow dirName with
+            match Directories.warnIfAnyFiles Directories.maxFilesToShow dirName with
             | Ok () -> Ok None
             | Error msg ->
                 printer.Warning msg
@@ -319,31 +316,36 @@ module Orchestrator =
             let unprocessedInputs =
                 inputs[processedCount-1..]
                 |> List.map (fun x -> $"• {x.Text}")
-                |> String.concat String.nl
+                |> String.concatNL
             printer.Warning $"Some inputs were not yet processed: {String.nl}{unprocessedInputs}"
 
         { NextAction = finalNextAction
           UpdatedSettings = Some finalSettings }
 
-    let private isWorkingDirReady (printer: Printer) dirName =
-        match Directories.warnIfAnyFiles maxLeftoverFilesToShow dirName with
-        | Ok () ->
-            true
+    let private isWorkingDirReady (printer: Printer) dirName : Result<unit, string> =
+        let emptyDirAndReport dirName =
+            match Directories.deleteAllFiles dirName with
+                | Ok results ->
+                    Directories.printDeletionResults printer results
+                    printer.Debug "Files deleted."
+                    Ok ()
+                | Error deletionError -> Error deletionError
+
+        match Directories.warnIfAnyFiles Directories.maxFilesToShow dirName with
+        | Ok () -> Ok ()
         | Error err ->
             printer.Error err
-            match Directories.askToDeleteAllFiles printer dirName with
-            | Ok results ->
-                Directories.printDeletionResults printer results
-                true
-            | Error deletionError ->
-                printer.Error deletionError
-                printer.Info "Aborting..."
-                false
+            match Directories.confirmDeleteFiles printer with
+            | No reason -> Error (defaultArg reason $"File deletion declined for \"{dirName}\".")
+            | Yes -> emptyDirAndReport dirName
 
     let start printer settings : NextAction =
-        if not (isWorkingDirReady printer settings.WorkingDirectory) then
-            QuitDueToErrors
-        else
+        match isWorkingDirReady printer settings.WorkingDirectory with
+        | Error err ->
+            printer.Error err
+            printer.Error "Cannot continue until the working directory is emptied. Quitting..."
+            QuitDueToErrors // TODO: Modify QuitDueToErrors type to include optional errors?
+        | Ok () ->
             let results = ResultTracker printer
             let history = History(settings.HistoryFile, settings.HistoryDisplayCount)
 

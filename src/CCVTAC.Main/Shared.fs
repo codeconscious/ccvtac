@@ -23,3 +23,5 @@ module Shared =
                 |> loop seconds)
 
         doneMsgFn seconds
+
+    type YesNoAnswer = Yes | No of Reason: string option

@@ -48,7 +48,7 @@ module PostProcessor =
             | Ok ts -> Ok ts
             | Error errMsgs ->
                 $"Error(s) creating tagging sets in working directory \"%s{dir}\"" :: errMsgs
-                |> String.concat String.nl
+                |> String.concatNL
                 |> Error
         with exn ->
             Error $"Error reading working files in \"{dir}\" for tagging set creation: %s{exn.Message}"

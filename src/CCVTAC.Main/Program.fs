@@ -35,18 +35,10 @@ module Program =
         | _ ->
             ShowHelp
 
-    let private registerCancelHandler (printer: Printer) workingDirectory =
+    let private registerCancelHandler (printer: Printer) : unit =
+        // Exits with error code 130, meaning termination by SIGINT (Ctrl‑C).
         Console.CancelKeyPress.Add(fun _ ->
-            let options = { PrintOptions.Default with LinesBefore = 1uy }
-            printer.Warning($"Quitting at user's request.", options)
-
-            match Directories.warnIfAnyFiles 10 workingDirectory with
-            | Ok () -> ()
-            | Error warnResult ->
-                printer.Error warnResult
-                match Directories.askToDeleteAllFiles printer workingDirectory with
-                | Error err  -> printer.Error err
-                | Ok results -> Directories.printDeletionResults printer results)
+            printer.Warning("Quitting by request.", PrintOptions.DefaultWithLineBefore))
 
     let private run (printer: Printer) (settingsFile: FileInfo) : int =
         if not settingsFile.Exists then
@@ -67,7 +59,7 @@ module Program =
                 printer.PrintTable (toTable settings)
                 printer.ShowDebug(not settings.QuietMode)
 
-                registerCancelHandler printer settings.WorkingDirectory
+                registerCancelHandler printer
 
                 try
                     match Orchestrator.start printer settings with
@@ -76,7 +68,9 @@ module Program =
                 with exn ->
                     printer.Critical $"Fatal error: {exn.Message}"
                     AnsiConsole.WriteException exn
-                    printer.Info "Please help improve this tool by reporting this error and any relevant data (URLs, etc.) at https://github.com/codeconscious/ccvtac/issues."
+                    printer.Info "Please help improve this tool by reporting this error \
+                                  with any relevant data (URLs, settings, etc.) at \
+                                  https://github.com/codeconscious/ccvtac/issues."
                     ExitCodes.OperationError
         |> int
 

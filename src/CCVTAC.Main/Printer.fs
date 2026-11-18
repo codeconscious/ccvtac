@@ -138,3 +138,4 @@ type Printer(showDebug: bool) =
 
     member this.AskToBool(question, yesAnswer, noAnswer) : bool =
         (ask question [ yesAnswer; noAnswer ]) = yesAnswer
+
