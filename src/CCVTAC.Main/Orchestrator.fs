@@ -336,8 +336,8 @@ module Orchestrator =
         | Error err ->
             printer.Error err
             match Directories.confirmDeleteFiles printer with
-            | No reason -> Error (defaultArg reason $"File deletion declined for \"{dirName}\".")
-            | Yes -> emptyDirAndReport dirName
+            | Proceed -> emptyDirAndReport dirName
+            | Decline reason -> Error reason
 
     let start printer settings : NextAction =
         match isWorkingDirReady printer settings.WorkingDirectory with

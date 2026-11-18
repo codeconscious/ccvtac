@@ -49,9 +49,9 @@ module Directories =
         |> Result.map delete
 
     /// Ask the user to confirm the deletion of files in the specified directory.
-    let confirmDeleteFiles (printer: Printer) : YesNoAnswer =
+    let confirmDeleteFiles (printer: Printer) : ConfirmationAnswer =
         let answer = printer.AskToBool("Delete all temporary files?", "Yes", "No")
-        if answer then Yes else No (Some "Temporary file deletion was declined.")
+        if answer then Proceed else Decline "Temporary file deletion was declined."
 
     let printDeletionResults (printer: Printer) (results: ResultMessages) : unit =
         printer.Info $"Deleted %s{String.fileLabel results.Successes.Length}."

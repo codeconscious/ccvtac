@@ -24,4 +24,4 @@ module Shared =
 
         doneMsgFn seconds
 
-    type YesNoAnswer = Yes | No of Reason: string option
+    type ConfirmationAnswer = Proceed | Decline of Reason: string
