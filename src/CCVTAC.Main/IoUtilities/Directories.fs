@@ -41,7 +41,7 @@ module Directories =
                 for fileName in fileNames do
                     try
                         File.Delete fileName
-                        successes.Add $"• Deleted \"%s{fileName}\""
+                        successes.Add $"• %s{fileName}"
                     with exn ->
                         failures.Add $"• Error deleting \"%s{fileName}\": %s{exn.Message}"
 
@@ -75,10 +75,11 @@ module Directories =
             if Array.isEmpty fileNames then
                 Ok ()
             else
-                SB($"""Found {String.plur' "leftover file" S fileNames.Length} in working directory "{dirName}":{String.nl}""")
+                SB($"""Found {String.plur' "leftover temporary file" S fileNames.Length} in "{dirName}":{String.nl}""")
                     .AppendLine
                         (fileNames
                          |> Array.truncate showMax
+                         |> Array.sort
                          |> Array.map (sprintf "• %s")
                          |> String.concatNL)
                 |> fun sb ->
