@@ -14,6 +14,12 @@ module Shared =
         | Proceed
         | Decline of Reason: string
 
+    type OutcomeCounts = { Successes: string list; Failures: string list }
+
+    type ActionOutcome =
+        | NoAction
+        | Completed of OutcomeCounts
+
     let sleep workingMsgFn doneMsgFn seconds : string =
         let rec loop remaining (ctx: StatusContext) =
             if remaining > 0us then

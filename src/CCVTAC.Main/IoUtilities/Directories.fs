@@ -31,19 +31,22 @@ module Directories =
             Directory.GetFiles(dirName, allFilesSearchPattern, EnumerationOptions())
             |> Array.filter (fun filePath -> not (ignoreFiles |> List.exists filePath.EndsWith)))
 
-    let deleteAllFiles workingDirectory : Result<ResultMessages, string> =
+    let deleteAllFiles workingDirectory : Result<ActionOutcome, string> =
         let delete fileNames =
-            let successes, failures = ResizeArray<string>(), ResizeArray<string>()
+            if Seq.isEmpty fileNames then
+                NoAction
+            else
+                let successes, failures = ResizeArray<string>(), ResizeArray<string>()
 
-            for fileName in fileNames do
-                try
-                    File.Delete fileName
-                    successes.Add $"• Deleted \"%s{fileName}\""
-                with exn ->
-                    failures.Add $"• Error deleting \"%s{fileName}\": %s{exn.Message}"
+                for fileName in fileNames do
+                    try
+                        File.Delete fileName
+                        successes.Add $"• Deleted \"%s{fileName}\""
+                    with exn ->
+                        failures.Add $"• Error deleting \"%s{fileName}\": %s{exn.Message}"
 
-            { Successes = List.ofSeq successes
-              Failures  = List.ofSeq failures }
+                Completed { Successes = List.ofSeq successes
+                            Failures  = List.ofSeq failures }
 
         getDirectoryFileNames workingDirectory None
         |> Result.map delete
@@ -53,13 +56,17 @@ module Directories =
         let answer = printer.AskToBool("Delete all temporary files?", "Yes", "No")
         if answer then Proceed else Decline "Temporary file deletion was declined."
 
-    let printDeletionResults (printer: Printer) (results: ResultMessages) : unit =
-        printer.Info $"Deleted %s{String.fileLabel results.Successes.Length}."
-        results.Successes |> List.iter printer.Debug
+    let printDeletionResults (printer: Printer) outcome : unit =
+        match outcome with
+        | NoAction ->
+            printer.Info "No files for deletion found."
+        | Completed counts ->
+            printer.Info $"Deleted %s{String.fileLabel counts.Successes.Length}."
+            counts.Successes |> List.iter printer.Debug
 
-        if List.isNotEmpty results.Failures then
-            printer.Error $"%s{String.fileLabel results.Failures.Length} could not be deleted:"
-            results.Failures |> List.iter printer.Error
+            if List.isNotEmpty counts.Failures then
+                printer.Error $"%s{String.fileLabel counts.Failures.Length} could not be deleted:"
+                counts.Failures |> List.iter printer.Error
 
     let warnIfAnyFiles showMax dirName : Result<unit, string> =
         match getDirectoryFileNames dirName None with
