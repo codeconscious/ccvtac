@@ -19,10 +19,9 @@ module Updater =
             match Runner.runTool printer toolSettings [] with
             | Ok details ->
                 if details.ExitCode <> successExitCode then
-                    let msg =
+                    printer.Warning <|
                         match details.Error with
                         | Some errMsg -> $"Update completed with minor issues: {errMsg}"
                         | None        ->  "Update completed with minor unspecified issues."
-                    printer.Warning msg
             | Error msg ->
-                printer.Error $"Failure updating: {msg}"
+                printer.Error $"Update failure: {msg}"
