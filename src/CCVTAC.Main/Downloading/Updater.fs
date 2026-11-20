@@ -11,21 +11,17 @@ module Updater =
 
     let run (printer: Printer) userSettings : unit =
         if String.hasNoText userSettings.DownloaderUpdateCommand then
-            printer.Info "No downloader update command provided, so will skip."
+            printer.Info "No downloader update command provided, so will skip updating."
         else
             let toolSettings = ToolSettings.create userSettings.DownloaderUpdateCommand
                                                    userSettings.WorkingDirectory
 
-            let executionResult = Runner.runTool printer toolSettings []
-
-            match executionResult with
+            match Runner.runTool printer toolSettings [] with
             | Ok details ->
                 if details.ExitCode <> successExitCode then
-                    match details.Error with
-                    | Some errMsg -> $"Update completed with minor issues: {errMsg}"
-                    | None        ->  "Update completed with minor unspecified issues."
-                    |> printer.Warning
-                printer.EmptyLine()
+                    printer.Warning <|
+                        match details.Error with
+                        | Some errMsg -> $"Update completed with minor issues: {errMsg}"
+                        | None        ->  "Update completed with minor unspecified issues."
             | Error msg ->
-                let printOptions = { PrintOptions.Default with AppendLines = 1uy }
-                printer.Error($"Failure updating: {msg}", printOptions)
+                printer.Error $"Update failure: {msg}"

@@ -46,9 +46,9 @@ module PostProcessor =
             let taggingSets = createSets <| Directory.GetFiles dir
             match taggingSets with
             | Ok ts -> Ok ts
-            | Error msgs ->
-                $"Error(s) creating tagging sets in working directory \"%s{dir}\"" :: msgs
-                |> String.concat String.nl
+            | Error errMsgs ->
+                $"Error(s) creating tagging sets in working directory \"%s{dir}\"" :: errMsgs
+                |> String.concatNL
                 |> Error
         with exn ->
             Error $"Error reading working files in \"{dir}\" for tagging set creation: %s{exn.Message}"

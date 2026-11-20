@@ -1,6 +1,7 @@
 namespace CCVTAC.Main
 
 open CCVTAC.Main.IoUtilities
+open CCVTAC.Main.Orchestrator
 open CCVTAC.Main.Settings
 open CCVTAC.Main.Settings.Settings
 open Settings.IO
@@ -34,47 +35,44 @@ module Program =
         | _ ->
             ShowHelp
 
-    let private registerCancelHandler (printer: Printer) workingDirectory =
+    let private registerCancelHandler (printer: Printer) : unit =
+        // Exits with error code 130, meaning termination by SIGINT (Ctrl‑C).
         Console.CancelKeyPress.Add(fun _ ->
-            printer.Warning $"{String.nl}Quitting at user's request."
-
-            match Directories.warnIfAnyFiles 10 workingDirectory with
-            | Ok () -> ()
-            | Error warnResult ->
-                printer.Error warnResult
-                match Directories.askToDeleteAllFiles printer workingDirectory with
-                | Error err  -> printer.Error err
-                | Ok results -> Directories.printDeletionResults printer results)
+            printer.Warning("Quitting by request.", PrintOptions.DefaultWithLineBefore))
 
     let private run (printer: Printer) (settingsFile: FileInfo) : int =
         if not settingsFile.Exists then
             match writeDefaultFile settingsFile with
             | Ok msg ->
                 printer.Info msg
-                int ExitCodes.Success
+                ExitCodes.Success
             | Error err ->
                 printer.Error err
-                int ExitCodes.OperationError
+                ExitCodes.OperationError
         else
             match read settingsFile with
             | Error err ->
                 printer.Error err
-                int ExitCodes.ArgError
+                ExitCodes.ArgError
             | Ok settings ->
                 printer.Info "Settings loaded OK."
                 printer.PrintTable (toTable settings)
                 printer.ShowDebug(not settings.QuietMode)
 
-                registerCancelHandler printer settings.WorkingDirectory
+                registerCancelHandler printer
 
                 try
-                    Orchestrator.start printer settings
-                    int ExitCodes.Success
+                    match Orchestrator.start printer settings with
+                    | QuitDueToErrors -> ExitCodes.OperationError
+                    | _               -> ExitCodes.Success
                 with exn ->
                     printer.Critical $"Fatal error: {exn.Message}"
                     AnsiConsole.WriteException exn
-                    printer.Info "Please help improve this tool by reporting this error and any relevant data (URLs, etc.) at https://github.com/codeconscious/ccvtac/issues."
-                    int ExitCodes.OperationError
+                    printer.Info "Please help improve this tool by reporting this error \
+                                  with any relevant data (URLs, settings, etc.) at \
+                                  https://github.com/codeconscious/ccvtac/issues."
+                    ExitCodes.OperationError
+        |> int
 
     [<EntryPoint>]
     let main args : int =

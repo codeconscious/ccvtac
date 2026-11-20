@@ -21,15 +21,16 @@ type private Colors =
 
 type PrintOptions =
     { AppendLineBreak: bool
-      PrependLines: byte
-      AppendLines: byte
+      LinesBefore: byte
       ProcessMarkup: bool }
 
     static member Default =
         { AppendLineBreak = true
-          PrependLines = 0uy
-          AppendLines = 0uy
+          LinesBefore = 0uy
           ProcessMarkup = true }
+
+    static member DefaultWithLineBefore =
+        { PrintOptions.Default with LinesBefore = 1uy }
 
 type Printer(showDebug: bool) =
 
@@ -87,7 +88,7 @@ type Printer(showDebug: bool) =
             if String.hasNoText message then
                 raise (ArgumentException(nameof(message), "Message cannot be empty."))
 
-            printEmptyLines printOptions.PrependLines
+            printEmptyLines printOptions.LinesBefore
 
             let escapedMessage = escapeText message
 
@@ -100,11 +101,9 @@ type Printer(showDebug: bool) =
             if printOptions.AppendLineBreak then
                 AnsiConsole.WriteLine()
 
-            printEmptyLines printOptions.AppendLines
-
     /// Toggle showing or hiding debug messages.
     member this.ShowDebug(shouldEnable) =
-        minimumLogLevel <- (if shouldEnable then Level.Debug else Level.Info)
+        minimumLogLevel <- if shouldEnable then Level.Debug else Level.Info
 
     member this.PrintTable(table: Table) =
         AnsiConsole.Write table
@@ -115,19 +114,23 @@ type Printer(showDebug: bool) =
     member this.Error(message) =
         print Level.Error message None
 
-    member this.Error(message, printOptions) =
-        print Level.Error message (Some printOptions)
+    member this.Error(message, options) =
+        print Level.Error message (Some options)
 
     member this.Warning(message) =
         print Level.Warning message None
 
+    member this.Warning(message, options) =
+        print Level.Warning message (Some options)
+
     member this.Info(message) =
         print Level.Info message None
 
+    member this.Info(message, options) =
+        print Level.Info message (Some options)
+
     member this.Debug(message) =
         print Level.Debug message None
-
-    member this.EmptyLine() = printEmptyLines 1uy
 
     member this.GetInput(prompt) : string =
         printEmptyLines 1uy
@@ -135,3 +138,4 @@ type Printer(showDebug: bool) =
 
     member this.AskToBool(question, yesAnswer, noAnswer) : bool =
         (ask question [ yesAnswer; noAnswer ]) = yesAnswer
+

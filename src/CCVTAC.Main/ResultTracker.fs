@@ -5,23 +5,14 @@ open CCFSharpUtils.Text
 open System
 open System.Collections.Generic
 
-type ResultTracker<'a>(printer: Printer) =
+type ResultTracker(printer: Printer) =
 
     let mutable successCount : uint64 = 0UL
 
-    let failures = Dictionary<string,string>()
+    let failures = Dictionary<string, string>()
 
     /// Logs the result for a specific corresponding input.
-    member _.RegisterResult(input: string, result: Result<'a, string>) : unit =
-        match result with
-        | Ok _ ->
-            successCount <- successCount + 1UL
-        | Error e ->
-            if not (failures.TryAdd(input, e)) then
-                failures[input] <- e
-
-    /// Logs the result for a specific corresponding input.
-    member _.RegisterResult(input: string, result: Result<'a, string list>) : unit =
+    member _.RegisterResult<'T>(input: string, result: Result<'T, string list>) : unit =
         match result with
         | Ok _ ->
             successCount <- successCount + 1UL
@@ -29,6 +20,7 @@ type ResultTracker<'a>(printer: Printer) =
             let msg = match e with [] -> String.Empty | _ -> List.head e
             if not (failures.TryAdd(input, msg)) then
                 failures[input] <- msg
+
 
     /// Prints any failures for the current batch.
     member _.PrintBatchFailures() : unit =
@@ -45,7 +37,8 @@ type ResultTracker<'a>(printer: Printer) =
         let successSummary = String.plur' "success" Es successCount
         let failureSummary = String.plur' "failure" S failures.Count
 
-        printer.Info $"Quitting with %s{successSummary} and %s{failureSummary}."
+        let options = PrintOptions.DefaultWithLineBefore
+        printer.Info($"Quitting with %s{successSummary} and %s{failureSummary}.", options)
 
         for pair in failures do
             printer.Warning $"- %s{pair.Key}: %s{pair.Value}"

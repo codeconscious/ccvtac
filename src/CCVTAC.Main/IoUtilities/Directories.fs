@@ -11,6 +11,9 @@ module Directories =
     [<Literal>]
     let private allFilesSearchPattern = "*"
 
+    [<Literal>]
+    let maxFilesToShow = 10
+
     /// Counts the number of audio files in a directory.
     let audioFileCount dirName includedExtensions =
         DirectoryInfo(dirName).EnumerateFiles()
@@ -46,10 +49,9 @@ module Directories =
         |> Result.map delete
 
     /// Ask the user to confirm the deletion of files in the specified directory.
-    let askToDeleteAllFiles (printer: Printer) dirName =
-        if printer.AskToBool("Delete all temporary files?", "Yes", "No")
-        then deleteAllFiles dirName
-        else Error "Will not delete the files."
+    let confirmDeleteFiles (printer: Printer) : ConfirmationAnswer =
+        let answer = printer.AskToBool("Delete all temporary files?", "Yes", "No")
+        if answer then Proceed else Decline "Temporary file deletion was declined."
 
     let printDeletionResults (printer: Printer) (results: ResultMessages) : unit =
         printer.Info $"Deleted %s{String.fileLabel results.Successes.Length}."
@@ -66,12 +68,12 @@ module Directories =
             if Array.isEmpty fileNames then
                 Ok ()
             else
-                SB($"Unexpectedly found {String.fileLabel fileNames.Length} in working directory \"{dirName}\":{String.nl}")
+                SB($"""Found {String.plur' "leftover file" S fileNames.Length} in working directory "{dirName}":{String.nl}""")
                     .AppendLine
                         (fileNames
                          |> Array.truncate showMax
                          |> Array.map (sprintf "• %s")
-                         |> String.concat String.nl)
+                         |> String.concatNL)
                 |> fun sb ->
                     if fileNames.Length > showMax
                     then sb.AppendLine $"... plus {fileNames.Length - showMax} more."
