@@ -11,7 +11,7 @@ module Updater =
 
     let run (printer: Printer) userSettings : unit =
         if String.hasNoText userSettings.DownloaderUpdateCommand then
-            printer.Info "No downloader update command provided, so will skip the update."
+            printer.Info "No downloader update command provided, so will skip updating."
         else
             let toolSettings = ToolSettings.create userSettings.DownloaderUpdateCommand
                                                    userSettings.WorkingDirectory
