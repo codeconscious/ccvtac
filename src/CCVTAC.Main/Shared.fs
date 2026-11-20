@@ -6,7 +6,13 @@ open Spectre.Console
 [<AutoOpen>]
 module Shared =
 
-    type ResultMessages = { Successes: string list; Failures: string list }
+    type ResultMessages =
+        { Successes: string list
+          Failures:  string list }
+
+    type ConfirmationAnswer =
+        | Proceed
+        | Decline of Reason: string
 
     let sleep workingMsgFn doneMsgFn seconds : string =
         let rec loop remaining (ctx: StatusContext) =
@@ -24,4 +30,3 @@ module Shared =
 
         doneMsgFn seconds
 
-    type ConfirmationAnswer = Proceed | Decline of Reason: string
