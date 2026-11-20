@@ -287,10 +287,8 @@ module Orchestrator =
 
                         let updatedSettings, nextAction =
                             match processResult with
-                            | Ok result ->
-                                defaultArg result.UpdatedSettings settings, result.NextAction
-                            | Error _ ->
-                                settings, nextAction'
+                            | Ok result -> defaultArg result.UpdatedSettings settings, result.NextAction
+                            | Error _ -> settings, nextAction'
 
                         // Advance the URL position only when the input was a URL.
                         let nextUrlPosition =
@@ -325,8 +323,8 @@ module Orchestrator =
     let private isWorkingDirReady (printer: Printer) dirName : Result<unit, string> =
         let emptyDirAndReport dirName =
             Directories.deleteAllFiles dirName
-            |> map (fun results ->
-                Directories.printDeletionResults printer results
+            |> Result.map (fun msgs ->
+                Directories.printDeletionResults printer msgs
                 printer.Debug "Files deleted.")
 
         match Directories.warnIfAnyFiles Directories.maxFilesToShow dirName with
@@ -358,8 +356,7 @@ module Orchestrator =
                     let categoryCounts = countCategories categorizedInputs
                     summarizeInput printer categorizedInputs categoryCounts
 
-                    let batchResult =
-                        processBatch printer categorizedInputs categoryCounts settings results history
+                    let batchResult = processBatch printer categorizedInputs categoryCounts settings results history
 
                     let nextSettings = defaultArg batchResult.UpdatedSettings settings
 
