@@ -18,7 +18,7 @@ Feel free to use it yourself, but please note that it's geared to my personal us
 
 ## Prerequisites
 
-- [.NET 10 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
+- [.NET 11 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/11.0)
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp)
 - [ffmpeg](https://ffmpeg.org/) (for yt-dlp artwork extraction and conversion)
 - Optional: [mogrify](https://imagemagick.org/script/mogrify.php) (for auto-trimming album art)
@@ -41,19 +41,19 @@ A valid JSON settings file is mandatory to use this application.
 
 By default, the application will look for a file named `settings.json` in its directory. However, you can manually specify an existing file path using the `-s` option, such as `dotnet run -- -s <PATH_TO_YOUR_FILE>`.
 
-> [!TIP]
+> [!NOTE]
 > The `--` is necessary to indicate that the command and arguments are for this program and not for `dotnet`.
 
 If your `settings.json` file does not exist, a default one will be created. At minimum, you will need to enter (1) an existing directory for temporary working files, (2) an existing directory to which the final audio files should be moved, and (3) a path to your history file. The other settings have sensible defaults. Some settings require familiarity with regular expressions (regex).
 
 <details>
-  <summary>Click to see a sample settings file</summary>
+  <summary>Expand this to see a sample settings file.</summary>
 
 The sample below contains explanations and some example values as well.
 
 **Important:** When entering regular expressions, you must double-up backslashes. For example, to match a whitespace character, use `\\s` instead of `\s`.
 
-```js
+```json
 {
   // Mandatory. The working directory for temporary files.
   // It is emptied after processing each URL.
