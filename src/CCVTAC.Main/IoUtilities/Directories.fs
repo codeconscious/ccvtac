@@ -31,10 +31,10 @@ module Directories =
             Directory.GetFiles(dirName, allFilesSearchPattern, EnumerationOptions())
             |> Array.filter (fun filePath -> not (ignoreFiles |> List.exists filePath.EndsWith)))
 
-    let deleteAllFiles workingDirectory : Result<ActionOutcome, string> =
+    let deleteAllFiles workingDirectory : Result<OutcomeCounts option, string> =
         let delete fileNames =
             if Seq.isEmpty fileNames then
-                NoAction
+                None
             else
                 let successes, failures = ResizeArray<string>(), ResizeArray<string>()
 
@@ -45,8 +45,8 @@ module Directories =
                     with exn ->
                         failures.Add $"• Error deleting \"%s{fileName}\": %s{exn.Message}"
 
-                Completed { Successes = List.ofSeq successes
-                            Failures  = List.ofSeq failures }
+                Some { Successes = List.ofSeq successes
+                       Failures  = List.ofSeq failures }
 
         getDirectoryFileNames workingDirectory None
         |> Result.map delete
@@ -58,9 +58,9 @@ module Directories =
 
     let printDeletionResults (printer: Printer) outcome : unit =
         match outcome with
-        | NoAction ->
+        | None ->
             printer.Info "No files for deletion found."
-        | Completed counts ->
+        | Some counts ->
             printer.Info $"Deleted %s{String.fileLabel counts.Successes.Length}."
             counts.Successes |> List.iter printer.Debug
 
