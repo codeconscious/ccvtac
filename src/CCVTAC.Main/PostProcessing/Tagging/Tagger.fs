@@ -41,12 +41,12 @@ module Tagger =
 
             try
                 File.Delete largestFileInfo.FullName
-                printer.Debug $"Deleted pre-split source file \"%s{largestFileInfo.Name}\""
+                printer.Debug $"Deleted source file \"%s{largestFileInfo.Name}\""
                 { taggingSet with
                     AudioFiles = taggingSet.AudioFiles
-                                     |> List.except [largestFileInfo.FullName] }
+                                 |> List.except [largestFileInfo.FullName] }
             with exn ->
-                printer.Error $"Error deleting pre-split source file \"%s{largestFileInfo.Name}\": %s{exn.Message}"
+                printer.Error $"Error deleting source file \"%s{largestFileInfo.Name}\": %s{exn.Message}"
                 taggingSet
 
     let private writeImageToFile (printer: Printer) (taggedFile: TaggedFile) imageFilePath =
