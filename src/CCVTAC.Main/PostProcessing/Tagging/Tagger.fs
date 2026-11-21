@@ -182,17 +182,19 @@ module Tagger =
         (embedImages: bool)
         : unit =
 
-        printer.Debug $"""Found %s{String.fileLabelWithDesc "audio" taggingSet.AudioFiles.Length} with resource ID %s{taggingSet.VideoId}."""
+        printer.Debug <|
+            sprintf "Found %s with resource ID %s."
+                (String.plur' "audio file" S taggingSet.AudioFiles.Length)
+                taggingSet.VideoId
 
         match parseVideoJson taggingSet with
         | Ok videoData ->
             let finalTaggingSet = deleteSourceFile printer taggingSet
 
             let imagePath =
-                if embedImages && List.isNotEmpty finalTaggingSet.AudioFiles then
-                    Some finalTaggingSet.ImageFile
-                else
-                    None
+                if embedImages && List.isNotEmpty finalTaggingSet.AudioFiles
+                then Some finalTaggingSet.ImageFile
+                else None
 
             for audioPath in finalTaggingSet.AudioFiles do
                 try

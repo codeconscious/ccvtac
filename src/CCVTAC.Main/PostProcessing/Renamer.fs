@@ -1,7 +1,7 @@
 namespace CCVTAC.Main.PostProcessing
 
 open CCVTAC.Main
-open CCVTAC.Main.IoUtilities
+open CCVTAC.Main.IoUtilities.Files
 open CCVTAC.Main.Settings.Settings
 open CCFSharpUtils
 open CCFSharpUtils.Collections
@@ -55,19 +55,19 @@ module Renamer =
 
             text
 
-    let run (printer: Printer) userSettings workingDirectory : unit =
+    let run (printer: Printer) userSettings workingDir : unit =
         let watch = Watch()
-        let workingDirInfo = DirectoryInfo workingDirectory
+        let workingDirInfo = DirectoryInfo workingDir
 
         let audioFiles =
             workingDirInfo.EnumerateFiles()
-            |> Seq.filter (fun f -> List.containsIgnoreCase f.Extension Files.audioFileExts)
+            |> Seq.filter (fun f -> List.containsIgnoreCase f.Extension audioFileExts)
             |> List.ofSeq
 
         if List.isEmpty audioFiles then
             printer.Warning "No audio files to rename were found."
         else
-            printer.Debug $"""Renaming %s{String.fileLabelWithDesc "audio" audioFiles.Length}..."""
+            printer.Debug $"""Renaming %s{countFiles' "audio" audioFiles.Length}..."""
 
             for audioFile in audioFiles do
                 let newFileName =
@@ -79,7 +79,7 @@ module Renamer =
 
                 try
                     let destinationPath =
-                        Path.Combine(workingDirectory, newFileName)
+                        Path.Combine(workingDir, newFileName)
                             .Normalize(toNormalizationForm userSettings.NormalizationForm)
 
                     File.Move(audioFile.FullName, destinationPath)

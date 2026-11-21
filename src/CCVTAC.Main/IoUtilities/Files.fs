@@ -14,6 +14,12 @@ module Files =
 
     let imageFileExts = [".jpg"; ".jpeg"]
 
+    let countFiles : int -> string =
+        String.plur' "file" S
+
+    let countFiles' description : int -> string =
+        String.plur' $" {description} file" S
+
     let filterByExt ext fs = fs |> List.filter (String.endsWith' ext)
 
     let readAllText (filePath: string) : Result<string, string> =

@@ -1,5 +1,6 @@
 namespace CCVTAC.Main.IoUtilities
 
+open Files
 open CCVTAC.Main
 open CCFSharpUtils
 open CCFSharpUtils.Collections
@@ -61,11 +62,11 @@ module Directories =
         | None ->
             printer.Info "No files for deletion found."
         | Some counts ->
-            printer.Info $"Deleted %s{String.fileLabel counts.Successes.Length}."
+            printer.Info $"Deleted %s{countFiles counts.Successes.Length}."
             counts.Successes |> List.iter printer.Debug
 
             if List.isNotEmpty counts.Failures then
-                printer.Error $"%s{String.fileLabel counts.Failures.Length} could not be deleted:"
+                printer.Error $"%s{countFiles counts.Failures.Length} could not be deleted:"
                 counts.Failures |> List.iter printer.Error
 
     let warnIfAnyFiles showMax dirName : Result<unit, string> =

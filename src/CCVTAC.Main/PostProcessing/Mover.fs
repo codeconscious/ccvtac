@@ -3,6 +3,7 @@ namespace CCVTAC.Main.PostProcessing
 
 open CCVTAC.Main
 open CCVTAC.Main.IoUtilities
+open CCVTAC.Main.IoUtilities.Files
 open CCVTAC.Main.PostProcessing
 open CCVTAC.Main.PostProcessing.Tagging
 open CCVTAC.Main.Settings.Settings
@@ -140,17 +141,17 @@ module Mover =
                 if audioFileNames.IsEmpty then
                     printer.Error "No audio filenames to move were found."
                 else
-                    let fileCountMsg = String.fileLabelWithDesc "audio"
+                    let countAudioFiles = countFiles' "audio"
 
-                    printer.Debug $"Moving %s{fileCountMsg audioFileNames.Length} to \"%s{fullMoveToDir}\"..."
+                    printer.Debug $"Moving %s{countAudioFiles audioFileNames.Length} to \"%s{fullMoveToDir}\"..."
 
                     let results = moveAudioFiles audioFileNames fullMoveToDir overwrite
 
-                    printer.Info $"Moved %s{fileCountMsg results.Successes.Length} in %s{watch.ElapsedFriendly}."
+                    printer.Info $"Moved %s{countAudioFiles results.Successes.Length} in %s{watch.ElapsedFriendly}."
                     results.Successes |> List.iter printer.Debug
 
                     if List.isNotEmpty results.Failures then
-                        printer.Warning $"However, %s{fileCountMsg results.Failures.Length} could not be moved:"
+                        printer.Warning $"However, %s{countAudioFiles results.Failures.Length} could not be moved:"
                         results.Failures |> List.iter printer.Error
 
                     moveImageFile collectionName subFolderName workingDirInfo fullMoveToDir
