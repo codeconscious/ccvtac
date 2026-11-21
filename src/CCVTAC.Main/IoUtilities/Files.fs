@@ -20,10 +20,7 @@ module Files =
     let countFiles' description : int -> string =
         String.plur' $" {description} file" S
 
-    let filterByExt ext fs = fs |> List.filter (String.endsWith' ext)
-
-    let readAllText (filePath: string) : Result<string, string> =
-        ofTry (fun _ -> File.ReadAllText filePath)
+    let filterByExt ext files = files |> List.filter (String.endsWith' ext)
 
     let appendToFile (file: FileInfo) (text: string) : Result<unit, string> =
         ofTry (fun _ -> File.AppendAllText(file.FullName, text))
