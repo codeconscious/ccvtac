@@ -21,7 +21,7 @@ module Tagger =
     let private parseVideoJson taggingSet : Result<VideoMetadata, string> =
         try
             let json = File.ReadAllText taggingSet.JsonFile
-            match JsonSerializer.Deserialize<VideoMetadata> json with
+            match json |> JsonSerializer.Deserialize<VideoMetadata> with
             | Null -> Error $"Deserialized JSON was null for \"%s{taggingSet.JsonFile}\"."
             | NonNull v -> Ok v
         with
@@ -30,7 +30,7 @@ module Tagger =
 
     /// If a video was split into sub-videos, then the original video is unneeded and should be deleted.
     let private deleteSourceFile (printer: Printer) taggingSet : TaggingSet =
-        if not (List.hasMultiple taggingSet.AudioFiles) then
+        if List.hasOne taggingSet.AudioFiles then
             taggingSet
         else
             let largestFileInfo =
