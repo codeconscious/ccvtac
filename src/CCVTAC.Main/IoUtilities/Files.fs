@@ -22,5 +22,6 @@ module Files =
 
     let filterByExt ext files = files |> List.filter (String.endsWith' ext)
 
+    // TODO: Use the version in CCFSharpUtils instead.
     let appendToFile (file: FileInfo) (text: string) : Result<unit, string> =
         ofTry (fun _ -> File.AppendAllText(file.FullName, text))
