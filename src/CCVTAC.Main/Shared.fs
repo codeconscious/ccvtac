@@ -12,7 +12,7 @@ module Shared =
 
     type ConfirmationAnswer =
         | Proceed
-        | Decline of Reason: string
+        | Decline
 
     type OutcomeCounts = { Successes: string list; Failures: string list }
 

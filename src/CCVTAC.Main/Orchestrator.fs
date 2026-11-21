@@ -331,9 +331,9 @@ module Orchestrator =
         | Ok () -> Ok ()
         | Error err ->
             printer.Error err
-            match Directories.confirmDeleteFiles printer with
+            match printer.AskToProceed("Delete leftover temporary files?") with
             | Proceed -> emptyDirAndReport dirName
-            | Decline reason -> Error reason
+            | Decline -> Error "Deletion of temporary files was declined."
 
     let start printer settings : NextAction =
         match isWorkingDirReady printer settings.WorkingDirectory with

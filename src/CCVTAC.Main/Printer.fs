@@ -139,3 +139,11 @@ type Printer(showDebug: bool) =
     member this.AskToBool(question, yesAnswer, noAnswer) : bool =
         (ask question [ yesAnswer; noAnswer ]) = yesAnswer
 
+    member this.AskToProceed(question) =
+        let yes, no = "Proceed", "Skip"
+        if (ask question [ yes; no ]) = yes
+        then Proceed
+        else Decline
+
+
+
