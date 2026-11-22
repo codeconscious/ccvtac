@@ -1,7 +1,7 @@
 namespace CCVTAC.Main
 
-open CCVTAC.Main.IoUtilities.Files
 open CCFSharpUtils.Collections
+open CCFSharpUtils.IO
 open CCFSharpUtils.Text
 open System
 open System.IO
@@ -22,7 +22,7 @@ type History(filePath: string, displayCount: int) =
             let serializedTime = JsonSerializer.Serialize(entryTime).Replace("\"", "")
             let text = serializedTime + string separator + url + String.nl
 
-            match appendToFile this.FileInfo text with
+            match File.appendToFile' this.FileInfo text with
             | Ok _      -> printer.Debug $"Added \"%s{url}\" to the history log."
             | Error err -> printer.Error $"Failed to write \"%s{url}\" to the history log at \"{this.FileInfo}\": {err}"
         with exn ->
