@@ -1,10 +1,12 @@
 namespace CCVTAC.Main.Settings
 
-open CCFSharpUtils.Text
+open CCVTAC.Main.IoUtilities.Files
 open Spectre.Console
 open FSharpPlus
 open System
 open System.Text.Json.Serialization
+open CCFSharpUtils.Text
+open CCFSharpUtils.IO
 
 module Settings =
 
@@ -129,32 +131,25 @@ module Settings =
         table
 
     module Validation' =
-        open System.IO
 
         let validate settings =
-            let dirMissing str = not (Directory.Exists str)
-
-            // Source: https://github.com/yt-dlp/yt-dlp/?tab=readme-ov-file#post-processing-options
-            let supportedAudioFormats = [ "best"; "aac"; "alac"; "flac"; "m4a"; "mp3"; "opus"; "vorbis"; "wav" ]
-            let supportedNormalizationForms = [ "C"; "D"; "KC"; "KD" ]
-
-            let validAudioFormat fmt = supportedAudioFormats |> List.contains fmt
-
             match settings with
             | { WorkingDirectory = dir } when String.hasNoText dir ->
                 Error "No working directory was specified in the settings."
-            | { WorkingDirectory = dir } when dirMissing dir ->
+            | { WorkingDirectory = dir } when Dir.dirMissing dir ->
                 Error $"Working directory \"{dir}\" is missing."
+            | { WorkingDirectory = dir } when not (Dir.isEmpty dir) ->
+                Error $"Working directory \"{dir}\" must be empty, including hidden and system items."
             | { MoveToDirectory = dir } when String.hasNoText dir ->
                 Error "No move-to directory was specified in the settings."
-            | { MoveToDirectory = dir } when dirMissing dir ->
+            | { MoveToDirectory = dir } when Dir.dirMissing dir ->
                 Error $"Move-to directory \"{dir}\" is missing."
             | { AudioQuality = q } when q < 0uy || q > 10uy ->
                 Error "Audio quality must be in the range 10 (lowest) and 0 (highest)."
             | { NormalizationForm = nf } when not(supportedNormalizationForms |> List.contains (nf.ToUpperInvariant())) ->
                 let okFormats = String.Join(", ", supportedNormalizationForms)
                 Error $"\"{nf}\" is an invalid normalization form. Use one of the following: {okFormats}."
-            | { AudioFormats = fmt } when not (fmt |> List.forall validAudioFormat) ->
+            | { AudioFormats = fmt } when not (fmt |> List.forall isValidAudioFmt) ->
                 let formats = String.Join(", ", fmt)
                 let approved = supportedAudioFormats |> String.concat ", "
                 Error $"Unsupported audio format(s) (\"%s{formats}\") found. Supported formats: {approved}."
