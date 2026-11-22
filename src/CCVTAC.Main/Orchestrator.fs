@@ -17,7 +17,7 @@ module Orchestrator =
 
     type NextAction =
         | Continue
-        | QuitAtUserRequest
+        | QuitByRequest
         | QuitDueToErrors
 
     type BatchResults =
@@ -165,7 +165,7 @@ module Orchestrator =
                 Ok { NextAction = Continue; UpdatedSettings = None }
 
             elif checkCommand Commands.quitCommands then
-                Ok { NextAction = QuitAtUserRequest; UpdatedSettings = None }
+                Ok { NextAction = QuitByRequest; UpdatedSettings = None }
 
             elif checkCommand Commands.history then
                 history.ShowRecent printer
