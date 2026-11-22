@@ -18,7 +18,7 @@ module Files =
         String.plur' "file" S
 
     let countFiles' description : int -> string =
-        String.plur' $" {description} file" S
+        String.plur' $"{description} file" S
 
     let filterByExt ext files = files |> List.filter (String.endsWith' ext)
 
