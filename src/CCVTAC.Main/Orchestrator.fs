@@ -106,7 +106,7 @@ module Orchestrator =
 
                     let groupClause =
                         if batchSize > 1
-                        then $" (item %d{urlIndex} of %d{batchSize})"
+                        then $" (URL %d{urlIndex} of %d{batchSize})"
                         else String.Empty
 
                     printer.Info $"Processed '%s{url}'%s{groupClause} in %s{jobWatch.ElapsedFriendly}."
