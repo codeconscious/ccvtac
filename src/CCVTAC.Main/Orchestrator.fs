@@ -1,6 +1,7 @@
 namespace CCVTAC.Main
 
 open CCVTAC.Main.Downloading
+open CCVTAC.Main.Downloading.Downloading
 open CCVTAC.Main.InputHelper
 open CCVTAC.Main.IoUtilities
 open CCVTAC.Main.PostProcessing
@@ -83,11 +84,11 @@ module Orchestrator =
 
             let jobWatch = Watch()
 
-            match Downloading.mediaTypeWithIds url with
+            match mediaTypeWithIds url with
             | Error errMsg ->
                 Error (Recoverable $"URL parse error: %s{errMsg}")
             | Ok mediaType ->
-                printer.Info $"%s{mediaType.GetType().Name} URL '%s{url}' detected."
+                printer.Info $"%s{typeName mediaType} URL '%s{url}' detected."
                 history.Append(url, urlInputTime, printer)
 
                 let downloadResult = Downloader.run printer mediaType settings
@@ -96,7 +97,7 @@ module Orchestrator =
                 | Error errs ->
                     let groupedErrs =
                         errs
-                        |> List.map (sprintf "Media download error: %s")
+                        |> List.map (sprintf "Download error: %s")
                         |> String.concatNL
                     Error (Recoverable groupedErrs)
                 | Ok message ->

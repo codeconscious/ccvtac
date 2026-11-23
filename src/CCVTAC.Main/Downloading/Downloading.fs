@@ -12,12 +12,14 @@ module Downloading =
         | ReleasePlaylist of Id: string
         | Channel of Id: string
 
-    type PrimaryUrl = PrimaryUrl of string
-
-    type SupplementaryUrl = SupplementaryUrl of string option
-
-    type Urls = { Primary: PrimaryUrl
-                  Metadata: SupplementaryUrl }
+    let typeName mediaType =
+        match mediaType with
+        | Video _ -> "Video"
+        | Short _ -> "Shorts"
+        | PlaylistVideo _ -> "Playlist Video"
+        | StandardPlaylist _ -> "Standard Playlist"
+        | ReleasePlaylist _ -> "Release Playlist"
+        | Channel _ -> "Channel"
 
     let isSingleVideoType mediaType =
         match mediaType with
@@ -26,6 +28,13 @@ module Downloading =
 
     let isMultiVideoType =
         not << isSingleVideoType
+
+    type PrimaryUrl = PrimaryUrl of string
+
+    type SupplementaryUrl = SupplementaryUrl of string option
+
+    type Urls = { Primary: PrimaryUrl
+                  Metadata: SupplementaryUrl }
 
     let mediaTypeWithIds url : Result<MediaType,string> =
         match url with
