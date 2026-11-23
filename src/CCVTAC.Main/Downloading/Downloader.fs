@@ -8,13 +8,13 @@ open CCVTAC.Main.Downloading.Downloading
 open CCVTAC.Main.ExternalTools
 open CCVTAC.Main.Settings.Settings
 open CCFSharpUtils
+open FSharpPlus
 open FsToolkit.ErrorHandling
 open System
 
 module Downloader =
 
-    // One download attempt refers to the set of all attempts for each audio format for a single URL.
-    let maximumAttempts = 3
+    let maximumFormatPasses = 3
 
     let generateDownloadArgs audioFormat userSettings (mediaType: MediaType option) additionalArgs : string =
         let writeJsonArg = "--write-info-json"
@@ -82,14 +82,15 @@ module Downloader =
             let downloadSettings = ToolSettings.create commandWithArgs userSettings.WorkingDirectory
 
             let downloadResult = runTool printer downloadSettings [1]
-            let anyFilesDownloaded = Num.isPos <| audioFileCount userSettings.WorkingDirectory Files.audioFileExts
+            let anyFilesDownloaded = Num.isPos <| audioFileCount Files.audioFileExts userSettings.WorkingDirectory
 
             match downloadResult, anyFilesDownloaded with
             | Ok result, true ->
-                Ok (
+                Ok <|
                     $"Successfully downloaded the \"{format}\" format."
-                    :: match result.Error with Some err -> [$"However, a minor issue was reported: {err}"] | None -> []
-                )
+                    :: match result.Error with
+                       | Some err -> [$"However, a minor issue was reported: {err}"]
+                       | None -> []
             | Ok result, false ->
                 let msg = $"While the downloader finished successfully, no audio files were downloaded in the \"{format}\" format."
                 Error (previousErrors @ buildErrMsg msg result.Error)
@@ -100,20 +101,24 @@ module Downloader =
                 let msg = $"A download error was reported for the \"{format}\" format, and no audio files were downloaded. {err}"
                 Error (previousErrors @ [msg])
 
-        let rec retryLoop errors attemptsRemaining audioFormats =
-            if Num.isZero attemptsRemaining then
-                Error (errors @ [$"Gave up after {maximumAttempts} failed attempts."])
+        let rec retryLoop errors passesRemaining formatsRemaining =
+            if Num.isZero passesRemaining then
+                Error <|
+                    errors
+                    @ [$"Gave up after {maximumFormatPasses} passes through the configured audio formats."]
             else
-                match audioFormats with
+                match formatsRemaining with
                 | [] ->
-                    // All formats attempted, retry with full list
-                    retryLoop errors (attemptsRemaining - 1) userSettings.AudioFormats
+                    // All formats in this pass were attempted; start another pass.
+                    retryLoop errors (passesRemaining - 1) userSettings.AudioFormats
                 | format :: remainingFormats ->
                     match attemptAudioFormat format errors with
                     | Ok msgs    -> Ok msgs
-                    | Error errs -> retryLoop errs attemptsRemaining remainingFormats
+                    | Error errs -> retryLoop errs passesRemaining remainingFormats
 
-        retryLoop [] maximumAttempts userSettings.AudioFormats
+        match userSettings.AudioFormats with
+        | []      -> Error ["No audio formats are configured."]
+        | formats -> retryLoop [] maximumFormatPasses formats
 
     let downloadMetadata (printer: Printer) userSettings (SupplementaryUrl url) : Result<string, string list> =
         match url with

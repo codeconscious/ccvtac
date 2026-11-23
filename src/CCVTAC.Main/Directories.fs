@@ -16,7 +16,7 @@ module Directories =
     let maxFilesToShow = 10
 
     /// Counts the number of audio files in a directory.
-    let audioFileCount dirName includedExtensions =
+    let audioFileCount includedExtensions dirName =
         DirectoryInfo(dirName).EnumerateFiles()
         |> Seq.filter (fun f -> List.containsIgnoreCase f.Extension includedExtensions)
         |> Seq.length
