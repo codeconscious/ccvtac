@@ -13,6 +13,9 @@ open System
 
 module Downloader =
 
+    // One download attempt refers to the set of all attempts for each audio format for a single URL.
+    let maximumAttempts = 3
+
     let generateDownloadArgs audioFormat userSettings (mediaType: MediaType option) additionalArgs : string =
         let writeJsonArg = "--write-info-json"
         let trimFileNamesArg = "--trim-filenames 250"
@@ -46,17 +49,17 @@ module Downloader =
         // No MediaType indicates that this is a supplemental metadata-only download.
         // TODO: Perhaps add a union type to more clearly indicate this difference.
         match mediaType with
+        | None -> ()
         | Some mt ->
             if userSettings.SplitChapters then
                 args <- args.Add "--split-chapters"
 
-            if not mt.IsVideo && not mt.IsPlaylistVideo then
+            if isMultiVideoType mt then
                 args <- args.Add $"--sleep-interval {userSettings.SleepSecondsBetweenDownloads}"
 
-            if mt.IsStandardPlaylist then
-                args <- args.Add
-                    """-o "%(uploader).80B - %(playlist).80B - %(playlist_autonumber)s - %(title).150B [%(id)s].%(ext)s" --playlist-reverse"""
-        | None -> ()
+                if mt.IsStandardPlaylist then
+                    args <- args.Add
+                        """-o "%(uploader).80B - %(playlist).80B - %(playlist_autonumber)s - %(title).150B [%(id)s].%(ext)s" --playlist-reverse"""
 
         let extraArgs = Set.ofList <| defaultArg additionalArgs []
         String.Join(" ", Set.union args extraArgs)
@@ -67,10 +70,7 @@ module Downloader =
     let downloadMedia (printer: Printer) (mediaType: MediaType) userSettings (PrimaryUrl url)
         : Result<string list, string list> =
 
-        // One attempt refers to a set of attempted downloads for all audio formats.
-        let maximumAttempts = 3
-
-        if not mediaType.IsVideo && not mediaType.IsPlaylistVideo then
+        if isMultiVideoType mediaType then
             printer.Info "Please wait for multiple videos to be downloaded..."
 
         let buildErrorMessage mainMsg maybeErr =
