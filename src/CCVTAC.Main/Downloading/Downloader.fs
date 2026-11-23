@@ -76,7 +76,7 @@ module Downloader =
         let buildErrMsg err maybeSndErr =
             err :: Option.toList maybeSndErr
 
-        let attemptAudioFormat format errors =
+        let attemptAudioFormat format previousErrors =
             let args = generateDownloadArgs (Some format) userSettings (Some mediaType) (Some [url])
             let commandWithArgs = $"{userSettings.DownloaderCommand} {args}"
             let downloadSettings = ToolSettings.create commandWithArgs userSettings.WorkingDirectory
@@ -92,13 +92,13 @@ module Downloader =
                 )
             | Ok result, false ->
                 let msg = $"While the downloader finished successfully, no audio files were downloaded in the \"{format}\" format."
-                Error (errors @ buildErrMsg msg result.Error)
+                Error (previousErrors @ buildErrMsg msg result.Error)
             | Error err, true ->
                 let msg = $"The downloader reported failure for \"{format}\", yet audio files were unexpectedly downloaded!"
-                Error (errors @ buildErrMsg msg (Some err))
+                Error (previousErrors @ buildErrMsg msg (Some err))
             | Error err, false ->
                 let msg = $"A download error was reported for the \"{format}\" format, and no audio files were downloaded. {err}"
-                Error (errors @ [msg])
+                Error (previousErrors @ [msg])
 
         let rec retryLoop errors attemptsRemaining audioFormats =
             if Num.isZero attemptsRemaining then
