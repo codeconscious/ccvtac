@@ -24,17 +24,17 @@ module Downloader =
             | Some format -> $"-f {format}"
 
         let mutable args =
-            match mediaType with
-            | None ->
-                [ $"--flat-playlist {writeJsonArg} {trimFileNamesArg}" ]
-            | Some _ ->
-                [ $"--extract-audio {formatArg}"
-                  $"--audio-quality {userSettings.AudioQuality}"
-                  "--write-thumbnail --convert-thumbnails jpg"
-                  writeJsonArg
-                  trimFileNamesArg
-                  "--retries 3" ]
-            |> Set.ofList
+            Set.ofList <|
+                match mediaType with
+                | None ->
+                    [ $"--flat-playlist {writeJsonArg} {trimFileNamesArg}" ]
+                | Some _ ->
+                    [ $"--extract-audio {formatArg}"
+                      $"--audio-quality {userSettings.AudioQuality}"
+                      "--write-thumbnail --convert-thumbnails jpg"
+                      writeJsonArg
+                      trimFileNamesArg
+                      "--retries 3" ]
 
         if userSettings.QuietMode then
             args <- args.Add "--quiet --no-warnings"
@@ -58,7 +58,7 @@ module Downloader =
                     """-o "%(uploader).80B - %(playlist).80B - %(playlist_autonumber)s - %(title).150B [%(id)s].%(ext)s" --playlist-reverse"""
         | None -> ()
 
-        let extraArgs = defaultArg additionalArgs [] |> Set.ofList
+        let extraArgs = Set.ofList <| defaultArg additionalArgs []
         String.Join(" ", Set.union args extraArgs)
 
     let wrapUrlInMediaType url : Result<MediaType, string> =
