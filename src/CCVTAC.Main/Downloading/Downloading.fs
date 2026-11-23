@@ -4,12 +4,19 @@ open CCFSharpUtils.Text
 
 module Downloading =
 
+    /// The type of media a media URL can represent.
     type MediaType =
+        /// A standard video.
         | Video of Id: string
+        /// A short-form, vertically-oriented Shorts video.
         | Short of Id: string
+        /// A standard video that is also included on a playlist.
         | PlaylistVideo of VideoId: string * PlaylistId: string
+        /// A standard playlist of videos.
         | StandardPlaylist of Id: string
+        /// A playlist of videos on an official "Topic" channel.
         | ReleasePlaylist of Id: string
+        /// A user's channel.
         | Channel of Id: string
 
     let typeName mediaType =
@@ -57,14 +64,15 @@ module Downloading =
 
     let generateDownloadUrl mediaType =
         let fullUrl urlBase id = urlBase + id
-        let videoUrl = fullUrl "https://www.youtube.com/watch?v="
-        let shortsUrl = fullUrl "https://www.youtube.com/shorts/"
+        let videoUrl    = fullUrl "https://www.youtube.com/watch?v="
+        let shortsUrl   = fullUrl "https://www.youtube.com/shorts/"
         let playlistUrl = fullUrl "https://www.youtube.com/playlist?list="
-        let channelUrl = fullUrl "https://" // For channels, the domain portion is also matched.
+        let channelUrl  = fullUrl "https://" // For channels, the domain portion is also included in matches.
 
         match mediaType with
         | Video id -> [videoUrl id]
         | Short id -> [shortsUrl id]
         | PlaylistVideo (vId, pId) -> [videoUrl vId; playlistUrl pId]
-        | StandardPlaylist id | ReleasePlaylist id -> [playlistUrl id]
+        | StandardPlaylist id
+        | ReleasePlaylist id -> [playlistUrl id]
         | Channel id -> [channelUrl id]
