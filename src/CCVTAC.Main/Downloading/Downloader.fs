@@ -8,7 +8,6 @@ open CCVTAC.Main.Downloading.Downloading
 open CCVTAC.Main.ExternalTools
 open CCVTAC.Main.Settings.Settings
 open CCFSharpUtils
-open FSharpPlus
 open FsToolkit.ErrorHandling
 open System
 
@@ -22,47 +21,38 @@ module Downloader =
 
         let formatArg =
             match audioFormat with
-            | None -> String.Empty
-            | Some format when format = "best" -> String.Empty
-            | Some format -> $"-f {format}"
+            | None
+            | Some "best" -> []
+            | Some format -> [$"-f {format}"]
 
-        let mutable args =
-            Set.ofList <|
-                match mediaType with
-                | None ->
-                    [ $"--flat-playlist {writeJsonArg} {trimFileNamesArg}" ]
-                | Some _ ->
-                    [ $"--extract-audio {formatArg}"
-                      $"--audio-quality {userSettings.AudioQuality}"
-                      "--write-thumbnail --convert-thumbnails jpg"
-                      writeJsonArg
-                      trimFileNamesArg
-                      "--retries 3" ]
+        let args =
+            match mediaType with
+            | None ->
+                [ "--flat-playlist"; writeJsonArg; trimFileNamesArg ]
+            | Some _ ->
+                [ "--extract-audio" ] @ formatArg
+                @ [ $"--audio-quality {userSettings.AudioQuality}"
+                    "--write-thumbnail"
+                    "--convert-thumbnails jpg"
+                    writeJsonArg
+                    trimFileNamesArg
+                    "--retries 3" ]
 
-        if userSettings.QuietMode then
-            args <- args.Add "--quiet --no-warnings"
+        let args' =
+            args
+            @ (if userSettings.QuietMode then [ "--quiet"; "--no-warnings" ] else [])
+            @ Option.toList userSettings.DownloaderAdditionalOptions
+            @ (match mediaType with
+               | None -> []
+               | Some mt ->
+                   [ if userSettings.SplitChapters then "--split-chapters"
+                     if isMultiVideo mt then
+                         $"--sleep-interval {userSettings.SleepSecondsBetweenDownloads}"
+                     if isMultiVideo mt && mt.IsStandardPlaylist then
+                         """-o "%(uploader).80B - %(playlist).80B - %(playlist_autonumber)s - %(title).150B [%(id)s].%(ext)s" --playlist-reverse""" ])
+            @ defaultArg additionalArgs []
 
-        match userSettings.DownloaderAdditionalOptions with
-        | Some x -> args <- args.Add x
-        | None   -> ()
-
-        // No MediaType indicates that this is a supplemental metadata-only download.
-        // TODO: Perhaps add a union type to more clearly indicate this difference.
-        match mediaType with
-        | None -> ()
-        | Some mt ->
-            if userSettings.SplitChapters then
-                args <- args.Add "--split-chapters"
-
-            if isMultiVideo mt then
-                args <- args.Add $"--sleep-interval {userSettings.SleepSecondsBetweenDownloads}"
-
-                if mt.IsStandardPlaylist then
-                    args <- args.Add
-                        """-o "%(uploader).80B - %(playlist).80B - %(playlist_autonumber)s - %(title).150B [%(id)s].%(ext)s" --playlist-reverse"""
-
-        let extraArgs = Set.ofList <| defaultArg additionalArgs []
-        String.Join(" ", Set.union args extraArgs)
+        String.Join(" ", args')
 
     let wrapUrlInMediaType url : Result<MediaType, string> =
         mediaTypeWithIds url
