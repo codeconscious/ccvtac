@@ -21,20 +21,20 @@ module Downloading =
         | ReleasePlaylist _ -> "Release Playlist"
         | Channel _ -> "Channel"
 
-    let isSingleVideoType mediaType =
+    let isSingleVideo mediaType =
         match mediaType with
         | Video _ | Short _ | PlaylistVideo _                -> true
         | StandardPlaylist _ | ReleasePlaylist _ | Channel _ -> false
 
-    let isMultiVideoType =
-        not << isSingleVideoType
+    let isMultiVideo =
+        not << isSingleVideo
 
     type PrimaryUrl = PrimaryUrl of string
 
     type SupplementaryUrl = SupplementaryUrl of string option
 
-    type Urls = { Primary: PrimaryUrl
-                  Metadata: SupplementaryUrl }
+    type MediaUrls = { Primary: PrimaryUrl
+                       Metadata: SupplementaryUrl }
 
     let mediaTypeWithIds url : Result<MediaType,string> =
         match url with

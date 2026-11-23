@@ -54,7 +54,7 @@ module Downloader =
             if userSettings.SplitChapters then
                 args <- args.Add "--split-chapters"
 
-            if isMultiVideoType mt then
+            if isMultiVideo mt then
                 args <- args.Add $"--sleep-interval {userSettings.SleepSecondsBetweenDownloads}"
 
                 if mt.IsStandardPlaylist then
@@ -70,7 +70,7 @@ module Downloader =
     let downloadMedia (printer: Printer) (mediaType: MediaType) userSettings (PrimaryUrl url)
         : Result<string list, string list> =
 
-        if isMultiVideoType mediaType then
+        if isMultiVideo mediaType then
             printer.Info "Please wait for multiple videos to be downloaded..."
 
         let buildErrorMessage mainMsg maybeErr =

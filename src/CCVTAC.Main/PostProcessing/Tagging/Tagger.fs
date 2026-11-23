@@ -215,7 +215,7 @@ module Tagger =
         printer.Debug "Adding file tags..."
         let watch = Watch()
 
-        let embedImages = settings.EmbedImages && isSingleVideoType mediaType
+        let embedImages = settings.EmbedImages && isSingleVideo mediaType
 
         for taggingSet in taggingSets do
             processTaggingSet printer settings taggingSet collectionJson embedImages
