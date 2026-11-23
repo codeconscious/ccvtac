@@ -67,16 +67,14 @@ module Downloader =
     let wrapUrlInMediaType url : Result<MediaType, string> =
         mediaTypeWithIds url
 
-    let downloadMedia (printer: Printer) (mediaType: MediaType) userSettings (PrimaryUrl url)
+    let downloadMedia (printer: Printer) mediaType userSettings (PrimaryUrl url)
         : Result<string list, string list> =
 
         if isMultiVideo mediaType then
             printer.Info "Please wait for multiple videos to be downloaded..."
 
-        let buildErrorMessage mainMsg maybeErr =
-            match maybeErr with
-            | Some err -> [mainMsg; err]
-            | None     -> [mainMsg]
+        let buildErrMsg err maybeSndErr =
+            err :: Option.toList maybeSndErr
 
         let attemptAudioFormat format errors =
             let args = generateDownloadArgs (Some format) userSettings (Some mediaType) (Some [url])
@@ -94,10 +92,10 @@ module Downloader =
                 )
             | Ok result, false ->
                 let msg = $"While the downloader finished successfully, no audio files were downloaded in the \"{format}\" format."
-                Error (errors @ buildErrorMessage msg result.Error)
+                Error (errors @ buildErrMsg msg result.Error)
             | Error err, true ->
                 let msg = $"The downloader reported failure for \"{format}\", yet audio files were unexpectedly downloaded!"
-                Error (errors @ buildErrorMessage msg (Some err))
+                Error (errors @ buildErrMsg msg (Some err))
             | Error err, false ->
                 let msg = $"A download error was reported for the \"{format}\" format, and no audio files were downloaded. {err}"
                 Error (errors @ [msg])
