@@ -132,6 +132,9 @@ type Printer(showDebug: bool) =
     member this.Debug(message) =
         print Level.Debug message None
 
+    member this.EmptyLine() =
+        printEmptyLines 1uy
+
     member this.GetInput(prompt) : string =
         printEmptyLines 1uy
         AnsiConsole.Ask<string>($"[skyblue1]{prompt}[/]")
