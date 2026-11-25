@@ -157,7 +157,7 @@ module Settings =
                     Success ()
 
             let validation =
-                let commatize (xs: string seq) = String.Join(", ", xs)
+                let comma化 (xs: string seq) = String.Join(", ", xs)
 
                 applicative {
                     let! () = validateWorkingDir settings.WorkingDirectory
@@ -168,16 +168,16 @@ module Settings =
                             "Audio quality must be in the range 10 (lowest) and 0 (highest)."
                     and! () =
                         let nf = settings.NormalizationForm
-                        let supported = commatize supportedNormalizationForms
+                        let supported = comma化 supportedNormalizationForms
                         check
                             (not (List.containsIgnoreCase nf supportedNormalizationForms))
                             $""""{nf}" is an invalid Unicode normalization form. Supported forms: {supported}."""
                     and! () =
                         let formats = settings.AudioFormats
-                        let supported = commatize supportedAudioFormats
+                        let supported = comma化 supportedAudioFormats
                         check
                             (List.exists (not << isValidAudioFmt) formats)
-                            ($"""Unsupported audio format(s) found in "{commatize formats}". """ +
+                            ($"""Unsupported audio format(s) found in "{comma化 formats}". """ +
                              $""""Supported formats: {supported}.""")
 
                     return settings
