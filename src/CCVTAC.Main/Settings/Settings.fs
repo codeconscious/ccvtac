@@ -11,24 +11,24 @@ open CCFSharpUtils.IO
 module Settings =
 
     type RenamePattern = {
-        [<JsonPropertyName("regex")>]           RegexPattern : string
-        [<JsonPropertyName("replacePattern")>]  ReplaceWithPattern : string
-        [<JsonPropertyName("summary")>]         Summary : string
+        [<JsonPropertyName("regex")>]           RegexPattern: string
+        [<JsonPropertyName("replacePattern")>]  ReplaceWithPattern: string
+        [<JsonPropertyName("summary")>]         Summary: string
     }
 
     type TagDetectionPattern = {
-        [<JsonPropertyName("regex")>]        RegexPattern : string
-        [<JsonPropertyName("matchGroup")>]   MatchGroup : int
-        [<JsonPropertyName("searchField")>]  SearchField : string
-        [<JsonPropertyName("summary")>]      Summary : string option
+        [<JsonPropertyName("regex")>]        RegexPattern: string
+        [<JsonPropertyName("matchGroup")>]   MatchGroup: int
+        [<JsonPropertyName("searchField")>]  SearchField: string
+        [<JsonPropertyName("summary")>]      Summary: string option
     }
 
     type TagDetectionPatterns = {
-        [<JsonPropertyName("title")>]     Title : TagDetectionPattern list
-        [<JsonPropertyName("artist")>]    Artist : TagDetectionPattern list
-        [<JsonPropertyName("album")>]     Album : TagDetectionPattern list
-        [<JsonPropertyName("composer")>]  Composer : TagDetectionPattern list
-        [<JsonPropertyName("year")>]      Year : TagDetectionPattern list
+        [<JsonPropertyName("title")>]     Title: TagDetectionPattern list
+        [<JsonPropertyName("artist")>]    Artist: TagDetectionPattern list
+        [<JsonPropertyName("album")>]     Album: TagDetectionPattern list
+        [<JsonPropertyName("composer")>]  Composer: TagDetectionPattern list
+        [<JsonPropertyName("year")>]      Year: TagDetectionPattern list
     }
 
     type UserSettings = {
