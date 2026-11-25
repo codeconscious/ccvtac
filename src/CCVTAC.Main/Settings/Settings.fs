@@ -2,11 +2,13 @@ namespace CCVTAC.Main.Settings
 
 open CCVTAC.Main.IoUtilities.Files
 open Spectre.Console
-open FSharpPlus
 open System
 open System.Text.Json.Serialization
-open CCFSharpUtils.Text
+open FSharpPlus.Data
+open FSharpPlus
+open CCFSharpUtils.Collections
 open CCFSharpUtils.IO
+open CCFSharpUtils.Text
 
 module Settings =
 
@@ -133,28 +135,57 @@ module Settings =
     module Validation' =
 
         let validate settings =
-            match settings with
-            | { WorkingDirectory = dir } when String.hasNoText dir ->
-                Error "No working directory was specified in the settings."
-            | { WorkingDirectory = dir } when Dir.dirMissing dir ->
-                Error $"Working directory \"{dir}\" is missing."
-            | { WorkingDirectory = dir } when not (Dir.isEmpty dir) ->
-                Error $"Working directory \"{dir}\" must be empty, including hidden and system items."
-            | { MoveToDirectory = dir } when String.hasNoText dir ->
-                Error "No move-to directory was specified in the settings."
-            | { MoveToDirectory = dir } when Dir.dirMissing dir ->
-                Error $"Move-to directory \"{dir}\" is missing."
-            | { AudioQuality = q } when q < 0uy || q > 10uy ->
-                Error "Audio quality must be in the range 10 (lowest) and 0 (highest)."
-            | { NormalizationForm = nf } when not(supportedNormalizationForms |> List.contains (nf.ToUpperInvariant())) ->
-                let okFormats = String.Join(", ", supportedNormalizationForms)
-                Error $"\"{nf}\" is an invalid normalization form. Use one of the following: {okFormats}."
-            | { AudioFormats = fmt } when not (fmt |> List.forall isValidAudioFmt) ->
-                let formats = String.Join(", ", fmt)
-                let approved = supportedAudioFormats |> String.concat ", "
-                Error $"Unsupported audio format(s) (\"%s{formats}\") found. Supported formats: {approved}."
-            | _ ->
-                Ok settings
+            let check condition errMessage : Validation<string list, unit> =
+                if condition then Failure [errMessage] else Success ()
+
+            let validateWorkingDir dir =
+                if String.hasNoText dir then
+                    Failure ["No working directory specified."]
+                elif Dir.dirMissing dir then
+                    Failure [$"Working directory \"{dir}\" does not exist."]
+                elif not (Dir.isEmpty dir) then
+                    Failure [$"Working directory \"{dir}\" must be empty, including hidden and system items."]
+                else
+                    Success ()
+
+            let validateMoveToDir dir =
+                if String.hasNoText dir then
+                    Failure ["No move-to directory specified."]
+                elif Dir.dirMissing dir then
+                    Failure [$"Move-to directory \"{dir}\" does not exist."]
+                else
+                    Success ()
+
+            let validation =
+                let commatize (xs: string seq) = String.Join(", ", xs)
+
+                applicative {
+                    let! () = validateWorkingDir settings.WorkingDirectory
+                    and! () = validateMoveToDir settings.MoveToDirectory
+                    and! () =
+                        check
+                            (settings.AudioQuality > 10uy)
+                            "Audio quality must be in the range 10 (lowest) and 0 (highest)."
+                    and! () =
+                        let nf = settings.NormalizationForm
+                        let supported = commatize supportedNormalizationForms
+                        check
+                            (not (List.containsIgnoreCase nf supportedNormalizationForms))
+                            $""""{nf}" is an invalid Unicode normalization form. Supported forms: {supported}."""
+                    and! () =
+                        let formats = settings.AudioFormats
+                        let supported = commatize supportedAudioFormats
+                        check
+                            (List.exists (not << isValidAudioFmt) formats)
+                            ($"""Unsupported audio format(s) found in "{commatize formats}". """ +
+                             $""""Supported formats: {supported}.""")
+
+                    return settings
+                }
+
+            match validation with
+            | Success validatedSettings -> Ok validatedSettings
+            | Failure errors            -> Error (errors |> List.map (sprintf "• %s") |> String.concatNL)
 
     module IO =
         open Validation'
