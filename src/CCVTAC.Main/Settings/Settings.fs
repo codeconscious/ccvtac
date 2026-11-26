@@ -156,7 +156,7 @@ module Settings =
                 else
                     Success ()
 
-            let validation =
+            let run =
                 let comma化 (xs: string seq) = String.Join(", ", xs)
 
                 applicative {
@@ -183,9 +183,9 @@ module Settings =
                     return settings
                 }
 
-            match validation with
-            | Success validatedSettings -> Ok validatedSettings
-            | Failure errors            -> Error (errors |> List.map (sprintf "• %s") |> String.concatNL)
+            match run with
+            | Success validSettings -> Ok validSettings
+            | Failure errors        -> Error (errors |> map String.bulletize |> String.concatNL)
 
     module IO =
         open Validation'
