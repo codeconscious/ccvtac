@@ -134,7 +134,7 @@ module Settings =
 
     module Validation' =
 
-        let validate settings =
+        let validate settings : Result<UserSettings, string> =
             let check condition errMessage : Validation<string list, unit> =
                 if condition then Failure [errMessage] else Success ()
 
