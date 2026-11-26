@@ -5,6 +5,7 @@ open CCVTAC.Main
 open CCFSharpUtils
 open CCFSharpUtils.Collections
 open CCFSharpUtils.Text
+open FSharpPlus
 open System.IO
 
 module Directories =
@@ -50,7 +51,7 @@ module Directories =
                        Failures  = List.ofSeq failures }
 
         getDirectoryFileNames workingDirectory None
-        |> Result.map delete
+        |>> delete
 
     let printDeletionResults (printer: Printer) outcome : unit =
         match outcome with

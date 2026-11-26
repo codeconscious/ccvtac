@@ -8,6 +8,7 @@ open CCVTAC.Main.PostProcessing
 open CCVTAC.Main.Settings.Settings
 open CCVTAC.Main.Settings.Settings.LiveUpdating
 open CCFSharpUtils.Collections
+open CCFSharpUtils.Operators
 open CCFSharpUtils.Text
 open FSharpPlus
 open Startwatch.Library
@@ -240,7 +241,7 @@ module Orchestrator =
             match inputCategory with
             | Command ->
                 processCommand printer text settings history
-                |> Result.mapError Recoverable
+                |!! Recoverable
             | Url ->
                 processUrl printer text settings history inputTime categoryCounts[Url] urlPosition
 
@@ -250,10 +251,10 @@ module Orchestrator =
             | Error msg ->
                 printer.Warning msg
                 Directories.deleteAllFiles dirName
-                |> Result.map (fun results ->
-                    Directories.printDeletionResults printer results
-                    Some "Files deleted successfully.")
-                |> Result.mapError (sprintf "Error deleting leftover files after download: %s")
+                |>> fun results ->
+                        Directories.printDeletionResults printer results
+                        Some "Files deleted successfully."
+                |!! sprintf "Error deleting leftover files after download: %s"
 
         let rec loop inputs settings nextAction' index urlPosition : NextAction * UserSettings * int =
             match inputs with
@@ -262,7 +263,7 @@ module Orchestrator =
 
                 resultTracker.RegisterResult(
                     input.Text,
-                    processResult |> Result.mapError (errorText >> List.singleton))
+                    processResult |!! (errorText >> List.singleton))
 
                 processResult |> Result.iterError (errorText >> printer.Error)
 
@@ -324,7 +325,7 @@ module Orchestrator =
     let private isWorkingDirReady (printer: Printer) dirName : Result<unit, string> =
         let emptyDirAndReport dirName =
             Directories.deleteAllFiles dirName
-            |> Result.map (fun msgs ->
+            |>> (fun msgs ->
                 Directories.printDeletionResults printer msgs
                 printer.Debug "Files deleted.")
 
